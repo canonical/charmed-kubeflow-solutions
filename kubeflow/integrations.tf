@@ -247,7 +247,7 @@ resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
 
   application {
     name     = module.katib_db.application_name
-    endpoint = "database"
+    endpoint = module.katib_db.provides.database
   }
 }
 
@@ -261,7 +261,7 @@ resource "juju_integration" "kfp_api_kfp_db_database" {
 
   application {
     name     = module.kfp_db.application_name
-    endpoint = "database"
+    endpoint = module.kfp_db.provides.database
   }
 }
 
