@@ -67,6 +67,7 @@ module "katib_controller" {
 }
 
 module "katib_db" {
+  # tflint-ignore: terraform_module_pinned_source
   source              = "git::https://github.com/canonical/terraform-modules//modules/k8s/mysql?ref=main"
   juju_model_name     = var.create_model ? juju_model.kubeflow[0].name : local.model_name
   mysql_app_name      = "katib-db"
@@ -101,6 +102,7 @@ module "kfp_api" {
 }
 
 module "kfp_db" {
+  # tflint-ignore: terraform_module_pinned_source
   source              = "git::https://github.com/canonical/terraform-modules//modules/k8s/mysql?ref=main"
   juju_model_name     = var.create_model ? juju_model.kubeflow[0].name : local.model_name
   mysql_app_name      = "kfp-db"
