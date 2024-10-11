@@ -1,5 +1,5 @@
 resource "juju_integration" "mlflow_server_resource_dispatcher_secrets" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model_name
+  model = module.kubeflow.model
 
   application {
     name     = module.mlflow.mlflow_server.app_name
@@ -13,7 +13,7 @@ resource "juju_integration" "mlflow_server_resource_dispatcher_secrets" {
 }
 
 resource "juju_integration" "mlflow_server_resource_dispatcher_pod_defaults" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model_name
+  model = module.kubeflow.model
 
   application {
     name     = module.mlflow.mlflow_server.app_name
@@ -27,8 +27,8 @@ resource "juju_integration" "mlflow_server_resource_dispatcher_pod_defaults" {
 }
 
 resource "juju_integration" "mlflow_minio_kserve_controller_object_storage" {
-  count = var.mlflow_kserve_integration ?  1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model_name
+  count = var.mlflow_kserve_integration ? 1 : 0
+  model = module.kubeflow.model
 
   application {
     name     = module.mlflow.mlflow_minio.app_name
@@ -42,8 +42,8 @@ resource "juju_integration" "mlflow_minio_kserve_controller_object_storage" {
 }
 
 resource "juju_integration" "kserve_controller_resource_dispatcher_service_accounts" {
-  count = var.mlflow_kserve_integration ?  1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model_name
+  count = var.mlflow_kserve_integration ? 1 : 0
+  model = module.kubeflow.model
 
   application {
     name     = module.kubeflow.kserve_controller.app_name
@@ -57,8 +57,8 @@ resource "juju_integration" "kserve_controller_resource_dispatcher_service_accou
 }
 
 resource "juju_integration" "kserve_controller_resource_dispatcher_secrets" {
-  count = var.mlflow_kserve_integration ?  1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model_name
+  count = var.mlflow_kserve_integration ? 1 : 0
+  model = module.kubeflow.model
 
   application {
     name     = module.kubeflow.kserve_controller.app_name

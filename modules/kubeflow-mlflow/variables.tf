@@ -4,12 +4,6 @@ variable "cos_configuration" {
   default     = false
 }
 
-variable "create_model" {
-  description = "Allows to skip Juju model creation and re-use a model created in a higher level module"
-  type        = bool
-  default     = true
-}
-
 variable "dex_connectors" {
   description = "dex-auth connectors in yaml format"
   type        = string
