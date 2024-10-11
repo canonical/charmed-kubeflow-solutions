@@ -1,8 +1,8 @@
 resource "juju_model" "kubeflow" {
   count = var.create_model ? 1 : 0
-  name  = local.model_name
+  name  = local.model
 }
 
 locals {
-  model_name = "kubeflow"
+  model = "kubeflow"
 }

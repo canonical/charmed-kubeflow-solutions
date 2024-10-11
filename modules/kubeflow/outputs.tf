@@ -19,8 +19,8 @@ output "kserve_controller" {
   }
 }
 
-output "model_name" {
-  value = local.model_name
+output "model" {
+  value = local.model
 }
 
 output "tls_certificate_requirer" {

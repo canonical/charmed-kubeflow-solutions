@@ -33,7 +33,7 @@ Upon applied, the solution module exports the following outputs:
 | Name | Description |
 | - | - |
 | `grafana_agent_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the grafana-agent-k8s charm used |
-| `model_name`|  Model name that Charmed Kubeflow is deployed on |
+| `model`|  Model name that Charmed Kubeflow is deployed on |
 | `tls_certificate_requirer`|  Map containing the `app_name` and the `requires` TLS endpoint of the TLS requirer charm |
 
 ## Usage
