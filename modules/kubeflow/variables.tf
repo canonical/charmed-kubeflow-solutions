@@ -93,61 +93,79 @@ variable "admission_webhook_revision" {
   type        = number
   default     = null
 }
+
 variable "argo_controller_revision" {
   description = "Charm revision for argo-controller"
   type        = number
   default     = null
 }
+
 variable "dex_auth_revision" {
   description = "Charm revision for dex-auth"
   type        = number
   default     = null
 }
+
 variable "envoy_revision" {
   description = "Charm revision for envoy"
   type        = number
   default     = null
 }
+
+variable "grafana_agent_k8s_revision" {
+  description = "Charm revision for grafana-agent-k8s"
+  type        = number
+  default     = null
+}
+
 variable "istio_ingressgateway_revision" {
   description = "Charm revision for istio-ingressgateway"
   type        = number
   default     = null
 }
+
 variable "istio_pilot_revision" {
   description = "Charm revision for istio-pilot"
   type        = number
   default     = null
 }
+
 variable "jupyter_controller_revision" {
   description = "Charm revision for jupyter-controller"
   type        = number
   default     = null
 }
+
 variable "jupyter_ui_revision" {
   description = "Charm revision for jupyter-ui"
   type        = number
   default     = null
 }
+
 variable "katib_controller_revision" {
   description = "Charm revision for katib-controller"
   type        = number
   default     = null
 }
+
 variable "katib_db_revision" {
   description = "Charm revision for katib-db"
   type        = number
   default     = null
 }
+
 variable "katib_db_manager_revision" {
   description = "Charm revision for katib-db-manager"
   type        = number
   default     = null
 }
+
 variable "katib_ui_revision" {
   description = "Charm revision for katib-ui"
   type        = number
   default     = null
 }
+
 variable "kfp_api_revision" {
   description = "Charm revision for kfp-api"
   type        = number
@@ -294,12 +312,6 @@ variable "tensorboards_web_app_revision" {
 
 variable "training_operator_revision" {
   description = "Charm revision for training-operator"
-  type        = number
-  default     = null
-}
-
-variable "grafana_agent_k8s_revision" {
-  description = "Charm revision for grafana-agent-k8s"
   type        = number
   default     = null
 }
