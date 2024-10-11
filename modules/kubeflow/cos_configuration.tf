@@ -322,7 +322,7 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_dashboard" {
 
   application {
     name     = module.katib_db.application_name
-    endpoint = "grafana-dashboard"
+    endpoint = module.katib_db.provides.grafana_dashboard
   }
 
   application {
@@ -337,7 +337,7 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_metrics_endpoint" {
 
   application {
     name     = module.katib_db.application_name
-    endpoint = "metrics-endpoint"
+    endpoint = module.katib_db.provides.metrics_endpoint
   }
 
   application {
@@ -352,7 +352,7 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_logging" {
 
   application {
     name     = module.katib_db.application_name
-    endpoint = "logging"
+    endpoint = module.katib_db.requires.logging
   }
 
   application {
@@ -443,7 +443,7 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_dashboard" {
 
   application {
     name     = module.kfp_db.application_name
-    endpoint = "grafana-dashboard"
+    endpoint = module.kfp_db.provides.grafana_dashboard
   }
 
   application {
@@ -458,7 +458,7 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_metrics_endpoint" {
 
   application {
     name     = module.kfp_db.application_name
-    endpoint = "metrics-endpoint"
+    endpoint = module.kfp_db.provides.metrics_endpoint
   }
 
   application {
@@ -473,7 +473,7 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_logging" {
 
   application {
     name     = module.kfp_db.application_name
-    endpoint = "logging"
+    endpoint = module.kfp_db.requires.logging
   }
 
   application {
