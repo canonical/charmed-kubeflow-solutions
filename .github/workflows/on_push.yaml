@@ -1,0 +1,14 @@
+name: On Push
+
+on:
+  push:
+    branches:
+    - main
+    - track/**
+
+jobs:
+
+  checks:
+    name: Run Checks
+    uses: ./.github/workflows/integrate.yaml
+    secrets: inherit
