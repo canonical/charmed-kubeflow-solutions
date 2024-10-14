@@ -1,5 +1,5 @@
 module "kubeflow" {
-  source                           = "git::https://github.com/canonical/charmed-kubeflow-solutions//modules/kubeflow?ref=kf-6272-feat-kubeflow-solution"
+  source                           = "../kubeflow"
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
   grafana_agent_k8s_size           = var.grafana_agent_k8s_size
@@ -54,7 +54,7 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=KF-6273-mlflow-bundle-terraform"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.15"
   # kubeflow module creates the model
   create_model                = false
   model                       = module.kubeflow.model
