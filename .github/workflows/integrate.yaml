@@ -7,6 +7,6 @@ jobs:
 
   terraform-checks:
     name: Terraform
-    uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@kf-6347-ci-terraform-lint-format
+    uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
       module-path: modules/kubeflow
