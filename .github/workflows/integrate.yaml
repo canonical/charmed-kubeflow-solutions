@@ -7,6 +7,11 @@ jobs:
 
   terraform-checks:
     name: Terraform
+    strategy:
+      matrix:
+        module:
+          - kubeflow
+          - kubeflow-mlflow
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
-      module-path: modules/kubeflow
+      module-path: modules/${{ matrix.module }}
