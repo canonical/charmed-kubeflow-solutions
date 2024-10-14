@@ -20,7 +20,7 @@ output "kserve_controller" {
 }
 
 output "model" {
-  value = local.model
+  value = var.create_model ? one(juju_model.kubeflow[*].name) : local.model
 }
 
 output "tls_certificate_requirer" {
