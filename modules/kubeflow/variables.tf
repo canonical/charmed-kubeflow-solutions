@@ -16,6 +16,18 @@ variable "dex_connectors" {
   default     = ""
 }
 
+variable "dex_static_username" {
+  description = "dex-auth static username value"
+  type        = string
+  default     = ""
+}
+
+variable "dex_static_password" {
+  description = "dex-auth static password"
+  type        = string
+  default     = ""
+}
+
 variable "existing_grafana_agent_name" {
   description = "Name of an existing grafana-agent-k8s deployment"
   type        = string
