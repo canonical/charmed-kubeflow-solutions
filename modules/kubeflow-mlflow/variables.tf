@@ -10,6 +10,20 @@ variable "dex_connectors" {
   default     = ""
 }
 
+variable "dex_static_username" {
+  description = "dex-auth static username value"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "dex_static_password" {
+  description = "dex-auth static password"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "grafana_agent_k8s_size" {
   description = "Grafana agent database storage size"
   type        = string

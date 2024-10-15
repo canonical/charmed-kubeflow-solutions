@@ -2,6 +2,8 @@ module "kubeflow" {
   source                           = "../kubeflow"
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
+  dex_static_username              = var.dex_static_username
+  dex_static_password              = var.dex_static_password
   grafana_agent_k8s_size           = var.grafana_agent_k8s_size
   http_proxy                       = var.http_proxy
   https_proxy                      = var.https_proxy

@@ -13,6 +13,8 @@ The solution module offers the following configurable inputs:
 | `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
 | `cos_configuration`| bool | Boolean value that enables COS configuration | False |
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
+| `dex_static_username`| string | dex-auth static username | False |
+| `dex_static_password`| string | dex-auth static password | False |
 | `grafana_agent_k8s_size`| string | Grafana agent database storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
