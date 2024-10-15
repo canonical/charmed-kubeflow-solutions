@@ -20,14 +20,14 @@ variable "dex_static_username" {
   description = "dex-auth static username value"
   type        = string
   default     = ""
-  sensitive = true
+  sensitive   = true
 }
 
 variable "dex_static_password" {
   description = "dex-auth static password"
   type        = string
   default     = ""
-  sensitive = true
+  sensitive   = true
 }
 
 variable "existing_grafana_agent_name" {
