@@ -17,6 +17,8 @@ module "dex_auth" {
   config = {
     "public-url" : var.public_url,
     "connectors" : var.dex_connectors
+    "static-username" : var.dex_static_username
+    "static-password" : var.dex_static_password
   }
   revision = var.dex_auth_revision
 }

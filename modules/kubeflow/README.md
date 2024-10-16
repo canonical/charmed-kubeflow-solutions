@@ -14,6 +14,8 @@ The solution module offers the following configurable inputs:
 | `cos_configuration`| bool | Boolean value that enables COS configuration | False |
 | `create_model`| bool | Allows to skip Juju model creation and re-use a model created in a higher level module | False |
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
+| `dex_static_username`| string | dex-auth static username | False |
+| `dex_static_password`| string | dex-auth static password | False |
 | `existing_grafana_agent_name`| string | Name of an existing grafana-agent-k8s deployment | False |
 | `grafana_agent_k8s_size`| string | Grafana agent database storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
