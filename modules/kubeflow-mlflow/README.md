@@ -37,6 +37,7 @@ Upon applied, the solution module exports the following outputs:
 | - | - |
 | `grafana_agent_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the grafana-agent-k8s charm used |
 | `model`|  Model name that Charmed Kubeflow and MLflow are deployed on |
+| `resource_dispatcher`|  Map containing the `app_name`, `provides` and `requires` fields of the resource-dispatcher charm |
 | `tls_certificate_requirer`|  Map containing the `app_name` and the `requires` TLS endpoint of the TLS requirer charm |
 
 ## Usage
