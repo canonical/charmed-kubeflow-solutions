@@ -18,22 +18,29 @@ class TestCharm:
     @pytest.mark.dependency()
     async def test_apply_terraform_solution(self):
         """Initialize and apply the kubeflow-mlflow Terraform solution module."""
-        subprocess.run(["terraform", "init"], check=True )
+        subprocess.run(["terraform", "init"], check=True)
         # Due to https://github.com/canonical/mysql-k8s-operator/issues/504,
         # we need to pin instances of mysql-k8s (using the one from 8.0/beta).
         # Otherwise, mysql will error out with COS configuration enabled.
-        subprocess.run(["terraform", "apply",
-                         "-var", "cos_configuration=true",
-                         "-var", "kfp_db_revision=203",
-                         "-var", "katib_db_revision=203",
-                         "-var", "mlflow_mysql_revision=203",
-                         "-auto-approve"], check=True)
-
+        subprocess.run(
+            [
+                "terraform",
+                "apply",
+                "-var",
+                "cos_configuration=true",
+                "-var",
+                "kfp_db_revision=203",
+                "-var",
+                "katib_db_revision=203",
+                "-var",
+                "mlflow_mysql_revision=203",
+                "-auto-approve",
+            ],
+            check=True,
+        )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
-    async def test_assert_deployment(
-        self, ops_test: OpsTest, lightkube_client
-    ):
+    async def test_assert_deployment(self, ops_test: OpsTest, lightkube_client):
         """
         Wait for the applications to become active and idle and verify its public URL access.
         """
@@ -70,7 +77,7 @@ class TestCharm:
                 "kserve-controller",
                 "kubeflow-dashboard",
                 "kubeflow-profiles",
-                "kubeflow-roles ",
+                "kubeflow-roles",
                 "kubeflow-volumes",
                 "metacontroller-operator",
                 "minio",
@@ -83,7 +90,7 @@ class TestCharm:
                 "resource-dispatcher",
                 "tensorboard-controller",
                 "tensorboards-web-app",
-                "training-operator"
+                "training-operator",
             ],
             status="active",
             raise_on_blocked=False,

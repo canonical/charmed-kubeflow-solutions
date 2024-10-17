@@ -11,10 +11,6 @@ on:
   schedule:
     - cron: "17 02 * * 1"
 
-  # Will remove this before merging, this is here in order to confirm that the workflow works
-  # Since no inputs are given, this simulates what will happen when scheduled
-  pull_request:
-
 jobs:
   deploy-solution-to-aks:
     name: Deploy CKF + MLFlow solution to AKS
@@ -69,7 +65,7 @@ jobs:
           # due to cluster naming restrictions
           version=${{ env.CKF_VERSION }}
           KF_VERSION="kf-${version//.}"
-          RESOURCE_GROUP=${KF_VERSION}-ResourceGroup
+          RESOURCE_GROUP=terraform-${KF_VERSION}-ResourceGroup
           NAME=terraform-${KF_VERSION}-AKSCluster
           LOCATION=westeurope
           echo "RESOURCE_GROUP=${RESOURCE_GROUP}" >> $GITHUB_ENV
@@ -142,7 +138,7 @@ jobs:
         if: failure() || cancelled()
 
       - name: Delete resource groups
-        if: always()
+        if: always() || cancelled()
         run: |
           az group delete --name ${{ env.RESOURCE_GROUP }} --yes
           if [ "$(az group exists --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }})" = "true" ]; then
@@ -150,7 +146,7 @@ jobs:
           fi
 
       - name: Check that resource groups have been deleted, else fail
-        if: always()
+        if: always() || cancelled()
         run: |
           if [ "$(az group exists --name ${{ env.RESOURCE_GROUP }} )" = "true" ] || [ "$(az group exists --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }})" = "true" ]; then
             exit 1
