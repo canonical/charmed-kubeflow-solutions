@@ -40,8 +40,7 @@ jobs:
           UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      # Remove once https://github.com/canonical/bundle-kubeflow/issues/761
-      # is resolved and applied to uats repository.
+      # Remove once https://github.com/canonical/charmed-kubeflow-uats/issues/79 is resolved
       - name: Install python ${{ env.PYTHON_VERSION }}
         run: |
           sudo add-apt-repository ppa:deadsnakes/ppa -y
