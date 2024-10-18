@@ -53,6 +53,7 @@ jobs:
           python${{ env.PYTHON_VERSION }} get-pip.py
           python${{ env.PYTHON_VERSION }} -m pip install tox
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
+          sudo snap install charmcraft --classic
           sudo snap install terraform  --channel latest/stable --classic
           juju version
           terraform --version
