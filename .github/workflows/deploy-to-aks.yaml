@@ -1,0 +1,152 @@
+name: Create AKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+on:
+  workflow_dispatch:
+    inputs:
+      k8s_version:
+        description: 'Kubernetes version to be used for the AKS cluster. Make sure that the corresponding K8s version is supported by the cloud.'
+        required: false
+      uats_branch:
+        description: 'Branch to run the UATs from e.g. main or track/1.9. By default, this is defined by the dependencies.yaml file.'
+        required: false
+  schedule:
+    - cron: "17 02 * * 1"
+
+jobs:
+  deploy-solution-to-aks:
+    name: Deploy CKF + MLFlow solution to AKS
+    runs-on: ubuntu-22.04
+    env:
+      AZURE_CORE_OUTPUT: none
+      PYTHON_VERSION: "3.8"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run YAML to Github Output Action
+        id: yaml-output
+        uses: christian-ci/action-yaml-github-output@v2
+        with:
+          file_path: ".github/dependencies.yaml"
+
+      - name: Update ENV variables from inputs if available
+        run: |
+          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
+
+      # Remove once https://github.com/canonical/charmed-kubeflow-uats/issues/79 is resolved
+      - name: Install python ${{ env.PYTHON_VERSION }}
+        run: |
+          sudo add-apt-repository ppa:deadsnakes/ppa -y
+          sudo apt update -y
+          sudo apt install python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-distutils python${{ env.PYTHON_VERSION }}-venv -y
+
+      - name: Install CLI tools
+        run: |
+          wget https://bootstrap.pypa.io/get-pip.py
+          python${{ env.PYTHON_VERSION }} get-pip.py
+          python${{ env.PYTHON_VERSION }} -m pip install tox
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
+          sudo snap install charmcraft --classic
+          sudo snap install terraform  --channel latest/stable --classic
+          juju version
+          terraform --version
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.CHARMED_KUBEFLOW_SOLUTIONS_AKS_SERVICE_PRINCIPAL }}
+
+      - name: Create resource group and cluster
+        run: |
+          # We need to remove the dot from version
+          # due to cluster naming restrictions
+          version=${{ env.CKF_VERSION }}
+          KF_VERSION="kf-${version//.}"
+          RESOURCE_GROUP=terraform-${KF_VERSION}-ResourceGroup
+          NAME=terraform-${KF_VERSION}-AKSCluster
+          LOCATION=westeurope
+          echo "RESOURCE_GROUP=${RESOURCE_GROUP}" >> $GITHUB_ENV
+          echo "NAME=${NAME}" >> $GITHUB_ENV
+          echo "LOCATION=${LOCATION}" >> $GITHUB_ENV
+          az group create --name ${RESOURCE_GROUP} --location ${LOCATION}
+          az aks create \
+            --resource-group ${RESOURCE_GROUP} \
+            --name ${NAME} \
+            --kubernetes-version ${{ env.K8S_VERSION }} \
+            --node-count 2 \
+            --node-vm-size Standard_D8s_v3 \
+            --node-osdisk-size 100 \
+            --node-osdisk-type Managed \
+            --os-sku Ubuntu \
+            --no-ssh-key
+
+      - name: Add AKS cloud to juju and bootstrap controller
+        run: |
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.NAME }} --admin
+          juju add-k8s aks --client
+          juju bootstrap aks aks-controller
+
+      - name: Deploy and assert kubeflow-mlflow solution
+        run: |
+          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+
+      - name: Run UATs
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
+          cd ~/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+          tox -e uats-remote
+
+      # On failure, capture debugging resources
+      - name: Select model
+        run: juju switch aks-controller:kubeflow
+        if: failure() || cancelled()
+
+      - name: Save debug artifacts
+        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+        if: failure() || cancelled()
+
+      - name: Get juju status
+        run: juju status
+        if: failure() || cancelled()
+
+      - name: Get juju debug logs
+        run: juju debug-log --replay --no-tail
+        if: failure() || cancelled()
+
+      - name: Get all kubernetes resources
+        run: kubectl get all -A
+        if: failure() || cancelled()
+
+      - name: Describe all pods
+        if: failure() || cancelled()
+        run: kubectl describe pods --all-namespaces
+
+      - name: Get logs from pods with status = Pending
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = Failed
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = CrashLoopBackOff
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Delete resource groups
+        if: always() || cancelled()
+        run: |
+          az group delete --name ${{ env.RESOURCE_GROUP }} --yes
+          if [ "$(az group exists --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }})" = "true" ]; then
+            az group delete --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }} --yes
+          fi
+
+      - name: Check that resource groups have been deleted, else fail
+        if: always() || cancelled()
+        run: |
+          if [ "$(az group exists --name ${{ env.RESOURCE_GROUP }} )" = "true" ] || [ "$(az group exists --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }})" = "true" ]; then
+            exit 1
+          fi
