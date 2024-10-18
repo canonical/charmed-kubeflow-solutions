@@ -45,53 +45,12 @@ class TestCharm:
         Wait for the applications to become active and idle and verify its public URL access.
         """
 
-        # We cannot wait the model because grafana-agent-k8s
-        # remains blocked until it's related to one of the COS charms
-        # Thus we define all charms deployed by the solution except this.
+        apps = list(ops_test.model.applications.keys())
+        # Remove grafana-agent-k8s from the apps list because it remains
+        # `blocked` until it's related to one of the COS charms
+        apps.remove("grafana-agent-k8s-kubeflow")
         await ops_test.model.wait_for_idle(
-            apps=[
-                "admission-webhook",
-                "argo-controller",
-                "dex-auth",
-                "envoy",
-                "istio-ingressgateway",
-                "istio-pilot",
-                "jupyter-controller",
-                "jupyter-ui",
-                "katib-controller",
-                "katib-db",
-                "katib-db-manager",
-                "katib-ui",
-                "kfp-api",
-                "kfp-db",
-                "kfp-metadata-writer",
-                "kfp-persistence",
-                "kfp-profile-controller",
-                "kfp-schedwf",
-                "kfp-ui",
-                "kfp-viewer",
-                "kfp-viz",
-                "knative-eventing",
-                "knative-operator",
-                "knative-serving",
-                "kserve-controller",
-                "kubeflow-dashboard",
-                "kubeflow-profiles",
-                "kubeflow-roles",
-                "kubeflow-volumes",
-                "metacontroller-operator",
-                "minio",
-                "mlflow-minio",
-                "mlflow-mysql",
-                "mlflow-server",
-                "mlmd",
-                "oidc-gatekeeper",
-                "pvcviewer-operator",
-                "resource-dispatcher",
-                "tensorboard-controller",
-                "tensorboards-web-app",
-                "training-operator",
-            ],
+            apps=apps,
             status="active",
             raise_on_blocked=False,
             raise_on_error=False,
