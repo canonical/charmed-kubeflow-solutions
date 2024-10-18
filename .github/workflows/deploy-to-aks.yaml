@@ -97,7 +97,7 @@ jobs:
         run: |
           tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
 
-      - name: Run Kubeflow UATs
+      - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
