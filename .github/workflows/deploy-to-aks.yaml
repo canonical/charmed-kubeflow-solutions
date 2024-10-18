@@ -11,10 +11,6 @@ on:
   schedule:
     - cron: "17 02 * * 1"
 
-  # TODO: remove this before merging, this is here in order to confirm that the workflow works
-  # Since no inputs are given, this simulates what will happen when scheduled
-  pull_request:
-
 jobs:
   deploy-solution-to-aks:
     name: Deploy CKF + MLFlow solution to AKS
