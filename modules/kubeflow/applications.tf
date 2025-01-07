@@ -70,16 +70,16 @@ module "katib_controller" {
 
 module "katib_db" {
   # tflint-ignore: terraform_module_pinned_source
-  source              = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
-  juju_model_name     = var.create_model ? juju_model.kubeflow[0].name : local.model
-  app_name      = "katib-db"
-  channel = "8.0/stable"
+  source          = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
+  juju_model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  app_name        = "katib-db"
+  channel         = "8.0/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile-limit-memory = "2048"
   }
-  storage_size   = var.katib_db_size
-  revision = var.katib_db_revision
+  storage_size = var.katib_db_size
+  revision     = var.katib_db_revision
 }
 
 module "katib_db_manager" {
@@ -102,16 +102,16 @@ module "kfp_api" {
 
 module "kfp_db" {
   # tflint-ignore: terraform_module_pinned_source
-  source              = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
-  juju_model_name     = var.create_model ? juju_model.kubeflow[0].name : local.model
-  app_name      = "kfp-db"
-  channel = "8.0/stable"
+  source          = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
+  juju_model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  app_name        = "kfp-db"
+  channel         = "8.0/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile-limit-memory = "2048"
   }
-  storage_size   = var.kfp_db_size
-  revision = var.kfp_db_revision
+  storage_size = var.kfp_db_size
+  revision     = var.kfp_db_revision
 }
 
 module "kfp_metadata_writer" {
