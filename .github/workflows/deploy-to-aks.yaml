@@ -14,10 +14,9 @@ on:
 jobs:
   deploy-solution-to-aks:
     name: Deploy CKF + MLFlow solution to AKS
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       AZURE_CORE_OUTPUT: none
-      PYTHON_VERSION: "3.8"
 
     steps:
       - name: Checkout repository
@@ -36,18 +35,9 @@ jobs:
           UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      # Remove once https://github.com/canonical/charmed-kubeflow-uats/issues/79 is resolved
-      - name: Install python ${{ env.PYTHON_VERSION }}
-        run: |
-          sudo add-apt-repository ppa:deadsnakes/ppa -y
-          sudo apt update -y
-          sudo apt install python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-distutils python${{ env.PYTHON_VERSION }}-venv -y
-
       - name: Install CLI tools
         run: |
-          wget https://bootstrap.pypa.io/get-pip.py
-          python${{ env.PYTHON_VERSION }} get-pip.py
-          python${{ env.PYTHON_VERSION }} -m pip install tox
+          pip install tox
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --classic
           sudo snap install terraform  --channel latest/stable --classic
