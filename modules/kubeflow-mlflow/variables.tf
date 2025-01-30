@@ -78,6 +78,12 @@ variable "minio_size" {
   default     = "10G"
 }
 
+variable "mlflow_dashboard_link" {
+  description = "Boolean value that enables MLflow link in Kubeflow's dashboard"
+  type        = bool
+  default     = true
+}
+
 variable "mlflow_kserve_integration" {
   description = "Boolean value that enables MLFlow-KServe configuration"
   type        = bool

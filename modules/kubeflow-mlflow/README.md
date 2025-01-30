@@ -24,6 +24,7 @@ The solution module offers the following configurable inputs:
 | `katib_db_size`| string | Katib database storage size | False |
 | `kfp_db_size`| string | KFP database storage size | False |
 | `minio_size`| string | MinIO database storage size | False |
+| `mlflow_dashboard_link`| bool | Boolean value that enables MLflow link in Kubeflow's dashboard | False |
 | `mlflow_kserve_integration` | bool | Boolean value that integrates MLflow with KServe | False |
 | `mlflow_minio_size`         | string | MinIO storage size allocation            | False    |
 | `mlflow_mysql_size`  | string | MySQL storage size allocation for MLflow | False    |
