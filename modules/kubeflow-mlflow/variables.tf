@@ -24,6 +24,12 @@ variable "dex_static_password" {
   sensitive   = true
 }
 
+variable "enable_mlflow_nodeport" {
+  description = "Boolean value that enables the NodePort service for MLFlow"
+  type        = bool
+  default     = true
+}
+
 variable "grafana_agent_k8s_size" {
   description = "Grafana agent database storage size"
   type        = string
