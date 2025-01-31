@@ -27,6 +27,7 @@ The solution module offers the following configurable inputs:
 | `mlflow_kserve_integration` | bool | Boolean value that integrates MLflow with KServe | False |
 | `mlflow_minio_size`         | string | MinIO storage size allocation            | False    |
 | `mlflow_mysql_size`  | string | MySQL storage size allocation for MLflow | False    |
+| `mlflow_nodeport` | number | The nodeport for MLflow | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
 | `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |

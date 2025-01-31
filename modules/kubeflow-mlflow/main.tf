@@ -67,6 +67,7 @@ module "mlflow" {
   mlflow_minio_size           = var.mlflow_minio_size
   mlflow_mysql_revision       = var.mlflow_mysql_revision
   mlflow_mysql_size           = var.mlflow_mysql_size
+  mlflow_nodeport             = var.mlflow_nodeport
   mlflow_server_revision      = var.mlflow_server_revision
 }
 

@@ -96,6 +96,12 @@ variable "mlflow_mysql_size" {
   default     = "10G"
 }
 
+variable "mlflow_nodeport" {
+  description = "The nodeport for MLflow"
+  type        = number
+  default     = 31380
+}
+
 variable "mlmd_size" {
   description = "MLMD database storage size"
   type        = string
