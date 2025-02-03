@@ -24,6 +24,12 @@ variable "dex_static_password" {
   sensitive   = true
 }
 
+variable "enable_mlflow_nodeport" {
+  description = "Boolean value that enables the NodePort service for MLFlow"
+  type        = bool
+  default     = true
+}
+
 variable "grafana_agent_k8s_size" {
   description = "Grafana agent database storage size"
   type        = string
@@ -94,6 +100,12 @@ variable "mlflow_mysql_size" {
   description = "Size allocated for mysql data"
   type        = string
   default     = "10G"
+}
+
+variable "mlflow_nodeport" {
+  description = "The nodeport for MLflow"
+  type        = number
+  default     = 31380
 }
 
 variable "mlmd_size" {

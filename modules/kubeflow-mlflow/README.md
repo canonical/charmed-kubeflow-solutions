@@ -15,6 +15,7 @@ The solution module offers the following configurable inputs:
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
 | `dex_static_username`| string | dex-auth static username | False |
 | `dex_static_password`| string | dex-auth static password | False |
+| `enable_mlflow_nodeport` | bool | Boolean value that enables the NodePort service for MLflow | False |
 | `grafana_agent_k8s_size`| string | Grafana agent database storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
@@ -27,6 +28,7 @@ The solution module offers the following configurable inputs:
 | `mlflow_kserve_integration` | bool | Boolean value that integrates MLflow with KServe | False |
 | `mlflow_minio_size`         | string | MinIO storage size allocation            | False    |
 | `mlflow_mysql_size`  | string | MySQL storage size allocation for MLflow | False    |
+| `mlflow_nodeport` | number | The nodeport for MLflow | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
 | `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
