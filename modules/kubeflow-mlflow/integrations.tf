@@ -26,6 +26,36 @@ resource "juju_integration" "mlflow_server_resource_dispatcher_pod_defaults" {
   }
 }
 
+resource "juju_integration" "mlflow_server_dashboard_links_provider_links" {
+  count = var.mlflow_dashboard_link ? 1 : 0
+  model = module.kubeflow.model
+
+  application {
+    name     = module.mlflow.mlflow_server.app_name
+    endpoint = module.mlflow.mlflow_server.requires.dashboard_links
+  }
+
+  application {
+    name     = module.kubeflow.dashboard_links_provider.app_name
+    endpoint = module.kubeflow.dashboard_links_provider.provides.links
+  }
+}
+
+resource "juju_integration" "mlflow_server_ingress_provider_ingress" {
+  count = var.mlflow_dashboard_link ? 1 : 0
+  model = module.kubeflow.model
+
+  application {
+    name     = module.mlflow.mlflow_server.app_name
+    endpoint = module.mlflow.mlflow_server.requires.ingress
+  }
+
+  application {
+    name     = module.kubeflow.ingress_provider.app_name
+    endpoint = module.kubeflow.ingress_provider.provides.ingress
+  }
+}
+
 resource "juju_integration" "mlflow_minio_kserve_controller_object_storage" {
   count = var.mlflow_kserve_integration ? 1 : 0
   model = module.kubeflow.model
