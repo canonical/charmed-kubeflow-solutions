@@ -1,3 +1,9 @@
+variable "create_model" {
+  description = "Allows to skip Juju model creation and re-use a model created in a higher level module"
+  type        = bool
+  default     = true
+}
+
 variable "cos_configuration" {
   description = "Boolean value that enables COS configuration"
   type        = bool
