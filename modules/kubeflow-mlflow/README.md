@@ -11,6 +11,7 @@ The solution module offers the following configurable inputs:
 | Name | Type | Description | Required |
 | - | - | - | - |
 | `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
+| `create_model` | bool | Allows to skip Juju model creation and re-use a model created in a higher level module. When re-using a model, if this is created by Terraform, make sure that the current module depends on the resource using the depends_on option. |
 | `cos_configuration`| bool | Boolean value that enables COS configuration | False |
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
 | `dex_static_username`| string | dex-auth static username | False |
