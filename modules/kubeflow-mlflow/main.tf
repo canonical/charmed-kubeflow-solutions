@@ -1,5 +1,6 @@
 module "kubeflow" {
   source                           = "../kubeflow"
+  create_model                     = var.create_model
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
   dex_static_username              = var.dex_static_username
