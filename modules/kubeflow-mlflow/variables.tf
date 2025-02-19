@@ -36,6 +36,12 @@ variable "enable_mlflow_nodeport" {
   default     = true
 }
 
+variable "existing_grafana_agent_name" {
+  description = "Name of an existing grafana-agent-k8s deployment"
+  type        = string
+  default     = null
+}
+
 variable "grafana_agent_k8s_size" {
   description = "Grafana agent database storage size"
   type        = string
