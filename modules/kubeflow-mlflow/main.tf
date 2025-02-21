@@ -5,7 +5,7 @@ module "kubeflow" {
   dex_connectors                   = var.dex_connectors
   dex_static_username              = var.dex_static_username
   dex_static_password              = var.dex_static_password
-  existing_grafana_agent_name      = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
+  existing_grafana_agent_name      = var.cos_configuration ? var.existing_grafana_agent_name : null
   grafana_agent_k8s_size           = var.grafana_agent_k8s_size
   http_proxy                       = var.http_proxy
   https_proxy                      = var.https_proxy
@@ -64,7 +64,7 @@ module "mlflow" {
   model                       = module.kubeflow.model
   cos_configuration           = var.cos_configuration
   enable_mlflow_nodeport      = var.enable_mlflow_nodeport
-  existing_grafana_agent_name = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
+  existing_grafana_agent_name = var.cos_configuration ? var.existing_grafana_agent_name : null
   mlflow_minio_revision       = var.mlflow_minio_revision
   mlflow_minio_size           = var.mlflow_minio_size
   mlflow_mysql_revision       = var.mlflow_mysql_revision
