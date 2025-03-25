@@ -59,10 +59,11 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.15"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=wip-new-pinning"
   # kubeflow module creates the model
   create_model                = false
   model                       = module.kubeflow.model
+  risk                        = var.risk
   cos_configuration           = var.cos_configuration
   enable_mlflow_nodeport      = var.enable_mlflow_nodeport
   existing_grafana_agent_name = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
