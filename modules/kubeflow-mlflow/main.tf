@@ -1,5 +1,6 @@
 module "kubeflow" {
   source                           = "../kubeflow"
+  risk                             = var.risk
   create_model                     = var.create_model
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
@@ -77,4 +78,5 @@ module "resource_dispatcher" {
   source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
+  channel    = "2.0/${var.risk}"
 }
