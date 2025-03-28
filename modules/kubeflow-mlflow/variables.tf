@@ -6,7 +6,7 @@ variable "risk" {
   validation {
     condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
     error_message = "Valid values for var: test_variable are (stable, candidate, beta and edge)."
-  } 
+  }
 }
 
 
