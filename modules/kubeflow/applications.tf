@@ -23,7 +23,7 @@ module "dex_auth" {
     "static-password" : var.dex_static_password
   }
   revision = var.dex_auth_revision
-  channel    = "2.39/${var.risk}"
+  channel  = "2.39/${var.risk}"
 }
 
 module "envoy" {
@@ -41,7 +41,7 @@ module "istio_ingressgateway" {
     kind = "ingress",
   }
   revision = var.istio_ingressgateway_revision
-  channel    = "1.22/${var.risk}"
+  channel  = "1.22/${var.risk}"
 }
 
 module "istio_pilot" {
@@ -52,7 +52,7 @@ module "istio_pilot" {
     "tls-secret-id" : var.istio_tls_secret_id
   }
   revision = var.istio_pilot_revision
-  channel    = "1.22/${var.risk}"
+  channel  = "1.22/${var.risk}"
 }
 
 module "jupyter_controller" {
@@ -182,7 +182,7 @@ module "knative_eventing" {
     namespace = "knative-eventing"
   }
   revision = var.knative_eventing_revision
-  channel    = "1.12/${var.risk}"
+  channel  = "1.12/${var.risk}"
 }
 
 module "knative_operator" {
@@ -204,7 +204,7 @@ module "knative_serving" {
     no-proxy                  = var.no_proxy,
   }
   revision = var.knative_serving_revision
-  channel    = "1.12/${var.risk}"
+  channel  = "1.12/${var.risk}"
 }
 
 module "kserve_controller" {
@@ -217,7 +217,7 @@ module "kserve_controller" {
     no-proxy        = var.no_proxy,
   }
   revision = var.kserve_controller_revision
-  channel    = "0.13/${var.risk}"
+  channel  = "0.13/${var.risk}"
 }
 
 module "kubeflow_dashboard" {
@@ -262,7 +262,7 @@ module "mlmd" {
     mlmd-data = var.mlmd_size
   }
   revision = var.mlmd_revision
-  channel    = "ckf-1.9/${var.risk}"
+  channel  = "ckf-1.9/${var.risk}"
 }
 
 module "minio" {
@@ -272,7 +272,7 @@ module "minio" {
     minio-data = var.minio_size
   }
   revision = var.minio_revision
-  channel    = "ckf-1.9/${var.risk}"
+  channel  = "ckf-1.9/${var.risk}"
 }
 
 module "oidc_gatekeeper" {
