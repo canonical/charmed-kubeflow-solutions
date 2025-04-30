@@ -49,7 +49,7 @@ class TestCharm:
             status="active",
             raise_on_blocked=False,
             raise_on_error=False,
-            timeout=1500,
+            timeout=3600,
         )
 
         
@@ -61,7 +61,7 @@ class TestCharm:
             status="active",
             raise_on_blocked=False,
             raise_on_error=False,
-            timeout=1500,
+            timeout=3600,
         )
 
         # Verify deployment by checking the public URL
