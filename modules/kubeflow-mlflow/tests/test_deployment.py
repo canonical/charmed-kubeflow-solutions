@@ -39,7 +39,20 @@ class TestCharm:
         Wait for the applications to become active and idle and verify its public URL access.
         """
 
-        apps = list(ops_test.model.applications.keys())
+        apps = [
+            app
+            for app in ops_test.model.applications.keys()
+            if app != "grafana-agent-k8s-kubeflow"
+        ]
+        await ops_test.model.wait_for_idle(
+            apps=apps,
+            status="active",
+            raise_on_blocked=False,
+            raise_on_error=False,
+            timeout=1500,
+        )
+
+        
         # Remove grafana-agent-k8s from the apps list because it remains
         # `blocked` until it's related to one of the COS charms
         apps.remove("grafana-agent-k8s-kubeflow")
