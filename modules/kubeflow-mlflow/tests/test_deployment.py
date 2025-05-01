@@ -43,7 +43,9 @@ class TestCharm:
         
         # Remove grafana-agent-k8s from the apps list because it remains
         # `blocked` until it's related to one of the COS charms
-        apps.remove("grafana-agent-k8s-kubeflow")
+        GRAFANA_CHARM="grafana-agent-k8s-kubeflow"
+
+        apps.remove(GRAFANA_CHARM)
         await ops_test.model.wait_for_idle(
             apps=apps,
             status="active",
@@ -52,6 +54,17 @@ class TestCharm:
             timeout=3600,
         )
 
+        # Remove grafana-agent
+        await ops_test.model.applications[GRAFANA_CHARM].remove()
+
+        await ops_test.model.wait_for_idle(
+            apps=apps,
+            status="active",
+            raise_on_blocked=False,
+            raise_on_error=False,
+            timeout=3600,
+        )
+        
         # Verify deployment by checking the public URL
         url = get_public_url(lightkube_client, "kubeflow")
         result_status, result_text = await fetch_response(url)
