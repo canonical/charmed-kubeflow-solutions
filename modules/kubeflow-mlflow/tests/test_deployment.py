@@ -39,7 +39,7 @@ class TestCharm:
         Wait for the applications to become active and idle and verify its public URL access.
         """
 
-        apps = ops_test.model.applications.keys()
+        apps = list(ops_test.model.applications.keys())
         
         # Remove grafana-agent-k8s from the apps list because it remains
         # `blocked` until it's related to one of the COS charms
