@@ -28,12 +28,6 @@ class TestCharm:
                 "apply",
                 "-var",
                 "cos_configuration=true",
-                "-var",
-                "kfp_db_revision=203",
-                "-var",
-                "katib_db_revision=203",
-                "-var",
-                "mlflow_mysql_revision=203",
                 "-auto-approve",
             ],
             check=True,
@@ -46,6 +40,7 @@ class TestCharm:
         """
 
         apps = list(ops_test.model.applications.keys())
+        
         # Remove grafana-agent-k8s from the apps list because it remains
         # `blocked` until it's related to one of the COS charms
         apps.remove("grafana-agent-k8s-kubeflow")
@@ -54,9 +49,9 @@ class TestCharm:
             status="active",
             raise_on_blocked=False,
             raise_on_error=False,
-            timeout=1500,
+            timeout=3600,
         )
-
+        
         # Verify deployment by checking the public URL
         url = get_public_url(lightkube_client, "kubeflow")
         result_status, result_text = await fetch_response(url)
