@@ -11,6 +11,7 @@ jobs:
       matrix:
         module:
           - kubeflow
+          - kubeflow-feast
           - kubeflow-mlflow
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:

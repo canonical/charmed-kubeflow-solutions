@@ -318,10 +318,23 @@ variable "offline_store_revision" {
   default     = null
 }
 
+variable "offline_store_size" {
+  description = "offline store storage size"
+  type        = string
+  default     = "10G"
+}
+
+
 variable "online_store_revision" {
   description = "Charm revision for online-store"
   type        = number
   default     = null
+}
+
+variable "online_store_size" {
+  description = "online store storage size"
+  type        = string
+  default     = "10G"
 }
 
 variable "oidc_gatekeeper_revision" {
@@ -340,6 +353,12 @@ variable "registry_revision" {
   description = "Charm revision for registry"
   type        = number
   default     = null
+}
+
+variable "registry_size" {
+  description = "registry storage size"
+  type        = string
+  default     = "10G"
 }
 
 variable "resource_dispatcher_revision" {

@@ -7,7 +7,7 @@ resource "juju_integration" "feast_integrator_offline_store" {
   }
 
   application {
-    name     = module.offline_store.app_name
+    name     = module.offline_store.application_name
     endpoint = module.offline_store.provides.database
   }
 }
@@ -21,7 +21,7 @@ resource "juju_integration" "feast_integrator_online_store" {
   }
 
   application {
-    name     = module.online_store.app_name
+    name     = module.online_store.application_name
     endpoint = module.online_store.provides.database
   }
 }
@@ -35,7 +35,7 @@ resource "juju_integration" "feast_integrator_registry" {
   }
 
   application {
-    name     = module.registry.app_name
+    name     = module.registry.application_name
     endpoint = module.registry.provides.database
   }
 }
@@ -54,16 +54,58 @@ resource "juju_integration" "feast_integrator_resource_dispatcher_secrets" {
   }
 }
 
-resource "juju_integration" "feast_integrator_resource_dispatcher_secrets" {
+resource "juju_integration" "feast_integrator_resource_dispatcher_pod_defaults" {
   model = module.kubeflow.model
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.secrets
+    endpoint = module.feast_integrator.requires.pod_defaults
   }
 
   application {
     name     = module.resource_dispatcher.app_name
-    endpoint = module.resource_dispatcher.provides.secrets
+    endpoint = module.resource_dispatcher.provides.pod_defaults
+  }
+}
+
+resource "juju_integration" "feast_ui_feast_integrator" {
+  model = module.kubeflow.model
+
+  application {
+    name     = module.feast_ui.app_name
+    endpoint = module.feast_ui.requires.feast_configuration
+  }
+
+  application {
+    name     = module.feast_integrator.app_name
+    endpoint = module.feast_integrator.provides.feast_configuration
+  }
+}
+
+resource "juju_integration" "feast_ui_ingress_provider_ingress" {
+  model = module.kubeflow.model
+
+  application {
+    name     = module.feast_ui.app_name
+    endpoint = module.feast_ui.requires.ingress
+  }
+
+  application {
+    name     = module.kubeflow.ingress_provider.app_name
+    endpoint = module.kubeflow.ingress_provider.provides.ingress
+  }
+}
+
+resource "juju_integration" "feast_ui_dashboard_links_provider_links" {
+  model = module.kubeflow.model
+
+  application {
+    name     = module.feast_ui.app_name
+    endpoint = module.feast_ui.requires.dashboard_links
+  }
+
+  application {
+    name     = module.kubeflow.dashboard_links_provider.app_name
+    endpoint = module.kubeflow.dashboard_links_provider.provides.links
   }
 }
