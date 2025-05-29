@@ -20,7 +20,7 @@ module "offline_store" {
   channel         = "14/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
-    profile-limit-memory = "2048"
+    profile_limit_memory = "2048"
   }
   storage_size = var.offline_store_size
   revision     = var.offline_store_revision
@@ -34,7 +34,7 @@ module "online_store" {
   channel         = "14/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
-    profile-limit-memory = "2048"
+    profile_limit_memory = "2048"
   }
   storage_size = var.online_store_size
   revision     = var.online_store_revision
@@ -48,7 +48,7 @@ module "registry" {
   channel         = "14/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
-    profile-limit-memory = "2048"
+    profile_limit_memory = "2048"
   }
   storage_size = var.registry_size
   revision     = var.registry_revision
