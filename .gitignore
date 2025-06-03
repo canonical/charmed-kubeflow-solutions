@@ -40,3 +40,6 @@ terraform.rc
 # Tox environments
 .tox
 __pycache__
+
+# Virtual environments
+venv/
