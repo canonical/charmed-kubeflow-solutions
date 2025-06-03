@@ -12,46 +12,46 @@ module "feast_ui" {
   revision   = var.feast_ui_revision
 }
 
-module "offline_store" {
+module "feast_offline_store" {
   # tflint-ignore: terraform_module_pinned_source
   source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=main"
   juju_model_name = module.kubeflow.model
-  app_name        = "offline-store"
+  app_name        = "feast-offline-store"
   channel         = "14/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile_limit_memory = "2048"
   }
-  storage_size = var.offline_store_size
-  revision     = var.offline_store_revision
+  storage_size = var.feast_offline_store_size
+  revision     = var.feast_offline_store_revision
 }
 
-module "online_store" {
+module "feast_online_store" {
   # tflint-ignore: terraform_module_pinned_source
   source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=main"
   juju_model_name = module.kubeflow.model
-  app_name        = "online-store"
+  app_name        = "feast-online-store"
   channel         = "14/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile_limit_memory = "2048"
   }
-  storage_size = var.online_store_size
-  revision     = var.online_store_revision
+  storage_size = var.feast_online_store_size
+  revision     = var.feast_online_store_revision
 }
 
-module "registry" {
+module "feast_registry" {
   # tflint-ignore: terraform_module_pinned_source
   source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=main"
   juju_model_name = module.kubeflow.model
-  app_name        = "registry"
+  app_name        = "feast-registry"
   channel         = "14/stable"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile_limit_memory = "2048"
   }
-  storage_size = var.registry_size
-  revision     = var.registry_revision
+  storage_size = var.feast_registry_size
+  revision     = var.feast_registry_revision
 }
 
 module "resource_dispatcher" {

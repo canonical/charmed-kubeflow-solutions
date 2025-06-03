@@ -1,7 +1,7 @@
 # Charmed Kubeflow + Feast Terraform solution
 
 
-This is a Terraform module facilitating the deployment and integration of Charmed Kubeflow and Feast, using the [Terraform juju provider](https://github.com/juju/terraform-provider-juju/). For more information, refer to the provider [documentation](https://registry.terraform.io/providers/juju/juju/latest/docs). 
+This is a Terraform module facilitating the deployment and integration of Charmed Kubeflow and Feast, using the [Terraform juju provider](https://github.com/juju/terraform-provider-juju/). For more information, refer to the provider [documentation](https://feast_registry.terraform.io/providers/juju/juju/latest/docs). 
 
 ## API
 
@@ -27,10 +27,10 @@ The solution module offers the following configurable inputs:
 | `minio_size`| string | MinIO database storage size | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
-| `offline_store_size`| string | offline store storage size | False |
-| `online_store_size`| string | online store storage size | False |
+| `feast_offline_store_size`| string | offline store storage size | False |
+| `feast_online_store_size`| string | online store storage size | False |
 | `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
-| `registry_size`| string | registry storage size | False |
+| `feast_registry_size`| string | feast_registry storage size | False |
 
 
 ### Outputs

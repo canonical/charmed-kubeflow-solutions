@@ -1,42 +1,42 @@
-resource "juju_integration" "feast_integrator_offline_store" {
+resource "juju_integration" "feast_integrator_feast_offline_store" {
   model = module.kubeflow.model
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.offline_store
+    endpoint = module.feast_integrator.requires.feast_offline_store
   }
 
   application {
-    name     = module.offline_store.application_name
-    endpoint = module.offline_store.provides.database
+    name     = module.feast_offline_store.application_name
+    endpoint = module.feast_offline_store.provides.database
   }
 }
 
-resource "juju_integration" "feast_integrator_online_store" {
+resource "juju_integration" "feast_integrator_feast_online_store" {
   model = module.kubeflow.model
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.online_store
+    endpoint = module.feast_integrator.requires.feast_online_store
   }
 
   application {
-    name     = module.online_store.application_name
-    endpoint = module.online_store.provides.database
+    name     = module.feast_online_store.application_name
+    endpoint = module.feast_online_store.provides.database
   }
 }
 
-resource "juju_integration" "feast_integrator_registry" {
+resource "juju_integration" "feast_integrator_feast_registry" {
   model = module.kubeflow.model
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.registry
+    endpoint = module.feast_integrator.requires.feast_registry
   }
 
   application {
-    name     = module.registry.application_name
-    endpoint = module.registry.provides.database
+    name     = module.feast_registry.application_name
+    endpoint = module.feast_registry.provides.database
   }
 }
 

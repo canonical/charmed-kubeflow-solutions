@@ -312,26 +312,26 @@ variable "minio_revision" {
   default     = null
 }
 
-variable "offline_store_revision" {
-  description = "Charm revision for offline-store"
+variable "feast_offline_store_revision" {
+  description = "Charm revision for feast-offline-store"
   type        = number
   default     = null
 }
 
-variable "offline_store_size" {
+variable "feast_offline_store_size" {
   description = "offline store storage size"
   type        = string
   default     = "10G"
 }
 
 
-variable "online_store_revision" {
-  description = "Charm revision for online-store"
+variable "feast_online_store_revision" {
+  description = "Charm revision for feast-online-store"
   type        = number
   default     = null
 }
 
-variable "online_store_size" {
+variable "feast_online_store_size" {
   description = "online store storage size"
   type        = string
   default     = "10G"
@@ -349,14 +349,14 @@ variable "pvcviewer_operator_revision" {
   default     = null
 }
 
-variable "registry_revision" {
-  description = "Charm revision for registry"
+variable "feast_registry_revision" {
+  description = "Charm revision for feast_registry"
   type        = number
   default     = null
 }
 
-variable "registry_size" {
-  description = "registry storage size"
+variable "feast_registry_size" {
+  description = "feast_registry storage size"
   type        = string
   default     = "10G"
 }
