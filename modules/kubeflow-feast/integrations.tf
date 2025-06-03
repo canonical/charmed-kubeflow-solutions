@@ -3,7 +3,7 @@ resource "juju_integration" "feast_integrator_feast_offline_store" {
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.feast_offline_store
+    endpoint = module.feast_integrator.requires.offline_store
   }
 
   application {
@@ -17,7 +17,7 @@ resource "juju_integration" "feast_integrator_feast_online_store" {
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.feast_online_store
+    endpoint = module.feast_integrator.requires.online_store
   }
 
   application {
@@ -31,7 +31,7 @@ resource "juju_integration" "feast_integrator_feast_registry" {
 
   application {
     name     = module.feast_integrator.app_name
-    endpoint = module.feast_integrator.requires.feast_registry
+    endpoint = module.feast_integrator.requires.registry
   }
 
   application {
