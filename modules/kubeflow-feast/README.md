@@ -57,3 +57,10 @@ The `cos_configuration` input enables the solution to configure Charmed Kubeflow
 ```
 terraform apply -var cos_configuration=true
 ```
+
+#### Use an existing grafana-agent-k8s
+If there is already an instance of the grafana-agent-k8s charm in the `kubeflow` model, then it can be used instead of deploying a new one. This is achieved with the use of `existing_grafana_agent_name` input. By default, its value is `null`.
+```
+terraform apply -var cos_configuration=true -var existing_grafana_agent_name="dummy-grafana-agent"
+```
+> :warning: Setting this input without `cos_configuration` will not have any effect.
