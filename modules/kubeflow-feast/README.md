@@ -1,7 +1,7 @@
 # Charmed Kubeflow + Feast Terraform solution
 
 
-This is a Terraform module facilitating the deployment and integration of Charmed Kubeflow and Feast, using the [Terraform juju provider](https://github.com/juju/terraform-provider-juju/). For more information, refer to the provider [documentation](https://feast_registry.terraform.io/providers/juju/juju/latest/docs). 
+This is a Terraform module facilitating the deployment and integration of Charmed Kubeflow and Feast, using the [Terraform juju provider](https://github.com/juju/terraform-provider-juju/). For more information, refer to the provider [documentation](https://registry.terraform.io/providers/juju/juju/latest/docs). 
 
 ## API
 
