@@ -13,7 +13,7 @@ on:
 
 jobs:
   deploy-solution-to-aks:
-    name: Deploy CKF + MLFlow solution to AKS
+    name: Deploy CKF + Feast solution to AKS
     runs-on: ubuntu-24.04
     env:
       AZURE_CORE_OUTPUT: none
@@ -78,16 +78,12 @@ jobs:
           juju add-k8s aks --client
           juju bootstrap aks aks-controller
 
-      - name: Deploy and assert kubeflow-mlflow solution
+      - name: Deploy and assert kubeflow-feast solution
         run: |
-          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+          tox -c ./modules/kubeflow-feast -vve test_deployment -- -vv -s
 
       - name: Run UATs
-        run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-          tox -e uats-remote
+        run: echo "WARNING UATs not yet implemented, skipping"
 
       # On failure, capture debugging resources
       - name: Select model
