@@ -15,7 +15,7 @@ def lightkube_client() -> lightkube.Client:
 
 class TestCharm:
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(self):
+    async def test_apply_terraform_solution(self, juju: jubilant.Juju):
         """Initialize and apply the kubeflow-feast Terraform solution module."""
         subprocess.run(["terraform", "init"], check=True)
         subprocess.run(
@@ -24,6 +24,8 @@ class TestCharm:
                 "apply",
                 "-var",
                 "cos_configuration=true",
+                "-var",
+                "create_model=false",
                 "-auto-approve",
             ],
             check=True,
