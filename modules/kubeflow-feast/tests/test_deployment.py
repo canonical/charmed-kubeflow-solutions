@@ -24,6 +24,8 @@ class TestCharm:
                 "apply",
                 "-var",
                 "cos_configuration=true",
+                "-var",
+                "create_model=false",
                 "-auto-approve",
             ],
             check=True,
