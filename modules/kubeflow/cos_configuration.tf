@@ -677,6 +677,21 @@ resource "juju_integration" "kserve_controller_grafana_agent_k8s_grafana_logging
   }
 }
 
+resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_metrics_endpoint" {
+  count = var.cos_configuration ? 1 : 0
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+
+  application {
+    name     = module.kubeflow_dashboard.app_name
+    endpoint = module.kubeflow_dashboard.provides.metrics_endpoint
+  }
+
+  application {
+    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    endpoint = "metrics-endpoint"
+  }
+}
+
 resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
