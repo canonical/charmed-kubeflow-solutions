@@ -3,6 +3,7 @@ import subprocess
 import aiohttp
 import lightkube
 import pytest
+import tenacity
 from lightkube.resources.core_v1 import Service
 from pytest_operator.plugin import OpsTest
 
@@ -61,6 +62,11 @@ class TestCharm:
         assert "Password" in result_text
 
 
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=2, min=1, max=10),
+    stop=tenacity.stop_after_attempt(30),
+    reraise=True,
+)
 def get_public_url(lightkube_client: lightkube.Client, bundle_name: str):
     """Extracts public URL from service istio-ingressgateway-workload."""
     ingressgateway_svc = lightkube_client.get(
