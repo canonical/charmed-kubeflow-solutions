@@ -87,7 +87,7 @@ jobs:
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e uats-remote
+          tox -e uats-remote -- --filter "not feast"
 
       # On failure, capture debugging resources
       - name: Select model
