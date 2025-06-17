@@ -54,8 +54,8 @@ jobs:
           # due to cluster naming restrictions
           version=${{ env.CKF_VERSION }}
           KF_VERSION="kf-${version//.}"
-          RESOURCE_GROUP=ckf-terraform-${KF_VERSION}-ResourceGroup
-          NAME=ckf-terraform-${KF_VERSION}-AKSCluster
+          RESOURCE_GROUP=ckf-tf-${KF_VERSION}-ResourceGroup
+          NAME=ckf-tf-${KF_VERSION}-AKSCluster
           LOCATION=westeurope
           echo "RESOURCE_GROUP=${RESOURCE_GROUP}" >> $GITHUB_ENV
           echo "NAME=${NAME}" >> $GITHUB_ENV
