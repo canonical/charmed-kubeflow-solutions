@@ -1,13 +1,13 @@
 module "feast_integrator" {
   # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/feast-operators//charms/feast-integrator/terraform?ref=main"
+  source     = "git::https://github.com/canonical/feast-operators//charms/feast-integrator/terraform?ref=track/0.49"
   model_name = module.kubeflow.model
   revision   = var.feast_integrator_revision
 }
 
 module "feast_ui" {
   # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/feast-operators//charms/feast-ui/terraform?ref=main"
+  source     = "git::https://github.com/canonical/feast-operators//charms/feast-ui/terraform?ref=track/0.49"
   model_name = module.kubeflow.model
   revision   = var.feast_ui_revision
 }
