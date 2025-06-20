@@ -21,6 +21,7 @@ The solution module offers the following configurable inputs:
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
 | `istio_tls_secret_id`| string | The juju secret id for the tls key/cert for istio-pilot | False |
+| `jupyter_ui_base` | string | Charm base for jupyter-ui | False |
 | `jupyter_ui_config`| map(string) | Map of config values passed to jupyter-ui | False |
 | `katib_db_size`| string | Katib database storage size | False |
 | `kfp_db_size`| string | KFP database storage size | False |

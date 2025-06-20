@@ -162,11 +162,14 @@ variable "jupyter_controller_revision" {
   default     = null
 }
 
-variable "jupyter_ui_revision" {
-  description = "Charm revision for jupyter-ui"
-  type        = number
-  default     = 1209
-}
+# Comment out revision variable due to https://github.com/canonical/charmed-kubeflow-solutions/issues/47
+# Revision is currently pinned in main.tf
+# Uncomment when jupyter-ui 1.10/edge is promoted to 1.10/stable
+# variable "jupyter_ui_revision" {
+#   description = "Charm revision for jupyter-ui"
+#   type        = number
+#   default     = null
+# }
 
 variable "katib_controller_revision" {
   description = "Charm revision for katib-controller"

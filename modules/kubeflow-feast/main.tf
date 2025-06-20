@@ -24,7 +24,8 @@ module "kubeflow" {
   istio_ingressgateway_revision    = var.istio_ingressgateway_revision
   istio_pilot_revision             = var.istio_pilot_revision
   jupyter_controller_revision      = var.jupyter_controller_revision
-  jupyter_ui_revision              = var.jupyter_ui_revision
+  jupyter_ui_base                  = "ubuntu@24.04"  # Set base to 24.04 due to https://github.com/canonical/charmed-kubeflow-solutions/issues/47
+  jupyter_ui_revision              = 1209  # Pin revision due to https://github.com/canonical/charmed-kubeflow-solutions/issues/47
   katib_controller_revision        = var.katib_controller_revision
   katib_db_revision                = var.katib_db_revision
   katib_db_manager_revision        = var.katib_db_manager_revision

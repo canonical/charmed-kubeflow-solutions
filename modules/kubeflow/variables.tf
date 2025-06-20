@@ -150,6 +150,12 @@ variable "jupyter_controller_revision" {
   default     = null
 }
 
+variable "jupyter_ui_base" {
+  description = "Charm base for jupyter-ui"
+  type        = string
+  default     = null
+}
+
 variable "jupyter_ui_revision" {
   description = "Charm revision for jupyter-ui"
   type        = number

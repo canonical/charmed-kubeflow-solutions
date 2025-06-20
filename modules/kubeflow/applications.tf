@@ -68,6 +68,7 @@ module "jupyter_ui" {
   config     = var.jupyter_ui_config
   revision   = var.jupyter_ui_revision
   channel    = "1.10/stable"
+  base       = var.jupyter_ui_base
 }
 
 module "katib_controller" {
