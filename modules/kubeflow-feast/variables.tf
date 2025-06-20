@@ -165,7 +165,7 @@ variable "jupyter_controller_revision" {
 variable "jupyter_ui_revision" {
   description = "Charm revision for jupyter-ui"
   type        = number
-  default     = null
+  default     = 1209
 }
 
 variable "katib_controller_revision" {
