@@ -24,7 +24,7 @@ module "kubeflow" {
   istio_ingressgateway_revision    = var.istio_ingressgateway_revision
   istio_pilot_revision             = var.istio_pilot_revision
   jupyter_controller_revision      = var.jupyter_controller_revision
-  jupyter_ui_revision              = var.jupyter_ui_revision
+  jupyter_ui_revision              = 1209
   katib_controller_revision        = var.katib_controller_revision
   katib_db_revision                = var.katib_db_revision
   katib_db_manager_revision        = var.katib_db_manager_revision
