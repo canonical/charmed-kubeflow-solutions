@@ -4,7 +4,7 @@ resource "juju_application" "grafana_agent_k8s" {
   count = var.cos_configuration && var.existing_grafana_agent_name == null ? 1 : 0
   charm {
     name     = "grafana-agent-k8s"
-    channel  = "latest/stable"
+    channel  = "1/stable"
     revision = var.grafana_agent_k8s_revision
   }
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
