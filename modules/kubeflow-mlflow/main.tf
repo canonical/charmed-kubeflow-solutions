@@ -1,5 +1,6 @@
 module "kubeflow" {
   source                           = "../kubeflow"
+  risk                             = var.risk
   create_model                     = var.create_model
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
@@ -58,8 +59,9 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=wip-new-pinning"
   # kubeflow module creates the model
+  risk                        = var.risk
   create_model                = false
   model                       = module.kubeflow.model
   cos_configuration           = var.cos_configuration

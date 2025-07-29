@@ -1,3 +1,14 @@
+variable "risk" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = "stable"
+
+  validation {
+    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
+    error_message = "Valid values for var: test_variable are (stable, candidate, beta and edge)."
+  }
+}
+
 variable "create_model" {
   description = "Allows to skip Juju model creation and re-use a model created in a higher level module. When re-using a model, if this is created by Terraform, make sure that the current module depends on the resource using the depends_on option."
   type        = bool
