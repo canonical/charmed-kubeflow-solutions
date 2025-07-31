@@ -1,0 +1,130 @@
+name: Create EKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+on:
+  workflow_dispatch:
+    inputs:
+      k8s_version:
+        description: 'Kubernetes version to be used for the EKS cluster. Make sure that the corresponding K8s version is supported by the cloud.'
+        required: false
+      uats_branch:
+        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
+        required: false
+  schedule:
+    - cron: "17 02 * * 1"
+
+env:
+  CLUSTER_NAME: kubeflow-eks
+  REGION: ${{ secrets.AWS_REGION }}
+  JUJU_CONTROLLER: kubeflow-controller
+  JUJU_MODEL: kubeflow
+  CKF_CHANNEL: "1.10/stable"
+  MLFLOW_CHANNEL: "latest/stable"
+
+jobs:
+  deploy-solution-to-eks:
+    name: Deploy CKF + MLFlow solution to EKS
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set envvars from dependencies.yaml
+        run: |
+          yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml" | while IFS= read -r line; do
+            echo "$line" >> "$GITHUB_ENV"
+          done
+
+      - name: Update ENV variables from inputs if available
+        run: |
+          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
+
+      - name: Install CLI tools & dependencies
+        run: |
+          pip install tox
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
+          sudo snap install charmcraft --classic
+          sudo snap install terraform  --channel latest/stable --classic
+          juju version
+          terraform --version
+          curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin
+          curl -LO "https://dl.k8s.io/release/v${K8S_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_DEPLOY }}
+          role-session-name: gha-eks-deploy
+
+      - name: Create EKS Cluster
+        run: |
+          eksctl create cluster \
+            --name $CLUSTER_NAME \
+            --region $REGION \
+            --version $K8S_VERSION \
+            --nodegroup-name standard-workers \
+            --node-type t3.large \
+            --nodes 3 \
+            --nodes-min 3 \
+            --nodes-max 5 \
+            --managed
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name $CLUSTER_NAME --region $REGION
+
+      - name: Add EKS cluster to Juju
+        run: |
+          juju version
+          juju add-k8s eks --client
+
+      - name: Deploy and assert kubeflow-mlflow solution
+        run: |
+          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+
+      - name: Run UATs
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
+          cd ~/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+          tox -e uats-remote -- --filter "not feast"
+
+      # On failure, capture debugging resources
+      - name: Select model
+        run: juju switch aks-controller:kubeflow
+        if: failure() || cancelled()
+
+      - name: Save debug artifacts
+        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+        if: failure() || cancelled()
+
+      - name: Get juju status
+        run: juju status
+        if: failure() || cancelled()
+
+      - name: Get juju debug logs
+        run: juju debug-log --replay --no-tail
+        if: failure() || cancelled()
+
+      - name: Get all kubernetes resources
+        run: kubectl get all -A
+        if: failure() || cancelled()
+
+      - name: Describe all pods
+        if: failure() || cancelled()
+        run: kubectl describe pods --all-namespaces
+
+      - name: Get logs from pods with status = Pending
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = Failed
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = CrashLoopBackOff
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
