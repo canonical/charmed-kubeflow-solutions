@@ -1,3 +1,14 @@
+variable "risk" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = "stable"
+
+  validation {
+    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
+    error_message = "Valid values for var: test_variable are (stable, candidate, beta and edge)."
+  }
+}
+
 variable "cos_configuration" {
   description = "Boolean value that enables COS configuration"
   type        = bool
