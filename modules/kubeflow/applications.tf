@@ -7,10 +7,10 @@ module "admission_webhook" {
 }
 
 module "argo_controller" {
-  source     = "git::https://github.com/canonical/argo-operators//charms/argo-controller/terraform?ref=track/3.4"
+  source     = "git::https://github.com/canonical/argo-operators//charms/argo-controller/terraform?ref=track/3.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.argo_controller_revision
-  channel    = "3.4/stable"
+  channel    = "3.5/edge"
 }
 
 module "dex_auth" {
@@ -82,7 +82,7 @@ module "katib_db" {
   source          = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
   juju_model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name        = "katib-db"
-  channel         = "8.0/stable"
+  channel         = "8.0/edge"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile-limit-memory = "2048"
@@ -106,10 +106,10 @@ module "katib_ui" {
 }
 
 module "kfp_api" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_api_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_db" {
@@ -117,7 +117,7 @@ module "kfp_db" {
   source          = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
   juju_model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name        = "kfp-db"
-  channel         = "8.0/stable"
+  channel         = "8.0/edge"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile-limit-memory = "2048"
@@ -127,52 +127,52 @@ module "kfp_db" {
 }
 
 module "kfp_metadata_writer" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-metadata-writer/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-metadata-writer/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_metadata_writer_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_persistence" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-persistence/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-persistence/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_persistence_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_profile_controller" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-profile-controller/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-profile-controller/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_profile_controller_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_schedwf" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-schedwf/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-schedwf/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_schedwf_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_ui" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-ui/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-ui/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_ui_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_viewer" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viewer/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viewer/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_viewer_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "kfp_viz" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viz/terraform?ref=track/2.4"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viz/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_viz_revision
-  channel    = "2.4/stable"
+  channel    = "2.5/edge"
 }
 
 module "knative_eventing" {
