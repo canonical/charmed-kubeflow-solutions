@@ -82,7 +82,7 @@ module "katib_db" {
   source          = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
   juju_model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name        = "katib-db"
-  channel         = "8.0/stable"
+  channel         = "8.0/edge"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile-limit-memory = "2048"
@@ -117,7 +117,7 @@ module "kfp_db" {
   source          = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=main"
   juju_model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name        = "kfp-db"
-  channel         = "8.0/stable"
+  channel         = "8.0/edge"
   # The following config is equivalent to "constraints: mem=2G"
   config = {
     profile-limit-memory = "2048"
