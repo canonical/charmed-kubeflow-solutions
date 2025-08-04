@@ -80,6 +80,7 @@ jobs:
         run: |
           juju version
           juju add-k8s eks --client
+          juju bootstrap eks eks-controller
 
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
@@ -94,7 +95,7 @@ jobs:
 
       # On failure, capture debugging resources
       - name: Select model
-        run: juju switch aks-controller:kubeflow
+        run: juju switch eks-controller:kubeflow
         if: failure() || cancelled()
 
       - name: Save debug artifacts
