@@ -5,21 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       k8s_version:
-        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.27).'
+        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.27)'
         required: false
       uats_branch:
-        description: 'Branch to run the UATs from, e.g., main or track/1.10. By default, this is defined by the dependencies.yaml file.'
+        description: 'Branch to run the UATs from, e.g., main or track/1.10'
         required: false
   schedule:
     - cron: "17 02 * * 1"
 
 env:
   CLUSTER_NAME: kubeflow-eks
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  JUJU_CONTROLLER: kubeflow-controller
-  JUJU_MODEL: kubeflow
-  CKF_CHANNEL: "1.10/stable"
-  MLFLOW_CHANNEL: "latest/stable"
 
 jobs:
   deploy-solution-to-eks:
@@ -30,12 +25,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set environment variables (from dependencies.yaml and/or inputs)
+      - name: Set environment variables (from dependencies.yaml and inputs)
         run: |
-          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
-          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
-          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
+          eval $(yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml")
+
+          FINAL_K8S_VERSION="${{ inputs.k8s_version }}"
+          FINAL_K8S_VERSION=${FINAL_K8S_VERSION:-$K8S_VERSION}
+
+          FINAL_UATS_BRANCH="${{ inputs.uats_branch }}"
+          FINAL_UATS_BRANCH=${FINAL_UATS_BRANCH:-$UATS_BRANCH}
+
+          echo "K8S_VERSION=$FINAL_K8S_VERSION" >> $GITHUB_ENV
+          echo "UATS_BRANCH=$FINAL_UATS_BRANCH" >> $GITHUB_ENV
+
+      - name: Extract AWS region from cluster.yaml
+        run: |
+          REGION=$(yq e '.metadata.region' .github/cluster.yaml)
+          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
 
       - name: Install CLI tools & dependencies
         run: |
@@ -66,6 +72,16 @@ jobs:
           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
+
+      - name: Pre-delete EKS cluster if exists
+        run: |
+          echo "Cleaning up old cluster (if any)..."
+          eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
+
+      - name: Pre-delete CloudFormation stack if exists
+        run: |
+          echo "Cleaning up old CloudFormation stack (if any)..."
+          aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster || echo "Stack not found."
 
       - name: Create EKS cluster
         run: |
