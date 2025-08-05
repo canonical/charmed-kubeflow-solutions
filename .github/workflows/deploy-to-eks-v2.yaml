@@ -23,7 +23,7 @@ env:
 
 jobs:
   deploy-solution-to-eks:
-    name: Deploy CKF + MLFlow solution to EKS
+    name: Deploy CKF + MLFlow solution to EKS 2
     runs-on: ubuntu-24.04
 
     steps:
