@@ -14,7 +14,7 @@ on:
     - cron: "17 02 * * 1"
 
 env:
-  CLUSTER_NAME: kubeflow-eks
+  CLUSTER_NAME: kubeflow-eks2
 
 jobs:
   deploy-solution-to-eks:
