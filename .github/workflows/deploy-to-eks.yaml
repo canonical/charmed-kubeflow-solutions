@@ -72,16 +72,25 @@ jobs:
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
 
-
-      - name: Pre-delete EKS cluster if exists
+      - name: Pre-delete EKS cluster (if exists)
         run: |
-          echo "Cleaning up old cluster (if any)..."
+          echo "Attempting to delete EKS cluster '${{ env.CLUSTER_NAME }}' (if it exists)..."
           eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
 
-      - name: Pre-delete CloudFormation stack if exists
+          echo "Confirming deletion..."
+          aws eks describe-cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster no longer exists."
+
+      - name: Pre-delete CloudFormation stack (if exists)
         run: |
-          echo "Cleaning up old CloudFormation stack (if any)..."
-          aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster || echo "Stack not found."
+          STACK_NAME="eksctl-${{ env.CLUSTER_NAME }}-cluster"
+          echo "Attempting to delete CloudFormation stack '$STACK_NAME' (if it exists)..."
+          aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack not found."
+
+          echo "Waiting for stack deletion to complete (if triggered)..."
+          aws cloudformation wait stack-delete-complete --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack may have already been deleted."
+
+          echo "Confirming stack deletion..."
+          aws cloudformation describe-stacks --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack no longer exists."
 
       - name: Create EKS cluster
         run: |
