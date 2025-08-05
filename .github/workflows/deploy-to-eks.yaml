@@ -43,14 +43,21 @@ jobs:
           REGION=$(yq e '.metadata.region' .github/cluster.yaml)
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV
 
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install CLI tools & dependencies
         run: |
           pip install tox
-          sudo snap install juju --classic
+          sudo snap install juju --channel=3.6/stable
           sudo snap install charmcraft --classic
-          sudo snap install terraform --classic
+          sudo snap refresh charmcraft --channel=3.x/stable
+          sudo snap install terraform --channel=latest/stable --classic
           juju version
           terraform --version
+          charmcraft version
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
