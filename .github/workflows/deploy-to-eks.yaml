@@ -83,14 +83,17 @@ jobs:
       - name: Pre-delete CloudFormation stack (if exists)
         run: |
           STACK_NAME="eksctl-${{ env.CLUSTER_NAME }}-cluster"
-          echo "Attempting to delete CloudFormation stack '$STACK_NAME' (if it exists)..."
+          echo "Deleting CloudFormation stack '$STACK_NAME' (if it exists)..."
           aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack not found."
 
-          echo "Waiting for stack deletion to complete (if triggered)..."
-          aws cloudformation wait stack-delete-complete --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack may have already been deleted."
+          echo "Waiting (max 10 minutes) for stack deletion to complete..."
+          timeout 600s aws cloudformation wait stack-delete-complete --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" \
+            && echo "Stack deleted." \
+            || echo "Stack deletion timed out or failed (continuing)."
 
-          echo "Confirming stack deletion..."
-          aws cloudformation describe-stacks --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack no longer exists."
+          echo "Verifying stack is gone..."
+          aws cloudformation describe-stacks --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" 2>/dev/null \
+            || echo "Stack no longer exists."
 
       - name: Create EKS cluster
         run: |
