@@ -132,3 +132,10 @@ jobs:
       - name: Get logs from pods with status = CrashLoopBackOff
         run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
         if: failure() || cancelled()
+
+      - name: Delete EKS cluster
+        if: always()
+        run: |
+          VERSION=${{ matrix.bundle_version }}
+          VERSION_WITHOUT_DOT="${VERSION//.}"
+          eksctl delete cluster --region eu-central-1 --name=kubeflow-test-$VERSION_WITHOUT_DOT
