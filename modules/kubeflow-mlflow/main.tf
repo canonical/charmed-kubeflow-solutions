@@ -59,7 +59,7 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=wip-new-pinning"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
   # kubeflow module creates the model
   risk                        = var.risk
   create_model                = false
