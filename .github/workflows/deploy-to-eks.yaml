@@ -133,6 +133,10 @@ jobs:
           python -m pytest --version
           pip show pytest-operator || echo "pytest-operator not installed"
 
+      - name: Clean up namespace before deployment
+        run: |
+          kubectl delete namespace kubeflow || true
+
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
           tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
