@@ -122,6 +122,16 @@ jobs:
           juju bootstrap eks eks-controller
           juju add-model kubeflow
 
+      - name: Debug Python environment
+        run: |
+          echo "Python version & installed packages"
+          python --version
+          pip freeze
+          echo
+          echo "pytest and pytest-operator check"
+          python -m pytest --version
+          pip show pytest-operator || echo "pytest-operator not installed"
+
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
           tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
