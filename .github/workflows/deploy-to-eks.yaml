@@ -133,9 +133,21 @@ jobs:
           python -m pytest --version
           pip show pytest-operator || echo "pytest-operator not installed"
 
-      - name: Clean up namespace before deployment
+      - name: Ensure kubeflow namespace is deleted
         run: |
-          kubectl delete namespace kubeflow || true
+          echo "Deleting kubeflow namespace if it exists..."
+          kubectl delete namespace kubeflow --ignore-not-found
+
+          echo "Waiting for namespace to terminate completely..."
+          for i in {1..30}; do
+            if kubectl get namespace kubeflow >/dev/null 2>&1; then
+              echo "Namespace still exists. Waiting..."
+              sleep 5
+            else
+              echo "Namespace deleted."
+              break
+            fi
+          done
 
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
