@@ -52,7 +52,7 @@ jobs:
         run: |
           pip install tox
           pip install pytest
-          sudo snap install juju --channel=3.6/stable
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --classic
           sudo snap refresh charmcraft --channel=3.x/stable
           sudo snap install terraform --channel=latest/stable --classic
@@ -123,8 +123,13 @@ jobs:
           juju bootstrap eks eks-controller
 
       - name: Deploy and assert kubeflow-mlflow solution
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+
 
       - name: Run UATs
         run: |
@@ -133,6 +138,7 @@ jobs:
           git checkout ${{ env.UATS_BRANCH }}
           tox -e uats-remote -- --filter "not feast"
 
+      # On failure, capture debugging resources
       - name: Select model (for debug)
         if: failure() || cancelled()
         run: juju switch eks-controller:kubeflow
@@ -172,6 +178,7 @@ jobs:
         run: |
           kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
 
+      # Clean up resources
       - name: Delete EKS cluster
         if: always()
         run: eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
