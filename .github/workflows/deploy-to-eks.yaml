@@ -121,33 +121,6 @@ jobs:
         run: |
           /snap/juju/current/bin/juju add-k8s eks --client
           juju bootstrap eks eks-controller
-          juju add-model kubeflow
-
-      - name: Debug Python environment
-        run: |
-          echo "Python version & installed packages"
-          python --version
-          pip freeze
-          echo
-          echo "pytest and pytest-operator check"
-          python -m pytest --version
-          pip show pytest-operator || echo "pytest-operator not installed"
-
-      - name: Ensure kubeflow namespace is deleted
-        run: |
-          echo "Deleting kubeflow namespace if it exists..."
-          kubectl delete namespace kubeflow --ignore-not-found
-
-          echo "Waiting for namespace to terminate completely..."
-          for i in {1..30}; do
-            if kubectl get namespace kubeflow >/dev/null 2>&1; then
-              echo "Namespace still exists. Waiting..."
-              sleep 5
-            else
-              echo "Namespace deleted."
-              break
-            fi
-          done
 
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
@@ -203,6 +176,6 @@ jobs:
         if: always()
         run: eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
 
-      - name: Delete CloudFormation stack (if present)
+      - name: Delete CloudFormation stack
         if: always()
         run: aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster
