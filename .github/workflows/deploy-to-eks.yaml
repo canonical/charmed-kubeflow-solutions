@@ -52,7 +52,7 @@ jobs:
         run: |
           pip install tox
           pip install pytest
-          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/latest/stable
           sudo snap install charmcraft --classic
           sudo snap refresh charmcraft --channel=3.x/stable
           sudo snap install terraform --channel=latest/stable --classic
