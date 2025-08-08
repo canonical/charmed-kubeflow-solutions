@@ -51,7 +51,6 @@ jobs:
       - name: Install CLI tools & dependencies
         run: |
           pip install tox
-          pip install pytest
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --classic
           sudo snap refresh charmcraft --channel=3.x/stable
