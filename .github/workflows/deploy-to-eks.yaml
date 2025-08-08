@@ -46,6 +46,7 @@ jobs:
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV
           echo "region=$REGION" >> $GITHUB_OUTPUT
 
+      # Double-check if this is still needed - same with pinning Charmcraft version
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
@@ -121,15 +122,8 @@ jobs:
 
       - name: Setup Juju controller
         run: |
-          /snap/juju/current/bin/juju add-k8s eks --client
+          juju add-k8s eks --client
           juju bootstrap eks eks-controller
-
-      - name: Patch mlflow-minio resource manually
-        run: |
-          echo "Deploying mlflow-minio manually to satisfy Terraform dependencies..."
-          juju deploy minio mlflow-minio --channel=ckf-1.10/stable
-          juju attach-resource mlflow-minio oci-image=docker.io/minio/minio:RELEASE.2024-06-25T21-19-59Z
-          juju wait --timeout=300s --watch --application mlflow-minio
 
       - name: Deploy and assert kubeflow-mlflow solution
         env:
@@ -194,22 +188,6 @@ jobs:
       - name: Delete CloudFormation stack
         if: always()
         run: aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster
-
-      - name: Delete orphaned EBS AWS volumes
-        if: always()
-        run: |
-          echo "Cleaning up unattached EBS volumes..."
-          aws ec2 describe-volumes \
-            --region ${{ env.AWS_REGION }} \
-            --filters Name=status,Values=available \
-            --query 'Volumes[].VolumeId' --output text | tr '\t' '\n' | while read vol; do
-              echo "Deleting EBS volume $vol"
-              aws ec2 delete-volume --volume-id $vol --region ${{ env.AWS_REGION }} || true
-            done
-
-      - name: Remove mlflow-minio (optional)
-        if: always()
-        run: juju remove-application mlflow-minio --force --no-prompt
 
   delete-unattached-volumes:
       name: Clean unattached EBS volumes
