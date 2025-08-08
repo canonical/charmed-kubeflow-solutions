@@ -216,15 +216,6 @@ jobs:
       if: always()
       needs: [deploy-solution-to-eks]
       uses: ./.github/workflows/delete-aws-volumes.yaml
-      secrets: inherit
-      with:
-        region: ${{ env.AWS_REGION }}   # or '' to sweep all regions
-
-  delete-unattached-volumes:
-      name: Clean unattached EBS volumes
-      if: always()
-      needs: [deploy-solution-to-eks]
-      uses: ./.github/workflows/delete-aws-volumes.yaml
       with:
         region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}  
       secrets: inherit
