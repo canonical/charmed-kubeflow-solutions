@@ -20,6 +20,8 @@ jobs:
   deploy-solution-to-eks:
     name: Deploy CKF + MLFlow solution to EKS
     runs-on: ubuntu-24.04
+    outputs:
+      aws_region: ${{ steps.extract_region.outputs.region }}
 
     steps:
       - name: Checkout repository
@@ -42,6 +44,7 @@ jobs:
         run: |
           REGION=$(yq e '.metadata.region' .github/cluster.yaml)
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV
+          echo "region=$REGION" >> $GITHUB_OUTPUT
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -216,3 +219,12 @@ jobs:
       secrets: inherit
       with:
         region: ${{ env.AWS_REGION }}   # or '' to sweep all regions
+
+  delete-unattached-volumes:
+      name: Clean unattached EBS volumes
+      if: always()
+      needs: [deploy-solution-to-eks]
+      uses: ./.github/workflows/delete-aws-volumes.yaml
+      with:
+        region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}  
+      secrets: inherit
