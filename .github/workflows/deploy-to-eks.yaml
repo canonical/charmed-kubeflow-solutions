@@ -122,7 +122,7 @@ jobs:
 
       - name: Setup Juju controller
         run: |
-          juju add-k8s eks --client
+          /snap/juju/current/bin/juju add-k8s eks --client
           juju bootstrap eks eks-controller
 
       - name: Deploy and assert kubeflow-mlflow solution
