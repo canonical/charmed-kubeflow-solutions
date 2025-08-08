@@ -25,18 +25,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set environment variables (from dependencies.yaml and inputs)
+      - name: Set envvars from dependencies.yaml
         run: |
-          eval $(yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml")
+          yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml" | while IFS= read -r line; do
+            echo "$line" >> "$GITHUB_ENV"
+          done
 
-          FINAL_K8S_VERSION="${{ inputs.k8s_version }}"
-          FINAL_K8S_VERSION=${FINAL_K8S_VERSION:-$K8S_VERSION}
-
-          FINAL_UATS_BRANCH="${{ inputs.uats_branch }}"
-          FINAL_UATS_BRANCH=${FINAL_UATS_BRANCH:-$UATS_BRANCH}
-
-          echo "K8S_VERSION=$FINAL_K8S_VERSION" >> $GITHUB_ENV
-          echo "UATS_BRANCH=$FINAL_UATS_BRANCH" >> $GITHUB_ENV
+      - name: Update ENV variables from inputs if available
+        run: |
+          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Extract AWS region from cluster.yaml
         run: |
@@ -52,7 +52,7 @@ jobs:
         run: |
           pip install tox
           pip install pytest
-          sudo snap install juju --channel=3.6/stable
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --classic
           sudo snap refresh charmcraft --channel=3.x/stable
           sudo snap install terraform --channel=latest/stable --classic
@@ -122,6 +122,13 @@ jobs:
           /snap/juju/current/bin/juju add-k8s eks --client
           juju bootstrap eks eks-controller
 
+      - name: Patch mlflow-minio resource manually
+        run: |
+          echo "Deploying mlflow-minio manually to satisfy Terraform dependencies..."
+          juju deploy minio mlflow-minio --channel=ckf-1.10/stable
+          juju attach-resource mlflow-minio oci-image=docker.io/minio/minio:RELEASE.2024-06-25T21-19-59Z
+          juju wait --timeout=300s --watch --application mlflow-minio
+
       - name: Deploy and assert kubeflow-mlflow solution
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -129,7 +136,6 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
-
 
       - name: Run UATs
         run: |
@@ -186,3 +192,28 @@ jobs:
       - name: Delete CloudFormation stack
         if: always()
         run: aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster
+
+      - name: Delete orphaned EBS AWS volumes
+        if: always()
+        run: |
+          echo "Cleaning up unattached EBS volumes..."
+          aws ec2 describe-volumes \
+            --region ${{ env.AWS_REGION }} \
+            --filters Name=status,Values=available \
+            --query 'Volumes[].VolumeId' --output text | tr '\t' '\n' | while read vol; do
+              echo "Deleting EBS volume $vol"
+              aws ec2 delete-volume --volume-id $vol --region ${{ env.AWS_REGION }} || true
+            done
+
+      - name: Remove mlflow-minio (optional)
+        if: always()
+        run: juju remove-application mlflow-minio --force --no-prompt
+
+delete-unattached-volumes:
+    name: Clean unattached EBS volumes
+    if: always()
+    needs: [deploy-solution-to-eks]
+    uses: ./.github/workflows/delete-aws-volumes.yaml
+    secrets: inherit
+    with:
+      region: ${{ env.AWS_REGION }}   # or '' to sweep all regions

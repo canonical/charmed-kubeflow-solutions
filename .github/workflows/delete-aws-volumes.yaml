@@ -1,0 +1,53 @@
+name: Delete unattached (available) EBS volumes
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "AWS region to clean. Leave empty to clean ALL regions."
+        required: false
+        default: ""
+  
+  workflow_call:
+    inputs:
+      region:
+        description: "AWS region to clean. Leave empty to clean ALL regions."
+        required: false
+        default: ""
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  delete-volumes:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        # Use your repo/org secrets: AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Always needs *some* region; if input empty we'll still iterate all inside the script
+          aws-region: ${{ inputs.region || 'eu-central-1' }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3 tenacity
+
+      - name: Run delete volumes script
+        run: |
+          python scripts/delete_volumes.py "${{ inputs.region }}"
