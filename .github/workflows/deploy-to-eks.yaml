@@ -41,6 +41,7 @@ jobs:
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Extract AWS region from cluster.yaml
+        id: extract_region
         run: |
           REGION=$(yq e '.metadata.region' .github/cluster.yaml)
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV

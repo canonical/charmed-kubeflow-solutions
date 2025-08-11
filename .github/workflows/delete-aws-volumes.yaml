@@ -50,4 +50,9 @@ jobs:
 
       - name: Run delete volumes script
         run: |
-          python scripts/delete_volumes.py "${{ inputs.region }}"
+          if [ -n "${{ inputs.region }}" ]; then
+            python scripts/delete_volumes.py "${{ inputs.region }}"
+          else
+            python scripts/delete_volumes.py
+          fi
+
