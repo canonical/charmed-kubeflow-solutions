@@ -88,6 +88,7 @@ jobs:
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
 
+      # Once working, do we want to keep these two pre-deletion steps?
       - name: Pre-delete EKS cluster (if exists)
         run: |
           echo "Attempting to delete EKS cluster '${{ env.CLUSTER_NAME }}' (if it exists)..."
