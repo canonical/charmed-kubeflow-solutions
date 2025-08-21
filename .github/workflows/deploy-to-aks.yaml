@@ -38,7 +38,7 @@ jobs:
       - name: Install CLI tools
         run: |
           pip install tox
-          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/latest/stable
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --classic
           sudo snap install terraform  --channel latest/stable --classic
           juju version
