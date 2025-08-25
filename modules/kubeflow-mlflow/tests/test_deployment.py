@@ -32,7 +32,7 @@ class TestCharm:
                 "-var",
                 "mlflow_minio_revision=542",
                 "-var",
-                "minio_revision=542"
+                "minio_revision=542",
                 "-auto-approve",
             ],
             check=True,
