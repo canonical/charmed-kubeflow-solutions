@@ -29,6 +29,10 @@ class TestCharm:
                 "apply",
                 "-var",
                 "cos_configuration=true",
+                "-var",
+                "mlflow_minio_revision=542",
+                "-var",
+                "minio_revision=542"
                 "-auto-approve",
             ],
             check=True,
