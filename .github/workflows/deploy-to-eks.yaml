@@ -146,11 +146,6 @@ jobs:
           git checkout ${{ env.UATS_BRANCH }}
           tox -e uats-remote -- --filter "not feast"
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        timeout-minutes: 60
-
       # On failure, capture debugging resources
       - name: Select model (for debug)
         if: failure() || cancelled()
