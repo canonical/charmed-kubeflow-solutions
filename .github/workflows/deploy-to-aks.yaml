@@ -1,5 +1,6 @@
 name: Create AKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
 on:
+  pull_request: {}
   workflow_dispatch:
     inputs:
       k8s_version:
@@ -20,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set envvars from dependencies.yaml
         run: |
