@@ -14,7 +14,7 @@ on:
     - cron: "17 02 * * 1"
 
 env:
-  CLUSTER_NAME: kubeflow-eks2
+  CLUSTER_NAME: kubeflow-eks-test
 
 jobs:
   deploy-solution-to-eks:
@@ -47,17 +47,11 @@ jobs:
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV
           echo "region=$REGION" >> $GITHUB_OUTPUT
 
-      # Double-check if this is still needed - same with pinning Charmcraft version
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install CLI tools & dependencies
         run: |
           pip install tox
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
-          sudo snap install charmcraft --channel=3.x/stable --classic
+          sudo snap install charmcraft --channel latest/stable --classic
           sudo snap install terraform --channel=latest/stable --classic
           juju version
           terraform --version
