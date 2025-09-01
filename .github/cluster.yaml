@@ -19,9 +19,6 @@ managedNodeGroups:
     withAddonPolicies:
       ebs: true
   instanceType: t2.2xlarge
-  labels:
-    alpha.eksctl.io/cluster-name: scrumptious-wardrobe-1684842095
-    alpha.eksctl.io/nodegroup-name: ng-d06bd84e
   maxSize: 2
   minSize: 2
   name: ng-d06bd84e
