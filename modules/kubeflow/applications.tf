@@ -109,7 +109,10 @@ module "kfp_api" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_api_revision
-  channel    = "2.5/${var.risk}"
+  config = {
+    object-store-bucket-name = var.kfp_api_object_store_bucket_name
+  }
+  channel = "2.5/${var.risk}"
 }
 
 module "kfp_db" {
@@ -268,6 +271,13 @@ module "mlmd" {
 module "minio" {
   source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/ckf-1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  config = {
+    access-key               = var.mlflow_minio_access_key,
+    secret-key               = var.mlflow_minio_secret_key,
+    mode                     = var.mlflow_minio_mode,
+    gateway-storage-service  = var.mlflow_minio_gateway_storage_service,
+    storage-service-endpoint = var.mlflow_minio_storage_service_endpoint,
+  }
   storage_directives = {
     minio-data = var.minio_size
   }

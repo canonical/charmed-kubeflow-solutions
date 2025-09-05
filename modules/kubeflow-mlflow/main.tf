@@ -13,8 +13,14 @@ module "kubeflow" {
   istio_tls_secret_id              = var.istio_tls_secret_id
   jupyter_ui_config                = var.jupyter_ui_config
   katib_db_size                    = var.katib_db_size
+  kfp_api_object_store_bucket_name = var.kfp_api_object_store_bucket_name
   kfp_db_size                      = var.kfp_db_size
+  minio_access_key                 = var.minio_access_key
+  minio_gateway_storage_service    = var.minio_gateway_storage_service
+  minio_mode                       = var.minio_mode
+  minio_secret_key                 = var.minio_secret_key
   minio_size                       = var.minio_size
+  minio_storage_service_endpoint   = var.minio_storage_service_endpoint
   mlmd_size                        = var.mlmd_size
   no_proxy                         = var.no_proxy
   public_url                       = var.public_url
@@ -61,18 +67,24 @@ module "kubeflow" {
 module "mlflow" {
   source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
   # kubeflow module creates the model
-  risk                        = var.risk
-  create_model                = false
-  model                       = module.kubeflow.model
-  cos_configuration           = var.cos_configuration
-  enable_mlflow_nodeport      = var.enable_mlflow_nodeport
-  existing_grafana_agent_name = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
-  mlflow_minio_revision       = var.mlflow_minio_revision
-  mlflow_minio_size           = var.mlflow_minio_size
-  mlflow_mysql_revision       = var.mlflow_mysql_revision
-  mlflow_mysql_size           = var.mlflow_mysql_size
-  mlflow_nodeport             = var.mlflow_nodeport
-  mlflow_server_revision      = var.mlflow_server_revision
+  risk                                  = var.risk
+  create_model                          = false
+  model                                 = module.kubeflow.model
+  cos_configuration                     = var.cos_configuration
+  enable_mlflow_nodeport                = var.enable_mlflow_nodeport
+  existing_grafana_agent_name           = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
+  mlflow_default_artifact_root          = var.mlflow_default_artifact_root
+  mlflow_minio_revision                 = var.mlflow_minio_revision
+  mlflow_minio_access_key               = var.mlflow_minio_access_key
+  mlflow_minio_gateway_storage_service  = var.mlflow_minio_gateway_storage_service
+  mlflow_minio_mode                     = var.mlflow_minio_mode
+  mlflow_minio_secret_key               = var.mlflow_minio_secret_key
+  mlflow_minio_size                     = var.mlflow_minio_size
+  mlflow_minio_storage_service_endpoint = var.mlflow_minio_storage_service_endpoint
+  mlflow_mysql_revision                 = var.mlflow_mysql_revision
+  mlflow_mysql_size                     = var.mlflow_mysql_size
+  mlflow_nodeport                       = var.mlflow_nodeport
+  mlflow_server_revision                = var.mlflow_server_revision
 }
 
 module "resource_dispatcher" {
