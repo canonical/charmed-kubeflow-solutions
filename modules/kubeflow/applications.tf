@@ -11,6 +11,9 @@ module "argo_controller" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.argo_controller_revision
   channel    = "3.5/${var.risk}"
+  config = {
+    bucket = var.argo_controller_bucket
+  }
 }
 
 module "dex_auth" {

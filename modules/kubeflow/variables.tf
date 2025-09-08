@@ -9,6 +9,12 @@ variable "risk" {
   }
 }
 
+variable "argo_controller_bucket" {
+  description = "The name of the bucket to be used by Argo controller in the object store"
+  type        = string
+  default     = "mlpipeline"
+}
+
 variable "cos_configuration" {
   description = "Boolean value that enables COS configuration"
   type        = bool

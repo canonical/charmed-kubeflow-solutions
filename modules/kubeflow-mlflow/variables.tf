@@ -9,6 +9,12 @@ variable "risk" {
   }
 }
 
+variable "argo_controller_bucket" {
+  description = "The name of the bucket to be used by Argo controller in the object store"
+  type        = string
+  default     = "mlpipeline"
+}
+
 variable "create_model" {
   description = "Allows to skip Juju model creation and re-use a model created in a higher level module. When re-using a model, if this is created by Terraform, make sure that the current module depends on the resource using the depends_on option."
   type        = bool

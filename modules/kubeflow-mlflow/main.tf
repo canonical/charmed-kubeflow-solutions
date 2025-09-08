@@ -1,6 +1,7 @@
 module "kubeflow" {
   source                           = "../kubeflow"
   risk                             = var.risk
+  argo_controller_bucket           = var.argo_controller_bucket
   create_model                     = var.create_model
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
