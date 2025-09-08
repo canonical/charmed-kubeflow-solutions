@@ -1,6 +1,5 @@
 name: Create AKS cluster, deploy kubeflow-feast Terraform solution and run UATs
 on:
-  pull_request: {}
   workflow_dispatch:
     inputs:
       k8s_version:
