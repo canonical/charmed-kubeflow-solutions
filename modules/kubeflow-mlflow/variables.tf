@@ -116,8 +116,8 @@ variable "minio_access_key" {
 
 variable "minio_gateway_storage_service" {
   description = "Gateway storage service configuration for MinIO when in 'gateway' mode"
-  type        = any
-  default     = {}
+  type        = string
+  default     = ""
 }
 
 variable "minio_mode" {
