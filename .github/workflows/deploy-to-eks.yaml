@@ -1,0 +1,197 @@
+name: Create EKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+
+on:
+  workflow_dispatch:
+    inputs:
+      k8s_version:
+        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.27)'
+        required: false
+      uats_branch:
+        description: 'Branch to run the UATs from, e.g., main or track/1.10'
+        required: false
+  schedule:
+    - cron: "17 02 * * 1"
+
+env:
+  CLUSTER_NAME: kubeflow-eks-test
+
+jobs:
+  deploy-solution-to-eks:
+    name: Deploy CKF + MLFlow solution to EKS
+    runs-on: ubuntu-24.04
+    outputs:
+      aws_region: ${{ steps.extract_region.outputs.region }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set envvars from dependencies.yaml
+        run: |
+          yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml" | while IFS= read -r line; do
+            echo "$line" >> "$GITHUB_ENV"
+          done
+
+      - name: Update ENV variables from inputs if available
+        run: |
+          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
+
+      - name: Extract AWS region from cluster.yaml
+        id: extract_region
+        run: |
+          REGION=$(yq e '.metadata.region' .github/cluster.yaml)
+          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
+          echo "region=$REGION" >> $GITHUB_OUTPUT
+
+      - name: Install CLI tools & dependencies
+        run: |
+          pip install tox
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
+          sudo snap install charmcraft --channel latest/stable --classic
+          sudo snap install terraform --channel=latest/stable --classic
+          juju version
+          terraform --version
+          charmcraft version
+
+      - name: Configure AWS credentials
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          mkdir -p ~/.aws
+          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws configure set default.region "${{ env.AWS_REGION }}"
+          echo "AWS_SDK_LOAD_CONFIG=1" >> "$GITHUB_ENV"
+
+      - name: Install kubectl
+        run: |
+          sudo snap install kubectl --classic --channel=${{ env.K8S_VERSION }}/stable
+          mkdir ~/.kube
+          kubectl version --client
+
+      - name: Install eksctl
+        run: |
+          PLATFORM=$(uname -s)_amd64
+          curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${PLATFORM}.tar.gz" | tar xz -C /tmp
+          sudo mv /tmp/eksctl /usr/local/bin
+          eksctl version
+
+      # Once working, do we want to keep these two pre-deletion steps?
+      - name: Pre-delete EKS cluster (if exists)
+        run: |
+          echo "Attempting to delete EKS cluster '${{ env.CLUSTER_NAME }}' (if it exists)..."
+          eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
+
+          echo "Confirming deletion..."
+          aws eks describe-cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster no longer exists."
+
+      - name: Pre-delete CloudFormation stack (if exists)
+        run: |
+          STACK_NAME="eksctl-${{ env.CLUSTER_NAME }}-cluster"
+          echo "Deleting CloudFormation stack '$STACK_NAME' (if it exists)..."
+          aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack not found."
+
+          echo "Waiting (max 10 minutes) for stack deletion to complete..."
+          timeout 600s aws cloudformation wait stack-delete-complete --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" \
+            && echo "Stack deleted." \
+            || echo "Stack deletion timed out or failed (continuing)."
+
+          echo "Verifying stack is gone..."
+          aws cloudformation describe-stacks --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" 2>/dev/null \
+            || echo "Stack no longer exists."
+
+      - name: Create EKS cluster
+        run: |
+          yq e ".metadata.name |= \"${{ env.CLUSTER_NAME }}\"" -i .github/cluster.yaml
+          yq e ".metadata.version |= \"${{ env.K8S_VERSION }}\"" -i .github/cluster.yaml
+
+          ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
+          eksctl create cluster -f .github/cluster.yaml
+          kubectl get nodes
+
+      - name: Configure EKS nodes
+        run: |
+          echo "Configuring sysctl on EKS workers"
+          source ./scripts/gh-actions/set_eks_sysctl_config.sh
+
+      - name: Setup Juju controller
+        run: |
+          /snap/juju/current/bin/juju add-k8s eks --client
+          juju bootstrap eks eks-controller
+
+      - name: Deploy and assert kubeflow-mlflow solution
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+
+      - name: Run UATs
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
+          cd ~/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+          tox -e uats-remote -- --filter "not feast"
+
+      # On failure, capture debugging resources
+      - name: Select model (for debug)
+        if: failure() || cancelled()
+        run: juju switch eks-controller:kubeflow
+
+      - name: Save debug artifacts
+        if: failure() || cancelled()
+        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+
+      - name: Get juju status
+        if: failure() || cancelled()
+        run: juju status
+
+      - name: Get juju debug logs
+        if: failure() || cancelled()
+        run: juju debug-log --replay --no-tail
+
+      - name: Get all Kubernetes resources
+        if: failure() || cancelled()
+        run: kubectl get all -A
+
+      - name: Describe all pods
+        if: failure() || cancelled()
+        run: kubectl describe pods --all-namespaces
+
+      - name: Logs from Pending pods
+        if: failure() || cancelled()
+        run: |
+          kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+
+      - name: Logs from Failed pods
+        if: failure() || cancelled()
+        run: |
+          kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+
+      - name: Logs from CrashLoopBackOff pods
+        if: failure() || cancelled()
+        run: |
+          kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+
+      # Clean up resources
+      - name: Delete EKS cluster
+        if: always()
+        run: eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+      - name: Delete CloudFormation stack
+        if: always()
+        run: aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster
+
+  delete-unattached-volumes:
+      name: Clean unattached EBS volumes
+      if: always()
+      needs: [deploy-solution-to-eks]
+      uses: ./.github/workflows/delete-aws-volumes.yaml
+      with:
+        region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}  
+      secrets: inherit
