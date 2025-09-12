@@ -9,6 +9,12 @@ variable "risk" {
   }
 }
 
+variable "argo_controller_bucket" {
+  description = "The name of the bucket to be used by Argo controller in the object store"
+  type        = string
+  default     = "mlpipeline"
+}
+
 variable "cos_configuration" {
   description = "Boolean value that enables COS configuration"
   type        = bool
@@ -83,16 +89,54 @@ variable "katib_db_size" {
   default     = "10G"
 }
 
+variable "kfp_api_object_store_bucket_name" {
+  description = "The name of the bucket to be used by KFP API in the object store"
+  type        = string
+  default     = "mlpipeline"
+}
+
 variable "kfp_db_size" {
   description = "KFP database storage size"
   type        = string
   default     = "10G"
 }
 
+variable "minio_access_key" {
+  description = "MinIO access key"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "minio_gateway_storage_service" {
+  description = "Gateway storage service configuration for MinIO when in 'gateway' mode"
+  type        = string
+  default     = ""
+}
+
+variable "minio_mode" {
+  description = "MinIO mode, either 'server' or 'gateway'"
+  type        = string
+  default     = "server"
+}
+
+variable "minio_secret_key" {
+  description = "MinIO secret key"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "minio_size" {
   description = "MinIO database storage size"
   type        = string
   default     = "10G"
+}
+
+variable "minio_storage_service_endpoint" {
+  description = "MinIO storage service endpoint, required if minio_mode is 'gateway'"
+  type        = string
+  default     = ""
 }
 
 variable "mlmd_size" {

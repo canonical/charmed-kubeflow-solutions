@@ -11,6 +11,9 @@ module "argo_controller" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.argo_controller_revision
   channel    = "3.5/${var.risk}"
+  config = {
+    bucket = var.argo_controller_bucket
+  }
 }
 
 module "dex_auth" {
@@ -109,7 +112,10 @@ module "kfp_api" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=track/2.5"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_api_revision
-  channel    = "2.5/${var.risk}"
+  config = {
+    object-store-bucket-name = var.kfp_api_object_store_bucket_name
+  }
+  channel = "2.5/${var.risk}"
 }
 
 module "kfp_db" {
@@ -268,6 +274,13 @@ module "mlmd" {
 module "minio" {
   source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/ckf-1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  config = {
+    access-key               = var.minio_access_key,
+    secret-key               = var.minio_secret_key,
+    mode                     = var.minio_mode,
+    gateway-storage-service  = var.minio_gateway_storage_service,
+    storage-service-endpoint = var.minio_storage_service_endpoint,
+  }
   storage_directives = {
     minio-data = var.minio_size
   }
