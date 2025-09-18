@@ -110,7 +110,7 @@ variable "kfp_db_size" {
 variable "minio_access_key" {
   description = "MinIO access key"
   type        = string
-  default     = ""
+  default     = "minio"
   sensitive   = true
 }
 
@@ -165,7 +165,7 @@ variable "mlflow_kserve_integration" {
 variable "mlflow_minio_access_key" {
   description = "MinIO access key for MLflow"
   type        = string
-  default     = ""
+  default     = "minio"
   sensitive   = true
 }
 

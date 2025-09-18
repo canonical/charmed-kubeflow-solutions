@@ -104,7 +104,7 @@ variable "kfp_db_size" {
 variable "minio_access_key" {
   description = "MinIO access key"
   type        = string
-  default     = ""
+  default     = "minio"
   sensitive   = true
 }
 
