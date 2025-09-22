@@ -224,6 +224,12 @@ variable "no_proxy" {
   default     = ""
 }
 
+variable "oidc_gatekeeper_ca_bundle" {
+  description = "Custom CA to be trusted by OIDC gatekeeper"
+  type        = string
+  default     = ""
+}
+
 variable "public_url" {
   description = "Public URL of Kubeflow for auth/OIDC"
   type        = string
