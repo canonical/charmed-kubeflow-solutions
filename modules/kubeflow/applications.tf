@@ -291,8 +291,11 @@ module "minio" {
 module "oidc_gatekeeper" {
   source     = "git::https://github.com/canonical/oidc-gatekeeper-operator//terraform?ref=track/ckf-1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.oidc_gatekeeper_revision
-  channel    = "ckf-1.10/${var.risk}"
+  config = {
+    ca-bundle = var.oidc_gatekeeper_ca_bundle,
+  }
+  revision = var.oidc_gatekeeper_revision
+  channel  = "ckf-1.10/${var.risk}"
 }
 
 module "pvcviewer_operator" {

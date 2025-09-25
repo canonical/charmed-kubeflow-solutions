@@ -145,6 +145,12 @@ variable "mlmd_size" {
   default     = "10G"
 }
 
+variable "oidc_gatekeeper_ca_bundle" {
+  description = "Custom CA to be trusted by OIDC gatekeeper"
+  type        = string
+  default     = ""
+}
+
 variable "no_proxy" {
   description = "Value of the no_proxy environment variable"
   type        = string
