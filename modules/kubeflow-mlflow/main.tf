@@ -1,5 +1,6 @@
 module "kubeflow" {
   source                           = "../kubeflow"
+  risk                             = var.risk
   create_model                     = var.create_model
   cos_configuration                = var.cos_configuration
   dex_connectors                   = var.dex_connectors
@@ -62,6 +63,7 @@ module "mlflow" {
   # kubeflow module creates the model
   create_model                = false
   model                       = module.kubeflow.model
+  risk                        = var.risk
   cos_configuration           = var.cos_configuration
   enable_mlflow_nodeport      = var.enable_mlflow_nodeport
   existing_grafana_agent_name = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
@@ -77,4 +79,5 @@ module "resource_dispatcher" {
   source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
+  channel    = "2.0/${var.risk}"
 }
