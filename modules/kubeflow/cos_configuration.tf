@@ -321,7 +321,7 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_dashboard" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.katib_db.application_name
+    name     = module.katib_db.app_name
     endpoint = module.katib_db.provides.grafana_dashboard
   }
 
@@ -336,7 +336,7 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_metrics_endpoint" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.katib_db.application_name
+    name     = module.katib_db.app_name
     endpoint = module.katib_db.provides.metrics_endpoint
   }
 
@@ -351,7 +351,7 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_logging" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.katib_db.application_name
+    name     = module.katib_db.app_name
     endpoint = module.katib_db.requires.logging
   }
 
@@ -442,7 +442,7 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_dashboard" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.kfp_db.application_name
+    name     = module.kfp_db.app_name
     endpoint = module.kfp_db.provides.grafana_dashboard
   }
 
@@ -457,7 +457,7 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_metrics_endpoint" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.kfp_db.application_name
+    name     = module.kfp_db.app_name
     endpoint = module.kfp_db.provides.metrics_endpoint
   }
 
@@ -472,7 +472,7 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_logging" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.kfp_db.application_name
+    name     = module.kfp_db.app_name
     endpoint = module.kfp_db.requires.logging
   }
 
