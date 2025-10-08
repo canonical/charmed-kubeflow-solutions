@@ -80,7 +80,7 @@ module "katib_controller" {
 
 module "katib_db" {
   # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=93d6608632ae791bffce18e3b74816ebe26d1c5a"
+  source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=eb6261e6fd1830d80aa4fa260d091c9110c24ba4"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name   = "katib-db"
   channel    = "8.0/stable"
@@ -115,7 +115,7 @@ module "kfp_api" {
 
 module "kfp_db" {
   # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=93d6608632ae791bffce18e3b74816ebe26d1c5a"
+  source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=eb6261e6fd1830d80aa4fa260d091c9110c24ba4"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name   = "kfp-db"
   channel    = "8.0/stable"
