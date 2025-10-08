@@ -189,7 +189,7 @@ variable "istio_ingressgateway_revision" {
 variable "istio_ingressgateway_annotations" {
   description = "A comma-separated list of annotations to apply to the Ingress Service to enable customisation for cloud providers or integrations."
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "istio_pilot_revision" {
