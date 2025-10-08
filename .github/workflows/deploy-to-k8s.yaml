@@ -1,21 +1,13 @@
-name: Validation on MicroK8s
+name: Create K8s cluster, deploy kubeflow-mlflow Terraform solution and run UATs
 on:
   workflow_dispatch:
     inputs:
       k8s_version:
-        description: 'Kubernetes version to be used for Microk8s.'
+        description: 'Kubernetes version to be used for the AKS cluster. Make sure that the corresponding K8s version is supported by the cloud.'
         required: false
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
         required: false
-      ckf_branch:
-        description: 'Branch on the Charmed Kubeflow repository to be tested'
-        required: false
-      risk:
-        description: 'The risk level to be tested'
-        required: false
-        default: 'stable'
-
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
@@ -23,20 +15,7 @@ on:
 jobs:
   deploy-solution:
     name: Deploy CKF + MLFlow solution to K8s
-    runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
-
-    strategy:
-      fail-fast: false
-      matrix:
-        bundle:
-          - module: kubeflow-mlflow
-            uats:
-              env: uats-remote
-              extra-args: --filter "not feast"
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
-              extra-args: ""
+    runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
 
     steps:
       - name: Checkout repository
@@ -52,56 +31,57 @@ jobs:
         run: |
           K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
-          CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
-          echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
-          echo "RISK=${RISK}" >> $GITHUB_ENV
-          
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${CKF_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      - id: setup-python
-        name: Setup Python
-        uses: actions/setup-python@v5.0.0
-        with:
-          python-version: "3.12"
-          architecture: x64
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
       - name: Install tox & poetry
         run: |
-          pip install tox
-          pip install poetry
+          sudo apt-get install -yqq pipx
+          pipx ensurepath
+          sudo pipx ensurepath
+          
+          pipx install tox
+          pipx install poetry
 
-      - name: Setup operator environment
-        uses: charmed-kubernetes/actions-operator@main
-        with:
-          juju-channel: "3.6/stable"
-          charmcraft-channel: "3.x/stable"
-          provider: microk8s
-          channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
-          microk8s-group: snap_microk8s
-          microk8s-addons: "rbac dns hostpath-storage metallb:10.64.140.43-10.64.140.49"
-          bootstrap-options: "--agent-version 3.6.9"
+      - name: Setup environment
+        run: |
+          if [ -n "$DOCKERHUB_MIRROR" ]; then
+          MIRROR_CONFIG=/opt/containerd/k8s-containerd/etc/containerd/hosts.d/docker.io
+            
+          sudo mkdir -p ${MIRROR_CONFIG}
+          sudo chown $USER ${MIRROR_CONFIG}
+          cat << EOF > ${MIRROR_CONFIG}/hosts.toml
+          [host."$DOCKERHUB_MIRROR"]
+          capabilities = ["pull", "resolve"]
+          EOF
+          fi
+          
+          sudo apt-get remove -y docker.io containerd
+          sudo rm -rf /run/containerd
+          sudo snap install concierge --classic
+          cd .github
+          sudo concierge prepare --trace
+          cd ..
 
       - name: Setup terraform
         run: |          
           sudo snap install terraform  --channel latest/stable --classic
           terraform --version
 
-      - name: Deploy solution
+      - name: Deploy and assert kubeflow-mlflow solution
         run: |
-          if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
-            git checkout '${{ env.CKF_BRANCH }}'
-          fi
-
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
+          juju switch concierge-k8s
+          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
+          tox -e uats-remote -- --filter "not feast"
 
       # On failure, capture debugging resources
       - name: Select model
