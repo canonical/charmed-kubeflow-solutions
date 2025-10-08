@@ -1,4 +1,4 @@
-name: Create AKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+name: Create MicroK8s cluster, deploy kubeflow-mlflow Terraform solution and run UATs
 on:
   workflow_dispatch:
     inputs:
@@ -8,15 +8,14 @@ on:
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
         required: false
+  pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
 jobs:
-  deploy-solution-to-aks:
-    name: Deploy CKF + MLFlow solution to AKS
-    runs-on: ubuntu-24.04
-    env:
-      AZURE_CORE_OUTPUT: none
+  deploy-solution:
+    name: Deploy CKF + MLFlow solution to K8s
+    runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
 
     steps:
       - name: Checkout repository
@@ -35,51 +34,38 @@ jobs:
           UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      - name: Install CLI tools
+      - uses: actions/checkout@v4
+
+      - id: setup-python
+        name: Setup Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: "3.12"
+          architecture: x64
+
+      - name: Install tox & poetry
         run: |
           pip install tox
-          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
-          sudo snap install charmcraft --classic
-          sudo snap install terraform  --channel latest/stable --classic
-          juju version
-          terraform --version
+          pip install poetry
 
-      - uses: azure/login@v1
+      - name: Setup operator environment
+        uses: charmed-kubernetes/actions-operator@main
         with:
-          creds: ${{ secrets.CHARMED_KUBEFLOW_SOLUTIONS_AKS_SERVICE_PRINCIPAL }}
+          juju-channel: "3.6/stable"
+          provider: microk8s
+          channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
+          bootstrap-options: "--agent-version 3.6.9"
+          microk8s-group: snap_microk8s
+          microk8s-addons: "rbac dns minio metallb:10.64.140.43-10.64.140.49"
 
-      - name: Create resource group and cluster
-        run: |
-          # We need to remove the dot from version
-          # due to cluster naming restrictions
-          version=${{ env.CKF_VERSION }}
-          KF_VERSION="kf-${version//.}"
-          RESOURCE_GROUP=ckf-tf-${KF_VERSION}-ResourceGroup
-          NAME=ckf-tf-${KF_VERSION}-AKSCluster
-          LOCATION=westeurope
-          echo "RESOURCE_GROUP=${RESOURCE_GROUP}" >> $GITHUB_ENV
-          echo "NAME=${NAME}" >> $GITHUB_ENV
-          echo "LOCATION=${LOCATION}" >> $GITHUB_ENV
-          az group create --name ${RESOURCE_GROUP} --location ${LOCATION}
-          az aks create \
-            --resource-group ${RESOURCE_GROUP} \
-            --name ${NAME} \
-            --kubernetes-version ${{ env.K8S_VERSION }} \
-            --node-count 2 \
-            --node-vm-size Standard_D8s_v3 \
-            --node-osdisk-size 100 \
-            --node-osdisk-type Managed \
-            --os-sku Ubuntu \
-            --no-ssh-key
-
-      - name: Add AKS cloud to juju and bootstrap controller
-        run: |
-          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.NAME }} --admin
-          juju add-k8s aks --client
-          juju bootstrap aks aks-controller
+      - name: Setup terraform
+        run: |          
+          sudo snap install terraform  --channel latest/stable --classic
+          terraform --version
 
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
+          # juju switch concierge-k8s
           tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
 
       - name: Run UATs
@@ -91,11 +77,7 @@ jobs:
 
       # On failure, capture debugging resources
       - name: Select model
-        run: juju switch aks-controller:kubeflow
-        if: failure() || cancelled()
-
-      - name: Save debug artifacts
-        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+        run: juju switch kubeflow
         if: failure() || cancelled()
 
       - name: Get juju status
@@ -125,18 +107,3 @@ jobs:
       - name: Get logs from pods with status = CrashLoopBackOff
         run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
         if: failure() || cancelled()
-
-      - name: Delete resource groups
-        if: always() || cancelled()
-        run: |
-          az group delete --name ${{ env.RESOURCE_GROUP }} --yes
-          if [ "$(az group exists --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }})" = "true" ]; then
-            az group delete --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }} --yes
-          fi
-
-      - name: Check that resource groups have been deleted, else fail
-        if: always() || cancelled()
-        run: |
-          if [ "$(az group exists --name ${{ env.RESOURCE_GROUP }} )" = "true" ] || [ "$(az group exists --name MC_${{ env.RESOURCE_GROUP }}_${{ env.NAME }}_${{ env.LOCATION }})" = "true" ]; then
-            exit 1
-          fi
