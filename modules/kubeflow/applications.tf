@@ -38,7 +38,7 @@ module "istio_ingressgateway" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name   = "istio-ingressgateway"
   config = {
-    kind        = "ingress",
+    kind = "ingress",
   }
   revision = var.istio_ingressgateway_revision
   channel  = "1.22/${var.risk}"
