@@ -51,14 +51,9 @@ jobs:
       - name: Deploy and assert kubeflow-mlflow solution
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
-            echo "here"
             git checkout 'track/${{ env.CKF_VERSION }}'
           fi
-          echo "here2"
-          git status
           echo "Current commit: $(git rev-parse HEAD)"
-          git checkout 'track/${{ env.CKF_VERSION }}'
-          echo "Current branch: $(git rev-parse HEAD)"
 
       - name: Run UATs
         run: |
