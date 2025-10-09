@@ -1,4 +1,4 @@
-name: Create AKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+name: Testing Action
 on:
   workflow_dispatch:
     inputs:
