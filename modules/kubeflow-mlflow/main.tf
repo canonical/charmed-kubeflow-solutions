@@ -23,7 +23,6 @@ module "kubeflow" {
   dex_auth_revision                = var.dex_auth_revision
   envoy_revision                   = var.envoy_revision
   istio_ingressgateway_revision    = var.istio_ingressgateway_revision
-  istio_ingressgateway_annotations = var.istio_ingressgateway_annotations
   istio_pilot_revision             = var.istio_pilot_revision
   jupyter_controller_revision      = var.jupyter_controller_revision
   jupyter_ui_revision              = var.jupyter_ui_revision

@@ -186,12 +186,6 @@ variable "istio_ingressgateway_revision" {
   default     = null
 }
 
-variable "istio_ingressgateway_annotations" {
-  description = "A comma-separated list of annotations to apply to the Ingress Service to enable customisation for cloud providers or integrations."
-  type        = string
-  default     = null
-}
-
 variable "istio_pilot_revision" {
   description = "Charm revision for istio-pilot"
   type        = number

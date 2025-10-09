@@ -39,7 +39,6 @@ module "istio_ingressgateway" {
   app_name   = "istio-ingressgateway"
   config = {
     kind        = "ingress",
-    annotations = var.istio_ingressgateway_annotations,
   }
   revision = var.istio_ingressgateway_revision
   channel  = "1.22/${var.risk}"
