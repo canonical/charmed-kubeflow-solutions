@@ -33,13 +33,19 @@ module "envoy" {
   channel    = "2.2/${var.risk}"
 }
 
+locals {
+  istio_ingressgateway_config = {
+    kind        = "ingress",
+    annotations = var.istio_ingressgateway_annotations,
+  }
+}
 module "istio_ingressgateway" {
   source     = "git::https://github.com/canonical/istio-operators//charms/istio-gateway/terraform?ref=track/1.22"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   app_name   = "istio-ingressgateway"
   config = {
-    kind        = "ingress",
-    annotations = var.istio_ingressgateway_annotations,
+    for key,value in local.istio_ingressgateway_config : key => value
+    if value != null
   }
   revision = var.istio_ingressgateway_revision
   channel  = "1.22/${var.risk}"
