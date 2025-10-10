@@ -17,6 +17,19 @@ jobs:
     name: Deploy CKF + MLFlow solution to K8s
     runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
 
+    strategy:
+      fail-fast: false
+      matrix:
+        bundle:
+          - module: kubeflow-mlflow
+            uats:
+              env: uats-remote
+              extra-args: --filter "not feast"
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+              extra-args: ""
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -63,17 +76,17 @@ jobs:
           sudo snap install terraform  --channel latest/stable --classic
           terraform --version
 
-      - name: Deploy and assert kubeflow-mlflow solution
+      - name: Deploy solution
         run: |
           # juju switch concierge-k8s
-          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e uats-remote -- --filter "not feast"
+          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
