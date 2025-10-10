@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  #checks:
-  #  name: Run Checks
-  #  uses: ./.github/workflows/integrate.yaml
-  #  secrets: inherit
+  checks:
+    name: Run Checks
+    uses: ./.github/workflows/integrate.yaml
+    secrets: inherit
