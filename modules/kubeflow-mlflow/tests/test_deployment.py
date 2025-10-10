@@ -1,4 +1,5 @@
 import subprocess
+from email.policy import default
 
 import aiohttp
 import lightkube
@@ -13,11 +14,27 @@ def lightkube_client() -> lightkube.Client:
     client = lightkube.Client(field_manager="kubeflow")
     return client
 
+def pytest_addoption(parser):
+    """Add CLI options to pytest."""
+    parser.addoption(
+        "--risk",
+        nargs="?",
+        choices=["stable", "candidate", "beta", "edge"],
+        const="stable",
+        default="stable",
+        type=str,
+        help="Risk to be used when deploying the terraform module",
+    )
+
+@pytest.fixture(scope="module")
+def risk(request) -> str:
+    """The risk to be used when deploying the terraform module."""
+    return request.config.getoption("--risk") or "stable"
 
 class TestCharm:
 
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(self):
+    async def test_apply_terraform_solution(self, risk):
         """Initialize and apply the kubeflow-mlflow Terraform solution module."""
         subprocess.run(["terraform", "init"], check=True)
         # Due to https://github.com/canonical/mysql-k8s-operator/issues/504,
@@ -29,6 +46,8 @@ class TestCharm:
                 "apply",
                 "-var",
                 "cos_configuration=true",
+                "-var",
+                f"risk={risk}",
                 "-auto-approve",
             ],
             check=True,
