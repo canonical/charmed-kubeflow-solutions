@@ -1,5 +1,4 @@
 import subprocess
-from email.policy import default
 
 import aiohttp
 import lightkube
