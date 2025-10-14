@@ -67,8 +67,9 @@ jobs:
         run: |
           # We need to remove the dot from version
           # due to cluster naming restrictions
-          version=${{ env.CKF_VERSION }}
-          KF_VERSION="kf-${${version##track/}//.}"
+          version=${{ env.CKF_BRANCH }}
+          KF_VERSION=${version##track/}
+          KF_VERSION="kf-${KF_VERSION//.}"
           RESOURCE_GROUP=ckf-tf-${KF_VERSION}-ResourceGroup
           NAME=ckf-tf-${KF_VERSION}-AKSCluster
           LOCATION=westeurope
