@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       k8s_version:
-        description: 'Kubernetes version to be used for the AKS cluster. Make sure that the corresponding K8s version is supported by the cloud.'
+        description: 'Kubernetes version to be used for Microk8s.'
         required: false
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
