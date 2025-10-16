@@ -47,29 +47,33 @@ jobs:
           UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - id: setup-python
         name: Setup Python
         uses: actions/setup-python@v5.0.0
         with:
           python-version: "3.12"
-          architecture: x64
 
       - name: Install tox & poetry
         run: |
-          pip install tox
-          pip install poetry
+          sudo apt-get install -yqq pipx
+          pipx ensurepath
+          sudo pipx ensurepath
+          
+          pipx install tox
+          pipx install poetry
 
       - name: Setup operator environment
         uses: charmed-kubernetes/actions-operator@main
         with:
           juju-channel: "3.6/stable"
+          charmcraft-channel: "3.x/stable"
           provider: microk8s
           channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
-          bootstrap-options: "--agent-version 3.6.9"
           microk8s-group: snap_microk8s
-          microk8s-addons: "rbac dns minio metallb:10.64.140.43-10.64.140.49"
+          microk8s-addons: "rbac dns metallb:10.64.140.43-10.64.140.49"
 
       - name: Setup terraform
         run: |          
@@ -78,7 +82,6 @@ jobs:
 
       - name: Deploy solution
         run: |
-          # juju switch concierge-k8s
           tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s
 
       - name: Run UATs
