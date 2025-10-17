@@ -251,6 +251,14 @@ module "kubeflow_roles" {
   channel    = "1.10/${var.risk}"
 }
 
+module "kubeflow_trainer" {
+  count      = var.kubeflow_trainer_v2
+  source     = "git::https://github.com/canonical/training-operator//terraform?ref=track/2.0"
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  revision   = var.kubeflow_trainer_revision
+  channel    = "2.0/${var.risk}"
+}
+
 module "kubeflow_volumes" {
   source     = "git::https://github.com/canonical/kubeflow-volumes-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
