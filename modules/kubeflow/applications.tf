@@ -230,8 +230,11 @@ module "kserve_controller" {
 module "kubeflow_dashboard" {
   source     = "git::https://github.com/canonical/kubeflow-dashboard-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.kubeflow_dashboard_revision
-  channel    = "1.10/${var.risk}"
+  config = {
+    "registration-flow" : var.kubeflow_dashboard_registration_flow
+  }
+  revision = var.kubeflow_dashboard_revision
+  channel  = "1.10/${var.risk}"
 }
 
 module "kubeflow_profiles" {

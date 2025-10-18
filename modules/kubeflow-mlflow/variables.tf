@@ -404,6 +404,12 @@ variable "kubeflow_dashboard_revision" {
   default     = null
 }
 
+variable "kubeflow_dashboard_registration_flow" {
+  description = "Whether to enable the registration flow on sign-in for kubeflow-dashboard"
+  type        = string
+  default     = "true"
+}
+
 variable "kubeflow_profiles_revision" {
   description = "Charm revision for kubeflow-profiles"
   type        = number
