@@ -30,6 +30,20 @@ jobs:
     outputs:
       aws_region: ${{ steps.extract_region.outputs.region }}
 
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        bundle:
+          - module: kubeflow-mlflow
+            uats:
+              env: uats-remote
+              extra-args: --filter "not feast"
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+              extra-args: ""
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -136,7 +150,7 @@ jobs:
       - name: Setup Juju controller
         run: |
           /snap/juju/current/bin/juju add-k8s eks --client
-          juju bootstrap eks eks-controller
+          juju bootstrap eks eks-controller --agent-version 3.6.9
 
       - name: Deploy and assert kubeflow-mlflow solution
         env:
@@ -148,14 +162,14 @@ jobs:
             git checkout 'track/${{ env.CKF_VERSION }}'
           fi
 
-          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e uats-remote -- --filter "not feast"
+          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model (for debug)
