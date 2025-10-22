@@ -1,0 +1,122 @@
+name: Validation on MicroK8s
+on:
+  workflow_dispatch:
+    inputs:
+      k8s_version:
+        description: 'Kubernetes version to be used for Microk8s.'
+        required: false
+      uats_branch:
+        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
+        required: false
+  pull_request:
+  schedule:
+    - cron: "17 02 * * 1"
+
+jobs:
+  deploy-solution:
+    name: Deploy CKF + MLFlow solution to K8s
+    runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        bundle:
+          - module: kubeflow-mlflow
+            uats:
+              env: uats-remote
+              extra-args: --filter "not feast"
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+              extra-args: ""
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set envvars from dependencies.yaml
+        run: |
+          yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml" | while IFS= read -r line; do
+            echo "$line" >> "$GITHUB_ENV"
+          done
+
+      - name: Update ENV variables from inputs if available
+        run: |
+          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - id: setup-python
+        name: Setup Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install tox & poetry
+        run: |
+          pip install tox
+          pip install poetry
+
+      - name: Setup operator environment
+        uses: charmed-kubernetes/actions-operator@main
+        with:
+          juju-channel: "3.6/stable"
+          charmcraft-channel: "3.x/stable"
+          provider: microk8s
+          channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
+          microk8s-group: snap_microk8s
+          microk8s-addons: "rbac dns hostpath-storage metallb:10.64.140.43-10.64.140.49"
+	  bootstrap-options: "--agent-version 3.6.9"
+	  
+      - name: Setup terraform
+        run: |          
+          sudo snap install terraform  --channel latest/stable --classic
+          terraform --version
+
+      - name: Deploy solution
+        run: |
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s
+
+      - name: Run UATs
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
+          cd ~/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
+
+      # On failure, capture debugging resources
+      - name: Select model
+        run: juju switch kubeflow
+        if: failure() || cancelled()
+
+      - name: Get juju status
+        run: juju status
+        if: failure() || cancelled()
+
+      - name: Get juju debug logs
+        run: juju debug-log --replay --no-tail
+        if: failure() || cancelled()
+
+      - name: Get all kubernetes resources
+        run: kubectl get all -A
+        if: failure() || cancelled()
+
+      - name: Describe all pods
+        if: failure() || cancelled()
+        run: kubectl describe pods --all-namespaces
+
+      - name: Get logs from pods with status = Pending
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = Failed
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = CrashLoopBackOff
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        if: failure() || cancelled()
