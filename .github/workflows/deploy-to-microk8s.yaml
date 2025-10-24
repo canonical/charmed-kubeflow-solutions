@@ -8,6 +8,14 @@ on:
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
         required: false
+      ckf_branch:
+        description: 'Branch on the Charmed Kubeflow repository to be tested'
+        required: false
+      risk:
+        description: 'The risk level to be tested'
+        required: false
+        default: 'stable'
+
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
@@ -44,11 +52,13 @@ jobs:
         run: |
           K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
+          echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
+          RISK=${{ inputs.risk }}
+          echo "RISK=${RISK}" >> $GITHUB_ENV
+          
+          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${CKF_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - id: setup-python
         name: Setup Python
@@ -70,8 +80,8 @@ jobs:
           channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
           microk8s-group: snap_microk8s
           microk8s-addons: "rbac dns hostpath-storage metallb:10.64.140.43-10.64.140.49"
-	  bootstrap-options: "--agent-version 3.6.9"
-	  
+          bootstrap-options: "--agent-version 3.6.9"
+
       - name: Setup terraform
         run: |          
           sudo snap install terraform  --channel latest/stable --classic
@@ -79,7 +89,11 @@ jobs:
 
       - name: Deploy solution
         run: |
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s
+          if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
+            git checkout '${{ env.CKF_BRANCH }}'
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |
