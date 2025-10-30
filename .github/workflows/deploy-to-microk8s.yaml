@@ -7,6 +7,7 @@ on:
         required: false
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
+        default: "track/1.10"
         required: false
       ckf_branch:
         description: 'Branch on the Charmed Kubeflow repository to be tested'
