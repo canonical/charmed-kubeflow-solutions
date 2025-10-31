@@ -16,7 +16,6 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
-  # pull_request:
   schedule:
     - cron: "17 02 * * 1"
 

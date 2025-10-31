@@ -8,6 +8,13 @@ on:
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
         required: false
+      ckf_branch:
+        description: 'Branch on the Charmed Kubeflow repository to be tested'
+        required: false
+      risk:
+        description: 'The risk level to be tested'
+        required: false
+        default: 'stable'
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
@@ -16,6 +23,19 @@ jobs:
   deploy-solution:
     name: Deploy CKF + MLFlow solution to K8s
     runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        bundle:
+          - module: kubeflow-mlflow
+            uats:
+              env: uats-remote
+              extra-args: --filter "not feast"
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+              extra-args: ""
 
     steps:
       - name: Checkout repository
@@ -31,7 +51,12 @@ jobs:
         run: |
           K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
+          echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
+          RISK=${{ inputs.risk }}
+          echo "RISK=${RISK}" >> $GITHUB_ENV
+          
+          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${CKF_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -63,6 +88,10 @@ jobs:
           sudo rm -rf /run/containerd
           sudo snap install concierge --classic
           cd .github
+          
+          # Set the K8s version
+          yq -i e '.providers.k8s.channel = "${{ env.K8S_VERSION }}-strict/channel"' concierge.yaml
+          
           sudo concierge prepare --trace
           cd ..
 
@@ -71,17 +100,20 @@ jobs:
           sudo snap install terraform  --channel latest/stable --classic
           terraform --version
 
-      - name: Deploy and assert kubeflow-mlflow solution
+      - name: Deploy solution
         run: |
-          juju switch concierge-k8s
-          tox -c ./modules/kubeflow-mlflow -vve test_deployment -- -vv -s
+          if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
+            git checkout '${{ env.CKF_BRANCH }}'
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e uats-remote -- --filter "not feast"
+          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
