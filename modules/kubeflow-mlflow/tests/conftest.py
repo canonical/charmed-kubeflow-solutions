@@ -38,4 +38,6 @@ def db_sizes(request) -> list[str]:
 @pytest.fixture(scope="module")
 def tf_vars(request, risk, db_sizes) -> list[str]:
     """Overall Terraform module customization."""
-    return risk +  db_sizes
+    return risk +  db_sizes + [
+        "-var", "cos_configuration=true",
+    ]
