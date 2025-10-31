@@ -1,9 +1,9 @@
-name: Create K8s cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+name: Validation on Canonical K8s
 on:
   workflow_dispatch:
     inputs:
       k8s_version:
-        description: 'Kubernetes version to be used for the AKS cluster. Make sure that the corresponding K8s version is supported by the cloud.'
+        description: 'Kubernetes version to be used for the K8s cluster.'
         required: false
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
@@ -90,7 +90,7 @@ jobs:
           cd .github
           
           # Set the K8s version
-          yq -i e '.providers.k8s.channel = "${{ env.K8S_VERSION }}-strict/channel"' concierge.yaml
+          yq -i e '.providers.k8s.channel = "${{ env.K8S_VERSION }}-strict/stable"' concierge.yaml
           
           sudo concierge prepare --trace
           cd ..

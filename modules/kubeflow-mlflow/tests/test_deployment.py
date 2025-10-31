@@ -17,7 +17,7 @@ def lightkube_client() -> lightkube.Client:
 class TestCharm:
 
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(self, risk):
+    async def test_apply_terraform_solution(self, tf_vars):
         """Initialize and apply the kubeflow-mlflow Terraform solution module."""
         subprocess.run(["terraform", "init"], check=True)
         # Due to https://github.com/canonical/mysql-k8s-operator/issues/504,
@@ -27,14 +27,8 @@ class TestCharm:
             [
                 "terraform",
                 "apply",
-                "-var", "cos_configuration=true",
-                "-var", f"risk={risk}",
-                "-var", "kfp_db_size=1G",
-                "-var", "katib_db_size=1G",
-                "-var", "mlflow_mysql_size=1G",
-                "-var", "grafana_agent_k8s_size=1G",
-                "-auto-approve",
-            ],
+                "-auto-approve"
+            ] + tf_vars,
             check=True,
         )
 
