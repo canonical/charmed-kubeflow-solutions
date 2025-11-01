@@ -1,162 +1,229 @@
 data "juju_model" "kubeflow" {
   name = var.model
+  owner = "admin"
 }
 
 resource "juju_application" "admission_webhook" {
   charm {
     name     = "admission-webhook"
-    channel  = var.admission_webhook.channel ? var.admission_webhook.channel : "1.10/${var.risk}"
+    channel  = var.admission_webhook.channel != null ? var.admission_webhook.channel : "1.10/${var.risk}"
     revision = var.admission_webhook.revision
   }
-  config    = var.admission_webhook.config
-  model     = data.juju_model.kubeflow.name
+  config             = var.admission_webhook.config
+  constraints        = var.admission_webhook.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
   name      = var.admission_webhook.name
-  # resources = var.resources
-  trust     = true
-  units     = 1
+}
+
+resource "juju_application" "argo_controller" {
+  charm {
+    name     = "argo-controller"
+    channel  = var.argo_controller.channel != null ? var.argo_controller.channel : "3.5/${var.risk}"
+    revision = var.argo_controller.revision
+  }
+  config             = var.argo_controller.config
+  constraints        = var.argo_controller.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.argo_controller.name
+}
+
+resource "juju_application" "dex_auth" {
+  charm {
+    name     = "dex-auth"
+    channel  = var.dex_auth.channel != null ? var.dex_auth.channel : "2.41/${var.risk}"
+    revision = var.dex_auth.revision
+  }
+  config             = var.dex_auth.config
+  constraints        = var.dex_auth.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.dex_auth.name
+}
+
+resource "juju_application" "envoy" {
+  charm {
+    name     = "envoy"
+    channel  = var.envoy.channel != null ? var.envoy.channel : "2.4/${var.risk}"
+    revision = var.envoy.revision
+  }
+  config             = var.envoy.config
+  constraints        = var.envoy.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.envoy.name
+}
+
+resource "juju_application" "istio_ingressgateway" {
+  charm {
+    name     = "istio-ingressgateway"
+    channel  = var.istio_ingressgateway.channel != null ? var.istio_ingressgateway.channel : "1.24/${var.risk}"
+    revision = var.istio_ingressgateway.revision
+  }
+  config             = var.istio_ingressgateway.config
+  constraints        = var.istio_ingressgateway.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.istio_ingressgateway.name
 }
 
 
-# module "admission_webhook" {
-#   source     = "git::https://github.com/canonical/admission-webhook-operator//terraform?ref=track/1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.admission_webhook_revision
-#   channel    = "1.10/${var.risk}"
-# }
-#
-# module "argo_controller" {
-#   source     = "git::https://github.com/canonical/argo-operators//charms/argo-controller/terraform?ref=track/3.5"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.argo_controller_revision
-#   channel    = "3.5/${var.risk}"
-#   config = {
-#     bucket = var.argo_controller_bucket
-#   }
-# }
-#
-# module "dex_auth" {
-#   source     = "git::https://github.com/canonical/dex-auth-operator//terraform?ref=track/2.41"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   config = {
-#     "public-url" : var.public_url,
-#     "connectors" : var.dex_connectors
-#     "static-username" : var.dex_static_username
-#     "static-password" : var.dex_static_password
-#   }
-#   revision = var.dex_auth_revision
-#   channel  = "2.41/${var.risk}"
-# }
-#
-# module "envoy" {
-#   source     = "git::https://github.com/canonical/envoy-operator//terraform?ref=track/2.4"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.envoy_revision
-#   channel    = "2.4/${var.risk}"
-# }
-#
-# module "istio_ingressgateway" {
-#   source     = "git::https://github.com/canonical/istio-operators//charms/istio-gateway/terraform?ref=track/1.24"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   app_name   = "istio-ingressgateway"
-#   config = {
-#     kind        = "ingress",
-#     annotations = var.istio_ingressgateway_annotations,
-#   }
-#   revision = var.istio_ingressgateway_revision
-#   channel  = "1.24/${var.risk}"
-# }
-#
-# module "istio_pilot" {
-#   source     = "git::https://github.com/canonical/istio-operators//charms/istio-pilot/terraform?ref=track/1.24"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   config = {
-#     default-gateway = "kubeflow-gateway",
-#     "tls-secret-id" : var.istio_tls_secret_id
-#   }
-#   revision = var.istio_pilot_revision
-#   channel  = "1.24/${var.risk}"
-# }
-#
-# module "kubeflow_dashboard" {
-#   source     = "git::https://github.com/canonical/kubeflow-dashboard-operator//terraform?ref=track/1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   config = {
-#     "registration-flow" : var.kubeflow_dashboard_registration_flow
-#   }
-#   revision = var.kubeflow_dashboard_revision
-#   channel  = "1.10/${var.risk}"
-# }
-#
-# module "kubeflow_profiles" {
-#   source     = "git::https://github.com/canonical/kubeflow-profiles-operator//terraform?ref=track/1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.kubeflow_profiles_revision
-#   channel    = "1.10/${var.risk}"
-# }
-#
-# module "kubeflow_roles" {
-#   source     = "git::https://github.com/canonical/kubeflow-roles-operator//terraform?ref=track/1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.kubeflow_roles_revision
-#   channel    = "1.10/${var.risk}"
-# }
-#
-# module "kubeflow_volumes" {
-#   source     = "git::https://github.com/canonical/kubeflow-volumes-operator//terraform?ref=track/1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.kubeflow_volumes_revision
-#   channel    = "1.10/${var.risk}"
-# }
-#
-# module "metacontroller_operator" {
-#   source     = "git::https://github.com/canonical/metacontroller-operator//terraform?ref=track/4.11"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.metacontroller_operator_revision
-#   channel    = "4.11/${var.risk}"
-# }
-#
-# module "mlmd" {
-#   source     = "git::https://github.com/canonical/mlmd-operator//terraform?ref=track/ckf-1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   storage_directives = {
-#     mlmd-data = var.mlmd_size
-#   }
-#   revision = var.mlmd_revision
-#   channel  = "ckf-1.10/${var.risk}"
-# }
-#
-# module "minio" {
-#   source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/ckf-1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   config = {
-#     access-key               = var.minio_access_key,
-#     secret-key               = var.minio_secret_key,
-#     mode                     = var.minio_mode,
-#     gateway-storage-service  = var.minio_gateway_storage_service,
-#     storage-service-endpoint = var.minio_storage_service_endpoint,
-#   }
-#   storage_directives = {
-#     minio-data = var.minio_size
-#   }
-#   revision = var.minio_revision
-#   channel  = "ckf-1.10/${var.risk}"
-# }
-#
-# module "oidc_gatekeeper" {
-#   source     = "git::https://github.com/canonical/oidc-gatekeeper-operator//terraform?ref=track/ckf-1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   config = {
-#     ca-bundle = var.oidc_gatekeeper_ca_bundle,
-#   }
-#   revision = var.oidc_gatekeeper_revision
-#   channel  = "ckf-1.10/${var.risk}"
-# }
-#
-# module "pvcviewer_operator" {
-#   source     = "git::https://github.com/canonical/pvcviewer-operator//terraform?ref=track/1.10"
-#   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-#   revision   = var.pvcviewer_operator_revision
-#   channel    = "1.10/${var.risk}"
-# }
-#
-#
+resource "juju_application" "istio_pilot" {
+  charm {
+    name     = "istio-pilot"
+    channel  = var.istio_pilot.channel != null ? var.istio_pilot.channel : "1.24/${var.risk}"
+    revision = var.istio_pilot.revision
+  }
+  config             = var.istio_pilot.config
+  constraints        = var.istio_pilot.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.istio_pilot.name
+}
+
+resource "juju_application" "kubeflow_dashboard" {
+  charm {
+    name     = "kubeflow-dashboard"
+    channel  = var.kubeflow_dashboard.channel != null ? var.kubeflow_dashboard.channel : "1.10/${var.risk}"
+    revision = var.kubeflow_dashboard.revision
+  }
+  config             = var.kubeflow_dashboard.config
+  constraints        = var.kubeflow_dashboard.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.kubeflow_dashboard.name
+}
+
+resource "juju_application" "kubeflow_profiles" {
+  charm {
+    name     = "kubeflow-profiles"
+    channel  = var.kubeflow_profiles.channel != null ? var.kubeflow_profiles.channel : "1.10/${var.risk}"
+    revision = var.kubeflow_profiles.revision
+  }
+  config             = var.kubeflow_profiles.config
+  constraints        = var.kubeflow_profiles.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.kubeflow_profiles.name
+}
+
+resource "juju_application" "kubeflow_roles" {
+  charm {
+    name     = "kubeflow-roles"
+    channel  = var.kubeflow_roles.channel != null ? var.kubeflow_roles.channel : "1.10/${var.risk}"
+    revision = var.kubeflow_roles.revision
+  }
+  config             = var.kubeflow_roles.config
+  constraints        = var.kubeflow_roles.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.kubeflow_roles.name
+}
+
+resource "juju_application" "kubeflow_volumes" {
+  charm {
+    name     = "kubeflow-volumes"
+    channel  = var.kubeflow_volumes.channel != null ? var.kubeflow_volumes.channel : "1.10/${var.risk}"
+    revision = var.kubeflow_volumes.revision
+  }
+  config             = var.kubeflow_volumes.config
+  constraints        = var.kubeflow_volumes.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.kubeflow_volumes.name
+}
+
+resource "juju_application" "metacontroller_operator" {
+  charm {
+    name     = "metacontroller-operator"
+    channel  = var.metacontroller_operator.channel != null ? var.metacontroller_operator.channel : "4.11/${var.risk}"
+    revision = var.metacontroller_operator.revision
+  }
+  config             = var.metacontroller_operator.config
+  constraints        = var.metacontroller_operator.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  # storage_directives = var.admission_webhook.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.metacontroller_operator.name
+}
+
+resource "juju_application" "mlmd" {
+  charm {
+    name     = "mlmd"
+    channel  = var.mlmd.channel != null ? var.mlmd.channel : "ckf-1.10/${var.risk}"
+    revision = var.mlmd.revision
+  }
+  config             = var.mlmd.config
+  constraints        = var.mlmd.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  storage_directives = var.mlmd.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.mlmd.name
+}
+
+resource "juju_application" "minio" {
+  charm {
+    name     = "minio"
+    channel  = var.minio.channel != null ? var.minio.channel : "ckf-1.10/${var.risk}"
+    revision = var.minio.revision
+  }
+  config             = var.minio.config
+  constraints        = var.minio.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  storage_directives = var.minio.storage_directives
+  trust              = true
+  units              = 1
+  name      = var.minio.name
+}
+
+resource "juju_application" "oidc_gatekeeper" {
+  charm {
+    name     = "oidc-gatekeeper"
+    channel  = var.oidc_gatekeeper.channel != null ? var.oidc_gatekeeper.channel : "ckf-1.10/${var.risk}"
+    revision = var.oidc_gatekeeper.revision
+  }
+  config             = var.oidc_gatekeeper.config
+  constraints        = var.oidc_gatekeeper.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  trust              = true
+  units              = 1
+  name      = var.oidc_gatekeeper.name
+}
+
+resource "juju_application" "pvcviewer_operator" {
+  charm {
+    name     = "pvcviewer-operator"
+    channel  = var.pvcviewer_operator.channel != null ? var.pvcviewer_operator.channel : "1.10/${var.risk}"
+    revision = var.pvcviewer_operator.revision
+  }
+  config             = var.pvcviewer_operator.config
+  constraints        = var.pvcviewer_operator.constraints
+  model_uuid         = data.juju_model.kubeflow.uuid
+  trust              = true
+  units              = 1
+  name      = var.pvcviewer_operator.name
+}
+
