@@ -420,6 +420,7 @@ resource "juju_integration" "kubeflow_dashboard_kfp_ui_links" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_kubeflow_trainer_links" {
+  count = var.kubeflow_trainer_v2 ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
@@ -428,8 +429,8 @@ resource "juju_integration" "kubeflow_dashboard_kubeflow_trainer_links" {
   }
 
   application {
-    name     = module.kubeflow_trainer.app_name
-    endpoint = module.kubeflow_trainer.requires.dashboard_links
+    name     = module.kubeflow_trainer[0].app_name
+    endpoint = module.kubeflow_trainer[0].requires.dashboard_links
   }
 }
 

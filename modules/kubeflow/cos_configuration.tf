@@ -754,12 +754,12 @@ resource "juju_integration" "kubeflow_profiles_grafana_agent_k8s_grafana_logging
 }
 
 resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_grafana_dashboard" {
-  count = var.cos_configuration ? 1 : 0
+  count = var.cos_configuration && var.kubeflow_trainer_v2 ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.kubeflow_trainer.app_name
-    endpoint = module.kubeflow_trainer.provides.grafana_dashboard
+    name     = module.kubeflow_trainer[0].app_name
+    endpoint = module.kubeflow_trainer[0].provides.grafana_dashboard
   }
 
   application {
@@ -769,12 +769,12 @@ resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_grafana_dashboar
 }
 
 resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_metrics_endpoint" {
-  count = var.cos_configuration ? 1 : 0
+  count = var.cos_configuration && var.kubeflow_trainer_v2 ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.kubeflow_trainer.app_name
-    endpoint = module.kubeflow_trainer.provides.metrics_endpoint
+    name     = module.kubeflow_trainer[0].app_name
+    endpoint = module.kubeflow_trainer[0].provides.metrics_endpoint
   }
 
   application {
