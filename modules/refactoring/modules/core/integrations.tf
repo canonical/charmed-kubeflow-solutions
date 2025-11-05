@@ -124,7 +124,7 @@ resource "juju_integration" "istio_pilot_oidc_gatekeeper_ingress_auth" {
   }
 }
 
-resource "juju_integration" "istio_pilot_istio_ingressgateway_istio_pilot" {
+resource "juju_integration" "istio_pilot_istio_gateway_istio_pilot" {
   model_uuid = data.juju_model.kubeflow.uuid
 
   application {
@@ -133,7 +133,7 @@ resource "juju_integration" "istio_pilot_istio_ingressgateway_istio_pilot" {
   }
 
   application {
-    name     = juju_application.istio_ingressgateway.name
+    name     = juju_application.istio_gateway.name
     endpoint = "istio-pilot"
   }
 }

@@ -63,19 +63,19 @@ resource "juju_application" "envoy" {
   name      = var.envoy.name
 }
 
-resource "juju_application" "istio_ingressgateway" {
+resource "juju_application" "istio_gateway" {
   charm {
-    name     = "istio-ingressgateway"
-    channel  = var.istio_ingressgateway.channel != null ? var.istio_ingressgateway.channel : "1.24/${var.risk}"
-    revision = var.istio_ingressgateway.revision
+    name     = "istio-gateway"
+    channel  = var.istio_gateway.channel != null ? var.istio_gateway.channel : "1.24/${var.risk}"
+    revision = var.istio_gateway.revision
   }
-  config             = var.istio_ingressgateway.config
-  constraints        = var.istio_ingressgateway.constraints
+  config             = var.istio_gateway.config
+  constraints        = var.istio_gateway.constraints
   model_uuid         = data.juju_model.kubeflow.uuid
   # storage_directives = var.admission_webhook.storage_directives
   trust              = true
   units              = 1
-  name      = var.istio_ingressgateway.name
+  name      = var.istio_gateway.name
 }
 
 

@@ -72,9 +72,9 @@ variable "envoy" {
   description = "Application configuration for Argo controller. For more details: https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application"
 }
 
-variable "istio_ingressgateway" {
+variable "istio_gateway" {
   type = object({
-    name           = optional(string, "istio-ingressgateway")
+    name           = optional(string, "istio-gateway")
     channel            = optional(string)
     config             = optional(map(string), {
       kind        = "ingress",
