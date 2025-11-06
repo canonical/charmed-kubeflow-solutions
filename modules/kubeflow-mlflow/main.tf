@@ -58,7 +58,7 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.15"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=man-sol-freeze"
   # kubeflow module creates the model
   create_model                = false
   model                       = module.kubeflow.model
@@ -74,7 +74,7 @@ module "mlflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=49995da38ca960d80f7721788f40eb97fe5695b4"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
 }
