@@ -24,7 +24,7 @@ env:
 
 jobs:
   deploy-solution-to-eks:
-    name: Deploy CKF + MLFlow solution to EKS
+    name: Deploy to EKS
     runs-on: ubuntu-24.04
     outputs:
       aws_region: ${{ steps.extract_region.outputs.region }}

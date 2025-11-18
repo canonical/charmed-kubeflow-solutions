@@ -20,7 +20,7 @@ on:
 
 jobs:
   deploy-solution-to-aks:
-    name: Deploy CKF + MLFlow solution to AKS
+    name: Deploy to AKS
     runs-on: ubuntu-24.04
     env:
       AZURE_CORE_OUTPUT: none

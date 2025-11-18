@@ -21,7 +21,7 @@ on:
 
 jobs:
   deploy-solution:
-    name: Deploy CKF + MLFlow solution to K8s
+    name: Deploy to Canonical K8s
     runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
 
     strategy:
