@@ -101,6 +101,12 @@ variable "kfp_db_size" {
   default     = "10G"
 }
 
+variable "kubeflow_profiles_security_policy" {
+  description = "Pod security policy to enforce in user workloads"
+  type        = string
+  default     = "privileged"
+}
+
 variable "minio_access_key" {
   description = "MinIO access key"
   type        = string
