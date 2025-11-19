@@ -241,10 +241,10 @@ module "kubeflow_profiles" {
   source     = "git::https://github.com/canonical/kubeflow-profiles-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
-	"security-policy" : var.kubeflow_profiles_security_policy
+    "security-policy" : var.kubeflow_profiles_security_policy
   }
-  revision   = var.kubeflow_profiles_revision
-  channel    = "1.10/${var.risk}"
+  revision = var.kubeflow_profiles_revision
+  channel  = "1.10/${var.risk}"
 }
 
 module "kubeflow_roles" {
