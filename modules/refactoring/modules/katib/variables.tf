@@ -76,34 +76,31 @@ variable "dashboard_links" {
 
 
 variable "db" {
-  description = "Database settings"
+  description = "Pointers to the dashboard links"
   type = object({
-    deployed = optional(string, "bundled")
-    info = optional(object({
-      name = optional(string, null)
-      endpoint  = optional(string, null)
-      revision = optional(number, null)
-      storage_size = optional(string, null)
-    }), {})
-    tls = optional(object({
-      cert = optional(string, "")
-      key  = optional(string, "")
-      ca   = optional(string, "")
-    }), {})
+    kind = string
+    name = optional(string, null)
+    endpoint = optional(string, null)
+    url = optional(string, null)
   })
-  default = { deployed = "bundled", info = {name=null, endpoint=null}}
 
   validation {
-    condition     = contains(["external", "bundled"], var.db.deployed)
-    error_message = "Valid values for var: cos.deployed are (external, bundled)"
+    condition     = contains(["endpoint", "offer"], var.db.kind)
+    error_message = "Valid values for var: db.kind are (endpoint, offer)"
   }
 
   validation {
-    condition = var.db.deployed != "external" || alltrue([
-      var.db.info.name != null,
-      var.db.info.endpoint != null,
-    ])
-    error_message = "When using external db, please define all fields in the offer variables"
+    condition     = var.db.kind != "endpoint" || (
+      var.db.name != null && var.db.endpoint != null
+    )
+    error_message = "When using endpoint kind, name and endpoint must be valued"
+  }
+
+  validation {
+    condition     = var.db.kind != "offer" || (
+      var.db.url != null
+    )
+    error_message = "When using offer kind, url must be valued"
   }
 }
 

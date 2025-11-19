@@ -39,12 +39,12 @@ resource "juju_model" "katib" {
 
 
 # Single MySQL database
-module "db" {
+module "central_db" {
   depends_on = [juju_model.kubeflow]
   count        = var.db.deployed == "shared" ? 1 : 0
   # tflint-ignore: terraform_module_pinned_source
   source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
-  model = juju_model.katib.uuid
+  model = juju_model.kubeflow.uuid
   app_name   = "mysql"
   channel    = "8.0/stable"
   # The following config is equivalent to "constraints: mem=2G"
@@ -55,9 +55,33 @@ module "db" {
   revision     = var.db.info.revision
 }
 
+resource "juju_offer" "central_db" {
+  count        = var.db.deployed == "shared" ? 1 : 0
+  application_name = module.central_db[0].app_name
+  endpoints = ["database"]
+  model_uuid       = juju_model.kubeflow.uuid
+}
+
+
+# Private Database
+module "katib_db" {
+  depends_on = [juju_model.katib]
+  count        = var.db.deployed == "private" ? 1 : 0
+  # tflint-ignore: terraform_module_pinned_source
+  source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
+  model = juju_model.katib.uuid
+  app_name   = "katib-db"
+  channel    = "8.0/stable"
+  # The following config is equivalent to "constraints: mem=2G"
+  config = {
+    profile-limit-memory = "2048"
+  }
+  storage_size = var.db.info.storage_size
+  revision     = var.db.info.revision
+}
 
 module "katib" {
-  depends_on = [module.core, module.db, juju_model.katib]
+  # depends_on = [module.core, module.central_db, , juju_model.katib]
   count = contains(var.components, "katib") ? 1 : 0
   source = "./modules/katib"
   model = juju_model.katib.uuid
@@ -72,25 +96,14 @@ module "katib" {
 
   # Dedicated DB
   db = var.db.deployed == "private" ? {
-    deployed = "bundled",
-    info = {
-      name = null
-      endpoint = null
-      revision = null
-    }
+    kind     = "endpoint"
+    name     = module.katib_db[0].app_name,
+    endpoint = "database"
   } : ( var.db.deployed == "shared" ? {
-    deployed = "external",
-    info = {
-      name     = module.db[0].app_name,
-      endpoint = "database" # module.db[0].provides.database
-      revision = null
-    }
+    kind = "offer"
+    url = juju_offer.central_db[0].url
   } : {
-    deployed = "external",
-    info = {
-      name = null,
-      endpoint = null,
-      revision = var.db.info.revision
-    }
+    kind = "offer"
+    url = var.db.info.offer
   } )
 }

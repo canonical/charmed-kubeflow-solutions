@@ -9,7 +9,7 @@ variable "db" {
     deployed = optional(string, "shared")
     info = optional(object({
       name = optional(string, "mysql")
-      endpoint  = optional(string, "database")
+      offer = optional(string, null)
       revision = optional(number, null)
       storage_size = optional(string, "10G")
     }), {})
@@ -19,7 +19,7 @@ variable "db" {
       ca   = optional(string, "")
     }), {})
   })
-  default = { deployed = "shared", info = {name="mysql",endpoint="database", revision=null, storage_size="10G"} }
+  default = { deployed = "shared", info = {name="mysql",offer=null, revision=null, storage_size="10G"} }
 
   validation {
     condition     = contains(["external", "shared", "private"], var.db.deployed)

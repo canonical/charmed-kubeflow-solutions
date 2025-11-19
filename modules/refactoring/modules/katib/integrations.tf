@@ -42,6 +42,7 @@ resource "juju_integration" "katib_db_manager_katib_controller_k8s_service_info"
 }
 
 resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
+  count = var.db.kind == "endpoint" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
   application {
@@ -50,8 +51,22 @@ resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
   }
 
   application {
-    name     = var.db.deployed == "bundled"? module.db[0].app_name : var.db.info.name
-    endpoint = var.db.deployed == "bundled"? module.db[0].provides.database : var.db.info.endpoint
+    name     = var.db.name
+    endpoint = var.db.endpoint
+  }
+}
+
+resource "juju_integration" "katib_db_manager_katib_db_relational_db_offer" {
+  count = var.db.kind == "offer" ? 1 : 0
+  model_uuid = data.juju_model.kubeflow.uuid
+
+  application {
+    name     = juju_application.katib_db_manager.name
+    endpoint = "relational-db"
+  }
+
+  application {
+    offer_url = var.db.url
   }
 }
 

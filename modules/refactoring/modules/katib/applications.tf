@@ -46,19 +46,5 @@ resource "juju_application" "katib_ui" {
   name      = var.katib_ui.name
 }
 
-module "db" {
-  count        = var.db.deployed == "bundled" ? 1 : 0
-  # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
-  model      = data.juju_model.kubeflow.uuid
-  app_name   = "katib-db"
-  channel    = "8.0/stable"
-  # The following config is equivalent to "constraints: mem=2G"
-  config = {
-    profile-limit-memory = "2048"
-  }
-  storage_size = var.db.info.storage_size
-  revision     = var.db.info.revision
-}
 
 
