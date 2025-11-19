@@ -18,14 +18,29 @@ variable "model" {
 variable "ingress" {
   description = "Pointers to the ingress"
   type = object({
-    kind = optional(string, "endpoint")
-    name = optional(string, "ingress")
-    endpoint = optional(string, "ingress")
+    kind = string
+    name = optional(string, null)
+    endpoint = optional(string, null)
+    url = optional(string, null)
   })
 
   validation {
-    condition     = contains(["endpoint"], var.ingress.kind)
+    condition     = contains(["endpoint", "offer"], var.ingress.kind)
     error_message = "Valid values for var: ingress.kind are (endpoint, offer)"
+  }
+
+  validation {
+    condition     = var.ingress.kind != "endpoint" || (
+      var.ingress.name != null && var.ingress.endpoint != null
+    )
+    error_message = "When using endpoint kind, name and endpoint must be valued"
+  }
+
+  validation {
+    condition     = var.ingress.kind != "offer" || (
+      var.ingress.url != null
+    )
+    error_message = "When using offer kind, url must be valued"
   }
 
 }
@@ -33,16 +48,30 @@ variable "ingress" {
 variable "dashboard_links" {
   description = "Pointers to the dashboard links"
   type = object({
-    kind = optional(string, "endpoint")
-    name = optional(string, "kubeflow-dashboard")
-    endpoint = optional(string, "links")
+    kind = string
+    name = optional(string, null)
+    endpoint = optional(string, null)
+    url = optional(string, null)
   })
 
   validation {
-    condition     = contains(["endpoint"], var.dashboard_links.kind)
+    condition     = contains(["endpoint", "offer"], var.dashboard_links.kind)
     error_message = "Valid values for var: dashboard_links.kind are (endpoint, offer)"
   }
 
+  validation {
+    condition     = var.dashboard_links.kind != "endpoint" || (
+      var.dashboard_links.name != null && var.dashboard_links.endpoint != null
+    )
+    error_message = "When using endpoint kind, name and endpoint must be valued"
+  }
+
+  validation {
+    condition     = var.dashboard_links.kind != "offer" || (
+      var.dashboard_links.url != null
+    )
+    error_message = "When using offer kind, url must be valued"
+  }
 }
 
 
