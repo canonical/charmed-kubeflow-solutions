@@ -17,12 +17,27 @@ locals {
     pvcviewer_operator = juju_application.pvcviewer_operator
   }
 
+  metrics_components = [
+    "istio_gateway", "istio_pilot", "kubeflow_dashboard", "envoy", "kubeflow_profiles",
+    "dex_auth", "minio", "argo_controller", "metacontroller_operator", "pvcviewer_operator"
+  ]
+
+  dashboard_components = [
+    "istio_pilot", "kubeflow_dashboard", "envoy", "dex_auth", "minio", "argo_controller",
+    "metacontroller_operator", "pvcviewer_operator"
+  ]
+
+  logging_components = [
+    "kubeflow_dashboard", "mlmd", "envoy", "kubeflow_volumes", "kubeflow_profiles",
+    "oidc_gatekeeper", "dex_auth", "argo_controller", "admission_webhook", "pvcviewer_operator"
+  ]
+
   metrics_endpoints = {
     for name, application in local.components :
     "${name}_metrics" => {
       name: application.name
-      endpoint: "metrics"
-    }
+      endpoint: "metrics-endpoint"
+    } if contains(local.metrics_components, name)
   }
 
   grafana_dashboards_endpoints = {
@@ -30,7 +45,7 @@ locals {
     "${name}_dashboard" => {
       name: application.name
       endpoint: "grafana-dashboard"
-    }
+    } if contains(local.dashboard_components, name)
   }
 
   logging_endpoints = {
@@ -38,7 +53,7 @@ locals {
     "${name}_logging" => {
       name: application.name
       endpoint: "logging"
-    }
+    } if contains(local.logging_components, name)
   }
 
   provides = merge({
