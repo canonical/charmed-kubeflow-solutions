@@ -15,6 +15,12 @@ variable "model" {
   default     = "kubeflow"
 }
 
+variable "expose_endpoints" {
+  type = list(string)
+  description = "endpoints to be exposed as offers"
+  default = []
+}
+
 variable "admission_webhook" {
   type = object({
     name           = optional(string, "admission-webhook")

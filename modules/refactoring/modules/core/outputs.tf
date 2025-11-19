@@ -1,15 +1,14 @@
-output "offers" {
-  description = "Map of all the provided endpoints"
-  value = {
-    ingress = {
-      kind: "endpoint"
-      name: juju_application.istio_pilot.name
-      endpoint: "ingress"
-    }
-    dashboard_links = {
-      kind: "endpoint"
-      name: juju_application.kubeflow_dashboard.name
-      endpoint: "links"
-    }
-  }
+output "components" {
+  value = local.components
 }
+
+output "provides" {
+  description = "Map of all the provided endpoints"
+  value = local.provides
+}
+
+output "requires" {
+  description = "Map of the requirer endpoints"
+  value = local.requires
+}
+

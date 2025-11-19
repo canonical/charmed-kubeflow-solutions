@@ -12,17 +12,18 @@ module "core" {
   depends_on = [juju_model.kubeflow]
   source = "./modules/core"
   model = juju_model.kubeflow.uuid
+  expose_endpoints = ["envoy_metrics"]
 }
 
 resource "juju_offer" "ingress" {
-  application_name = module.core.offers.ingress.name
-  endpoints = [module.core.offers.ingress.endpoint]
+  application_name = module.core.provides.ingress.name
+  endpoints = [module.core.provides.ingress.endpoint]
   model_uuid       = juju_model.kubeflow.uuid
 }
 
 resource "juju_offer" "dashboard_links" {
-  application_name = module.core.offers.dashboard_links.name
-  endpoints = [module.core.offers.dashboard_links.endpoint]
+  application_name = module.core.provides.dashboard_links.name
+  endpoints = [module.core.provides.dashboard_links.endpoint]
   model_uuid       = juju_model.kubeflow.uuid
 }
 
