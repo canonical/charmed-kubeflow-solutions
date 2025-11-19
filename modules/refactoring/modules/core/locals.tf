@@ -69,9 +69,14 @@ locals {
 
   requires = merge(local.logging_endpoints)
 
+  offers_selection = {
+    for name, endpoint in merge(local.requires, local.provides) :
+    name => endpoint if contains(var.expose_endpoints, name)
+  }
+
   offers = {
-    for name, endpoint in merge(local.requires, local.provides):
-    endpoint.name => endpoint.endpoint if contains(var.expose_endpoints, name)
+    for name, endpoint in local.offers_selection:
+    endpoint.name => endpoint.endpoint
   }
 
 }

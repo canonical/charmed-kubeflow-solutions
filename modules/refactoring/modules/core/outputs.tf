@@ -12,3 +12,11 @@ output "requires" {
   value = local.requires
 }
 
+output "offers" {
+  description = "Offers"
+  value = {
+    for key, offer in zipmap(keys(local.offers_selection), values(juju_offer.offered_endpoints)):
+    key => offer.url
+  }
+}
+
