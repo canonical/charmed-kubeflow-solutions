@@ -35,3 +35,20 @@ variable "db" {
   }
 }
 
+variable "http_proxy" {
+  type = string
+  description = "Address for the http proxy"
+  default = ""
+}
+
+variable "https_proxy" {
+  type = string
+  description = "Address for the https proxy"
+  default = ""
+}
+
+variable "no_proxy" {
+  type = string
+  description = "Addresses to not be proxies"
+  default = ""
+}

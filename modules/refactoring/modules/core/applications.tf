@@ -1,6 +1,6 @@
 data "juju_model" "kubeflow" {
-  name = var.model
-  owner = "admin"
+  uuid = var.model
+  # owner = "admin"
 }
 
 resource "juju_application" "admission_webhook" {

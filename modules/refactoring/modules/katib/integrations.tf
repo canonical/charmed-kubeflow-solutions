@@ -1,5 +1,5 @@
 resource "juju_integration" "istio_pilot_katib_uiingress" {
-  model_uuid = var.model # data.juju_model.kubeflow.uuid
+  model_uuid = data.juju_model.kubeflow.uuid
 
   application {
     name     = var.ingress.name
@@ -13,7 +13,7 @@ resource "juju_integration" "istio_pilot_katib_uiingress" {
 }
 
 resource "juju_integration" "katib_db_manager_katib_controller_k8s_service_info" {
-  model_uuid = var.model #data.juju_model.kubeflow.uuid
+  model_uuid = data.juju_model.kubeflow.uuid
 
   application {
     name     = juju_application.katib_db_manager.name
@@ -27,7 +27,7 @@ resource "juju_integration" "katib_db_manager_katib_controller_k8s_service_info"
 }
 
 resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
-  model_uuid = var.model # data.juju_model.kubeflow.uuid
+  model_uuid = data.juju_model.kubeflow.uuid
 
   application {
     name     = juju_application.katib_db_manager.name
@@ -41,7 +41,7 @@ resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_katib_ui_links" {
-  model_uuid = var.model # data.juju_model.kubeflow.uuid
+  model_uuid = data.juju_model.kubeflow.uuid
 
   application {
     name     = var.dashboard_links.name
