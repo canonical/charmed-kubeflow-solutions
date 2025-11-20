@@ -71,6 +71,18 @@ variable "https_proxy" {
   default     = ""
 }
 
+variable "istio_cni_bin_dir" {
+  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_conf_dir" {
+  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
 variable "istio_tls_secret_id" {
   description = "The juju secret id for the tls key/cert for istio-pilot"
   type        = string

@@ -53,6 +53,8 @@ module "istio_pilot" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     default-gateway = "kubeflow-gateway",
+    "cni-bin-dir" : var.istio_cni_bin_dir
+    "cni-conf-dir" : var.istio_cni_conf_dir
     "tls-secret-id" : var.istio_tls_secret_id
   }
   revision = var.istio_pilot_revision
