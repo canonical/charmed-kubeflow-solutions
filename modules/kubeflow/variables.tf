@@ -102,9 +102,14 @@ variable "kfp_db_size" {
 }
 
 variable "kubeflow_profiles_security_policy" {
-  description = "Pod security policy to enforce in user workloads"
+  description = "Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported"
   type        = string
   default     = "privileged"
+
+  validation {
+    condition     = var.kubeflow_profiles_security_policy == "privileged" || var.kubeflow_profiles_security_policy == "baseline"
+    error_message = "The variable must be one of 'privileged' or 'baseline'."
+  }
 }
 
 variable "minio_access_key" {

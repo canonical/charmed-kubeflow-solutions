@@ -25,6 +25,7 @@ The solution module offers the following configurable inputs:
 | `jupyter_ui_config`| map(string) | Map of config values passed to jupyter-ui | False |
 | `katib_db_size`| string | Katib database storage size | False |
 | `kfp_db_size`| string | KFP database storage size | False |
+| `kubeflow_profiles_security_policy`| string | Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported | False |
 | `minio_size`| string | MinIO database storage size | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
