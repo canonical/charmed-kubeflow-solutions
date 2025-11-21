@@ -15,14 +15,13 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
-
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
 jobs:
   deploy-solution:
-    name: Deploy CKF + MLFlow solution to K8s
+    name: Deploy to MicroK8s
     runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
 
     strategy:
@@ -65,6 +64,7 @@ jobs:
         uses: actions/setup-python@v5.0.0
         with:
           python-version: "3.12"
+          architecture: x64
 
       - name: Install tox & poetry
         run: |
@@ -93,7 +93,7 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |

@@ -16,7 +16,6 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
-  # pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
@@ -25,7 +24,7 @@ env:
 
 jobs:
   deploy-solution-to-eks:
-    name: Deploy CKF + MLFlow solution to EKS
+    name: Deploy to EKS
     runs-on: ubuntu-24.04
     outputs:
       aws_region: ${{ steps.extract_region.outputs.region }}
@@ -162,7 +161,7 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |
