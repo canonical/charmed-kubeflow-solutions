@@ -10,10 +10,13 @@ module "kubeflow" {
   grafana_agent_k8s_size           = var.grafana_agent_k8s_size
   http_proxy                       = var.http_proxy
   https_proxy                      = var.https_proxy
+  istio_cni_bin_dir = var.istio_cni_bin_dir
+  istio_cni_conf_dir = var.istio_cni_conf_dir
   istio_tls_secret_id              = var.istio_tls_secret_id
   jupyter_ui_config                = var.jupyter_ui_config
   katib_db_size                    = var.katib_db_size
   kfp_db_size                      = var.kfp_db_size
+  kubeflow_profiles_security_policy = var.kubeflow_profiles_security_policy
   minio_size                       = var.minio_size
   mlmd_size                        = var.mlmd_size
   no_proxy                         = var.no_proxy
