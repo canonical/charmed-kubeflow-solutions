@@ -1,4 +1,4 @@
-resource "juju_integration" "istio_pilot_katib_uiingress" {
+resource "juju_integration" "istio_pilot_uiingress" {
   count = var.ingress.kind == "endpoint" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
@@ -8,12 +8,12 @@ resource "juju_integration" "istio_pilot_katib_uiingress" {
   }
 
   application {
-    name     = juju_application.katib_ui.name
+    name     = juju_application.ui.name
     endpoint = "ingress"
   }
 }
 
-resource "juju_integration" "istio_pilot_katib_uiingress_offer" {
+resource "juju_integration" "istio_pilot_uiingress_offer" {
   count = var.ingress.kind == "offer" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
@@ -22,31 +22,31 @@ resource "juju_integration" "istio_pilot_katib_uiingress_offer" {
   }
 
   application {
-    name     = juju_application.katib_ui.name
+    name     = juju_application.ui.name
     endpoint = "ingress"
   }
 }
 
-resource "juju_integration" "katib_db_manager_katib_controller_k8s_service_info" {
+resource "juju_integration" "katib_db_manager_controller_k8s_service_info" {
   model_uuid = data.juju_model.kubeflow.uuid
 
   application {
-    name     = juju_application.katib_db_manager.name
+    name     = juju_application.db_manager.name
     endpoint = "k8s-service-info"
   }
 
   application {
-    name     = juju_application.katib_controller.name
+    name     = juju_application.controller.name
     endpoint = "k8s-service-info"
   }
 }
 
-resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
+resource "juju_integration" "db_manager_db_relational_db" {
   count = var.db.kind == "endpoint" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
   application {
-    name     = juju_application.katib_db_manager.name
+    name     = juju_application.db_manager.name
     endpoint = "relational-db"
   }
 
@@ -56,12 +56,12 @@ resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
   }
 }
 
-resource "juju_integration" "katib_db_manager_katib_db_relational_db_offer" {
+resource "juju_integration" "db_manager_db_relational_db_offer" {
   count = var.db.kind == "offer" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
   application {
-    name     = juju_application.katib_db_manager.name
+    name     = juju_application.db_manager.name
     endpoint = "relational-db"
   }
 
@@ -70,7 +70,7 @@ resource "juju_integration" "katib_db_manager_katib_db_relational_db_offer" {
   }
 }
 
-resource "juju_integration" "kubeflow_dashboard_katib_ui_links" {
+resource "juju_integration" "kubeflow_dashboard_ui_links" {
   count = var.dashboard_links.kind == "endpoint" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
@@ -80,12 +80,12 @@ resource "juju_integration" "kubeflow_dashboard_katib_ui_links" {
   }
 
   application {
-    name     = juju_application.katib_ui.name
+    name     = juju_application.ui.name
     endpoint = "dashboard-links"
   }
 }
 
-resource "juju_integration" "kubeflow_dashboard_katib_ui_links_offer" {
+resource "juju_integration" "kubeflow_dashboard_ui_links_offer" {
   count = var.dashboard_links.kind == "offer" ? 1 : 0
   model_uuid = data.juju_model.kubeflow.uuid
 
@@ -94,7 +94,7 @@ resource "juju_integration" "kubeflow_dashboard_katib_ui_links_offer" {
   }
 
   application {
-    name     = juju_application.katib_ui.name
+    name     = juju_application.ui.name
     endpoint = "dashboard-links"
   }
 }

@@ -2,9 +2,9 @@ resource "juju_model" "kubeflow" {
   name  = "kubeflow"
   # owner = "admin"
   config = {
-    juju-http-proxy = var.http_proxy
-    juju-https-proxy = var.https_proxy
-    juju-no-proxy = var.no_proxy
+    juju-http-proxy = var.proxy.http
+    juju-https-proxy = var.proxy.https
+    juju-no-proxy = var.proxy.no-proxy
   }
 }
 
@@ -32,32 +32,29 @@ resource "juju_model" "katib" {
   name  = "katib"
   # owner = "admin"
   config = {
-    juju-http-proxy = var.http_proxy
-    juju-https-proxy = var.https_proxy
-    juju-no-proxy = var.no_proxy
+    juju-http-proxy = var.proxy.http
+    juju-https-proxy = var.proxy.https
+    juju-no-proxy = var.proxy.no-proxy
   }
 }
 
 
-# Single MySQL database
+# Central MySQL database
 module "central_db" {
   depends_on = [juju_model.kubeflow]
-  count        = var.db.deployed == "shared" ? 1 : 0
+  count        = local.is_central_db_deployed ? 1 : 0
   # tflint-ignore: terraform_module_pinned_source
   source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
-  model = juju_model.kubeflow.uuid
-  app_name   = "mysql"
-  channel    = "8.0/stable"
-  # The following config is equivalent to "constraints: mem=2G"
-  config = {
-    profile-limit-memory = "2048"
-  }
-  storage_size = var.db.info.storage_size
-  revision     = var.db.info.revision
+  model = juju_model.kubeflow.uuid # non-compliant
+  app_name   = var.central_db.name
+  channel    = var.central_db.channel
+  config = var.central_db.config
+  storage_size = var.central_db.storage_size
+  revision     = var.central_db.revision
 }
 
 resource "juju_offer" "central_db" {
-  count        = var.db.deployed == "shared" ? 1 : 0
+  count        = local.is_central_db_deployed ? 1 : 0
   application_name = module.central_db[0].app_name
   endpoints = ["database"]
   model_uuid       = juju_model.kubeflow.uuid
@@ -67,25 +64,22 @@ resource "juju_offer" "central_db" {
 # Private Database
 module "katib_db" {
   depends_on = [juju_model.katib]
-  count        = var.db.deployed == "private" ? 1 : 0
+  count        = var.katib.db == "private" ? 1 : 0
   # tflint-ignore: terraform_module_pinned_source
   source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
-  model = juju_model.katib.uuid
-  app_name   = "katib-db"
-  channel    = "8.0/stable"
-  # The following config is equivalent to "constraints: mem=2G"
-  config = {
-    profile-limit-memory = "2048"
-  }
-  storage_size = var.db.info.storage_size
-  revision     = var.db.info.revision
+  model = juju_model.katib.uuid # non-compliant
+  app_name   = var.katib_db.name
+  channel    = var.katib_db.channel
+  config = var.katib_db.config
+  storage_size = var.katib_db.storage_size
+  revision     = var.katib_db.revision
 }
 
 module "katib" {
   # depends_on = [module.core, module.central_db, , juju_model.katib]
-  count = contains(var.components, "katib") ? 1 : 0
+  count = local.is_katib_deployed ? 1 : 0
   source = "./modules/katib"
-  model = juju_model.katib.uuid
+  model_uuid = juju_model.katib.uuid
   ingress = {
     kind = "offer",
     url = module.core.offers["ingress"] # juju_offer.ingress.url
@@ -96,15 +90,15 @@ module "katib" {
   }
 
   # Dedicated DB
-  db = var.db.deployed == "private" ? {
+  db = var.katib.db == "private" ? {
     kind     = "endpoint"
     name     = module.katib_db[0].app_name,
     endpoint = "database"
-  } : ( var.db.deployed == "shared" ? {
+  } : ( var.katib.db == "shared" ? {
     kind = "offer"
     url = juju_offer.central_db[0].url
   } : {
     kind = "offer"
-    url = var.db.info.offer
+    url = var.katib.db_offer
   } )
 }

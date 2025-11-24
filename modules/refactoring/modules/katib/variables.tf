@@ -1,15 +1,5 @@
-variable "risk" {
-  type        = string
-  description = "Value for the risk to be used"
-  default     = "stable"
 
-  validation {
-    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
-    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
-  }
-}
-
-variable "model" {
+variable "model_uuid" {
   type        = string
   description = "Name for the model to be used"
   default     = "kubeflow"
@@ -104,10 +94,56 @@ variable "db" {
   }
 }
 
-variable "katib_controller" {
+variable "controller" {
   type = object({
-    name           = optional(string, "katib-controller")
-    channel            = optional(string)
+    name               = optional(string, "katib-controller")
+    channel            = optional(string, "0.18/stable")
+    config             = optional(map(string), {})
+    constraints        = optional(string, "arch=amd64")
+    revision           = optional(number, null)
+    # storage_directives = optional(map(string), {})
+  })
+  default     = {}
+  description = "Application configuration for Argo controller. For more details: https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application"
+
+  validation {
+    condition = var.controller.name != null
+    error_message = "name attribute cannot be null"
+  }
+
+  validation {
+    condition = var.controller.channel != null
+    error_message = "channel attribute cannot be null"
+  }
+}
+
+variable "db_manager" {
+  type = object({
+    name               = optional(string, "katib-db-manager")
+    channel            = optional(string, "0.18/stable")
+    config             = optional(map(string), {})
+    constraints        = optional(string, "arch=amd64")
+    revision           = optional(number, null)
+    # storage_directives = optional(map(string), {})
+  })
+  default     = {}
+  description = "Application configuration for Argo controller. For more details: https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application"
+
+  validation {
+    condition = var.db_manager.name != null
+    error_message = "name attribute cannot be null"
+  }
+
+  validation {
+    condition = var.db_manager.channel != null
+    error_message = "channel attribute cannot be null"
+  }
+}
+
+variable "ui" {
+  type = object({
+    name               = optional(string, "katib-ui")
+    channel            = optional(string, "0.18/stable")
     config             = optional(map(string), {})
     constraints        = optional(string, "arch=amd64")
     revision           = optional(number, null)
@@ -117,28 +153,15 @@ variable "katib_controller" {
   description = "Application configuration for Argo controller. For more details: https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application"
 }
 
-variable "katib_db_manager" {
-  type = object({
-    name           = optional(string, "katib-db-manager")
-    channel            = optional(string)
-    config             = optional(map(string), {})
-    constraints        = optional(string, "arch=amd64")
-    revision           = optional(number, null)
-    # storage_directives = optional(map(string), {})
-  })
-  default     = {}
-  description = "Application configuration for Argo controller. For more details: https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application"
+variable "risk" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.risk == null || contains(["stable", "candidate", "beta", "edge"], var.risk)
+    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
+  }
 }
 
-variable "katib_ui" {
-  type = object({
-    name           = optional(string, "katib-ui")
-    channel            = optional(string)
-    config             = optional(map(string), {})
-    constraints        = optional(string, "arch=amd64")
-    revision           = optional(number, null)
-    # storage_directives = optional(map(string), {})
-  })
-  default     = {}
-  description = "Application configuration for Argo controller. For more details: https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application"
-}
