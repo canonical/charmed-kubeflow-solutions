@@ -31,7 +31,7 @@ resource "juju_application" "kubeflow_integrator" {
   charm {
     name     = "data-kubeflow-integrator"
     channel  = "1/edge/pr-8"
-    revision = 12
+    revision = 14
   }
   units       = 1
   constraints = "arch=amd64"
