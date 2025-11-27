@@ -449,7 +449,7 @@ variable "metacontroller_operator_revision" {
 variable "mlflow_minio_revision" {
   description = "Charm revision for mlflow-minio"
   type        = number
-  default     = 617
+  default     = null
 }
 
 variable "mlflow_mysql_revision" {
@@ -473,7 +473,7 @@ variable "mlmd_revision" {
 variable "minio_revision" {
   description = "Charm revision for minio"
   type        = number
-  default     = 617
+  default     = null
 }
 
 variable "oidc_gatekeeper_revision" {
