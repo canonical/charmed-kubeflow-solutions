@@ -429,7 +429,7 @@ variable "kubeflow_trainer_revision" {
 }
 
 variable "kubeflow_trainer_v2" {
-  description = "Boolean value that enables deployment of Kubeflow Trainer V2"
+  description = "Boolean value that enables deployment of Kubeflow Trainer V2 (experimental)"
   type        = bool
   default     = false
 }

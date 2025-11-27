@@ -25,7 +25,7 @@ The solution module offers the following configurable inputs:
 | `jupyter_ui_config`| map(string) | Map of config values passed to jupyter-ui | False |
 | `katib_db_size`| string | Katib database storage size | False |
 | `kfp_db_size`| string | KFP database storage size | False |
-| `kubeflow_trainer_v2`| bool | Boolean value that enables deployment of Kubeflow Trainer V2 | False |
+| `kubeflow_trainer_v2`| bool | Boolean value that enables deployment of Kubeflow Trainer V2 (experimental) | False |
 | `minio_size`| string | MinIO database storage size | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
@@ -64,7 +64,7 @@ terraform apply -var cos_configuration=true
 
 ### Kubeflow Trainer V2
 
-#### Enable Kubeflow Trainer V2
+#### Enable Kubeflow Trainer V2 (Experimental)
 The `kubeflow_trainer_v2` input enables the solution to deploy Kubeflow Trainer V2 charm and all the required resources.
 ```shell
 terraform apply -var kubeflow_trainer_v2=true
