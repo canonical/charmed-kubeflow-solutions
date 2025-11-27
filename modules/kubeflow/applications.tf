@@ -297,7 +297,7 @@ module "minio" {
     minio-data = var.minio_size
   }
   revision = var.minio_revision
-  channel  = "ckf-1.10/${var.risk}"
+  channel  = "1.10/edge"
 }
 
 module "oidc_gatekeeper" {

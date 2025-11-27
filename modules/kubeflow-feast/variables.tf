@@ -320,7 +320,7 @@ variable "mlmd_revision" {
 variable "minio_revision" {
   description = "Charm revision for minio"
   type        = number
-  default     = null
+  default     = 617
 }
 
 variable "feast_offline_store_revision" {
