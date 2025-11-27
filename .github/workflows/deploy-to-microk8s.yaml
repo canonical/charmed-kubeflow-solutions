@@ -38,6 +38,9 @@ jobs:
             uats:
               env: feast-remote
               extra-args: ""
+        pod-security-standards:
+          - privileged
+          - baseline
 
     steps:
       - name: Checkout repository
@@ -94,14 +97,14 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }} --pss ${{ matrix.pod-security-standards }}
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" ${{ matrix.bundle.uats.extra-args }}
+          git checkout kf-8136/test/job-exempt-from-baseline-policy
+          tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" ${{ matrix.bundle.uats.extra-args }} --security-policy ${{ matrix.pod-security-standards }}
 
       # On failure, capture debugging resources
       - name: Select model
