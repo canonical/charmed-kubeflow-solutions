@@ -31,11 +31,11 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
+              extra-args: --filter "not feast" --include-kubeflow-trainer-tests --bundle https://raw.githubusercontent.com/canonical/bundle-kubeflow/refs/heads/kf-8177-upgrade-minio/releases/1.10/edge/bundle.yaml
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: ""
+              extra-args: --bundle https://raw.githubusercontent.com/canonical/bundle-kubeflow/refs/heads/kf-8177-upgrade-minio/releases/1.10/edge/bundle.yaml
 
     steps:
       - name: Checkout repository
