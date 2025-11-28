@@ -101,21 +101,14 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s \
-            --risk ${{ env.RISK }} \
-            --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} \
-            --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} \
-            --pss ${{ matrix.pod-security-standards.policy }}
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }}
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout kf-8136/test/job-exempt-from-baseline-policy
-          tox -e ${{ matrix.bundle.uats.env }} -- \
-            --bundle "" \
-            --security-policy ${{ matrix.pod-security-standards.policy }} \
-            ${{ matrix.bundle.uats.extra-args }}
+          tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
