@@ -3,6 +3,22 @@ import pytest
 def pytest_addoption(parser):
     """Add CLI options to pytest."""
     parser.addoption(
+        "--istio-cni-bin-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of binaries for Istio CNI",
+    )
+    parser.addoption(
+        "--istio-cni-conf-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of configurations for Istio CNI",
+    )
+    parser.addoption(
         "--pss",
         nargs="?",
         choices=["privileged", "baseline"],
@@ -22,9 +38,19 @@ def pytest_addoption(parser):
     )
 
 @pytest.fixture(scope="module")
+def istio_cni_bin_dir(request) -> str:
+    """Directory of binaries for Istio CNI."""
+    return request.config.getoption("--istio-cni-bin-dir")
+
+@pytest.fixture(scope="module")
+def istio_cni_conf_dir(request) -> str:
+    """Directory of configurations for Istio CNI."""
+    return request.config.getoption("--istio-cni-conf-dir")
+
+@pytest.fixture(scope="module")
 def pss(request) -> str:
     """Pod security standards enforced in Profiles' namespaces."""
-    return request.config.getoption("--risk") or "stable"
+    return request.config.getoption("--pss")
 
 @pytest.fixture(scope="module")
 def risk(request) -> str:
