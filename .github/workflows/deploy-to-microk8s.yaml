@@ -108,7 +108,6 @@ jobs:
 
           sudo microk8s config | juju add-k8s local-k8s --client
           juju bootstrap --agent-version 3.6.9 local-k8s microk8s
-          juju add-model kubeflow
 
       - name: Setup terraform
         run: |          
