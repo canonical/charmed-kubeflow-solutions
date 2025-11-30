@@ -111,7 +111,6 @@ jobs:
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
-          mkdir ~/.kube
           microk8s config > ~/.kube/config
 
       - name: Setup terraform
