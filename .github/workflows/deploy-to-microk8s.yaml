@@ -109,6 +109,11 @@ jobs:
           sudo microk8s config | juju add-k8s local-k8s --client
           juju bootstrap --agent-version 3.6.9 local-k8s microk8s
 
+          # for Python's K8s client to find K8s configurations without code or
+          # environment-variable changes:
+          # mkdir ~/.kube
+          # microk8s config > ~/.kube/config
+
       - name: Setup terraform
         run: |          
           sudo snap install terraform --channel latest/stable --classic
