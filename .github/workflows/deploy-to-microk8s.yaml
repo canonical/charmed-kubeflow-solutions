@@ -91,9 +91,9 @@ jobs:
           # nor the `concierge` snap support configuring as of today
 
           sudo snap refresh
-          sudo snap install juju '--channel=${{ env.JUJU_VERSION }}/stable' --classic
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable --classic
           sudo snap install charmcraft --channel=3.x/stable --classic
-          sudo snap install microk8s '--channel=${{ env.K8S_VERSION }}/stable' --classic
+          sudo snap install microk8s --channel=${{ env.K8S_VERSION }}/stable --classic
 
           sudo snap alias microk8s.kubectl kubectl
           sudo usermod -a -G microk8s $USER
