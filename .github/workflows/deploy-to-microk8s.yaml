@@ -6,8 +6,9 @@ on:
         description: 'Kubernetes version to be used for Microk8s.'
         required: false
       uats_branch:
-        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this falls back to the name of the CKF branch being tested.'
+        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
         required: false
+        default: "track/1.10"
       ckf_branch:
         description: 'Branch on the Charmed Kubeflow repository to be tested'
         required: false
@@ -15,13 +16,14 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
+
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
 jobs:
   deploy-solution:
-    name: Deploy to MicroK8s
+    name: Deploy CKF + MLFlow solution to K8s
     runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
 
     strategy:
@@ -31,11 +33,18 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
+              extra-args: --filter "not feast"
           - module: kubeflow-feast
             uats:
               env: feast-remote
               extra-args: ""
+        pod-security-standards:
+          - policy: privileged
+            istio-cni-bin-dir: ""  # meaning Istio CNI disabled
+            istio-cni-conf-dir: ""  # meaning Istio CNI disabled
+          - policy: baseline
+            istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
+            istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
 
     steps:
       - name: Checkout repository
@@ -64,7 +73,6 @@ jobs:
         uses: actions/setup-python@v5.0.0
         with:
           python-version: "3.12"
-          architecture: x64
 
       - name: Install tox & poetry
         run: |
@@ -72,19 +80,42 @@ jobs:
           pip install poetry
 
       - name: Setup operator environment
-        uses: charmed-kubernetes/actions-operator@main
-        with:
-          juju-channel: "3.6/stable"
-          charmcraft-channel: "3.x/stable"
-          provider: microk8s
-          channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
-          microk8s-group: snap_microk8s
-          microk8s-addons: "rbac dns hostpath-storage metallb:10.64.140.43-10.64.140.49"
-          bootstrap-options: "--agent-version 3.6.9"
+        run: |
+          # NOTE: bacause of this issue...
+          # https://github.com/canonical/istio-operators/issues/656
+          # ...non-strict MicroK8s is required for Istio CNI to be functional,
+          # and Juju does not support non-strict MicroK8s snaps unless manually
+          # added to Juju as K8s clouds like this...
+          # `sudo microk8s config | juju add-k8s local-k8s --client`
+          # ...which neither the action `charmed-kubernetes/actions-operator`
+          # nor the `concierge` snap support configuring as of today
+
+          sudo snap refresh
+          sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable --classic
+          sudo snap install charmcraft --channel=3.x/stable --classic
+          sudo snap install microk8s --channel=${{ env.K8S_VERSION }}/stable --classic
+
+          sudo snap alias microk8s.kubectl kubectl
+          sudo usermod -a -G microk8s $USER
+          newgrp microk8s
+
+          microk8s status --wait-ready
+          sudo microk8s enable dns hostpath-storage rbac metallb:10.64.140.43-10.64.140.49
+          microk8s status --wait-ready
+
+          # a workaround for Juju 3's strict snap:
+          mkdir -p ~/.local/share/juju
+
+          sudo microk8s config | juju add-k8s local-k8s --client
+          juju bootstrap local-k8s microk8s
+
+          # for Python's K8s client to find K8s configurations without code or
+          # environment-variable changes:
+          microk8s config > ~/.kube/config
 
       - name: Setup terraform
         run: |          
-          sudo snap install terraform  --channel latest/stable --classic
+          sudo snap install terraform --channel latest/stable --classic
           terraform --version
 
       - name: Deploy solution
@@ -93,14 +124,14 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }}
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
+          tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
@@ -124,13 +155,13 @@ jobs:
         run: kubectl describe pods --all-namespaces
 
       - name: Get logs from pods with status = Pending
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
         if: failure() || cancelled()
 
       - name: Get logs from pods with status = Failed
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
         if: failure() || cancelled()
 
       - name: Get logs from pods with status = CrashLoopBackOff
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
         if: failure() || cancelled()
