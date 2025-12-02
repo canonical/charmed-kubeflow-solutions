@@ -55,6 +55,8 @@ module "kubeflow" {
   kubeflow_dashboard_registration_flow = var.kubeflow_dashboard_registration_flow
   kubeflow_profiles_revision           = var.kubeflow_profiles_revision
   kubeflow_roles_revision              = var.kubeflow_roles_revision
+  kubeflow_trainer_revision            = var.kubeflow_trainer_revision
+  kubeflow_trainer_v2                  = var.kubeflow_trainer_v2
   kubeflow_volumes_revision            = var.kubeflow_volumes_revision
   metacontroller_operator_revision     = var.metacontroller_operator_revision
   mlmd_revision                        = var.mlmd_revision

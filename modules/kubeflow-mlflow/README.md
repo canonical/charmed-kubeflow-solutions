@@ -26,6 +26,7 @@ The solution module offers the following configurable inputs:
 | `jupyter_ui_config`| map(string) | Map of config values passed to jupyter-ui | False |
 | `katib_db_size`| string | Katib database storage size | False |
 | `kfp_db_size`| string | KFP database storage size | False |
+| `kubeflow_trainer_v2`| bool | Boolean value that enables deployment of Kubeflow Trainer V2 (experimental) | False |
 | `minio_size`| string | MinIO database storage size | False |
 | `mlflow_dashboard_link`| bool | Boolean value that enables MLflow link in Kubeflow's dashboard | False |
 | `mlflow_kserve_integration` | bool | Boolean value that integrates MLflow with KServe | False |
@@ -59,4 +60,12 @@ This solution always creates a model of the name `kubeflow`, since Charmed Kubef
 The `cos_configuration` input enables the solution to configure Charmed Kubeflow and MLflow to integrate with COS. This is done by deploying a `grafana-agent-k8s` charm and adding all the required relations.
 ```
 terraform apply -var cos_configuration=true
+```
+
+### Kubeflow Trainer V2
+
+#### Enable Kubeflow Trainer V2 (Experimental)
+The `kubeflow_trainer_v2` input enables the solution to deploy Kubeflow Trainer V2 charm and all the required resources.
+```shell
+terraform apply -var kubeflow_trainer_v2=true
 ```

@@ -419,6 +419,21 @@ resource "juju_integration" "kubeflow_dashboard_kfp_ui_links" {
   }
 }
 
+resource "juju_integration" "kubeflow_dashboard_kubeflow_trainer_links" {
+  count = var.kubeflow_trainer_v2 ? 1 : 0
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+
+  application {
+    name     = module.kubeflow_dashboard.app_name
+    endpoint = module.kubeflow_dashboard.provides.links
+  }
+
+  application {
+    name     = module.kubeflow_trainer[0].app_name
+    endpoint = module.kubeflow_trainer[0].requires.dashboard_links
+  }
+}
+
 resource "juju_integration" "kubeflow_dashboard_kubeflow_volumes_links" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
