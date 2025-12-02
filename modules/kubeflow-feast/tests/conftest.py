@@ -99,9 +99,9 @@ def pss(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes) -> list[str]:
+def tf_vars(request, risk, db_sizes, pss) -> list[str]:
     """Overall Terraform module customization."""
-    return risk +  db_sizes + pss + [
+    return risk + db_sizes + pss + [
         "-var", "create_model=false",
         "-var", "cos_configuration=true",
     ]
