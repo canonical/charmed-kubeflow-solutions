@@ -84,11 +84,19 @@ def db_sizes(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
+def tf_vars(request, risk, db_sizes) -> list[str]:
+    """Overall Terraform module customization."""
+    return risk +  db_sizes + pss + [
+        "-var", "create_model=false",
+        "-var", "cos_configuration=true",
+    ]
+
+@pytest.fixture(scope="module")
 def pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
     pss = request.config.getoption("--pss")
-    istio_cni_bin_dir = request.config.getoption("--istio-cni-conf-dir") or ""
-    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
+    istio_cni_bin_dir = request.config.getoption("--istio-cni-conf-dir")
+    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir")
     return [
         "-var",
         f"istio_cni_bin_dir={istio_cni_bin_dir}",
@@ -96,12 +104,4 @@ def pss(request) -> list[str]:
         f"istio_cni_conf_dir={istio_cni_conf_dir}",
         "-var",
         f"kubeflow_profiles_security_policy={pss}",
-    ]
-
-@pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes) -> list[str]:
-    """Overall Terraform module customization."""
-    return risk +  db_sizes + pss + [
-        "-var", "create_model=false",
-        "-var", "cos_configuration=true",
     ]
