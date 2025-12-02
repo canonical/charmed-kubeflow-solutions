@@ -8,7 +8,6 @@ on:
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
         required: false
-        default: "track/1.10"
       ckf_branch:
         description: 'Branch on the Charmed Kubeflow repository to be tested'
         required: false
@@ -131,6 +130,7 @@ jobs:
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
+          # TODO: remove '--bundle ""' from this tox command:
           tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources

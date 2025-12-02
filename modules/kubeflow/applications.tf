@@ -246,7 +246,7 @@ module "kubeflow_profiles" {
     "security-policy" : var.kubeflow_profiles_security_policy
   }
   revision = var.kubeflow_profiles_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "1.10/edge" # TODO: revert the risk from edge to var.risk
 }
 
 module "kubeflow_roles" {
