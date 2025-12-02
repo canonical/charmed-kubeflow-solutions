@@ -62,12 +62,12 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="module")
 def istio_cni_bin_dir(request) -> str:
     """Directory of binaries for Istio CNI."""
-    return request.config.getoption("--istio-cni-bin-dir")
+    return request.config.getoption("--istio-cni-bin-dir") or ""
 
 @pytest.fixture(scope="module")
 def istio_cni_conf_dir(request) -> str:
     """Directory of configurations for Istio CNI."""
-    return request.config.getoption("--istio-cni-conf-dir")
+    return request.config.getoption("--istio-cni-conf-dir") or ""
 
 @pytest.fixture(scope="module")
 def pss(request) -> str:
