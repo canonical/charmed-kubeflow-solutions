@@ -19,10 +19,7 @@ class TestCharm:
     @pytest.mark.dependency()
     async def test_apply_terraform_solution(
         self,
-        istio_cni_bin_dir,
-        istio_cni_conf_dir,
-        pss,
-        risk
+        tf_vars
     ):
         """Initialize and apply the kubeflow-mlflow Terraform solution module."""
         subprocess.run(["terraform", "init"], check=True)
@@ -33,18 +30,9 @@ class TestCharm:
             [
                 "terraform",
                 "apply",
-                "-var",
-                "cos_configuration=true",
-                "-var",
-                f"istio_cni_bin_dir={istio_cni_bin_dir}",
-                "-var",
-                f"istio_cni_conf_dir={istio_cni_conf_dir}",
-                "-var",
                 f"kubeflow_profiles_security_policy={pss}",
-                "-var",
-                f"risk={risk}",
                 "-auto-approve",
-            ],
+            ] + tf_vars,
             check=True,
         )
 

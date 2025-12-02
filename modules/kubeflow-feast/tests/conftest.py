@@ -58,23 +58,50 @@ def pytest_addoption(parser):
         type=str,
         help="Risk to be used when deploying the terraform module",
     )
+    parser.addoption(
+        "--db-size",
+        default="1G",
+        type=str,
+        help="Size to be used for the databases.",
+    )
 
 @pytest.fixture(scope="module")
-def istio_cni_bin_dir(request) -> str:
-    """Directory of binaries for Istio CNI."""
-    return request.config.getoption("--istio-cni-bin-dir") or ""
+def risk(request) -> list[str]:
+    """Terraform module customization for the risk."""
+    risk = request.config.getoption("--risk") or "stable"
+    return ["-var", f"risk={risk}"]
 
 @pytest.fixture(scope="module")
-def istio_cni_conf_dir(request) -> str:
-    """Directory of configurations for Istio CNI."""
-    return request.config.getoption("--istio-cni-conf-dir") or ""
+def db_sizes(request) -> list[str]:
+    """Terraform module customization for the db sizes."""
+    size = request.config.getoption("--db-size") or "1G"
+    return [
+        "-var", f"kfp_db_size={size}",
+        "-var", f"katib_db_size={size}",
+        "-var", f"grafana_agent_k8s_size={size}",
+        "-var", f"feast_registry_size={size}",
+        "-var", f"feast_online_store_size={size}",
+    ]
 
 @pytest.fixture(scope="module")
-def pss(request) -> str:
+def tf_vars(request, risk, db_sizes) -> list[str]:
+    """Overall Terraform module customization."""
+    return risk +  db_sizes + pss + [
+        "-var", "create_model=false",
+        "-var", "cos_configuration=true",
+    ]
+
+@pytest.fixture(scope="module")
+def pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
-    return request.config.getoption("--pss")
-
-@pytest.fixture(scope="module")
-def risk(request) -> str:
-    """The risk to be used when deploying the terraform module."""
-    return request.config.getoption("--risk") or "stable"
+    pss = request.config.getoption("--pss")
+    istio_cni_bin_dir = request.config.getoption("--istio-cni-conf-dir")
+    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir")
+    return [
+        "-var",
+        f"istio_cni_bin_dir={istio_cni_bin_dir}",
+        "-var",
+        f"istio_cni_conf_dir={istio_cni_conf_dir}",
+        "-var",
+        f"kubeflow_profiles_security_policy={pss}",
+    ]
