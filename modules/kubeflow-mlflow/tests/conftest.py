@@ -3,6 +3,31 @@ import pytest
 def pytest_addoption(parser):
     """Add CLI options to pytest."""
     parser.addoption(
+        "--istio-cni-bin-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of binaries for Istio CNI",
+    )
+    parser.addoption(
+        "--istio-cni-conf-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of configurations for Istio CNI",
+    )
+    parser.addoption(
+        "--pss",
+        nargs="?",
+        choices=["privileged", "baseline"],
+        const="privileged",
+        default="privileged",
+        type=str,
+        help="Pod security standards enforced in Profiles' namespaces",
+    )
+    parser.addoption(
         "--risk",
         nargs="?",
         choices=["stable", "candidate", "beta", "edge"],
@@ -11,34 +36,23 @@ def pytest_addoption(parser):
         type=str,
         help="Risk to be used when deploying the terraform module",
     )
-    parser.addoption(
-        "--db-size",
-        default="1G",
-        type=str,
-        help="Size to be used for the databases.",
-    )
 
 @pytest.fixture(scope="module")
-def risk(request) -> list[str]:
-    """Terraform module customization for the risk."""
-    risk = request.config.getoption("--risk") or "stable"
-    return ["-var", f"risk={risk}"]
+def istio_cni_bin_dir(request) -> str:
+    """Directory of binaries for Istio CNI."""
+    return request.config.getoption("--istio-cni-bin-dir")
 
 @pytest.fixture(scope="module")
-def db_sizes(request) -> list[str]:
-    """Terraform module customization for the db sizes."""
-    size = request.config.getoption("--db-size") or "1G"
-    return [
-        "-var", f"kfp_db_size={size}",
-        "-var", f"katib_db_size={size}",
-        "-var", f"mlflow_mysql_size={size}",
-        "-var", f"grafana_agent_k8s_size={size}",
-    ]
+def istio_cni_conf_dir(request) -> str:
+    """Directory of configurations for Istio CNI."""
+    return request.config.getoption("--istio-cni-conf-dir")
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes) -> list[str]:
-    """Overall Terraform module customization."""
-    return risk +  db_sizes + [
-        "-var", "cos_configuration=true",
-        "-var", "kubeflow_trainer_v2=true",
-    ]
+def pss(request) -> str:
+    """Pod security standards enforced in Profiles' namespaces."""
+    return request.config.getoption("--pss")
+
+@pytest.fixture(scope="module")
+def risk(request) -> str:
+    """The risk to be used when deploying the terraform module."""
+    return request.config.getoption("--risk") or "stable"

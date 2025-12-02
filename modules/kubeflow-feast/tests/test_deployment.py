@@ -15,15 +15,34 @@ def lightkube_client() -> lightkube.Client:
 
 class TestCharm:
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(self, juju: jubilant.Juju, tf_vars):
+    async def test_apply_terraform_solution(
+        self,
+        juju: jubilant.Juju,
+        istio_cni_bin_dir,
+        istio_cni_conf_dir,
+        pss,
+        risk
+    ):
         """Initialize and apply the kubeflow-feast Terraform solution module."""
         subprocess.run(["terraform", "init"], check=True)
         subprocess.run(
             [
                 "terraform",
                 "apply",
+                "-var",
+                "cos_configuration=true",
+                "-var",
+                "create_model=false",
+                "-var",
+                f"istio_cni_bin_dir={istio_cni_bin_dir}",
+                "-var",
+                f"istio_cni_conf_dir={istio_cni_conf_dir}",
+                "-var",
+                f"kubeflow_profiles_security_policy={pss}",
+                "-var",
+                f"risk={risk}",
                 "-auto-approve",
-            ] + tf_vars,
+            ],
             check=True,
         )
 
