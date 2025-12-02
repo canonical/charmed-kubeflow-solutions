@@ -17,10 +17,7 @@ def lightkube_client() -> lightkube.Client:
 class TestCharm:
 
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(
-        self,
-        tf_vars
-    ):
+    async def test_apply_terraform_solution(self, tf_vars):
         """Initialize and apply the kubeflow-mlflow Terraform solution module."""
         subprocess.run(["terraform", "init"], check=True)
         # Due to https://github.com/canonical/mysql-k8s-operator/issues/504,
@@ -30,7 +27,6 @@ class TestCharm:
             [
                 "terraform",
                 "apply",
-                f"kubeflow_profiles_security_policy={pss}",
                 "-auto-approve",
             ] + tf_vars,
             check=True,
