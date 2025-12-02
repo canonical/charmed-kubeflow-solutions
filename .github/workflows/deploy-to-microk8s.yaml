@@ -8,7 +8,6 @@ on:
       uats_branch:
         description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this falls back to the name of the CKF branch being tested.'
         required: false
-        default: "track/1.10"
       ckf_branch:
         description: 'Branch on the Charmed Kubeflow repository to be tested'
         required: false
@@ -78,7 +77,7 @@ jobs:
           juju-channel: "3.6/stable"
           charmcraft-channel: "3.x/stable"
           provider: microk8s
-          channel: "1.32-strict/stable"
+          channel: ${{ format('{0}-strict/stable', env.K8S_VERSION) }}
           microk8s-group: snap_microk8s
           microk8s-addons: "rbac dns hostpath-storage metallb:10.64.140.43-10.64.140.49"
           bootstrap-options: "--agent-version 3.6.9"
@@ -101,7 +100,7 @@ jobs:
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" ${{ matrix.bundle.uats.extra-args }}
+          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model

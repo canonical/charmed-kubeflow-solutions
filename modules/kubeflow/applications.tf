@@ -246,7 +246,7 @@ module "kubeflow_profiles" {
     "security-policy" : var.kubeflow_profiles_security_policy
   }
   revision = var.kubeflow_profiles_revision
-  channel  = "latest/edge"
+  channel  = "1.10/${var.risk}"
 }
 
 module "kubeflow_roles" {
