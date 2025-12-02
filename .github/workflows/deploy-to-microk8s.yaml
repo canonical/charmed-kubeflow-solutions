@@ -6,7 +6,7 @@ on:
         description: 'Kubernetes version to be used for Microk8s.'
         required: false
       uats_branch:
-        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
+        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this falls back to the name of the CKF branch being tested.'
         required: false
         default: "track/1.10"
       ckf_branch:
