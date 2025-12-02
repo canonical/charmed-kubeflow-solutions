@@ -27,7 +27,7 @@ class TestCharm:
             [
                 "terraform",
                 "apply",
-                "-auto-approve",
+                "-auto-approve"
             ] + tf_vars,
             check=True,
         )
