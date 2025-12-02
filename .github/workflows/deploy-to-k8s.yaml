@@ -38,6 +38,11 @@ jobs:
               extra-args: ""
 
     steps:
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
+        with:
+          detached: true
+
       - name: Checkout repository
         uses: actions/checkout@v5
 
