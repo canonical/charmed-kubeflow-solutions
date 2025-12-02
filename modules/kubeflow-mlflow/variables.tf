@@ -445,6 +445,18 @@ variable "kubeflow_roles_revision" {
   default     = null
 }
 
+variable "kubeflow_trainer_revision" {
+  description = "Charm revision for kubeflow-trainer"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_trainer_v2" {
+  description = "Boolean value that enables deployment of Kubeflow Trainer V2 (experimental)"
+  type        = bool
+  default     = false
+}
+
 variable "kubeflow_volumes_revision" {
   description = "Charm revision for kubeflow-volumes"
   type        = number

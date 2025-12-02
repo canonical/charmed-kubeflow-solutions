@@ -20,7 +20,7 @@ on:
 
 jobs:
   deploy-solution-to-aks:
-    name: Deploy CKF + MLFlow solution to AKS
+    name: Deploy to AKS
     runs-on: ubuntu-24.04
     env:
       AZURE_CORE_OUTPUT: none
@@ -33,7 +33,7 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast"
+              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
@@ -115,7 +115,7 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
           
-          tox -c ./modules/${{ matrix.bundle.module }} -vve test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |
@@ -150,15 +150,15 @@ jobs:
         run: kubectl describe pods --all-namespaces
 
       - name: Get logs from pods with status = Pending
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
         if: failure() || cancelled()
 
       - name: Get logs from pods with status = Failed
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
         if: failure() || cancelled()
 
       - name: Get logs from pods with status = CrashLoopBackOff
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
         if: failure() || cancelled()
 
       - name: Delete resource groups
