@@ -71,6 +71,21 @@ jobs:
           pip install tox
           pip install poetry
 
+      - name: Setup environment
+        run: |
+          # Avoiding dockerhub rate limits (see https://canonical-self-hosted-github-runner-docs.readthedocs-hosted.com/en/latest/usage/faq/how-to-avoid-dockerhub-rate-limits/ for more informations)
+          if [ -n "$DOCKERHUB_MIRROR" ]; then
+          MIRROR_CONFIG=/var/snap/microk8s/current/args/certs.d/docker.io
+            
+          sudo mkdir -p ${MIRROR_CONFIG}
+          sudo chown $USER ${MIRROR_CONFIG}
+          cat << EOF > ${MIRROR_CONFIG}/hosts.toml
+          [host."$DOCKERHUB_MIRROR"]
+          capabilities = ["pull", "resolve"]
+          EOF
+          fi
+
+
       - name: Setup operator environment
         uses: charmed-kubernetes/actions-operator@main
         with:
