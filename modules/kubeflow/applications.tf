@@ -284,7 +284,7 @@ module "mlmd" {
 }
 
 module "minio" {
-  source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/ckf-1.10"
+  source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     access-key               = var.minio_access_key,
