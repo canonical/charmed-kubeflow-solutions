@@ -38,6 +38,11 @@ jobs:
               extra-args: ""
 
     steps:
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
+        with:
+          detached: true
+      
       - name: Checkout repository
         uses: actions/checkout@v5
 
@@ -117,11 +122,6 @@ jobs:
           # TODO: remove '--bundle ""' from this tox command:
           tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" ${{ matrix.bundle.uats.extra-args }}
 
-      # On failure, capture debugging resources
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure() || cancelled()
-          
       # On failure, capture debugging resources
       - name: Select model
         run: juju switch kubeflow

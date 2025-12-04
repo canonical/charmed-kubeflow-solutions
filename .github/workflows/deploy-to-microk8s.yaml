@@ -46,6 +46,11 @@ jobs:
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
 
     steps:
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
+        with:
+          detached: true
+      
       - name: Checkout repository
         uses: actions/checkout@v5
 
@@ -135,10 +140,6 @@ jobs:
           tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure() || cancelled()
-      
       - name: Select model
         run: juju switch kubeflow
         if: failure() || cancelled()
