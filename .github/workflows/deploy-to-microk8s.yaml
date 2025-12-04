@@ -48,6 +48,7 @@ jobs:
     steps:
       - name: Setup tmate session
         uses: canonical/action-tmate@main
+        timeout-minutes: 60
         with:
           detached: true
       
