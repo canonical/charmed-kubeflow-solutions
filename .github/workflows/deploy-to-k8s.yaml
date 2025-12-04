@@ -118,6 +118,11 @@ jobs:
           tox -e ${{ matrix.bundle.uats.env }} -- --bundle "" ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure() || cancelled()
+          
+      # On failure, capture debugging resources
       - name: Select model
         run: juju switch kubeflow
         if: failure() || cancelled()
