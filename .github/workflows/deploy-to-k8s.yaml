@@ -102,11 +102,6 @@ jobs:
           sudo concierge prepare --trace
           cd ..
 
-      - name: Configure sysctl
-        run: |
-          sudo sysctl fs.inotify.max_user_instances=1280
-          sudo sysctl fs.inotify.max_user_watches=655360
-          
       - name: Setup terraform
         run: |          
           sudo snap install terraform  --channel latest/stable --classic
