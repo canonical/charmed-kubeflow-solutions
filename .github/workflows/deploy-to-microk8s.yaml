@@ -105,6 +105,21 @@ jobs:
           sudo usermod -a -G microk8s $USER
           newgrp microk8s
 
+          # avoiding Docker Hub's image pull rate limits - see:
+          # https://canonical-self-hosted-github-runner-docs.readthedocs-hosted.com/en/latest/usage/faq/how-to-avoid-dockerhub-rate-limits
+          if [ -n "$DOCKERHUB_MIRROR" ]; then
+          MIRROR_CONFIG=/var/snap/microk8s/current/args/certs.d/docker.io
+          sudo mkdir -p ${MIRROR_CONFIG}
+          sudo chown $USER ${MIRROR_CONFIG}
+          cat << EOF > ${MIRROR_CONFIG}/hosts.toml
+          [host."$DOCKERHUB_MIRROR"]
+          capabilities = ["pull", "resolve"]
+          EOF
+          fi
+          microk8s status --wait-ready
+          sudo microk8s stop
+          sudo microk8s start
+
           microk8s status --wait-ready
           sudo microk8s enable dns hostpath-storage rbac metallb:10.64.140.43-10.64.140.49
           microk8s status --wait-ready
