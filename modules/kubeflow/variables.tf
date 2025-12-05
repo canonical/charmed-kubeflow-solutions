@@ -101,6 +101,12 @@ variable "kfp_db_size" {
   default     = "10G"
 }
 
+variable "kubeflow_trainer_v2" {
+  description = "Boolean value that enables deployment of Kubeflow Trainer V2 (experimental)"
+  type        = bool
+  default     = false
+}
+
 variable "minio_access_key" {
   description = "MinIO access key"
   type        = string
@@ -345,6 +351,12 @@ variable "kubeflow_profiles_revision" {
 
 variable "kubeflow_roles_revision" {
   description = "Charm revision for kubeflow-roles"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_trainer_revision" {
+  description = "Charm revision for kubeflow-trainer"
   type        = number
   default     = null
 }
