@@ -22,7 +22,7 @@ on:
 
 jobs:
   deploy-solution:
-    name: Deploy CKF + MLFlow solution to K8s
+    name: Deploy CKF + MLFlow/Feast solution to K8s
     runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
 
     strategy:
@@ -46,12 +46,6 @@ jobs:
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
 
     steps:
-      - name: Setup tmate session
-        uses: canonical/action-tmate@main
-        timeout-minutes: 60
-        with:
-          detached: true
-      
       - name: Checkout repository
         uses: actions/checkout@v5
 
