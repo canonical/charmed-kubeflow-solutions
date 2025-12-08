@@ -64,7 +64,7 @@ def db_sizes(request) -> list[str]:
 def pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
     pss = request.config.getoption("--pss")
-    istio_cni_bin_dir = request.config.getoption("--istio-cni-conf-dir") or ""
+    istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
     istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
     return [
         "-var",
