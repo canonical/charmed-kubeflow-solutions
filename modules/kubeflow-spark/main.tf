@@ -69,7 +69,7 @@ module "kubeflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=update-terraform"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
   channel    = "2.0/${var.risk}"
@@ -77,10 +77,10 @@ module "resource_dispatcher" {
 
 
 resource "juju_application" "integration_hub" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
   name  = "integration-hub"
   charm {
-    name     = "spark-integration-hub-k8s"update to 3/stable
+    name     = "spark-integration-hub-k8s"
     channel  = "3/edge" # TODO: fix hardcoded value
   }
   units       = 1
@@ -89,7 +89,7 @@ resource "juju_application" "integration_hub" {
 }
 
 resource "juju_application" "kubeflow_integrator" {
- model = var.create_model ? juju_model.kubeflow[0].name : local.model
+ model  = module.kubeflow.model
   name  = "kubeflow-integrator"
   charm {
     name     = "data-kubeflow-integrator"

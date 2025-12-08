@@ -1,6 +1,6 @@
 
 resource "juju_integration" "kubeflow_integrator_integration_hub" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
 
   application {
     name     = juju_application.kubeflow_integrator.name
@@ -14,7 +14,7 @@ resource "juju_integration" "kubeflow_integrator_integration_hub" {
 }
 
 resource "juju_integration" "kubeflow_integrator_resource_dispatcher_secrets" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
 
   application {
     name     = juju_application.kubeflow_integrator.name
@@ -22,13 +22,13 @@ resource "juju_integration" "kubeflow_integrator_resource_dispatcher_secrets" {
   }
 
   application {
-    name     = juju_application.resource_dispatcher.name
-    endpoint = "secrets"
+    name     = module.resource_dispatcher.app_name
+    endpoint = module.resource_dispatcher.provides.secrets
   }
 }
 
 resource "juju_integration" "kubeflow_integrator_resource_dispatcher_service_accounts" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
 
   application {
     name     = juju_application.kubeflow_integrator.name
@@ -36,13 +36,13 @@ resource "juju_integration" "kubeflow_integrator_resource_dispatcher_service_acc
   }
 
   application {
-    name     = juju_application.resource_dispatcher.name
-    endpoint = "service-accounts"
+    name     = module.resource_dispatcher.app_name
+    endpoint = module.resource_dispatcher.provides.service_accounts
   }
 }
 
 resource "juju_integration" "kubeflow_integrator_resource_dispatcher_poddefaults" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
 
   application {
     name     = juju_application.kubeflow_integrator.name
@@ -50,13 +50,13 @@ resource "juju_integration" "kubeflow_integrator_resource_dispatcher_poddefaults
   }
 
   application {
-    name     = juju_application.resource_dispatcher.name
-    endpoint = "pod-defaults"
+    name     = module.resource_dispatcher.app_name
+    endpoint = module.resource_dispatcher.provides.pod_defaults
   }
 }
 
 resource "juju_integration" "kubeflow_integrator_resource_dispatcher_roles" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
 
   application {
     name     = juju_application.kubeflow_integrator.name
@@ -64,13 +64,13 @@ resource "juju_integration" "kubeflow_integrator_resource_dispatcher_roles" {
   }
 
   application {
-    name     = juju_application.resource_dispatcher.name
-    endpoint = "roles"
+    name     = module.resource_dispatcher.app_name
+    endpoint = module.resource_dispatcher.provides.roles
   }
 }
 
 resource "juju_integration" "kubeflow_integrator_resource_dispatcher_rolebindings" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = module.kubeflow.model
 
   application {
     name     = juju_application.kubeflow_integrator.name
@@ -78,8 +78,8 @@ resource "juju_integration" "kubeflow_integrator_resource_dispatcher_rolebinding
   }
 
   application {
-    name     = juju_application.resource_dispatcher.name
-    endpoint = "role-bindings"
+    name     = module.resource_dispatcher.app_name
+    endpoint = module.resource_dispatcher.provides.role_bindings
   }
 }
 
