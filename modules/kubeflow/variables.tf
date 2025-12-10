@@ -119,8 +119,8 @@ variable "kubeflow_profiles_security_policy" {
   default     = "privileged"
 
   validation {
-    condition     = var.kubeflow_profiles_security_policy == "privileged" || var.kubeflow_profiles_security_policy == "baseline"
-    error_message = "The variable must be one of 'privileged' or 'baseline'."
+    condition     = contains(["baseline", "privileged"], var.kubeflow_profiles_security_policy)
+    error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)"
   }
 }
 variable "kubeflow_trainer_v2" {
