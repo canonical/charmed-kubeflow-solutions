@@ -22,7 +22,7 @@ on:
 
 jobs:
   deploy-solution:
-    name: Deploy CKF + MLFlow/Feast solution to K8s
+    name: Deploy to Microk8s
     runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
 
     strategy:
