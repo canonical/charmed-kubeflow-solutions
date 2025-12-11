@@ -116,7 +116,7 @@ jobs:
           juju add-k8s aks --client
           juju bootstrap aks aks-controller --agent-version 3.6.9
 
-      - name: Deploy and assert kubeflow-mlflow solution
+      - name: Deploy and assert solution
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
