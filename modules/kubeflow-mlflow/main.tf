@@ -69,7 +69,7 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=2b1afe5348aa4f3f552414bec73959aca6da8bc9"
   # kubeflow module creates the model
   risk                                  = var.risk
   create_model                          = false
@@ -92,7 +92,7 @@ module "mlflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=39bd5b5dc843f9c335f42640943e2fe60a54b65d"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
   channel    = "2.0/${var.risk}"
