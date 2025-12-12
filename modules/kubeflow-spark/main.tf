@@ -86,9 +86,6 @@ resource "juju_application" "integration_hub" {
   units       = 1
   trust       = true
   constraints = "arch=amd64"
-  # config      = {
-  #   "spark-image": var.spark_image
-  # }
 }
 
 resource "juju_application" "kubeflow_integrator" {
