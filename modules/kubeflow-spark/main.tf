@@ -69,7 +69,7 @@ module "kubeflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=update-terraform"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
   channel    = "2.0/${var.risk}"
@@ -86,6 +86,9 @@ resource "juju_application" "integration_hub" {
   units       = 1
   trust       = true
   constraints = "arch=amd64"
+  # config      = {
+  #   "spark-image": var.spark_image
+  # }
 }
 
 resource "juju_application" "kubeflow_integrator" {

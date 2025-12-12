@@ -419,5 +419,11 @@ variable "kubeflow_spark_service_account" {
 variable "kubeflow_spark_profile" {
   description = "The name of the Kubeflow profile where Spark needs to be accessible."
   type        = string
-  default     = "spark"
+  default     = "admin"
+}
+
+variable "spark_image" {
+  description = "The OCI image to be used by Spark drivers and executors"
+  type        = string
+  default     = "ghcr.io/canonical/charmed-spark:3.5-22.04_edge"
 }

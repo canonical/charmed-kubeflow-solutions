@@ -1,4 +1,6 @@
 {
     "metacontroller_operator_revision": 551,
-    "resource_dispatcher_revision": 408
+    "resource_dispatcher_revision": 410,
+    "dex_static_username": "admin",
+    "dex_static_password": "admin"
 }
