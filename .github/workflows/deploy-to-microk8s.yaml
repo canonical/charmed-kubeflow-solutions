@@ -31,11 +31,11 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests --bundle https://raw.githubusercontent.com/canonical/bundle-kubeflow/refs/heads/kf-8177-upgrade-minio/releases/1.10/edge/bundle.yaml
+              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: --bundle https://raw.githubusercontent.com/canonical/bundle-kubeflow/refs/heads/kf-8177-upgrade-minio/releases/1.10/edge/bundle.yaml
+              extra-args: ""
 
     steps:
       - name: Checkout repository
@@ -81,11 +81,6 @@ jobs:
           microk8s-group: snap_microk8s
           microk8s-addons: "rbac dns hostpath-storage metallb:10.64.140.43-10.64.140.49"
           bootstrap-options: "--agent-version 3.6.9"
-
-      - name: Configure sysctl
-        run: |
-          sudo sysctl fs.inotify.max_user_instances=1280
-          sudo sysctl fs.inotify.max_user_watches=655360
 
       - name: Setup terraform
         run: |          
