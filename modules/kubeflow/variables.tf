@@ -71,6 +71,18 @@ variable "https_proxy" {
   default     = ""
 }
 
+variable "istio_cni_bin_dir" {
+  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_conf_dir" {
+  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
 variable "istio_tls_secret_id" {
   description = "The juju secret id for the tls key/cert for istio-pilot"
   type        = string
@@ -101,6 +113,16 @@ variable "kfp_db_size" {
   default     = "10G"
 }
 
+variable "kubeflow_profiles_security_policy" {
+  description = "Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported"
+  type        = string
+  default     = "privileged"
+
+  validation {
+    condition     = contains(["baseline", "privileged"], var.kubeflow_profiles_security_policy)
+    error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)"
+  }
+}
 variable "kubeflow_trainer_v2" {
   description = "Boolean value that enables deployment of Kubeflow Trainer V2 (experimental)"
   type        = bool

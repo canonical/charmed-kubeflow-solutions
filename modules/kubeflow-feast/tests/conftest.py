@@ -25,6 +25,31 @@ def juju(request: pytest.FixtureRequest):
 def pytest_addoption(parser):
     """Add CLI options to pytest."""
     parser.addoption(
+        "--istio-cni-bin-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of binaries for Istio CNI",
+    )
+    parser.addoption(
+        "--istio-cni-conf-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of configurations for Istio CNI",
+    )
+    parser.addoption(
+        "--pss",
+        nargs="?",
+        choices=["privileged", "baseline"],
+        const="privileged",
+        default="privileged",
+        type=str,
+        help="Pod security standards enforced in Profiles' namespaces",
+    )
+    parser.addoption(
         "--risk",
         nargs="?",
         choices=["stable", "candidate", "beta", "edge"],
@@ -59,9 +84,24 @@ def db_sizes(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes) -> list[str]:
+def pss(request) -> list[str]:
+    """Pod security standards enforced in Profiles' namespaces."""
+    pss = request.config.getoption("--pss")
+    istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
+    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
+    return [
+        "-var",
+        f"istio_cni_bin_dir={istio_cni_bin_dir}",
+        "-var",
+        f"istio_cni_conf_dir={istio_cni_conf_dir}",
+        "-var",
+        f"kubeflow_profiles_security_policy={pss}",
+    ]
+
+@pytest.fixture(scope="module")
+def tf_vars(request, risk, db_sizes, pss) -> list[str]:
     """Overall Terraform module customization."""
-    return risk +  db_sizes + [
+    return risk + db_sizes + pss + [
         "-var", "create_model=false",
         "-var", "cos_configuration=true",
     ]

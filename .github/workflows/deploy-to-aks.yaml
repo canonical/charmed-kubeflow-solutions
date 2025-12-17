@@ -38,6 +38,13 @@ jobs:
             uats:
               env: feast-remote
               extra-args: ""
+        pod-security-standards:
+          - policy: privileged
+            istio-cni-bin-dir: ""  # meaning Istio CNI disabled
+            istio-cni-conf-dir: ""  # meaning Istio CNI disabled
+          - policy: baseline
+            istio-cni-bin-dir: /opt/cni/bin
+            istio-cni-conf-dir: /etc/cni/net.d
 
     steps:
       - name: Checkout repository
@@ -60,7 +67,7 @@ jobs:
           RISK=${{ inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
           
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${CKF_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
 
@@ -109,20 +116,20 @@ jobs:
           juju add-k8s aks --client
           juju bootstrap aks aks-controller --agent-version 3.6.9
 
-      - name: Deploy and assert kubeflow-mlflow solution
+      - name: Deploy and assert solution
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
           fi
           
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }}
 
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
+          tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
