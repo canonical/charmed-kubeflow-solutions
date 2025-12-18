@@ -1,3 +1,4 @@
+
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"
