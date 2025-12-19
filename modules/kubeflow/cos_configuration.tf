@@ -1,22 +1,22 @@
 # TODO: Update to use a reusable module instead of defining
 # a `juju_application` resource
-resource "juju_application" "grafana_agent_k8s" {
-  count = var.cos_configuration && var.existing_grafana_agent_name == null ? 1 : 0
+resource "juju_application" "opentelemetry_collector_k8s" {
+  count = var.cos_configuration && var.existing_opentelemetry_collector_name == null ? 1 : 0
   charm {
-    name     = "grafana-agent-k8s"
+    name     = "opentelemetry-collector-k8s"
     channel  = "1/stable"
-    revision = var.grafana_agent_k8s_revision
+    revision = var.opentelemetry_collector_k8s_revision
   }
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
-  name  = "grafana-agent-k8s-kubeflow"
+  name  = "opentelemetry-collector-k8s-kubeflow"
   storage_directives = {
-    data = var.grafana_agent_k8s_size
+    data = var.opentelemetry_collector_k8s_size
   }
   trust = true
   units = 1
 }
 
-resource "juju_integration" "argo_controller_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -26,12 +26,12 @@ resource "juju_integration" "argo_controller_grafana_agent_k8s_grafana_dashboard
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "argo_controller_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -41,12 +41,12 @@ resource "juju_integration" "argo_controller_grafana_agent_k8s_metrics_endpoint"
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "argo_controller_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -56,12 +56,12 @@ resource "juju_integration" "argo_controller_grafana_agent_k8s_grafana_logging" 
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "admission_webhook_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "admission_webhook_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -71,12 +71,12 @@ resource "juju_integration" "admission_webhook_grafana_agent_k8s_grafana_logging
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "dex_auth_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -86,12 +86,12 @@ resource "juju_integration" "dex_auth_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "dex_auth_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -101,12 +101,12 @@ resource "juju_integration" "dex_auth_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "dex_auth_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -116,12 +116,12 @@ resource "juju_integration" "dex_auth_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "envoy_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -131,12 +131,12 @@ resource "juju_integration" "envoy_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "envoy_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "envoy_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -146,12 +146,12 @@ resource "juju_integration" "envoy_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "envoy_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -161,12 +161,12 @@ resource "juju_integration" "envoy_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "istio_ingressgateway_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "istio_ingressgateway_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -176,12 +176,12 @@ resource "juju_integration" "istio_ingressgateway_grafana_agent_k8s_metrics_endp
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "istio_pilot_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "istio_pilot_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -191,12 +191,12 @@ resource "juju_integration" "istio_pilot_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "istio_pilot_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "istio_pilot_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -206,12 +206,12 @@ resource "juju_integration" "istio_pilot_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "jupyter_controller_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -221,12 +221,12 @@ resource "juju_integration" "jupyter_controller_grafana_agent_k8s_grafana_dashbo
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "jupyter_controller_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -236,12 +236,12 @@ resource "juju_integration" "jupyter_controller_grafana_agent_k8s_metrics_endpoi
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "jupyter_controller_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -251,12 +251,12 @@ resource "juju_integration" "jupyter_controller_grafana_agent_k8s_grafana_loggin
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "jupyter_ui_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "jupyter_ui_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -266,12 +266,12 @@ resource "juju_integration" "jupyter_ui_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "katib_controller_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -281,12 +281,12 @@ resource "juju_integration" "katib_controller_grafana_agent_k8s_grafana_dashboar
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "katib_controller_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -296,12 +296,12 @@ resource "juju_integration" "katib_controller_grafana_agent_k8s_metrics_endpoint
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "katib_controller_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -311,12 +311,12 @@ resource "juju_integration" "katib_controller_grafana_agent_k8s_grafana_logging"
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -326,12 +326,12 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "katib_db_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "katib_db_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -341,12 +341,12 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -356,12 +356,12 @@ resource "juju_integration" "katib_db_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "katib_db_manager_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "katib_db_manager_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -371,12 +371,12 @@ resource "juju_integration" "katib_db_manager_grafana_agent_k8s_grafana_logging"
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "katib_ui_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "katib_ui_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -386,12 +386,12 @@ resource "juju_integration" "katib_ui_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_api_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -401,12 +401,12 @@ resource "juju_integration" "kfp_api_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "kfp_api_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -416,12 +416,12 @@ resource "juju_integration" "kfp_api_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "kfp_api_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -431,13 +431,13 @@ resource "juju_integration" "kfp_api_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
 
-resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -447,12 +447,12 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "kfp_db_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -462,12 +462,12 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -477,12 +477,12 @@ resource "juju_integration" "kfp_db_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_metadata_writer_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_metadata_writer_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -492,12 +492,12 @@ resource "juju_integration" "kfp_metadata_writer_grafana_agent_k8s_grafana_loggi
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_persistence_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_persistence_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -507,12 +507,12 @@ resource "juju_integration" "kfp_persistence_grafana_agent_k8s_grafana_logging" 
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_profile_controller_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_profile_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -522,12 +522,12 @@ resource "juju_integration" "kfp_profile_controller_grafana_agent_k8s_grafana_lo
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_schedwf_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_schedwf_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -537,12 +537,12 @@ resource "juju_integration" "kfp_schedwf_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_ui_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_ui_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -552,12 +552,12 @@ resource "juju_integration" "kfp_ui_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_viewer_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_viewer_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -567,12 +567,12 @@ resource "juju_integration" "kfp_viewer_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kfp_viz_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kfp_viz_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -582,7 +582,7 @@ resource "juju_integration" "kfp_viz_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
@@ -617,7 +617,7 @@ resource "juju_integration" "knative_serving_knative_operator_otel_collector" {
   }
 }
 
-resource "juju_integration" "knative_operator_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "knative_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -627,12 +627,12 @@ resource "juju_integration" "knative_operator_grafana_agent_k8s_metrics_endpoint
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "knative_operator_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "knative_operator_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -642,12 +642,12 @@ resource "juju_integration" "knative_operator_grafana_agent_k8s_grafana_logging"
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kserve_controller_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -657,12 +657,12 @@ resource "juju_integration" "kserve_controller_grafana_agent_k8s_metrics_endpoin
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "kserve_controller_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -672,12 +672,12 @@ resource "juju_integration" "kserve_controller_grafana_agent_k8s_grafana_logging
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -687,12 +687,12 @@ resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_metrics_endpoi
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -702,12 +702,12 @@ resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_grafana_dashbo
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -717,13 +717,13 @@ resource "juju_integration" "kubeflow_dashboard_grafana_agent_k8s_grafana_loggin
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
 
-resource "juju_integration" "kubeflow_profiles_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -733,12 +733,12 @@ resource "juju_integration" "kubeflow_profiles_grafana_agent_k8s_metrics_endpoin
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "kubeflow_profiles_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -748,12 +748,12 @@ resource "juju_integration" "kubeflow_profiles_grafana_agent_k8s_grafana_logging
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "kubeflow_trainer_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration && var.kubeflow_trainer_v2 ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -763,12 +763,12 @@ resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_grafana_dashboar
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "kubeflow_trainer_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration && var.kubeflow_trainer_v2 ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -778,13 +778,13 @@ resource "juju_integration" "kubeflow_trainer_grafana_agent_k8s_metrics_endpoint
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
 
-resource "juju_integration" "kubeflow_volumes_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "kubeflow_volumes_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -794,12 +794,12 @@ resource "juju_integration" "kubeflow_volumes_grafana_agent_k8s_grafana_logging"
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "metacontroller_operator_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "metacontroller_operator_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -809,12 +809,12 @@ resource "juju_integration" "metacontroller_operator_grafana_agent_k8s_grafana_d
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "metacontroller_operator_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "metacontroller_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -824,12 +824,12 @@ resource "juju_integration" "metacontroller_operator_grafana_agent_k8s_metrics_e
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "mlmd_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "mlmd_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -839,12 +839,12 @@ resource "juju_integration" "mlmd_grafana_agent_k8s_grafana_logging" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "minio_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "minio_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -854,12 +854,12 @@ resource "juju_integration" "minio_grafana_agent_k8s_grafana_dashboard" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "minio_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "minio_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -869,12 +869,12 @@ resource "juju_integration" "minio_grafana_agent_k8s_metrics_endpoint" {
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "oidc_gatekeeper_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "oidc_gatekeeper_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -884,12 +884,12 @@ resource "juju_integration" "oidc_gatekeeper_grafana_agent_k8s_grafana_logging" 
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "pvcviewer_operator_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -899,12 +899,12 @@ resource "juju_integration" "pvcviewer_operator_grafana_agent_k8s_grafana_dashbo
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "pvcviewer_operator_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -914,12 +914,12 @@ resource "juju_integration" "pvcviewer_operator_grafana_agent_k8s_metrics_endpoi
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "pvcviewer_operator_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -929,12 +929,12 @@ resource "juju_integration" "pvcviewer_operator_grafana_agent_k8s_grafana_loggin
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "tensorboard_controller_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -944,12 +944,12 @@ resource "juju_integration" "tensorboard_controller_grafana_agent_k8s_metrics_en
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
 
-resource "juju_integration" "tensorboard_controller_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -959,12 +959,12 @@ resource "juju_integration" "tensorboard_controller_grafana_agent_k8s_grafana_lo
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "tensorboards_web_app_grafana_agent_k8s_grafana_logging" {
+resource "juju_integration" "tensorboards_web_app_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -974,12 +974,12 @@ resource "juju_integration" "tensorboards_web_app_grafana_agent_k8s_grafana_logg
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "logging-provider"
   }
 }
 
-resource "juju_integration" "training_operator_grafana_agent_k8s_grafana_dashboard" {
+resource "juju_integration" "training_operator_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -989,12 +989,12 @@ resource "juju_integration" "training_operator_grafana_agent_k8s_grafana_dashboa
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "grafana-dashboards-consumer"
   }
 }
 
-resource "juju_integration" "training_operator_grafana_agent_k8s_metrics_endpoint" {
+resource "juju_integration" "training_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
@@ -1004,7 +1004,7 @@ resource "juju_integration" "training_operator_grafana_agent_k8s_metrics_endpoin
   }
 
   application {
-    name     = var.existing_grafana_agent_name == null ? juju_application.grafana_agent_k8s[count.index].name : var.existing_grafana_agent_name
+    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
     endpoint = "metrics-endpoint"
   }
 }
