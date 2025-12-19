@@ -10,7 +10,7 @@ resource "juju_application" "opentelemetry_collector_k8s" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
   name  = "opentelemetry-collector-k8s-kubeflow"
   storage_directives = {
-    data = var.opentelemetry_collector_k8s_size
+    persisted = var.opentelemetry_collector_k8s_size
   }
   trust = true
   units = 1

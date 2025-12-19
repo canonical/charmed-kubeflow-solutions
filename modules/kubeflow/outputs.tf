@@ -12,7 +12,7 @@ output "opentelemetry_collector_k8s" {
       grafana_dashboards_provider = "grafana-dashboards-provider",
     }
     requires = {
-      logging_consumer  = "logging-consumer",
+      send_loki_logs  = "send-loki-logs",
       send_remote_write = "send-remote-write",
     }
   } : null
