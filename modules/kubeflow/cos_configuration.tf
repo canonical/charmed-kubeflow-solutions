@@ -4,7 +4,7 @@ resource "juju_application" "opentelemetry_collector_k8s" {
   count = var.cos_configuration && var.existing_opentelemetry_collector_name == null ? 1 : 0
   charm {
     name     = "opentelemetry-collector-k8s"
-    channel  = "1/stable"
+    channel  = "2/stable"
     revision = var.opentelemetry_collector_k8s_revision
   }
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
