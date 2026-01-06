@@ -57,7 +57,7 @@ resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -72,7 +72,7 @@ resource "juju_integration" "admission_webhook_opentelemetry_collector_k8s_grafa
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -117,7 +117,7 @@ resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_loggin
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -162,7 +162,7 @@ resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_logging" 
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -252,7 +252,7 @@ resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_graf
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -267,7 +267,7 @@ resource "juju_integration" "jupyter_ui_opentelemetry_collector_k8s_grafana_logg
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -312,7 +312,7 @@ resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafan
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -357,7 +357,7 @@ resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_loggin
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -372,7 +372,7 @@ resource "juju_integration" "katib_db_manager_opentelemetry_collector_k8s_grafan
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -387,7 +387,7 @@ resource "juju_integration" "katib_ui_opentelemetry_collector_k8s_grafana_loggin
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -432,7 +432,7 @@ resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_logging
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -478,7 +478,7 @@ resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_logging"
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -493,7 +493,7 @@ resource "juju_integration" "kfp_metadata_writer_opentelemetry_collector_k8s_gra
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -508,7 +508,7 @@ resource "juju_integration" "kfp_persistence_opentelemetry_collector_k8s_grafana
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -523,7 +523,7 @@ resource "juju_integration" "kfp_profile_controller_opentelemetry_collector_k8s_
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -538,7 +538,7 @@ resource "juju_integration" "kfp_schedwf_opentelemetry_collector_k8s_grafana_log
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -553,7 +553,7 @@ resource "juju_integration" "kfp_ui_opentelemetry_collector_k8s_grafana_logging"
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -568,7 +568,7 @@ resource "juju_integration" "kfp_viewer_opentelemetry_collector_k8s_grafana_logg
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -583,7 +583,7 @@ resource "juju_integration" "kfp_viz_opentelemetry_collector_k8s_grafana_logging
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -643,7 +643,7 @@ resource "juju_integration" "knative_operator_opentelemetry_collector_k8s_grafan
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -673,7 +673,7 @@ resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_grafa
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -718,7 +718,7 @@ resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_graf
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -749,7 +749,7 @@ resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_grafa
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -795,7 +795,7 @@ resource "juju_integration" "kubeflow_volumes_opentelemetry_collector_k8s_grafan
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -840,7 +840,7 @@ resource "juju_integration" "mlmd_opentelemetry_collector_k8s_grafana_logging" {
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -885,7 +885,7 @@ resource "juju_integration" "oidc_gatekeeper_opentelemetry_collector_k8s_grafana
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -930,7 +930,7 @@ resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_graf
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -960,7 +960,7 @@ resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
@@ -975,7 +975,7 @@ resource "juju_integration" "tensorboards_web_app_opentelemetry_collector_k8s_gr
 
   application {
     name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "logging-provider"
+    endpoint = "receive-loki-logs"
   }
 }
 
