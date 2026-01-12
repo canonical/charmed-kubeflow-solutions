@@ -21,10 +21,14 @@ The solution module offers the following configurable inputs:
 | `grafana_agent_k8s_size`| string | Grafana agent database storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
+| `istio_cni_bin_dir`| string | Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path. | False |
+| `istio_cni_conf_dir`| string | Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path. | False |
 | `istio_tls_secret_id`| string | The juju secret id for the tls key/cert for istio-pilot | False |
 | `jupyter_ui_config`| map(string) | Map of config values passed to jupyter-ui | False |
 | `katib_db_size`| string | Katib database storage size | False |
 | `kfp_db_size`| string | KFP database storage size | False |
+| `kubeflow_profiles_security_policy`| string | Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported | False |
+| `kubeflow_trainer_v2`| bool | Boolean value that enables deployment of Kubeflow Trainer V2 (experimental) | False |
 | `minio_size`| string | MinIO database storage size | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
@@ -59,6 +63,14 @@ By default, it is set to `true` in order to enable the Charmed Kubeflow's standa
 The `cos_configuration` input enables the solution to configure Charmed Kubeflow to integrate with COS. This is done by deploying a `grafana-agent-k8s` charm and adding all the required relations.
 ```
 terraform apply -var cos_configuration=true
+```
+
+### Kubeflow Trainer V2
+
+#### Enable Kubeflow Trainer V2 (Experimental)
+The `kubeflow_trainer_v2` input enables the solution to deploy Kubeflow Trainer V2 charm and all the required resources.
+```shell
+terraform apply -var kubeflow_trainer_v2=true
 ```
 
 #### Use an existing grafana-agent-k8s

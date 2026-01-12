@@ -53,6 +53,8 @@ module "istio_pilot" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     default-gateway = "kubeflow-gateway",
+    "cni-bin-dir" : var.istio_cni_bin_dir
+    "cni-conf-dir" : var.istio_cni_conf_dir
     "tls-secret-id" : var.istio_tls_secret_id
   }
   revision = var.istio_pilot_revision
@@ -240,8 +242,11 @@ module "kubeflow_dashboard" {
 module "kubeflow_profiles" {
   source     = "git::https://github.com/canonical/kubeflow-profiles-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.kubeflow_profiles_revision
-  channel    = "1.10/${var.risk}"
+  config = {
+    "security-policy" : var.kubeflow_profiles_security_policy
+  }
+  revision = var.kubeflow_profiles_revision
+  channel  = "1.10/${var.risk}"
 }
 
 module "kubeflow_roles" {
@@ -249,6 +254,14 @@ module "kubeflow_roles" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_roles_revision
   channel    = "1.10/${var.risk}"
+}
+
+module "kubeflow_trainer" {
+  count      = var.kubeflow_trainer_v2 ? 1 : 0
+  source     = "git::https://github.com/canonical/training-operator//terraform?ref=track/2.0"
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  revision   = var.kubeflow_trainer_revision
+  channel    = "2.0/edge"
 }
 
 module "kubeflow_volumes" {
@@ -276,7 +289,7 @@ module "mlmd" {
 }
 
 module "minio" {
-  source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/ckf-1.10"
+  source     = "git::https://github.com/canonical/minio-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     access-key               = var.minio_access_key,
@@ -289,7 +302,7 @@ module "minio" {
     minio-data = var.minio_size
   }
   revision = var.minio_revision
-  channel  = "ckf-1.10/${var.risk}"
+  channel  = "1.10/${var.risk}"
 }
 
 module "oidc_gatekeeper" {

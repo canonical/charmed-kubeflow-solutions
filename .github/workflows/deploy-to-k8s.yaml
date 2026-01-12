@@ -31,7 +31,7 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast"
+              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
@@ -56,7 +56,7 @@ jobs:
           RISK=${{ inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
           
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${CKF_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -75,7 +75,7 @@ jobs:
         run: |
           # Avoiding dockerhub rate limits (see https://canonical-self-hosted-github-runner-docs.readthedocs-hosted.com/en/latest/usage/faq/how-to-avoid-dockerhub-rate-limits/ for more informations)
           if [ -n "$DOCKERHUB_MIRROR" ]; then
-          MIRROR_CONFIG=/opt/containerd/k8s-containerd/etc/containerd/hosts.d/docker.io
+          MIRROR_CONFIG=/etc/containerd/hosts.d/docker.io
             
           sudo mkdir -p ${MIRROR_CONFIG}
           sudo chown $USER ${MIRROR_CONFIG}
@@ -138,13 +138,13 @@ jobs:
         run: kubectl describe pods --all-namespaces
 
       - name: Get logs from pods with status = Pending
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
         if: failure() || cancelled()
 
       - name: Get logs from pods with status = Failed
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
         if: failure() || cancelled()
 
       - name: Get logs from pods with status = CrashLoopBackOff
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
         if: failure() || cancelled()
