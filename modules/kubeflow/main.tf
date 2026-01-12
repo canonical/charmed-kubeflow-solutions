@@ -3,9 +3,9 @@ resource "juju_model" "kubeflow" {
   name  = local.model
 
   config = {
-    juju-http-proxy = var.http_proxy
+    juju-http-proxy  = var.http_proxy
     juju-https-proxy = var.https_proxy
-    juju-no-proxy = var.no_proxy
+    juju-no-proxy    = var.no_proxy
   }
 }
 
