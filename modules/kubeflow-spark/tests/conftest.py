@@ -36,8 +36,16 @@ def db_sizes(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes) -> list[str]:
+def kf_spark_vars(request) -> list[str]:
+    """Terraform module customization for the Kubeflow Spark module."""
+    return [
+        "-var", "metacontroller_operator_revision=551",
+        "-var", "resource_dispatcher_revision=410",
+    ]
+
+@pytest.fixture(scope="module")
+def tf_vars(request, risk, db_sizes, kf_spark_vars) -> list[str]:
     """Overall Terraform module customization."""
-    return risk +  db_sizes + [
+    return risk + db_sizes + kf_spark_vars + [
         "-var", "cos_configuration=true",
     ]
