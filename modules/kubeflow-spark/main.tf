@@ -80,8 +80,8 @@ resource "juju_application" "integration_hub" {
   model = module.kubeflow.model
   name  = "integration-hub"
   charm {
-    name     = "spark-integration-hub-k8s"
-    channel  = "3/edge" # TODO: fix hardcoded value
+    name    = "spark-integration-hub-k8s"
+    channel = "3/edge" # TODO: fix hardcoded value
   }
   units       = 1
   trust       = true
@@ -89,18 +89,18 @@ resource "juju_application" "integration_hub" {
 }
 
 resource "juju_application" "kubeflow_integrator" {
- model  = module.kubeflow.model
+  model = module.kubeflow.model
   name  = "kubeflow-integrator"
   charm {
-    name     = "data-kubeflow-integrator"
-    channel  = "1/edge" # TODO: fix hardcoded value
+    name    = "data-kubeflow-integrator"
+    channel = "1/edge" # TODO: fix hardcoded value
   }
   units       = 1
   constraints = "arch=amd64"
   trust       = true
   config = {
     spark-service-account = var.kubeflow_spark_service_account
-    profile = var.kubeflow_spark_profile
+    profile               = var.kubeflow_spark_profile
   }
 }
 
