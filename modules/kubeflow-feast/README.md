@@ -18,7 +18,7 @@ The solution module offers the following configurable inputs:
 | `dex_static_username`| string | dex-auth static username | False |
 | `dex_static_password`| string | dex-auth static password | False |
 | `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
-| `opentelemetry_collector_k8s_size`| string | Grafana agent database storage size | False |
+| `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
 | `istio_cni_bin_dir`| string | Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path. | False |
