@@ -37,6 +37,10 @@ jobs:
             uats:
               env: feast-remote
               extra-args: ""
+          - module: kubeflow-spark
+            uats:
+              env: spark-remote
+              extra-args: ""
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
