@@ -17,8 +17,8 @@ The solution module offers the following configurable inputs:
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
 | `dex_static_username`| string | dex-auth static username | False |
 | `dex_static_password`| string | dex-auth static password | False |
-| `existing_grafana_agent_name`| string | Name of an existing grafana-agent-k8s deployment | False |
-| `grafana_agent_k8s_size`| string | Grafana agent database storage size | False |
+| `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
+| `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
 | `istio_cni_bin_dir`| string | Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path. | False |
@@ -42,7 +42,7 @@ Upon applied, the solution module exports the following outputs:
 
 | Name | Description |
 | - | - |
-| `grafana_agent_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the grafana-agent-k8s charm used |
+| `opentelemetry_collector_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the opentelemetry-collector-k8s charm used |
 | `model`|  Model name that Charmed Kubeflow and Feast are deployed on |
 | `resource_dispatcher`|  Map containing the `app_name`, `provides` and `requires` fields of the resource-dispatcher charm |
 | `tls_certificate_requirer`|  Map containing the `app_name` and the `requires` TLS endpoint of the TLS requirer charm |
@@ -57,14 +57,14 @@ This solution always creates a model of the name `kubeflow`, since Charmed Kubef
 ### COS configuration
 
 #### Enable COS configuration
-The `cos_configuration` input enables the solution to configure Charmed Kubeflow to integrate with COS. This is done by deploying a `grafana-agent-k8s` charm and adding all the required relations.
+The `cos_configuration` input enables the solution to configure Charmed Kubeflow to integrate with COS. This is done by deploying a `opentelemetry-collector-k8s` charm and adding all the required relations.
 ```
 terraform apply -var cos_configuration=true
 ```
 
-#### Use an existing grafana-agent-k8s
-If there is already an instance of the grafana-agent-k8s charm in the `kubeflow` model, then it can be used instead of deploying a new one. This is achieved with the use of `existing_grafana_agent_name` input. By default, its value is `null`.
+#### Use an existing opentelemetry-collector-k8s
+If there is already an instance of the opentelemetry-collector-k8s charm in the `kubeflow` model, then it can be used instead of deploying a new one. This is achieved with the use of `existing_opentelemetry_collector_name` input. By default, its value is `null`.
 ```
-terraform apply -var cos_configuration=true -var existing_grafana_agent_name="dummy-grafana-agent"
+terraform apply -var cos_configuration=true -var existing_opentelemetry_collector_name="dummy-opentelemetry-collector"
 ```
 > :warning: Setting this input without `cos_configuration` will not have any effect.
