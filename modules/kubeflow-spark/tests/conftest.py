@@ -3,6 +3,31 @@ import pytest
 def pytest_addoption(parser):
     """Add CLI options to pytest."""
     parser.addoption(
+        "--istio-cni-bin-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of binaries for Istio CNI",
+    )
+    parser.addoption(
+        "--istio-cni-conf-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of configurations for Istio CNI",
+    )
+    parser.addoption(
+        "--pss",
+        nargs="?",
+        choices=["privileged", "baseline"],
+        const="privileged",
+        default="privileged",
+        type=str,
+        help="Pod security standards enforced in Profiles' namespaces",
+    )
+    parser.addoption(
         "--risk",
         nargs="?",
         choices=["stable", "candidate", "beta", "edge"],
@@ -35,6 +60,21 @@ def db_sizes(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
+def pss(request) -> list[str]:
+    """Pod security standards enforced in Profiles' namespaces."""
+    pss = request.config.getoption("--pss")
+    istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
+    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
+    return [
+        "-var",
+        f"istio_cni_bin_dir={istio_cni_bin_dir}",
+        "-var",
+        f"istio_cni_conf_dir={istio_cni_conf_dir}",
+        "-var",
+        f"kubeflow_profiles_security_policy={pss}",
+    ]
+
+@pytest.fixture(scope="module")
 def kf_spark_vars(request) -> list[str]:
     """Terraform module customization for the Kubeflow Spark module."""
     return [
@@ -45,6 +85,6 @@ def kf_spark_vars(request) -> list[str]:
 @pytest.fixture(scope="module")
 def tf_vars(request, risk, db_sizes, kf_spark_vars) -> list[str]:
     """Overall Terraform module customization."""
-    return risk + db_sizes + kf_spark_vars + [
+    return risk + pss + db_sizes + kf_spark_vars + [
         "-var", "cos_configuration=true",
     ]
