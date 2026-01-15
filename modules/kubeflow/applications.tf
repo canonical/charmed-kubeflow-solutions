@@ -187,9 +187,6 @@ module "kfp_viz" {
 module "knative_eventing" {
   source     = "git::https://github.com/canonical/knative-operators//charms/knative-eventing/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  config = {
-    namespace = "knative-eventing"
-  }
   revision = var.knative_eventing_revision
   channel  = "latest/${var.risk}"
 }
@@ -209,7 +206,6 @@ module "knative_serving" {
     https-proxy               = var.https_proxy,
     "istio.gateway.namespace" = local.model,
     "istio.gateway.name"      = "kubeflow-gateway",
-    namespace                 = "knative-serving",
     no-proxy                  = var.no_proxy,
   }
   revision = var.knative_serving_revision
