@@ -36,7 +36,7 @@ Upon applied, the solution module exports the following outputs:
 
 | Name | Description |
 | - | - |
-| `grafana_agent_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the grafana-agent-k8s charm used |
+| `opentelemetry_collector_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the opentelemetry-collector-k8s charm used |
 | `model`|  Model name that Charmed Kubeflow and MLflow are deployed on |
 | `resource_dispatcher`|  Map containing the `app_name`, `provides` and `requires` fields of the resource-dispatcher charm |
 | `tls_certificate_requirer`|  Map containing the `app_name` and the `requires` TLS endpoint of the TLS requirer charm |
@@ -51,7 +51,7 @@ This solution always creates a model of the name `kubeflow`, since Charmed Kubef
 ### COS configuration
 
 #### Enable COS configuration
-The `cos_configuration` input enables the solution to configure Charmed Kubeflow and MLflow to integrate with COS. This is done by deploying a `grafana-agent-k8s` charm and adding all the required relations.
+The `cos_configuration` input enables the solution to configure Charmed Kubeflow and MLflow to integrate with COS. This is done by deploying a `opentelemetry-collector-k8s` charm and adding all the required relations.
 ```
 terraform apply -var cos_configuration=true
 ```
