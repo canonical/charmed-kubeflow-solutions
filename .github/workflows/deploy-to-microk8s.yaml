@@ -40,7 +40,7 @@ jobs:
           - module: kubeflow-spark
             uats:
               env: spark-remote
-              extra-args: ""
+              extra-args: "--bundle '' --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
