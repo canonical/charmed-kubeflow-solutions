@@ -74,7 +74,7 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=kf-8292-replace-grafana-agent-k8s"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
   # kubeflow module creates the model
   risk                                  = var.risk
   create_model                          = false
