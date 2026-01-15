@@ -76,11 +76,11 @@ module "kubeflow" {
 module "mlflow" {
   source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
   # kubeflow module creates the model
-  risk                                  = var.risk
-  create_model                          = false
-  model                                 = module.kubeflow.model
-  cos_configuration                     = var.cos_configuration
-  enable_mlflow_nodeport                = var.enable_mlflow_nodeport
+  risk                   = var.risk
+  create_model           = false
+  model                  = module.kubeflow.model
+  cos_configuration      = var.cos_configuration
+  enable_mlflow_nodeport = var.enable_mlflow_nodeport
   # existing_grafana_agent_name           = var.cos_configuration ? module.kubeflow.grafana_agent_k8s.app_name : null
   mlflow_default_artifact_root          = var.mlflow_default_artifact_root
   mlflow_minio_revision                 = var.mlflow_minio_revision
