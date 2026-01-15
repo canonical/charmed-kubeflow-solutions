@@ -83,7 +83,7 @@ def kf_spark_vars(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes, kf_spark_vars) -> list[str]:
+def tf_vars(request, risk, pss, db_sizes, kf_spark_vars) -> list[str]:
     """Overall Terraform module customization."""
     return risk + pss + db_sizes + kf_spark_vars + [
         "-var", "cos_configuration=true",
