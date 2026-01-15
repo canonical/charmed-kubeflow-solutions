@@ -279,7 +279,7 @@ module "metacontroller_operator" {
 }
 
 module "mlmd" {
-  source     = "git::https://github.com/canonical/mlmd-operator//terraform?ref=track/main"
+  source     = "git::https://github.com/canonical/mlmd-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   storage_directives = {
     mlmd-data = var.mlmd_size
