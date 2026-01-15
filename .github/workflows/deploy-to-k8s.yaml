@@ -36,6 +36,11 @@ jobs:
             uats:
               env: feast-remote
               extra-args: ""
+          - module: kubeflow-spark
+            juju-agent-version: 3.6.9
+            uats:
+              env: spark-remote
+              extra-args: "--bundle '' --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
 
     steps:
       - name: Checkout repository
