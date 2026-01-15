@@ -423,8 +423,8 @@ variable "kubeflow_spark_profile" {
   default     = "admin"
 }
 
-variable "spark_image" {
-  description = "The OCI image to be used by Spark drivers and executors"
-  type        = string
-  default     = "ghcr.io/canonical/charmed-spark:3.5-22.04_edge"
-}
+# variable "spark_image" {
+#   description = "The OCI image to be used by Spark drivers and executors"
+#   type        = string
+#   default     = "ghcr.io/canonical/charmed-spark:3.5-22.04_edge"
+# }
