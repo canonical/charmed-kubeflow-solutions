@@ -39,6 +39,7 @@ jobs:
               env: feast-remote
               extra-args: ""
           - module: kubeflow-spark
+            juju-agent-version: 3.6.9
             uats:
               env: spark-remote
               extra-args: "--bundle '' --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
@@ -127,7 +128,12 @@ jobs:
           mkdir -p ~/.local/share/juju
 
           sudo microk8s config | juju add-k8s local-k8s --client
-          juju bootstrap local-k8s microk8s
+
+          AGENT_VERSION_ARG=""
+          if [[ -n "${{ matrix.bundle.juju-agent-version }}" ]]; then
+            AGENT_VERSION_ARG="--agent-version=${{ matrix.bundle.juju-agent-version }}"
+          fi
+          juju bootstrap local-k8s microk8s $AGENT_VERSION_ARG
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
