@@ -97,7 +97,7 @@ module "mlflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
   channel    = "latest/${var.risk}"
