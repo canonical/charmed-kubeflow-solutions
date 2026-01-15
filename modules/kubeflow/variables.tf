@@ -47,14 +47,14 @@ variable "dex_static_password" {
   sensitive   = true
 }
 
-variable "existing_grafana_agent_name" {
-  description = "Name of an existing grafana-agent-k8s deployment"
+variable "existing_opentelemetry_collector_name" {
+  description = "Name of an existing opentelemetry-collector-k8s deployment"
   type        = string
   default     = null
 }
 
-variable "grafana_agent_k8s_size" {
-  description = "Grafana agent database storage size"
+variable "opentelemetry_collector_k8s_size" {
+  description = "OpenTelemetry collector storage size"
   type        = string
   default     = "10G"
 }
@@ -215,8 +215,8 @@ variable "envoy_revision" {
   default     = null
 }
 
-variable "grafana_agent_k8s_revision" {
-  description = "Charm revision for grafana-agent-k8s"
+variable "opentelemetry_collector_k8s_revision" {
+  description = "Charm revision for opentelemetry-collector-k8s"
   type        = number
   default     = null
 }

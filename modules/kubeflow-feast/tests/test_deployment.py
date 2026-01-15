@@ -35,9 +35,9 @@ class TestCharm:
 
         apps = list(juju.status().apps.keys())
 
-        # Remove grafana-agent-k8s from the apps list because it remains
+        # Remove opentelemetry-collector-k8s from the apps list because it remains
         # `blocked` until it's related to one of the COS charms
-        apps.remove("grafana-agent-k8s-kubeflow")
+        apps.remove("opentelemetry-collector-k8s-kubeflow")
 
         juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=3600)
 
