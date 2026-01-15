@@ -7,8 +7,8 @@ module "kubeflow" {
   dex_connectors                       = var.dex_connectors
   dex_static_username                  = var.dex_static_username
   dex_static_password                  = var.dex_static_password
-  existing_grafana_agent_name          = var.cos_configuration ? var.existing_grafana_agent_name : null
-  grafana_agent_k8s_size               = var.grafana_agent_k8s_size
+  existing_opentelemetry_collector_name = var.cos_configuration ? var.existing_opentelemetry_collector_name : null
+  opentelemetry_collector_k8s_size      = var.opentelemetry_collector_k8s_size
   http_proxy                           = var.http_proxy
   https_proxy                          = var.https_proxy
   istio_cni_bin_dir                    = var.istio_cni_bin_dir
@@ -68,7 +68,6 @@ module "kubeflow" {
   tensorboard_controller_revision      = var.tensorboard_controller_revision
   tensorboards_web_app_revision        = var.tensorboards_web_app_revision
   training_operator_revision           = var.training_operator_revision
-  grafana_agent_k8s_revision           = var.grafana_agent_k8s_revision
 }
 
 module "resource_dispatcher" {
