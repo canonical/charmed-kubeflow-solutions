@@ -31,8 +31,8 @@ def pytest_addoption(parser):
         "--risk",
         nargs="?",
         choices=["stable", "candidate", "beta", "edge"],
-        const="edge",
-        default="edge",
+        const="stable",
+        default="stable",
         type=str,
         help="Risk to be used when deploying the terraform module",
     )
@@ -46,7 +46,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="module")
 def risk(request) -> list[str]:
     """Terraform module customization for the risk."""
-    risk = request.config.getoption("--risk") or "edge"
+    risk = request.config.getoption("--risk") or "stable"
     return ["-var", f"risk={risk}"]
 
 @pytest.fixture(scope="module")

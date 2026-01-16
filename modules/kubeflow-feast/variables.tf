@@ -1,7 +1,7 @@
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"
-  default     = "edge"
+  default     = "stable"
 
   validation {
     condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
