@@ -42,6 +42,14 @@ def pytest_addoption(parser):
         type=str,
         help="Size to be used for the databases.",
     )
+    parser.addoption(
+        "--tf-vars-file",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Custom TF vars for the terraform module.",
+    )
 
 @pytest.fixture(scope="module")
 def risk(request) -> list[str]:
@@ -83,8 +91,16 @@ def kf_spark_vars(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, pss, db_sizes, kf_spark_vars) -> list[str]:
+def tf_vars_file(request) -> list[str]:
+    """Custom TF vars for the terraform module."""
+    tfvars_file = request.config.getoption("--tf-vars-file")
+    if tfvars_file:
+        return ["-var-file", tfvars_file]
+    return []
+
+@pytest.fixture(scope="module")
+def tf_vars(risk, pss, db_sizes, kf_spark_vars, tf_vars_file) -> list[str]:
     """Overall Terraform module customization."""
     return risk + pss + db_sizes + kf_spark_vars + [
         "-var", "cos_configuration=true",
-    ]
+    ] + tf_vars_file
