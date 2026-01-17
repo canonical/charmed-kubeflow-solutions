@@ -38,9 +38,10 @@ jobs:
               extra-args: ""
           - module: kubeflow-spark
             juju-agent-version: 3.6.9
+            tfvars-file: examples/tfvars.json
             uats:
               env: spark-remote
-              extra-args: "--bundle '' --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
+              extra-args: "--test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
 
     steps:
       - name: Checkout repository
@@ -112,7 +113,12 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tfvars-file }}" ]]; then
+            TF_VARS_ARG="--tfvars-file ${{ matrix.bundle.tfvars-file }}"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} $TF_VARS_ARG
 
       - name: Run UATs
         run: |

@@ -82,13 +82,6 @@ def pss(request) -> list[str]:
         f"kubeflow_profiles_security_policy={pss}",
     ]
 
-@pytest.fixture(scope="module")
-def kf_spark_vars(request) -> list[str]:
-    """Terraform module customization for the Kubeflow Spark module."""
-    return [
-        "-var", "metacontroller_operator_revision=551",
-        "-var", "resource_dispatcher_revision=410",
-    ]
 
 @pytest.fixture(scope="module")
 def tf_vars_file(request) -> list[str]:
@@ -99,8 +92,8 @@ def tf_vars_file(request) -> list[str]:
     return []
 
 @pytest.fixture(scope="module")
-def tf_vars(risk, pss, db_sizes, kf_spark_vars, tf_vars_file) -> list[str]:
+def tf_vars(risk, pss, db_sizes, tf_vars_file) -> list[str]:
     """Overall Terraform module customization."""
-    return risk + pss + db_sizes + kf_spark_vars + [
+    return risk + pss + db_sizes + [
         "-var", "cos_configuration=true",
     ] + tf_vars_file
