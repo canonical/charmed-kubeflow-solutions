@@ -18,8 +18,8 @@ The solution module offers the following configurable inputs:
 | `dex_static_username`| string | dex-auth static username | False |
 | `dex_static_password`| string | dex-auth static password | False |
 | `enable_mlflow_nodeport` | bool | Boolean value that enables the NodePort service for MLflow | False |
-| `existing_grafana_agent_name`| string | Name of an existing grafana-agent-k8s deployment | False |
-| `grafana_agent_k8s_size`| string | Grafana agent database storage size | False |
+| `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
+| `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
 | `istio_tls_secret_id`| string | The juju secret id for the tls key/cert for istio-pilot | False |
@@ -36,7 +36,7 @@ Upon applied, the solution module exports the following outputs:
 
 | Name | Description |
 | - | - |
-| `grafana_agent_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the grafana-agent-k8s charm used |
+| `opentelemetry_collector_k8s`| Map containing the `app_name`, `provides` and `requires` endpoints of the opentelemetry-collector-k8s charm used |
 | `model`|  Model name that Charmed Kubeflow and MLflow are deployed on |
 | `resource_dispatcher`|  Map containing the `app_name`, `provides` and `requires` fields of the resource-dispatcher charm |
 | `tls_certificate_requirer`|  Map containing the `app_name` and the `requires` TLS endpoint of the TLS requirer charm |
@@ -51,7 +51,7 @@ This solution always creates a model of the name `kubeflow`, since Charmed Kubef
 ### COS configuration
 
 #### Enable COS configuration
-The `cos_configuration` input enables the solution to configure Charmed Kubeflow and MLflow to integrate with COS. This is done by deploying a `grafana-agent-k8s` charm and adding all the required relations.
+The `cos_configuration` input enables the solution to configure Charmed Kubeflow and MLflow to integrate with COS. This is done by deploying a `opentelemetry-collector-k8s` charm and adding all the required relations.
 ```
 terraform apply -var cos_configuration=true
 ```

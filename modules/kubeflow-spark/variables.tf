@@ -48,16 +48,14 @@ variable "dex_static_password" {
   sensitive   = true
 }
 
-
-
-variable "existing_grafana_agent_name" {
-  description = "Name of an existing grafana-agent-k8s deployment"
+variable "existing_opentelemetry_collector_name" {
+  description = "Name of an existing opentelemetry-collector-k8s deployment"
   type        = string
   default     = null
 }
 
-variable "grafana_agent_k8s_size" {
-  description = "Grafana agent database storage size"
+variable "opentelemetry_collector_k8s_size" {
+  description = "OpenTelemetry collector storage size"
   type        = string
   default     = "10G"
 }
@@ -70,6 +68,18 @@ variable "http_proxy" {
 
 variable "https_proxy" {
   description = "Value of the https_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_bin_dir" {
+  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_conf_dir" {
+  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
   type        = string
   default     = ""
 }
@@ -102,6 +112,17 @@ variable "kfp_db_size" {
   description = "KFP database storage size"
   type        = string
   default     = "10G"
+}
+
+variable "kubeflow_profiles_security_policy" {
+  description = "Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported"
+  type        = string
+  default     = "privileged"
+
+  validation {
+    condition     = contains(["baseline", "privileged"], var.kubeflow_profiles_security_policy)
+    error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)"
+  }
 }
 
 variable "minio_access_key" {
@@ -185,12 +206,6 @@ variable "dex_auth_revision" {
 
 variable "envoy_revision" {
   description = "Charm revision for envoy"
-  type        = number
-  default     = null
-}
-
-variable "grafana_agent_k8s_revision" {
-  description = "Charm revision for grafana-agent-k8s"
   type        = number
   default     = null
 }
@@ -421,10 +436,4 @@ variable "kubeflow_spark_profile" {
   description = "The name of the Kubeflow profile where Spark needs to be accessible."
   type        = string
   default     = "admin"
-}
-
-variable "spark_image" {
-  description = "The OCI image to be used by Spark drivers and executors"
-  type        = string
-  default     = "ghcr.io/canonical/charmed-spark:3.5-22.04_edge"
 }

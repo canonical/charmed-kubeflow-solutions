@@ -31,11 +31,16 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
+              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
               extra-args: ""
+          - module: kubeflow-spark
+            tf-vars-file: examples/tfvars.json
+            uats:
+              env: spark-remote
+              extra-args: "--test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
 
     steps:
       - name: Checkout repository
@@ -107,7 +112,12 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
+            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} $TF_VARS_ARG
 
       - name: Run UATs
         run: |

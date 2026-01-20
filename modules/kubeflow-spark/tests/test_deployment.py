@@ -40,9 +40,9 @@ class TestCharm:
 
         apps = list(ops_test.model.applications.keys())
         
-        # Remove grafana-agent-k8s from the apps list because it remains
+        # Remove opentelemetry-collector-k8s-kubeflow from the apps list because it remains
         # `blocked` until it's related to one of the COS charms
-        apps.remove("grafana-agent-k8s-kubeflow")
+        apps.remove("opentelemetry-collector-k8s-kubeflow")
         await ops_test.model.wait_for_idle(
             apps=apps,
             status="active",
