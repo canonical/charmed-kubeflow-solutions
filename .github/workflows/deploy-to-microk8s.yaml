@@ -38,7 +38,6 @@ jobs:
               env: feast-remote
               extra-args: ""
           - module: kubeflow-spark
-            juju-agent-version: 3.6.9 # TODO: remove pin once Spark can work on recent Juju agent versions
             tf-vars-file: examples/tfvars.json
             uats:
               env: spark-remote
@@ -128,13 +127,8 @@ jobs:
           mkdir -p ~/.local/share/juju
 
           sudo microk8s config | juju add-k8s local-k8s --client
-
-          AGENT_VERSION_ARG=""
-          if [[ -n "${{ matrix.bundle.juju-agent-version }}" ]]; then
-            AGENT_VERSION_ARG="--agent-version=${{ matrix.bundle.juju-agent-version }}"
-          fi
       
-          juju bootstrap local-k8s microk8s $AGENT_VERSION_ARG
+          juju bootstrap local-k8s microk8s
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
