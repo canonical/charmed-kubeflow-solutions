@@ -187,7 +187,7 @@ variable "istio_ingressgateway_revision" {
 variable "istio_pilot_revision" {
   description = "Charm revision for istio-pilot"
   type        = number
-  default     = null
+  default     = 1487
 }
 
 variable "jupyter_controller_revision" {
