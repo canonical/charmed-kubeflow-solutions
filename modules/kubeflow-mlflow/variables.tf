@@ -292,7 +292,7 @@ variable "opentelemetry_collector_k8s_revision" {
 variable "istio_ingressgateway_revision" {
   description = "Charm revision for istio-ingressgateway"
   type        = number
-  default     = null
+  default     = 1547
 }
 
 variable "istio_ingressgateway_annotations" {
