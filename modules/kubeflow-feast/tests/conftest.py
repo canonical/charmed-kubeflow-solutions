@@ -15,7 +15,6 @@ def juju(request: pytest.FixtureRequest):
             print(log, end="")
 
     juju_instance = jubilant.Juju()
-    juju_instance.add_model(MODEL_NAME)
 
     try:
         yield juju_instance
