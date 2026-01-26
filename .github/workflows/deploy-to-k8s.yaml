@@ -107,7 +107,9 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          juju add-model kubeflow
+          kubectl label namespaces kubeflow pod-security.kubernetes.io/enforce=baseline
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --create_model false --risk ${{ env.RISK }}
 
       - name: Run UATs
         run: |
