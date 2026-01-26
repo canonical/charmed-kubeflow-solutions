@@ -257,7 +257,7 @@ module "kubeflow_trainer" {
   source     = "git::https://github.com/canonical/training-operator//terraform?ref=main-v2"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_trainer_revision
-  channel    = "2.0/edge"
+  channel    = "latest/edge"
 }
 
 module "kubeflow_volumes" {
