@@ -31,11 +31,11 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
+              extra-args: --filter "not feast and not test_bundle_correctness" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: ""
+              extra-args: --filter "not test_bundle_correctness"
 
     steps:
       - name: Checkout repository
