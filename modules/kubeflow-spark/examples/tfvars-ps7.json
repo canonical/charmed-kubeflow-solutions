@@ -1,6 +1,6 @@
 {
     "metacontroller_operator_revision": 551,
-    "resource_dispatcher_revision": 410,
+    "resource_dispatcher_revision": 434,
     "dex_static_username": "admin",
     "dex_static_password": "admin",
     "http_proxy": "http://egress.ps7.internal:3128",
