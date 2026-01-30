@@ -38,6 +38,7 @@ jobs:
               env: feast-remote
               extra-args: --bundle ""
           - module: kubeflow-spark
+            risk: edge
             juju-agent-version: 3.6.9 # TODO: remove pin once Spark can work on recent Juju agent versions
             tf-vars-file: examples/tfvars.json
             uats:
@@ -67,7 +68,7 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
+          RISK=${{ matrix.bundle.risk || inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
           
           if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
