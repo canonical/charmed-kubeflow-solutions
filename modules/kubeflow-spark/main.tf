@@ -1,6 +1,6 @@
 module "kubeflow" {
   source                                = "../kubeflow"
-  risk                                  = "edge" # TODO: Remove pinning once the required charms are released to stable
+  risk                                  = var.risk
   argo_controller_bucket                = var.argo_controller_bucket
   create_model                          = var.create_model
   cos_configuration                     = var.cos_configuration
