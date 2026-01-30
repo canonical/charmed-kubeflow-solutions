@@ -35,7 +35,7 @@ jobs:
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: ""
+              extra-args: --bundle ""
           - module: kubeflow-spark
             tf-vars-file: examples/tfvars.json
             uats:
