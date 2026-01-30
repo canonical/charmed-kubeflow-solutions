@@ -40,7 +40,7 @@ jobs:
             tf-vars-file: examples/tfvars.json
             uats:
               env: spark-remote
-              extra-args: "--test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge"
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7
 
     steps:
       - name: Checkout repository
