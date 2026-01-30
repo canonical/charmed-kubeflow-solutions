@@ -38,7 +38,8 @@ jobs:
               env: feast-remote
               extra-args: --bundle ""
           - module: kubeflow-spark
-            risk: edge
+            risk: edge # TODO: Run Spark tests with Kubeflow from `stable` risk once all changes for Spark integration are released to stable
+            uats_branch: main # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
             juju-agent-version: 3.6.9 # TODO: remove pin once Spark can work on recent Juju agent versions
             tf-vars-file: examples/tfvars.json
             uats:
@@ -71,7 +72,7 @@ jobs:
           RISK=${{ matrix.bundle.risk || inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
           
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - id: setup-python
