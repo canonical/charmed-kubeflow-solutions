@@ -1,5 +1,8 @@
 # Charmed Kubeflow + Charmed Spark Terraform solution
 
+> [!WARNING]
+> This feature is experimental and therefore should not be used in production.
+
 
 This is a Terraform module facilitating the deployment and integration of Charmed Kubeflow and Spark, using the [Terraform juju provider](https://github.com/juju/terraform-provider-juju/). For more information, refer to the provider [documentation](https://registry.terraform.io/providers/juju/juju/latest/docs). 
 
@@ -17,7 +20,6 @@ The solution module offers the following configurable inputs:
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
 | `dex_static_username`| string | dex-auth static username | False |
 | `dex_static_password`| string | dex-auth static password | False |
-| `enable_mlflow_nodeport` | bool | Boolean value that enables the NodePort service for MLflow | False |
 | `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
 | `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
@@ -48,10 +50,3 @@ This solution module is intended to be used either on its own or as part of a hi
 ### Model
 This solution always creates a model of the name `kubeflow`, since Charmed Kubeflow cannot be deployed in a different model.
 
-### COS configuration
-
-#### Enable COS configuration
-The `cos_configuration` input enables the solution to configure Charmed Kubeflow and MLflow to integrate with COS. This is done by deploying a `opentelemetry-collector-k8s` charm and adding all the required relations.
-```
-terraform apply -var cos_configuration=true
-```

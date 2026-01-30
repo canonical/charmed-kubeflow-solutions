@@ -1,4 +1,4 @@
-output "grafana_agent_k8s" {
+output "opentelemetry_collector_k8s" {
   value = module.kubeflow.opentelemetry_collector_k8s
 }
 
