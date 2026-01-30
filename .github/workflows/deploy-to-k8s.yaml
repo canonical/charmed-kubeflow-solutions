@@ -38,6 +38,8 @@ jobs:
               extra-args: --bundle ""
           - module: kubeflow-spark
             tf-vars-file: examples/tfvars.json
+            risk: edge # TODO: Run Spark tests with Kubeflow from `stable` risk once all changes for Spark integration are released to stable
+            uats_branch: main # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
             uats:
               env: spark-remote
               extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7 --bundle ""
@@ -58,10 +60,10 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
+          RISK=${{ matrix.bundle.risk || inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
           
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository

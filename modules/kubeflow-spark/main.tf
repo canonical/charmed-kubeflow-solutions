@@ -74,7 +74,7 @@ module "resource_dispatcher" {
   source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=893c73d48f49023f0cf3aa13927a609167d53bf7"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "2.0/${var.risk}"
+  channel    = "latest/edge" # TODO: fix hardcoded value
 }
 
 

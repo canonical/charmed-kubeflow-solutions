@@ -16,7 +16,7 @@ module "feast_ui" {
 
 module "feast_offline_store" {
   # tflint-ignore: terraform_module_pinned_source
-  source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=main"
+  source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=ac1f27eae4d9ccee2557ec84a175fbb5722e45be" # TODO: Unpin after juju TF provider upgraded to >1.0
   juju_model_name = module.kubeflow.model
   app_name        = "feast-offline-store"
   channel         = "14/stable"
@@ -30,7 +30,7 @@ module "feast_offline_store" {
 
 module "feast_online_store" {
   # tflint-ignore: terraform_module_pinned_source
-  source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=main"
+  source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=ac1f27eae4d9ccee2557ec84a175fbb5722e45be" # TODO: Unpin after juju TF provider upgraded to >1.0
   juju_model_name = module.kubeflow.model
   app_name        = "feast-online-store"
   channel         = "14/stable"
@@ -44,7 +44,7 @@ module "feast_online_store" {
 
 module "feast_registry" {
   # tflint-ignore: terraform_module_pinned_source
-  source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=main"
+  source          = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=ac1f27eae4d9ccee2557ec84a175fbb5722e45be" # TODO: Unpin after juju TF provider upgraded to >1.0
   juju_model_name = module.kubeflow.model
   app_name        = "feast-registry"
   channel         = "14/stable"
