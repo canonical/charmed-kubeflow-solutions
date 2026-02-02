@@ -40,6 +40,13 @@ jobs:
             uats:
               env: kubeflow-remote
               extra-args: --bundle "file:assets/versions-ambient.yaml"
+          - module: kubeflow-spark
+            tf-vars-file: examples/tfvars.json
+            uats_branch: main
+	    # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
+            uats:
+              env: spark-remote
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7 --bundle ""
 
     steps:
       - name: Checkout repository
@@ -59,7 +66,7 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
+	  UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -121,11 +128,14 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           PLATFORM_ARG=""
           if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
-            RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform"
           fi
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
+            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
+          fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_VAR $TF_VARS_ARG $PLATFORM_ARG
 
       - name: Run UATs
         run: |
