@@ -10,6 +10,14 @@ iam:
 addons:
 - name: aws-ebs-csi-driver
   serviceAccountRoleARN: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+- name: vpc-cni
+  configurationValues: |
+    {
+      "env": {
+        "ENABLE_PREFIX_DELEGATION": "true",
+        "WARM_PREFIX_TARGET": "1"
+      }
+    }
 kind: ClusterConfig
 kubernetesNetworkConfig:
   ipFamily: IPv4
