@@ -1,0 +1,456 @@
+variable "risk" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = "stable"
+
+  validation {
+    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
+    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
+  }
+}
+
+variable "argo_controller_bucket" {
+  description = "The name of the bucket to be used by Argo controller in the object store"
+  type        = string
+  default     = "mlpipeline"
+}
+
+variable "cos_configuration" {
+  description = "Boolean value that enables COS configuration"
+  type        = bool
+  default     = false
+}
+
+variable "create_model" {
+  description = "Allows to skip Juju model creation and re-use a model created in a higher level module"
+  type        = bool
+  default     = true
+}
+
+variable "dex_connectors" {
+  description = "dex-auth connectors in yaml format"
+  type        = string
+  default     = ""
+}
+
+variable "dex_static_username" {
+  description = "dex-auth static username value"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "dex_static_password" {
+  description = "dex-auth static password"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "existing_opentelemetry_collector_name" {
+  description = "Name of an existing opentelemetry-collector-k8s deployment"
+  type        = string
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_size" {
+  description = "OpenTelemetry collector storage size"
+  type        = string
+  default     = "10G"
+}
+
+variable "http_proxy" {
+  description = "Value of the http_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "https_proxy" {
+  description = "Value of the https_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_bin_dir" {
+  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_conf_dir" {
+  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_tls_secret_id" {
+  description = "The juju secret id for the tls key/cert for istio-pilot"
+  type        = string
+  default     = ""
+}
+
+variable "jupyter_ui_config" {
+  description = "Map of config values passed to jupyter-ui"
+  type        = map(string)
+  default     = {}
+}
+
+variable "katib_db_size" {
+  description = "Katib database storage size"
+  type        = string
+  default     = "10G"
+}
+
+variable "kfp_api_object_store_bucket_name" {
+  description = "The name of the bucket to be used by KFP API in the object store"
+  type        = string
+  default     = "mlpipeline"
+}
+
+variable "kfp_db_size" {
+  description = "KFP database storage size"
+  type        = string
+  default     = "10G"
+}
+
+variable "kubeflow_profiles_security_policy" {
+  description = "Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported"
+  type        = string
+  default     = "privileged"
+
+  validation {
+    condition     = contains(["baseline", "privileged"], var.kubeflow_profiles_security_policy)
+    error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)"
+  }
+}
+variable "kubeflow_trainer_v2" {
+  description = "Boolean value that enables deployment of Kubeflow Trainer V2 (experimental)"
+  type        = bool
+  default     = false
+}
+
+variable "minio_access_key" {
+  description = "MinIO access key"
+  type        = string
+  default     = "minio"
+  sensitive   = true
+}
+
+variable "minio_gateway_storage_service" {
+  description = "Gateway storage service configuration for MinIO when in 'gateway' mode"
+  type        = string
+  default     = ""
+}
+
+variable "minio_mode" {
+  description = "MinIO mode, either 'server' or 'gateway'"
+  type        = string
+  default     = "server"
+}
+
+variable "minio_secret_key" {
+  description = "MinIO secret key"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "minio_size" {
+  description = "MinIO database storage size"
+  type        = string
+  default     = "10G"
+}
+
+variable "minio_storage_service_endpoint" {
+  description = "MinIO storage service endpoint, required if minio_mode is 'gateway'"
+  type        = string
+  default     = ""
+}
+
+variable "mlmd_size" {
+  description = "MLMD database storage size"
+  type        = string
+  default     = "10G"
+}
+
+variable "oidc_gatekeeper_ca_bundle" {
+  description = "Custom CA to be trusted by OIDC gatekeeper"
+  type        = string
+  default     = ""
+}
+
+variable "no_proxy" {
+  description = "Value of the no_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "public_url" {
+  description = "Public URL of Kubeflow for auth/OIDC"
+  type        = string
+  default     = "http://dex-auth.kubeflow.svc:5556"
+}
+
+variable "admission_webhook_revision" {
+  description = "Charm revision for admission-webhook"
+  type        = number
+  default     = null
+}
+
+variable "argo_controller_revision" {
+  description = "Charm revision for argo-controller"
+  type        = number
+  default     = null
+}
+
+variable "dex_auth_revision" {
+  description = "Charm revision for dex-auth"
+  type        = number
+  default     = null
+}
+
+variable "envoy_revision" {
+  description = "Charm revision for envoy"
+  type        = number
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_revision" {
+  description = "Charm revision for opentelemetry-collector-k8s"
+  type        = number
+  default     = null
+}
+
+variable "istio_ingressgateway_revision" {
+  description = "Charm revision for istio-ingressgateway"
+  type        = number
+  default     = null
+}
+
+variable "istio_ingressgateway_annotations" {
+  description = "A comma-separated list of annotations to apply to the Ingress Service to enable customisation for cloud providers or integrations."
+  type        = string
+  default     = null
+}
+
+variable "istio_pilot_revision" {
+  description = "Charm revision for istio-pilot"
+  type        = number
+  default     = null
+}
+
+variable "jupyter_controller_revision" {
+  description = "Charm revision for jupyter-controller"
+  type        = number
+  default     = null
+}
+
+variable "jupyter_ui_revision" {
+  description = "Charm revision for jupyter-ui"
+  type        = number
+  default     = null
+}
+
+variable "katib_controller_revision" {
+  description = "Charm revision for katib-controller"
+  type        = number
+  default     = null
+}
+
+variable "katib_db_revision" {
+  description = "Charm revision for katib-db"
+  type        = number
+  default     = null
+}
+
+variable "katib_db_manager_revision" {
+  description = "Charm revision for katib-db-manager"
+  type        = number
+  default     = null
+}
+
+variable "katib_ui_revision" {
+  description = "Charm revision for katib-ui"
+  type        = number
+  default     = null
+}
+
+variable "kfp_api_revision" {
+  description = "Charm revision for kfp-api"
+  type        = number
+  default     = null
+}
+
+variable "kfp_db_revision" {
+  description = "Charm revision for kfp-db"
+  type        = number
+  default     = null
+}
+
+variable "kfp_metadata_writer_revision" {
+  description = "Charm revision for kfp-metadata-writer"
+  type        = number
+  default     = null
+}
+
+variable "kfp_persistence_revision" {
+  description = "Charm revision for kfp-persistence"
+  type        = number
+  default     = null
+}
+
+variable "kfp_profile_controller_revision" {
+  description = "Charm revision for kfp-profile-controller"
+  type        = number
+  default     = null
+}
+
+variable "kfp_schedwf_revision" {
+  description = "Charm revision for kfp-schedwf"
+  type        = number
+  default     = null
+}
+
+variable "kfp_ui_revision" {
+  description = "Charm revision for kfp-ui"
+  type        = number
+  default     = null
+}
+
+variable "kfp_viewer_revision" {
+  description = "Charm revision for kfp-viewer"
+  type        = number
+  default     = null
+}
+
+variable "kfp_viz_revision" {
+  description = "Charm revision for kfp-viz"
+  type        = number
+  default     = null
+}
+
+variable "knative_eventing_revision" {
+  description = "Charm revision for knative-eventing"
+  type        = number
+  default     = null
+}
+
+variable "knative_operator_revision" {
+  description = "Charm revision for knative-operator"
+  type        = number
+  default     = null
+}
+
+variable "knative_serving_revision" {
+  description = "Charm revision for knative-serving"
+  type        = number
+  default     = null
+}
+
+variable "kserve_controller_revision" {
+  description = "Charm revision for kserve-controller"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_dashboard_revision" {
+  description = "Charm revision for kubeflow-dashboard"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_dashboard_registration_flow" {
+  description = "Whether to enable the registration flow on sign-in for kubeflow-dashboard"
+  type        = string
+  default     = "true"
+}
+
+variable "kubeflow_profiles_revision" {
+  description = "Charm revision for kubeflow-profiles"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_roles_revision" {
+  description = "Charm revision for kubeflow-roles"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_trainer_revision" {
+  description = "Charm revision for kubeflow-trainer"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_volumes_revision" {
+  description = "Charm revision for kubeflow-volumes"
+  type        = number
+  default     = null
+}
+
+variable "metacontroller_operator_revision" {
+  description = "Charm revision for metacontroller-operator"
+  type        = number
+  default     = null
+}
+
+variable "mlmd_revision" {
+  description = "Charm revision for mlmd"
+  type        = number
+  default     = null
+}
+
+variable "minio_revision" {
+  description = "Charm revision for minio"
+  type        = number
+  default     = null
+}
+
+variable "oidc_gatekeeper_revision" {
+  description = "Charm revision for oidc-gatekeeper"
+  type        = number
+  default     = null
+}
+
+variable "pvcviewer_operator_revision" {
+  description = "Charm revision for pvcviewer-operator"
+  type        = number
+  default     = null
+}
+
+variable "tensorboard_controller_revision" {
+  description = "Charm revision for tensorboard-controller"
+  type        = number
+  default     = null
+}
+
+variable "tensorboards_web_app_revision" {
+  description = "Charm revision for tensorboards-web-app"
+  type        = number
+  default     = null
+}
+
+variable "training_operator_revision" {
+  description = "Charm revision for training-operator"
+  type        = number
+  default     = null
+}
+
+variable "istio_k8s_revision" {
+  description = "Charm revision for istio-k8s"
+  type        = number
+  default     = null
+}
+
+variable "istio_ingress_k8s_revision" {
+  description = "Charm revision for istio-ingress-k8s"
+  type        = number
+  default     = null
+}
+
+variable "istio_beacon_k8s_revision" {
+  description = "Charm revision for istio-beacon-k8s"
+  type        = number
+  default     = null
+}
