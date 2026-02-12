@@ -969,8 +969,8 @@ resource "juju_integration" "istio_beacon_k8s_opentelemetry_collector_k8s_servic
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {

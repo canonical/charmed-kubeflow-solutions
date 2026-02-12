@@ -326,8 +326,8 @@ resource "juju_integration" "istio_beacon_k8s_admission_webhook" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -340,8 +340,8 @@ resource "juju_integration" "istio_beacon_k8s_dex_auth" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -354,8 +354,8 @@ resource "juju_integration" "istio_beacon_k8s_katib_controller" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -368,8 +368,8 @@ resource "juju_integration" "istio_beacon_k8s_katib_ui" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -382,8 +382,8 @@ resource "juju_integration" "istio_beacon_k8s_kfp_api" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -396,8 +396,8 @@ resource "juju_integration" "istio_beacon_k8s_kfp_persistence" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -410,8 +410,8 @@ resource "juju_integration" "istio_beacon_k8s_kfp_profile_controller" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -424,8 +424,8 @@ resource "juju_integration" "istio_beacon_k8s_kfp_schedwf" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -438,8 +438,8 @@ resource "juju_integration" "istio_beacon_k8s_kfp_ui" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -452,8 +452,8 @@ resource "juju_integration" "istio_beacon_k8s_kfp_viz" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -466,8 +466,8 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_dashboard" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -480,8 +480,8 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_profiles" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -494,8 +494,8 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_volumes" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -508,8 +508,8 @@ resource "juju_integration" "istio_beacon_k8s_minio" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -522,8 +522,8 @@ resource "juju_integration" "istio_beacon_k8s_oidc_gatekeeper" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -536,8 +536,8 @@ resource "juju_integration" "istio_beacon_k8s_pvcviewer_operator" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -550,8 +550,8 @@ resource "juju_integration" "istio_beacon_k8s_tensorboard_controller" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -564,8 +564,8 @@ resource "juju_integration" "istio_beacon_k8s_tensorboards_web_app" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -578,8 +578,8 @@ resource "juju_integration" "istio_beacon_k8s_jupyter_controller" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -592,8 +592,8 @@ resource "juju_integration" "istio_beacon_k8s_jupyter_ui" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -606,8 +606,8 @@ resource "juju_integration" "istio_beacon_k8s_envoy" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -620,8 +620,8 @@ resource "juju_integration" "istio_beacon_k8s_kserve_controller" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_beacon_k8s.app_name
-    endpoint = module.istio_beacon_k8s.provides.service_mesh
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
   }
 
   application {
@@ -634,8 +634,8 @@ resource "juju_integration" "istio_ingress_k8s_kubeflow_volumes" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -648,8 +648,8 @@ resource "juju_integration" "istio_ingress_k8s_kfp_ui" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -662,8 +662,8 @@ resource "juju_integration" "istio_ingress_k8s_envoy" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -676,8 +676,8 @@ resource "juju_integration" "istio_ingress_k8s_katib_ui" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -690,8 +690,8 @@ resource "juju_integration" "istio_ingress_k8s_kubeflow_dashboard" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -704,8 +704,8 @@ resource "juju_integration" "istio_ingress_k8s_jupyter_ui" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -718,8 +718,8 @@ resource "juju_integration" "istio_ingress_k8s_tensorboards_web_app" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_route
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route"
   }
 
   application {
@@ -737,8 +737,8 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_unauthenticated" 
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.ingress_unauthenticated
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route-unauthenticated"
   }
 }
 
@@ -751,8 +751,8 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_forward_auth" {
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.requires.forward_auth
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "forward-auth"
   }
 }
 
@@ -765,8 +765,8 @@ resource "juju_integration" "dex_auth_istio_ingress_k8s_unauthenticated" {
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.ingress_unauthenticated
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-route-unauthenticated"
   }
 }
 
@@ -774,13 +774,13 @@ resource "juju_integration" "istio_k8s_istio_ingress_k8s_ingress_config" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
   application {
-    name     = module.istio_k8s.app_name
-    endpoint = module.istio_k8s.requires.istio_ingress_config
+    name     = juju_application.istio_k8s.name
+    endpoint = "istio-ingress-config"
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.istio_ingress_config
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "istio-ingress-config"
   }
 }
 
@@ -793,8 +793,8 @@ resource "juju_integration" "jupyter_controller_istio_ingress_k8s_gateway_metada
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.gateway_metadata
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "gateway-metadata"
   }
 }
 
@@ -807,8 +807,8 @@ resource "juju_integration" "pvcviewer_operator_istio_ingress_k8s_gateway_metada
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.gateway_metadata
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "gateway-metadata"
   }
 }
 
@@ -821,8 +821,8 @@ resource "juju_integration" "tensorboard_controller_istio_ingress_k8s_gateway_me
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.gateway_metadata
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "gateway-metadata"
   }
 }
 
@@ -835,7 +835,7 @@ resource "juju_integration" "kserve_controller_istio_ingress_k8s_gateway_metadat
   }
 
   application {
-    name     = module.istio_ingress_k8s.app_name
-    endpoint = module.istio_ingress_k8s.provides.gateway_metadata
+    name     = juju_application.istio_ingress_k8s.name
+    endpoint = "gateway-metadata"
   }
 }

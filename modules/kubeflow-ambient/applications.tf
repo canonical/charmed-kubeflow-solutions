@@ -318,23 +318,41 @@ module "training_operator" {
   channel    = "latest/${var.risk}"
 }
 
-module "istio_k8s" {
-  source     = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=track/2"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.istio_k8s_revision
-  channel    = "2/edge"
+resource "juju_application" "istio_k8s" {
+  name  = "istio-k8s"
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  trust = true
+  config = {
+    platform = var.istio_k8s_platform
+  }
+
+  charm {
+    name     = "istio-k8s"
+    channel  = "2/edge"
+    revision = var.istio_k8s_revision
+  }
 }
 
-module "istio_ingress_k8s" {
-  source     = "git::https://github.com/canonical/istio-ingress-k8s-operator//terraform?ref=track/2"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.istio_ingress_k8s_revision
-  channel    = "2/edge"
+resource "juju_application" "istio_ingress_k8s" {
+  name  = "istio-ingress-k8s"
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  trust = true
+
+  charm {
+    name     = "istio-ingress-k8s"
+    channel  = "2/edge"
+    revision = var.istio_ingress_k8s_revision
+  }
 }
 
-module "istio_beacon_k8s" {
-  source     = "git::https://github.com/canonical/istio-beacon-k8s-operator//terraform?ref=track/2"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.istio_beacon_k8s_revision
-  channel    = "2/edge"
+resource "juju_application" "istio_beacon_k8s" {
+  name  = "istio-beacon-k8s"
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  trust = true
+
+  charm {
+    name     = "istio-beacon-k8s"
+    channel  = "2/edge"
+    revision = var.istio_beacon_k8s_revision
+  }
 }
