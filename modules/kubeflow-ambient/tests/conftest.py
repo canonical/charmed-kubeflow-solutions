@@ -71,8 +71,6 @@ def db_sizes(request) -> list[str]:
         "-var", f"kfp_db_size={size}",
         "-var", f"katib_db_size={size}",
         "-var", f"opentelemetry_collector_k8s_size={size}",
-        "-var", f"feast_registry_size={size}",
-        "-var", f"feast_online_store_size={size}",
     ]
 
 @pytest.fixture(scope="module")
