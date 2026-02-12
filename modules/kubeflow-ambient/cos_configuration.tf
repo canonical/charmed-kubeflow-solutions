@@ -166,51 +166,6 @@ resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_logging" 
   }
 }
 
-resource "juju_integration" "istio_ingressgateway_opentelemetry_collector_k8s_metrics_endpoint" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.istio_ingressgateway.app_name
-    endpoint = module.istio_ingressgateway.provides.metrics_endpoint
-  }
-
-  application {
-    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "metrics-endpoint"
-  }
-}
-
-resource "juju_integration" "istio_pilot_opentelemetry_collector_k8s_grafana_dashboard" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.istio_pilot.app_name
-    endpoint = module.istio_pilot.provides.grafana_dashboard
-  }
-
-  application {
-    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "grafana-dashboards-consumer"
-  }
-}
-
-resource "juju_integration" "istio_pilot_opentelemetry_collector_k8s_metrics_endpoint" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.istio_pilot.app_name
-    endpoint = module.istio_pilot.provides.metrics_endpoint
-  }
-
-  application {
-    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "metrics-endpoint"
-  }
-}
-
 resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model

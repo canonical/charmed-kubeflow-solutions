@@ -18,13 +18,6 @@ output "opentelemetry_collector_k8s" {
   } : null
 }
 
-output "ingress_provider" {
-  value = {
-    app_name = module.istio_pilot.app_name,
-    provides = module.istio_pilot.provides,
-  }
-}
-
 output "kserve_controller" {
   value = {
     app_name = module.kserve_controller.app_name,
@@ -37,9 +30,3 @@ output "model" {
   value = var.create_model ? one(juju_model.kubeflow[*].name) : local.model
 }
 
-output "tls_certificate_requirer" {
-  value = {
-    app_name = module.istio_pilot.app_name,
-    requires = module.istio_pilot.requires.certificates
-  }
-}

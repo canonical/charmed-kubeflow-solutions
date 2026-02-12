@@ -36,31 +36,6 @@ module "envoy" {
   channel    = "latest/${var.risk}"
 }
 
-module "istio_ingressgateway" {
-  source     = "git::https://github.com/canonical/istio-operators//charms/istio-gateway/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  app_name   = "istio-ingressgateway"
-  config = {
-    kind        = "ingress",
-    annotations = var.istio_ingressgateway_annotations,
-  }
-  revision = var.istio_ingressgateway_revision
-  channel  = "latest/${var.risk}"
-}
-
-module "istio_pilot" {
-  source     = "git::https://github.com/canonical/istio-operators//charms/istio-pilot/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  config = {
-    default-gateway = "kubeflow-gateway",
-    "cni-bin-dir" : var.istio_cni_bin_dir
-    "cni-conf-dir" : var.istio_cni_conf_dir
-    "tls-secret-id" : var.istio_tls_secret_id
-  }
-  revision = var.istio_pilot_revision
-  channel  = "latest/${var.risk}"
-}
-
 module "jupyter_controller" {
   source     = "git::https://github.com/canonical/notebook-operators//charms/jupyter-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
