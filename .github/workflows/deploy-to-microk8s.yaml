@@ -163,7 +163,12 @@ jobs:
             TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }} $TF_VARS_ARG
+          CNI_ARGS=""
+          if [[ "${{ matrix.bundle.module }}" != "kubeflow-ambient" ]]; then
+            CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} $CNI_ARGS --pss ${{ matrix.pod-security-standards.policy }} $TF_VARS_ARG
 
       - name: Run UATs
         run: |

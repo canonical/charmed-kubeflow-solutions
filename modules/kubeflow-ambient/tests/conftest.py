@@ -30,7 +30,7 @@ def pytest_addoption(parser):
         const="",
         default="microk8s",
         type=str,
-        help="Platform for istio-k8s (e.g., k8s, microk8s, or empty string for Canonical K8s)",
+        help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
     parser.addoption(
         "--pss",

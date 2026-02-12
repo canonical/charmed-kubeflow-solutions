@@ -134,7 +134,7 @@ jobs:
 
           ISTIO_PLATFORM_ARG=""
           if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
-            ISTIO_PLATFORM_ARG='--istio-k8s-platform ""'
+            ISTIO_PLATFORM_ARG='--istio-k8s-platform'
           fi
 
           tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} $TF_VARS_ARG $ISTIO_PLATFORM_ARG
