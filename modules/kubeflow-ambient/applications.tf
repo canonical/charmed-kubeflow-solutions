@@ -352,10 +352,6 @@ resource "juju_application" "istio_beacon_k8s" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
   trust = true
 
-  config = {
-    "model-on-mesh" = "true"
-  }
-
   charm {
     name     = "istio-beacon-k8s"
     channel  = "2/edge"
