@@ -219,6 +219,8 @@ module "kubeflow_profiles" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     "security-policy" : var.kubeflow_profiles_security_policy
+    "service-mesh-mode" : "istio-ambient"
+    "istio-gateway-principal" : "cluster.local/ns/kubeflow/sa/istio-ingress-k8s-istio"
   }
   revision = var.kubeflow_profiles_revision
   channel  = "latest/${var.risk}"
@@ -233,7 +235,7 @@ module "kubeflow_roles" {
 
 module "kubeflow_trainer" {
   count      = var.kubeflow_trainer_v2 ? 1 : 0
-  source     = "git::https://github.com/canonical/training-operator//terraform?ref=main"
+  source     = "git::https://github.com/canonical/training-operator//terraform?ref=main-v2"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_trainer_revision
   channel    = "latest/${var.risk}"
@@ -349,6 +351,10 @@ resource "juju_application" "istio_beacon_k8s" {
   name  = "istio-beacon-k8s"
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
   trust = true
+
+  config = {
+    "model-on-mesh" = "true"
+  }
 
   charm {
     name     = "istio-beacon-k8s"

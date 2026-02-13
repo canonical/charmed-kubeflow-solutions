@@ -839,3 +839,45 @@ resource "juju_integration" "kserve_controller_istio_ingress_k8s_gateway_metadat
     endpoint = "gateway-metadata"
   }
 }
+
+resource "juju_integration" "kfp_api_kfp_persistence_grpc" {
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+
+  application {
+    name     = module.kfp_api.app_name
+    endpoint = module.kfp_api.provides.kfp_api_grpc
+  }
+
+  application {
+    name     = module.kfp_persistence.app_name
+    endpoint = module.kfp_persistence.requires.kfp_api_grpc
+  }
+}
+
+resource "juju_integration" "istio_beacon_k8s_training_operator" {
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+
+  application {
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
+  }
+
+  application {
+    name     = module.training_operator.app_name
+    endpoint = module.training_operator.requires.service_mesh
+  }
+}
+
+resource "juju_integration" "kfp_api_kfp_schedwf_grpc" {
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+
+  application {
+    name     = module.kfp_api.app_name
+    endpoint = module.kfp_api.provides.kfp_api_grpc
+  }
+
+  application {
+    name     = module.kfp_schedwf.app_name
+    endpoint = module.kfp_schedwf.requires.kfp_api_grpc
+  }
+}
