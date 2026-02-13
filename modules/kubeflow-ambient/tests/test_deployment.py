@@ -51,13 +51,13 @@ class TestCharm:
 
 
 def get_public_url(lightkube_client: lightkube.Client, bundle_name: str):
-    """Extracts public URL from service istio-ingressgateway-workload."""
-    ingressgateway_svc = lightkube_client.get(
-        Service, "istio-ingressgateway-workload", namespace=bundle_name
+    """Extracts public URL from service istio-ingress-k8s-istio."""
+    istio_ingress_k8s_svc = lightkube_client.get(
+        Service, "istio-ingress-k8s-istio", namespace=bundle_name
     )
     address = (
-        ingressgateway_svc.status.loadBalancer.ingress[0].hostname
-        or ingressgateway_svc.status.loadBalancer.ingress[0].ip
+        istio_ingress_k8s_svc.status.loadBalancer.ingress[0].hostname
+        or istio_ingress_k8s_svc.status.loadBalancer.ingress[0].ip
     )
     public_url = f"http://{address}"
     return public_url
