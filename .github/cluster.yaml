@@ -34,6 +34,8 @@ managedNodeGroups:
   maxPodsPerNode: 110
   name: ng-d06bd84e
   releaseVersion: ""
+  ssh:
+    allow: true
   tags:
     alpha.eksctl.io/nodegroup-name: ng-d06bd84e
     alpha.eksctl.io/nodegroup-type: managed
