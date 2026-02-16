@@ -868,6 +868,21 @@ resource "juju_integration" "istio_beacon_k8s_training_operator" {
   }
 }
 
+resource "juju_integration" "istio_beacon_k8s_kubeflow_trainer" {
+  count = var.kubeflow_trainer_v2 ? 1 : 0
+  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+
+  application {
+    name     = juju_application.istio_beacon_k8s.name
+    endpoint = "service-mesh"
+  }
+
+  application {
+    name     = module.kubeflow_trainer[0].app_name
+    endpoint = module.kubeflow_trainer[0].requires.service_mesh
+  }
+}
+
 resource "juju_integration" "kfp_api_kfp_schedwf_grpc" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 
