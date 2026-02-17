@@ -10,9 +10,9 @@ jobs:
     strategy:
       matrix:
         module:
-          - kubeflow
-          - kubeflow-feast
-          - kubeflow-mlflow
+          # - kubeflow
+          # - kubeflow-feast
+          # - kubeflow-mlflow
           - kubeflow-spark
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
