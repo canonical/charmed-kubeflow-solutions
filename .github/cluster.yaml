@@ -8,8 +8,18 @@ iam:
   vpcResourceControllerPolicy: true
   withOIDC: false
 addons:
+- name: eks-pod-identity-agent
 - name: aws-ebs-csi-driver
-  serviceAccountRoleARN: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  useDefaultPodIdentityAssociations: true
+- name: vpc-cni
+  useDefaultPodIdentityAssociations: true
+  configurationValues: |
+    {
+      "env": {
+        "ENABLE_PREFIX_DELEGATION": "true",
+        "WARM_PREFIX_TARGET": "1"
+      }
+    }
 kind: ClusterConfig
 kubernetesNetworkConfig:
   ipFamily: IPv4
@@ -18,9 +28,10 @@ managedNodeGroups:
   iam:
     withAddonPolicies:
       ebs: true
-  instanceType: t2.2xlarge
+  instanceType: t3.2xlarge
   maxSize: 2
   minSize: 2
+  maxPodsPerNode: 110
   name: ng-d06bd84e
   releaseVersion: ""
   ssh:
