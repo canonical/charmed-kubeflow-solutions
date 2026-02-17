@@ -70,7 +70,7 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          
+
           if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
@@ -85,7 +85,7 @@ jobs:
         run: |
           pip install tox
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
-          sudo snap install charmcraft --channel latest/stable --classic
+          sudo snap install charmcraft --channe=3.x/stable --classic
           sudo snap install terraform --channel=latest/stable --classic
           juju version
           terraform --version
@@ -156,7 +156,7 @@ jobs:
       - name: Setup Juju controller
         run: |
           /snap/juju/current/bin/juju add-k8s eks --client
-          juju bootstrap eks eks-controller --agent-version 3.6.9
+          juju bootstrap eks eks-controller
 
       - name: Deploy and assert solution
         env:
@@ -232,5 +232,5 @@ jobs:
       needs: [deploy-solution-to-eks]
       uses: ./.github/workflows/delete-aws-volumes.yaml
       with:
-        region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}  
+        region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}
       secrets: inherit
