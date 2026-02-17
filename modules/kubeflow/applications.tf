@@ -187,8 +187,8 @@ module "kfp_viz" {
 module "knative_eventing" {
   source     = "git::https://github.com/canonical/knative-operators//charms/knative-eventing/terraform?ref=track/1.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision = var.knative_eventing_revision
-  channel  = "1.16/${var.risk}"
+  revision   = var.knative_eventing_revision
+  channel    = "1.16/${var.risk}"
 }
 
 module "knative_operator" {
