@@ -93,4 +93,5 @@ def tf_vars(request, risk, db_sizes, pss) -> list[str]:
     return risk + db_sizes + pss + [
         "-var", "create_model=false",
         "-var", "cos_configuration=true",
+        "-var", "kubeflow_trainer_v2=true",
     ]
