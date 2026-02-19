@@ -167,20 +167,6 @@ resource "juju_integration" "kfp_ui_minio_object_storage" {
   }
 }
 
-resource "juju_integration" "kserve_controller_knative_serving_local_gateway" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.kserve_controller.app_name
-    endpoint = module.kserve_controller.requires.local_gateway
-  }
-
-  application {
-    name     = module.knative_serving.app_name
-    endpoint = module.knative_serving.provides.local_gateway
-  }
-}
-
 resource "juju_integration" "kubeflow_profiles_kubeflow_dashboard_kubeflow_profiles" {
   model = var.create_model ? juju_model.kubeflow[0].name : local.model
 

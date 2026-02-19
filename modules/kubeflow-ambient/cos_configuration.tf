@@ -542,66 +542,6 @@ resource "juju_integration" "kfp_viz_opentelemetry_collector_k8s_grafana_logging
   }
 }
 
-resource "juju_integration" "knative_eventing_knative_operator_otel_collector" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.knative_eventing.app_name
-    endpoint = module.knative_eventing.requires.otel_collector
-  }
-
-  application {
-    name     = module.knative_operator.app_name
-    endpoint = module.knative_operator.provides.otel_collector
-  }
-}
-
-resource "juju_integration" "knative_serving_knative_operator_otel_collector" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.knative_serving.app_name
-    endpoint = module.knative_serving.requires.otel_collector
-  }
-
-  application {
-    name     = module.knative_operator.app_name
-    endpoint = module.knative_operator.provides.otel_collector
-  }
-}
-
-resource "juju_integration" "knative_operator_opentelemetry_collector_k8s_metrics_endpoint" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.knative_operator.app_name
-    endpoint = module.knative_operator.provides.metrics_endpoint
-  }
-
-  application {
-    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "metrics-endpoint"
-  }
-}
-
-resource "juju_integration" "knative_operator_opentelemetry_collector_k8s_grafana_logging" {
-  count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
-
-  application {
-    name     = module.knative_operator.app_name
-    endpoint = module.knative_operator.requires.logging
-  }
-
-  application {
-    name     = var.existing_opentelemetry_collector_name == null ? juju_application.opentelemetry_collector_k8s[count.index].name : var.existing_opentelemetry_collector_name
-    endpoint = "receive-loki-logs"
-  }
-}
-
 resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
   model = var.create_model ? juju_model.kubeflow[0].name : local.model

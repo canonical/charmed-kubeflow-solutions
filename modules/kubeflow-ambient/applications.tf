@@ -159,34 +159,6 @@ module "kfp_viz" {
   channel    = "latest/${var.risk}"
 }
 
-module "knative_eventing" {
-  source     = "git::https://github.com/canonical/knative-operators//charms/knative-eventing/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision = var.knative_eventing_revision
-  channel  = "1.16/${var.risk}"
-}
-
-module "knative_operator" {
-  source     = "git::https://github.com/canonical/knative-operators//charms/knative-operator/terraform?ref=track/1.16"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  revision   = var.knative_operator_revision
-  channel    = "1.16/${var.risk}"
-}
-
-module "knative_serving" {
-  source     = "git::https://github.com/canonical/knative-operators//charms/knative-serving/terraform?ref=track/1.16"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  config = {
-    http-proxy                = var.http_proxy,
-    https-proxy               = var.https_proxy,
-    "istio.gateway.namespace" = local.model,
-    "istio.gateway.name"      = "kubeflow-gateway",
-    no-proxy                  = var.no_proxy,
-  }
-  revision = var.knative_serving_revision
-  channel  = "1.16/${var.risk}"
-}
-
 module "kserve_controller" {
   source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model

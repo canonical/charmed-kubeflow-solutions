@@ -293,24 +293,6 @@ variable "kfp_viz_revision" {
   default     = null
 }
 
-variable "knative_eventing_revision" {
-  description = "Charm revision for knative-eventing"
-  type        = number
-  default     = null
-}
-
-variable "knative_operator_revision" {
-  description = "Charm revision for knative-operator"
-  type        = number
-  default     = null
-}
-
-variable "knative_serving_revision" {
-  description = "Charm revision for knative-serving"
-  type        = number
-  default     = null
-}
-
 variable "kserve_controller_revision" {
   description = "Charm revision for kserve-controller"
   type        = number
