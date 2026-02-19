@@ -47,7 +47,7 @@ jobs:
             risk: edge
             uats:
               env: kubeflow-remote
-              extra-args: --bundle ""
+              extra-args: --bundle "" --include-kubeflow-trainer-tests
 
     steps:
       - name: Checkout repository
