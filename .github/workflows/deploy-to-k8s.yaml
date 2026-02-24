@@ -28,14 +28,14 @@ jobs:
       fail-fast: false
       matrix:
         bundle:
-          # - module: kubeflow-mlflow
-          #   uats:
-          #     env: uats-remote
-          #     extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
-          # - module: kubeflow-feast
-          #   uats:
-          #     env: feast-remote
-          #     extra-args: ""
+          - module: kubeflow-mlflow
+            uats:
+              env: uats-remote
+              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+              extra-args: ""
           # - module: kubeflow-spark
           #   tf-vars-file: examples/tfvars.json
           #   risk: edge # TODO: Run Spark tests with Kubeflow from `stable` risk once all changes for Spark integration are released to stable
