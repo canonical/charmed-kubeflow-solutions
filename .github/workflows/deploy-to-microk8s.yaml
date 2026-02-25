@@ -29,22 +29,22 @@ jobs:
       fail-fast: false
       matrix:
         bundle:
-          # - module: kubeflow-mlflow
-          #   uats:
-          #     env: uats-remote
-          #     extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
-          # - module: kubeflow-feast
-          #   uats:
-          #     env: feast-remote
-          #     extra-args: ""
-          # - module: kubeflow-spark
-          #   risk: edge # TODO: Run Spark tests with Kubeflow from `stable` risk once all changes for Spark integration are released to stable
-          #   uats_branch: main # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
-          #   juju-agent-version: 3.6.9 # TODO: remove pin once Spark can work on recent Juju agent versions
-          #   tf-vars-file: examples/tfvars.json
-          #   uats:
-          #     env: spark-remote
-          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7 --bundle ""
+          - module: kubeflow-mlflow
+            uats:
+              env: uats-remote
+              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+              extra-args: ""
+          - module: kubeflow-spark
+            risk: edge # TODO: Run Spark tests with Kubeflow from `stable` risk once all changes for Spark integration are released to stable
+            uats_branch: main # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
+            juju-agent-version: 3.6.9 # TODO: remove pin once Spark can work on recent Juju agent versions
+            tf-vars-file: examples/tfvars.json
+            uats:
+              env: spark-remote
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7 --bundle ""
           - module: kubeflow-ambient
             risk: edge
             uats:
