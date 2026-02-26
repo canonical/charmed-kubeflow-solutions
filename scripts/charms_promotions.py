@@ -1,12 +1,13 @@
 import json
 import re
+import shlex
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 import yaml
-from IPython.core.oinspect import Bundle
 
 RISKS = {"edge": 1, "beta": 2, "candidate": 3, "stable": 4}
 
@@ -29,7 +30,8 @@ class Charm:
 
         if not self._status:
             output = subprocess.check_output(
-                ["charmcraft", "status", self.name, "--format", "json"]
+                ["charmcraft", "status", self.name, "--format", "json"],
+                stderr=subprocess.STDOUT,
             )
 
             self._status = json.loads(output.decode("utf-8"))
@@ -80,7 +82,7 @@ class Charm:
         )
 
         if dry_run:
-            return cmds
+            return shlex.join(cmds)
 
         return subprocess.check_output(cmds).decode("utf-8")
 
@@ -97,13 +99,14 @@ class Bundle:
     charms: list[Charm]
 
     @classmethod
-    def from_status(cls, content: str, format: Format = "text"):
+    def from_status(cls, content: str, format: Format | str = Format.TEXT):
         parsers = {
             Format.TEXT: TextParser,
             Format.YAML: YAMLParser
         }
+        normalized_format = Format(format)
 
-        return parsers[format].parse(content)
+        return parsers[normalized_format].parse(content)
 
 
 class YAMLParser:
@@ -119,7 +122,7 @@ class YAMLParser:
 
 
 class TextParser:
-    word_with_leading_spaces = re.compile("^\s*[^\s]+")
+    word_with_leading_spaces = re.compile(r"^\s*[^\s]+")
 
     @staticmethod
     def extract_first_word(mystring):
@@ -134,13 +137,35 @@ class TextParser:
 
     @staticmethod
     def parse(content: str):
+        lines = content.splitlines()
 
-        lines = content.split("\n")
+        white_spaces = re.compile(r"\s+\s+")
 
-        white_spaces = re.compile("\s+\s+")
+        app_header_index = next(
+            (
+                index
+                for index, line in enumerate(lines)
+                if line.strip().startswith("App")
+                and "Charm" in line
+                and "Channel" in line
+            ),
+            None,
+        )
+
+        if app_header_index is None:
+            raise ValueError("Could not locate applications table in status text")
+
+        table_lines = []
+        for line in lines[app_header_index:]:
+            if table_lines and (not line.strip() or line.strip().startswith("Unit")):
+                break
+            table_lines.append(line)
+
+        if len(table_lines) < 2:
+            raise ValueError("Applications table is empty in status text")
 
         # Get header
-        header = lines[0]
+        header = table_lines[0]
 
         # First guess of width based on headers
         ends=[s.end() for s in white_spaces.finditer(header)]
@@ -153,7 +178,7 @@ class TextParser:
         # This is due to the fact that some columns the text extends to before the start
         # of the columns header (text aligned right)
         widths = [len(column) for column in columns]
-        for line in lines[1:]:
+        for line in table_lines[1:]:
 
             widths = list(map(max,zip(
                 widths,
@@ -167,10 +192,10 @@ class TextParser:
 
         data = [
             dict(zip(columns, TextParser.parse_line(line, indices)))
-            for line in lines[1:]
+            for line in table_lines[1:]
+            if line.strip()
         ]
 
-        # pd.DataFrame([TextParser.parse_line(line, indices) for line in lines[1:]], columns= columns)
         return Bundle([
             Charm(item["Charm"], int(item["Rev"]), item["Channel"])
             for item in data
@@ -180,18 +205,25 @@ class TextParser:
 
 if __name__ == "__main__":
 
-    # with open("./scripts/status.txt") as fid:
-    #     bundle = Bundle.from_status(fid.read(), Format.TEXT)
-
-    # with open("./scripts/status.yaml") as fid:
-    #     bundle = Bundle.from_status(fid.read(), Format.YAML)
-
     import argparse
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--file", required=True)
-    parser.add_argument("--apply", default=False, action="store_true")
+    action_group = parser.add_mutually_exclusive_group()
+    action_group.add_argument(
+        "--dry-run",
+        dest="dry_run",
+        action="store_true",
+        help="Print release commands without executing them (default)",
+    )
+    action_group.add_argument(
+        "--apply",
+        dest="dry_run",
+        action="store_false",
+        help="Execute charmcraft release commands",
+    )
+    parser.set_defaults(dry_run=True)
     parser.add_argument("--format", choices=("text", "yaml"), default="text")
     parser.add_argument("--promote-to", choices=("beta", "candidate", "stable"), default="beta")
     parser.add_argument("--exclude", nargs="*", default=["mysql-k8s"])
@@ -202,15 +234,17 @@ if __name__ == "__main__":
 
     for charm in bundle.charms:
         if not charm.name in args.exclude:
-            print(charm.promote_version(args.promote_to, not args.apply))
-
-
-
-
-
-
-
-
-
-
-    
+            try:
+                print(charm.promote_version(args.promote_to, args.dry_run))
+            except subprocess.CalledProcessError as err:
+                output = (err.output or b"").decode("utf-8", errors="replace").strip()
+                if "permission-required" in output:
+                    print(
+                        f"WARNING: skipping '{charm.name}' due to missing permissions. Add it to --exclude to avoid this warning.",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(
+                        f"WARNING: skipping '{charm.name}' after command failure: {shlex.join(err.cmd)}",
+                        file=sys.stderr,
+                    )
