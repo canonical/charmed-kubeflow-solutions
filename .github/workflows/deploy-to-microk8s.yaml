@@ -14,7 +14,7 @@ on:
       risk:
         description: 'The risk level to be tested'
         required: false
-        default: 'edge'
+        default: 'candidate'
 
   pull_request:
   schedule:
