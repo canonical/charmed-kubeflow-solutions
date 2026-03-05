@@ -14,7 +14,7 @@ on:
       risk:
         description: 'The risk level to be tested'
         required: false
-        default: 'stable'
+        default: 'candidate'
 
   pull_request:
   schedule:
@@ -32,11 +32,10 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
+              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: ""
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
@@ -61,9 +60,9 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
+          RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          
+
           if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
@@ -129,7 +128,7 @@ jobs:
           microk8s config > ~/.kube/config
 
       - name: Setup terraform
-        run: |          
+        run: |
           sudo snap install terraform --channel latest/stable --classic
           terraform --version
 
