@@ -35,7 +35,6 @@ jobs:
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: ""
           - module: kubeflow-ambient
             uats_branch: fix-increase-katib-experiment-timeout
             uats:
