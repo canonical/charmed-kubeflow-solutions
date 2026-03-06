@@ -36,6 +36,12 @@ jobs:
           - module: kubeflow-feast
             uats:
               env: feast-remote
+              extra-args: ""
+          - module: kubeflow-ambient
+            uats_branch: fix-increase-katib-experiment-timeout
+            uats:
+              env: kubeflow-remote
+              extra-args: --include-kubeflow-trainer-tests
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
@@ -60,10 +66,9 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk || env.RISK }}
+          RISK=${{ matrix.bundle.risk || inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - id: setup-python
@@ -138,7 +143,16 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }}
+          CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          RISK_ARG="--risk ${{ env.RISK }}"
+          PLATFORM_ARG=""
+          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
+            CNI_ARGS=""
+            RISK_ARG=""
+            PLATFORM_ARG="--istio-k8s-platform"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $CNI_ARGS --pss ${{ matrix.pod-security-standards.policy }} $PLATFORM_ARG
 
       - name: Run UATs
         run: |

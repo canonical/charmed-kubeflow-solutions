@@ -35,6 +35,12 @@ jobs:
           - module: kubeflow-feast
             uats:
               env: feast-remote
+              extra-args: ""
+          - module: kubeflow-ambient
+            uats_branch: fix-increase-katib-experiment-timeout
+            uats:
+              env: kubeflow-remote
+              extra-args: --include-kubeflow-trainer-tests
 
     steps:
       - name: Checkout repository
@@ -52,10 +58,9 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk || env.RISK }}
+          RISK=${{ matrix.bundle.risk || inputs.risk }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -106,7 +111,14 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          RISK_ARG="--risk ${{ env.RISK }}"
+          PLATFORM_ARG=""
+          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
+            RISK_ARG=""
+            PLATFORM_ARG="--istio-k8s-platform"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG
 
       - name: Run UATs
         run: |
