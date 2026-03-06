@@ -44,8 +44,7 @@ jobs:
           #     env: spark-remote
           #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7 --bundle ""
           - module: kubeflow-ambient
-            risk: edge
-            uats_branch: main
+            uats_branch: fix-increase-katib-experiment-timeout
             uats:
               env: kubeflow-remote
               extra-args: --include-kubeflow-trainer-tests
