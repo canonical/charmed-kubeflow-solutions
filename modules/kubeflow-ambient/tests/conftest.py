@@ -30,7 +30,7 @@ def pytest_addoption(parser):
         const="",
         default="microk8s",
         type=str,
-        help="Platform for istio-k8s (e.g., k8s, microk8s, or empty string for Canonical K8s)",
+        help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
     parser.addoption(
         "--pss",
@@ -56,8 +56,6 @@ def db_sizes(request) -> list[str]:
         "-var", f"kfp_db_size={size}",
         "-var", f"katib_db_size={size}",
         "-var", f"opentelemetry_collector_k8s_size={size}",
-        "-var", f"feast_registry_size={size}",
-        "-var", f"feast_online_store_size={size}",
     ]
 
 @pytest.fixture(scope="module")
@@ -80,4 +78,5 @@ def tf_vars(request, db_sizes, pss) -> list[str]:
     return db_sizes + pss + [
         "-var", "create_model=false",
         "-var", "cos_configuration=true",
+        "-var", "kubeflow_trainer_v2=true",
     ]
