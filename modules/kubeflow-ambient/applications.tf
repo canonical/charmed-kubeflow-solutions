@@ -188,7 +188,7 @@ module "kubeflow_profiles" {
   config = {
     "security-policy" : var.kubeflow_profiles_security_policy
     "service-mesh-mode" : "istio-ambient"
-    "istio-gateway-principal" : "cluster.local/ns/kubeflow/sa/istio-ingress-k8s-istio"
+    "istio-gateway-service-account" : "istio-ingress-k8s-istio"
   }
   revision = var.kubeflow_profiles_revision
   channel  = "latest/${var.risk}"
