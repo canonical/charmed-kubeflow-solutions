@@ -42,26 +42,11 @@ def pytest_addoption(parser):
         help="Pod security standards enforced in Profiles' namespaces",
     )
     parser.addoption(
-        "--risk",
-        nargs="?",
-        choices=["stable", "candidate", "beta", "edge"],
-        const="stable",
-        default="stable",
-        type=str,
-        help="Risk to be used when deploying the terraform module",
-    )
-    parser.addoption(
         "--db-size",
         default="1G",
         type=str,
         help="Size to be used for the databases.",
     )
-
-@pytest.fixture(scope="module")
-def risk(request) -> list[str]:
-    """Terraform module customization for the risk."""
-    risk = request.config.getoption("--risk") or "stable"
-    return ["-var", f"risk={risk}"]
 
 @pytest.fixture(scope="module")
 def db_sizes(request) -> list[str]:
@@ -88,9 +73,9 @@ def pss(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, risk, db_sizes, pss) -> list[str]:
+def tf_vars(request, db_sizes, pss) -> list[str]:
     """Overall Terraform module customization."""
-    return risk + db_sizes + pss + [
+    return db_sizes + pss + [
         "-var", "create_model=false",
         "-var", "cos_configuration=true",
         "-var", "kubeflow_trainer_v2=true",
