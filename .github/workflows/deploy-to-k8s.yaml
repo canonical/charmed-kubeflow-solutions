@@ -48,7 +48,7 @@ jobs:
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args: --bundle "" --include-kubeflow-trainer-tests
+              extra-args: --include-kubeflow-trainer-tests
 
     steps:
       - name: Checkout repository

@@ -50,7 +50,7 @@ jobs:
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args: --bundle "" --include-kubeflow-trainer-tests
+              extra-args: --include-kubeflow-trainer-tests
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
