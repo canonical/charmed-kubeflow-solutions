@@ -133,11 +133,13 @@ jobs:
           fi
 
           ISTIO_PLATFORM_ARG=""
+          RISK_ARG="--risk ${{ env.RISK }}"
           if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
             ISTIO_PLATFORM_ARG='--istio-k8s-platform'
+            RISK_ARG=""
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} $TF_VARS_ARG $ISTIO_PLATFORM_ARG
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $TF_VARS_ARG $ISTIO_PLATFORM_ARG
 
       - name: Run UATs
         run: |

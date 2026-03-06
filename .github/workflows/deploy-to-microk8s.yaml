@@ -164,11 +164,14 @@ jobs:
           fi
 
           CNI_ARGS=""
+          RISK_ARG="--risk ${{ env.RISK }}"
           if [[ "${{ matrix.bundle.module }}" != "kubeflow-ambient" ]]; then
             CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          else
+            RISK_ARG=""
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} $CNI_ARGS --pss ${{ matrix.pod-security-standards.policy }} $TF_VARS_ARG
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $CNI_ARGS --pss ${{ matrix.pod-security-standards.policy }} $TF_VARS_ARG
 
       - name: Run UATs
         run: |
