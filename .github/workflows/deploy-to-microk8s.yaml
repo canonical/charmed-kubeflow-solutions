@@ -171,6 +171,9 @@ jobs:
             RISK_ARG=""
           fi
 
+          juju add-model istio-system
+          juju add-model kubeflow
+          kubectl label namespaces kubeflow pod-security.kubernetes.io/enforce=baseline
           tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $CNI_ARGS --pss ${{ matrix.pod-security-standards.policy }} $TF_VARS_ARG
 
       - name: Run UATs
