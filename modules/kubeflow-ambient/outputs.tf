@@ -27,6 +27,6 @@ output "kserve_controller" {
 }
 
 output "model" {
-  value = var.create_model ? one(juju_model.kubeflow[*].name) : local.model
+  value = var.create_model ? one(juju_model.kubeflow[*].name) : local.kubeflow_platform_model
 }
 

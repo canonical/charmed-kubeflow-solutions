@@ -1,14 +1,14 @@
 
 module "admission_webhook" {
   source     = "git::https://github.com/canonical/admission-webhook-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.admission_webhook_revision
   channel    = "latest/edge"
 }
 
 module "argo_controller" {
   source     = "git::https://github.com/canonical/argo-operators//charms/argo-controller/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.argo_controller_revision
   channel    = "latest/edge"
   config = {
@@ -18,7 +18,7 @@ module "argo_controller" {
 
 module "dex_auth" {
   source     = "git::https://github.com/canonical/dex-auth-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config = {
     "public-url" : var.public_url,
     "connectors" : var.dex_connectors
@@ -31,21 +31,21 @@ module "dex_auth" {
 
 module "envoy" {
   source     = "git::https://github.com/canonical/envoy-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.envoy_revision
   channel    = "latest/edge"
 }
 
 module "jupyter_controller" {
   source     = "git::https://github.com/canonical/notebook-operators//charms/jupyter-controller/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.jupyter_controller_revision
   channel    = "latest/edge"
 }
 
 module "jupyter_ui" {
   source     = "git::https://github.com/canonical/notebook-operators//charms/jupyter-ui/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config     = var.jupyter_ui_config
   revision   = var.jupyter_ui_revision
   channel    = "latest/edge"
@@ -53,7 +53,7 @@ module "jupyter_ui" {
 
 module "katib_controller" {
   source     = "git::https://github.com/canonical/katib-operators//charms/katib-controller/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.katib_controller_revision
   channel    = "latest/edge"
 }
@@ -61,7 +61,7 @@ module "katib_controller" {
 module "katib_db" {
   # tflint-ignore: terraform_module_pinned_source
   source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=eb6261e6fd1830d80aa4fa260d091c9110c24ba4"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   app_name   = "katib-db"
   channel    = "8.0/stable"
   # The following config is equivalent to "constraints: mem=2G"
@@ -74,21 +74,21 @@ module "katib_db" {
 
 module "katib_db_manager" {
   source     = "git::https://github.com/canonical/katib-operators//charms/katib-db-manager/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.katib_db_manager_revision
   channel    = "latest/edge"
 }
 
 module "katib_ui" {
   source     = "git::https://github.com/canonical/katib-operators//charms/katib-ui/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.katib_ui_revision
   channel    = "latest/edge"
 }
 
 module "kfp_api" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_api_revision
   config = {
     object-store-bucket-name = var.kfp_api_object_store_bucket_name
@@ -99,7 +99,7 @@ module "kfp_api" {
 module "kfp_db" {
   # tflint-ignore: terraform_module_pinned_source
   source     = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=eb6261e6fd1830d80aa4fa260d091c9110c24ba4"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   app_name   = "kfp-db"
   channel    = "8.0/stable"
   # The following config is equivalent to "constraints: mem=2G"
@@ -112,56 +112,56 @@ module "kfp_db" {
 
 module "kfp_metadata_writer" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-metadata-writer/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_metadata_writer_revision
   channel    = "latest/edge"
 }
 
 module "kfp_persistence" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-persistence/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_persistence_revision
   channel    = "latest/edge"
 }
 
 module "kfp_profile_controller" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-profile-controller/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_profile_controller_revision
   channel    = "latest/edge"
 }
 
 module "kfp_schedwf" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-schedwf/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_schedwf_revision
   channel    = "latest/edge"
 }
 
 module "kfp_ui" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-ui/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_ui_revision
   channel    = "latest/edge"
 }
 
 module "kfp_viewer" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viewer/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_viewer_revision
   channel    = "latest/edge"
 }
 
 module "kfp_viz" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viz/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kfp_viz_revision
   channel    = "latest/edge"
 }
 
 module "kserve_controller" {
   source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config = {
     deployment-mode = "rawdeployment",
     http-proxy      = var.http_proxy,
@@ -174,7 +174,7 @@ module "kserve_controller" {
 
 module "kubeflow_dashboard" {
   source     = "git::https://github.com/canonical/kubeflow-dashboard-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config = {
     "registration-flow" : var.kubeflow_dashboard_registration_flow
   }
@@ -184,7 +184,7 @@ module "kubeflow_dashboard" {
 
 module "kubeflow_profiles" {
   source     = "git::https://github.com/canonical/kubeflow-profiles-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config = {
     "security-policy" : var.kubeflow_profiles_security_policy
     "service-mesh-mode" : "istio-ambient"
@@ -196,7 +196,7 @@ module "kubeflow_profiles" {
 
 module "kubeflow_roles" {
   source     = "git::https://github.com/canonical/kubeflow-roles-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kubeflow_roles_revision
   channel    = "latest/edge"
 }
@@ -204,28 +204,28 @@ module "kubeflow_roles" {
 module "kubeflow_trainer" {
   count      = var.kubeflow_trainer_v2 ? 1 : 0
   source     = "git::https://github.com/canonical/training-operator//terraform?ref=main-v2"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kubeflow_trainer_revision
   channel    = "latest/edge"
 }
 
 module "kubeflow_volumes" {
   source     = "git::https://github.com/canonical/kubeflow-volumes-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.kubeflow_volumes_revision
   channel    = "latest/edge"
 }
 
 module "metacontroller_operator" {
   source     = "git::https://github.com/canonical/metacontroller-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.metacontroller_operator_revision
   channel    = "latest/edge"
 }
 
 module "mlmd" {
   source     = "git::https://github.com/canonical/mlmd-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   storage_directives = {
     mlmd-data = var.mlmd_size
   }
@@ -235,7 +235,7 @@ module "mlmd" {
 
 module "minio" {
   source     = "git::https://github.com/canonical/minio-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config = {
     access-key               = var.minio_access_key,
     secret-key               = var.minio_secret_key,
@@ -252,7 +252,7 @@ module "minio" {
 
 module "oidc_gatekeeper" {
   source     = "git::https://github.com/canonical/oidc-gatekeeper-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   config = {
     ca-bundle = var.oidc_gatekeeper_ca_bundle,
   }
@@ -262,35 +262,35 @@ module "oidc_gatekeeper" {
 
 module "pvcviewer_operator" {
   source     = "git::https://github.com/canonical/pvcviewer-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.pvcviewer_operator_revision
   channel    = "latest/edge"
 }
 
 module "tensorboard_controller" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboard-controller/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.tensorboard_controller_revision
   channel    = "latest/edge"
 }
 
 module "tensorboards_web_app" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboards-web-app/terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.tensorboards_web_app_revision
   channel    = "latest/edge"
 }
 
 module "training_operator" {
   source     = "git::https://github.com/canonical/training-operator//terraform?ref=main"
-  model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model_name = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   revision   = var.training_operator_revision
   channel    = "latest/edge"
 }
 
 resource "juju_application" "istio_k8s" {
   name  = "istio-k8s"
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.istio[0].name : local.istio_system_model
   trust = true
   config = {
     platform = var.istio_k8s_platform
@@ -305,7 +305,7 @@ resource "juju_application" "istio_k8s" {
 
 resource "juju_application" "istio_ingress_k8s" {
   name  = "istio-ingress-k8s"
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   trust = true
 
   charm {
@@ -317,7 +317,7 @@ resource "juju_application" "istio_ingress_k8s" {
 
 resource "juju_application" "istio_beacon_k8s" {
   name  = "istio-beacon-k8s"
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   trust = true
 
   charm {

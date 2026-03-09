@@ -3,7 +3,8 @@
 import jubilant
 import pytest
 
-MODEL_NAME = "kubeflow"
+MODEL_NAME_FOR_ISTIO_SYSTEM = "istio-system"
+MODEL_NAME_FOR_KUBEFLOW_PLATFORM = "kubeflow"
 
 @pytest.fixture(scope="module")
 def juju(request: pytest.FixtureRequest):
@@ -15,7 +16,8 @@ def juju(request: pytest.FixtureRequest):
             print(log, end="")
 
     juju_instance = jubilant.Juju()
-    juju_instance.add_model(MODEL_NAME)
+    juju_instance.add_model(MODEL_NAME_FOR_ISTIO_SYSTEM)
+    juju_instance.add_model(MODEL_NAME_FOR_KUBEFLOW_PLATFORM)
 
     try:
         yield juju_instance

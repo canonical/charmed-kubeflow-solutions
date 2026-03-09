@@ -7,7 +7,7 @@ resource "juju_application" "opentelemetry_collector_k8s" {
     channel  = "2/stable"
     revision = var.opentelemetry_collector_k8s_revision
   }
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
   name  = "opentelemetry-collector-k8s-kubeflow"
   storage_directives = {
     persisted = var.opentelemetry_collector_k8s_size
@@ -18,7 +18,7 @@ resource "juju_application" "opentelemetry_collector_k8s" {
 
 resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.argo_controller.app_name
@@ -33,7 +33,7 @@ resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana
 
 resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.argo_controller.app_name
@@ -48,7 +48,7 @@ resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_metrics
 
 resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.argo_controller.app_name
@@ -63,7 +63,7 @@ resource "juju_integration" "argo_controller_opentelemetry_collector_k8s_grafana
 
 resource "juju_integration" "admission_webhook_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.admission_webhook.app_name
@@ -78,7 +78,7 @@ resource "juju_integration" "admission_webhook_opentelemetry_collector_k8s_grafa
 
 resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.dex_auth.app_name
@@ -93,7 +93,7 @@ resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_dashbo
 
 resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.dex_auth.app_name
@@ -108,7 +108,7 @@ resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_metrics_endpoi
 
 resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.dex_auth.app_name
@@ -123,7 +123,7 @@ resource "juju_integration" "dex_auth_opentelemetry_collector_k8s_grafana_loggin
 
 resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.envoy.app_name
@@ -138,7 +138,7 @@ resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_dashboard
 
 resource "juju_integration" "envoy_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.envoy.app_name
@@ -153,7 +153,7 @@ resource "juju_integration" "envoy_opentelemetry_collector_k8s_metrics_endpoint"
 
 resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.envoy.app_name
@@ -168,7 +168,7 @@ resource "juju_integration" "envoy_opentelemetry_collector_k8s_grafana_logging" 
 
 resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.jupyter_controller.app_name
@@ -183,7 +183,7 @@ resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_graf
 
 resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.jupyter_controller.app_name
@@ -198,7 +198,7 @@ resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_metr
 
 resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.jupyter_controller.app_name
@@ -213,7 +213,7 @@ resource "juju_integration" "jupyter_controller_opentelemetry_collector_k8s_graf
 
 resource "juju_integration" "jupyter_ui_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.jupyter_ui.app_name
@@ -228,7 +228,7 @@ resource "juju_integration" "jupyter_ui_opentelemetry_collector_k8s_grafana_logg
 
 resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_controller.app_name
@@ -243,7 +243,7 @@ resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafan
 
 resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_controller.app_name
@@ -258,7 +258,7 @@ resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_metric
 
 resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_controller.app_name
@@ -273,7 +273,7 @@ resource "juju_integration" "katib_controller_opentelemetry_collector_k8s_grafan
 
 resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_db.app_name
@@ -288,7 +288,7 @@ resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_dashbo
 
 resource "juju_integration" "katib_db_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_db.app_name
@@ -303,7 +303,7 @@ resource "juju_integration" "katib_db_opentelemetry_collector_k8s_metrics_endpoi
 
 resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_db.app_name
@@ -318,7 +318,7 @@ resource "juju_integration" "katib_db_opentelemetry_collector_k8s_grafana_loggin
 
 resource "juju_integration" "katib_db_manager_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_db_manager.app_name
@@ -333,7 +333,7 @@ resource "juju_integration" "katib_db_manager_opentelemetry_collector_k8s_grafan
 
 resource "juju_integration" "katib_ui_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_ui.app_name
@@ -348,7 +348,7 @@ resource "juju_integration" "katib_ui_opentelemetry_collector_k8s_grafana_loggin
 
 resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -363,7 +363,7 @@ resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_dashboa
 
 resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -378,7 +378,7 @@ resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_metrics_endpoin
 
 resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -394,7 +394,7 @@ resource "juju_integration" "kfp_api_opentelemetry_collector_k8s_grafana_logging
 
 resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_db.app_name
@@ -409,7 +409,7 @@ resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_dashboar
 
 resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_db.app_name
@@ -424,7 +424,7 @@ resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_metrics_endpoint
 
 resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_db.app_name
@@ -439,7 +439,7 @@ resource "juju_integration" "kfp_db_opentelemetry_collector_k8s_grafana_logging"
 
 resource "juju_integration" "kfp_metadata_writer_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_metadata_writer.app_name
@@ -454,7 +454,7 @@ resource "juju_integration" "kfp_metadata_writer_opentelemetry_collector_k8s_gra
 
 resource "juju_integration" "kfp_persistence_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_persistence.app_name
@@ -469,7 +469,7 @@ resource "juju_integration" "kfp_persistence_opentelemetry_collector_k8s_grafana
 
 resource "juju_integration" "kfp_profile_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_profile_controller.app_name
@@ -484,7 +484,7 @@ resource "juju_integration" "kfp_profile_controller_opentelemetry_collector_k8s_
 
 resource "juju_integration" "kfp_schedwf_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_schedwf.app_name
@@ -499,7 +499,7 @@ resource "juju_integration" "kfp_schedwf_opentelemetry_collector_k8s_grafana_log
 
 resource "juju_integration" "kfp_ui_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_ui.app_name
@@ -514,7 +514,7 @@ resource "juju_integration" "kfp_ui_opentelemetry_collector_k8s_grafana_logging"
 
 resource "juju_integration" "kfp_viewer_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_viewer.app_name
@@ -529,7 +529,7 @@ resource "juju_integration" "kfp_viewer_opentelemetry_collector_k8s_grafana_logg
 
 resource "juju_integration" "kfp_viz_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_viz.app_name
@@ -544,7 +544,7 @@ resource "juju_integration" "kfp_viz_opentelemetry_collector_k8s_grafana_logging
 
 resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kserve_controller.app_name
@@ -559,7 +559,7 @@ resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_metri
 
 resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kserve_controller.app_name
@@ -574,7 +574,7 @@ resource "juju_integration" "kserve_controller_opentelemetry_collector_k8s_grafa
 
 resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -589,7 +589,7 @@ resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_metr
 
 resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -604,7 +604,7 @@ resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_graf
 
 resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -620,7 +620,7 @@ resource "juju_integration" "kubeflow_dashboard_opentelemetry_collector_k8s_graf
 
 resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_profiles.app_name
@@ -635,7 +635,7 @@ resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_metri
 
 resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_profiles.app_name
@@ -650,7 +650,7 @@ resource "juju_integration" "kubeflow_profiles_opentelemetry_collector_k8s_grafa
 
 resource "juju_integration" "kubeflow_trainer_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration && var.kubeflow_trainer_v2 ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_trainer[0].app_name
@@ -665,7 +665,7 @@ resource "juju_integration" "kubeflow_trainer_opentelemetry_collector_k8s_grafan
 
 resource "juju_integration" "kubeflow_trainer_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration && var.kubeflow_trainer_v2 ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_trainer[0].app_name
@@ -681,7 +681,7 @@ resource "juju_integration" "kubeflow_trainer_opentelemetry_collector_k8s_metric
 
 resource "juju_integration" "kubeflow_volumes_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_volumes.app_name
@@ -696,7 +696,7 @@ resource "juju_integration" "kubeflow_volumes_opentelemetry_collector_k8s_grafan
 
 resource "juju_integration" "metacontroller_operator_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.metacontroller_operator.app_name
@@ -711,7 +711,7 @@ resource "juju_integration" "metacontroller_operator_opentelemetry_collector_k8s
 
 resource "juju_integration" "metacontroller_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.metacontroller_operator.app_name
@@ -726,7 +726,7 @@ resource "juju_integration" "metacontroller_operator_opentelemetry_collector_k8s
 
 resource "juju_integration" "mlmd_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.mlmd.app_name
@@ -741,7 +741,7 @@ resource "juju_integration" "mlmd_opentelemetry_collector_k8s_grafana_logging" {
 
 resource "juju_integration" "minio_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.minio.app_name
@@ -756,7 +756,7 @@ resource "juju_integration" "minio_opentelemetry_collector_k8s_grafana_dashboard
 
 resource "juju_integration" "minio_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.minio.app_name
@@ -771,7 +771,7 @@ resource "juju_integration" "minio_opentelemetry_collector_k8s_metrics_endpoint"
 
 resource "juju_integration" "oidc_gatekeeper_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.oidc_gatekeeper.app_name
@@ -786,7 +786,7 @@ resource "juju_integration" "oidc_gatekeeper_opentelemetry_collector_k8s_grafana
 
 resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.pvcviewer_operator.app_name
@@ -801,7 +801,7 @@ resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_graf
 
 resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.pvcviewer_operator.app_name
@@ -816,7 +816,7 @@ resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_metr
 
 resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.pvcviewer_operator.app_name
@@ -831,7 +831,7 @@ resource "juju_integration" "pvcviewer_operator_opentelemetry_collector_k8s_graf
 
 resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.tensorboard_controller.app_name
@@ -846,7 +846,7 @@ resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_
 
 resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.tensorboard_controller.app_name
@@ -861,7 +861,7 @@ resource "juju_integration" "tensorboard_controller_opentelemetry_collector_k8s_
 
 resource "juju_integration" "tensorboards_web_app_opentelemetry_collector_k8s_grafana_logging" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.tensorboards_web_app.app_name
@@ -876,7 +876,7 @@ resource "juju_integration" "tensorboards_web_app_opentelemetry_collector_k8s_gr
 
 resource "juju_integration" "training_operator_opentelemetry_collector_k8s_grafana_dashboard" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.training_operator.app_name
@@ -891,7 +891,7 @@ resource "juju_integration" "training_operator_opentelemetry_collector_k8s_grafa
 
 resource "juju_integration" "training_operator_opentelemetry_collector_k8s_metrics_endpoint" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.training_operator.app_name
@@ -906,7 +906,7 @@ resource "juju_integration" "training_operator_opentelemetry_collector_k8s_metri
 
 resource "juju_integration" "istio_beacon_k8s_opentelemetry_collector_k8s_service_mesh" {
   count = var.cos_configuration ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name

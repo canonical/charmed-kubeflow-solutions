@@ -1,6 +1,6 @@
 
 resource "juju_integration" "argo_controller_minio" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.argo_controller.app_name
@@ -14,7 +14,7 @@ resource "juju_integration" "argo_controller_minio" {
 }
 
 resource "juju_integration" "dex_auth_oidc_gatekeeper_dex_oidc_config" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.dex_auth.app_name
@@ -28,7 +28,7 @@ resource "juju_integration" "dex_auth_oidc_gatekeeper_dex_oidc_config" {
 }
 
 resource "juju_integration" "dex_auth_oidc_gatekeeper_oidc_client" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.dex_auth.app_name
@@ -42,7 +42,7 @@ resource "juju_integration" "dex_auth_oidc_gatekeeper_oidc_client" {
 }
 
 resource "juju_integration" "katib_db_manager_katib_controller_k8s_service_info" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_db_manager.app_name
@@ -56,7 +56,7 @@ resource "juju_integration" "katib_db_manager_katib_controller_k8s_service_info"
 }
 
 resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.katib_db_manager.app_name
@@ -70,7 +70,7 @@ resource "juju_integration" "katib_db_manager_katib_db_relational_db" {
 }
 
 resource "juju_integration" "kfp_api_kfp_db_database" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -84,7 +84,7 @@ resource "juju_integration" "kfp_api_kfp_db_database" {
 }
 
 resource "juju_integration" "kfp_api_kfp_persistence_database" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -98,7 +98,7 @@ resource "juju_integration" "kfp_api_kfp_persistence_database" {
 }
 
 resource "juju_integration" "kfp_api_kfp_ui_database" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -112,7 +112,7 @@ resource "juju_integration" "kfp_api_kfp_ui_database" {
 }
 
 resource "juju_integration" "kfp_api_kfp_viz_database" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -126,7 +126,7 @@ resource "juju_integration" "kfp_api_kfp_viz_database" {
 }
 
 resource "juju_integration" "kfp_api_minio_object_storage" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -140,7 +140,7 @@ resource "juju_integration" "kfp_api_minio_object_storage" {
 }
 
 resource "juju_integration" "kfp_profile_controller_minio_object_storage" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_profile_controller.app_name
@@ -154,7 +154,7 @@ resource "juju_integration" "kfp_profile_controller_minio_object_storage" {
 }
 
 resource "juju_integration" "kfp_ui_minio_object_storage" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_ui.app_name
@@ -168,7 +168,7 @@ resource "juju_integration" "kfp_ui_minio_object_storage" {
 }
 
 resource "juju_integration" "kubeflow_profiles_kubeflow_dashboard_kubeflow_profiles" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_profiles.app_name
@@ -182,7 +182,7 @@ resource "juju_integration" "kubeflow_profiles_kubeflow_dashboard_kubeflow_profi
 }
 
 resource "juju_integration" "kubeflow_dashboard_jupyter_ui_links" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -196,7 +196,7 @@ resource "juju_integration" "kubeflow_dashboard_jupyter_ui_links" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_katib_ui_links" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -210,7 +210,7 @@ resource "juju_integration" "kubeflow_dashboard_katib_ui_links" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_kfp_ui_links" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -225,7 +225,7 @@ resource "juju_integration" "kubeflow_dashboard_kfp_ui_links" {
 
 resource "juju_integration" "kubeflow_dashboard_kubeflow_trainer_links" {
   count = var.kubeflow_trainer_v2 ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -239,7 +239,7 @@ resource "juju_integration" "kubeflow_dashboard_kubeflow_trainer_links" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_kubeflow_volumes_links" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -253,7 +253,7 @@ resource "juju_integration" "kubeflow_dashboard_kubeflow_volumes_links" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_tensorboards_web_app_links" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -267,7 +267,7 @@ resource "juju_integration" "kubeflow_dashboard_tensorboards_web_app_links" {
 }
 
 resource "juju_integration" "kubeflow_dashboard_training_operator_links" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kubeflow_dashboard.app_name
@@ -281,7 +281,7 @@ resource "juju_integration" "kubeflow_dashboard_training_operator_links" {
 }
 
 resource "juju_integration" "mlmd_envoy_grpc" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.mlmd.app_name
@@ -295,7 +295,7 @@ resource "juju_integration" "mlmd_envoy_grpc" {
 }
 
 resource "juju_integration" "mlmd_kfp_metadata_writer_grpc" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.mlmd.app_name
@@ -309,7 +309,7 @@ resource "juju_integration" "mlmd_kfp_metadata_writer_grpc" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_admission_webhook" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -323,7 +323,7 @@ resource "juju_integration" "istio_beacon_k8s_admission_webhook" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_dex_auth" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -337,7 +337,7 @@ resource "juju_integration" "istio_beacon_k8s_dex_auth" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_katib_controller" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -351,7 +351,7 @@ resource "juju_integration" "istio_beacon_k8s_katib_controller" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_katib_ui" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -365,7 +365,7 @@ resource "juju_integration" "istio_beacon_k8s_katib_ui" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kfp_api" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -379,7 +379,7 @@ resource "juju_integration" "istio_beacon_k8s_kfp_api" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kfp_persistence" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -393,7 +393,7 @@ resource "juju_integration" "istio_beacon_k8s_kfp_persistence" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kfp_profile_controller" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -407,7 +407,7 @@ resource "juju_integration" "istio_beacon_k8s_kfp_profile_controller" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kfp_schedwf" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -421,7 +421,7 @@ resource "juju_integration" "istio_beacon_k8s_kfp_schedwf" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kfp_ui" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -435,7 +435,7 @@ resource "juju_integration" "istio_beacon_k8s_kfp_ui" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kfp_viz" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -449,7 +449,7 @@ resource "juju_integration" "istio_beacon_k8s_kfp_viz" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kubeflow_dashboard" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -463,7 +463,7 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_dashboard" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kubeflow_profiles" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -477,7 +477,7 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_profiles" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kubeflow_volumes" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -491,7 +491,7 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_volumes" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_minio" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -505,7 +505,7 @@ resource "juju_integration" "istio_beacon_k8s_minio" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_oidc_gatekeeper" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -519,7 +519,7 @@ resource "juju_integration" "istio_beacon_k8s_oidc_gatekeeper" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_pvcviewer_operator" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -533,7 +533,7 @@ resource "juju_integration" "istio_beacon_k8s_pvcviewer_operator" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_tensorboard_controller" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -547,7 +547,7 @@ resource "juju_integration" "istio_beacon_k8s_tensorboard_controller" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_tensorboards_web_app" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -561,7 +561,7 @@ resource "juju_integration" "istio_beacon_k8s_tensorboards_web_app" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_jupyter_controller" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -575,7 +575,7 @@ resource "juju_integration" "istio_beacon_k8s_jupyter_controller" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_jupyter_ui" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -589,7 +589,7 @@ resource "juju_integration" "istio_beacon_k8s_jupyter_ui" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_envoy" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -603,7 +603,7 @@ resource "juju_integration" "istio_beacon_k8s_envoy" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_kserve_controller" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -617,7 +617,7 @@ resource "juju_integration" "istio_beacon_k8s_kserve_controller" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_kubeflow_volumes" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -631,7 +631,7 @@ resource "juju_integration" "istio_ingress_k8s_kubeflow_volumes" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_kfp_ui" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -645,7 +645,7 @@ resource "juju_integration" "istio_ingress_k8s_kfp_ui" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_envoy" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -659,7 +659,7 @@ resource "juju_integration" "istio_ingress_k8s_envoy" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_katib_ui" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -673,7 +673,7 @@ resource "juju_integration" "istio_ingress_k8s_katib_ui" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_kubeflow_dashboard" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -687,7 +687,7 @@ resource "juju_integration" "istio_ingress_k8s_kubeflow_dashboard" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_jupyter_ui" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -701,7 +701,7 @@ resource "juju_integration" "istio_ingress_k8s_jupyter_ui" {
 }
 
 resource "juju_integration" "istio_ingress_k8s_tensorboards_web_app" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_ingress_k8s.name
@@ -715,7 +715,7 @@ resource "juju_integration" "istio_ingress_k8s_tensorboards_web_app" {
 }
 
 resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_unauthenticated" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.oidc_gatekeeper.app_name
@@ -729,7 +729,7 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_unauthenticated" 
 }
 
 resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_forward_auth" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.oidc_gatekeeper.app_name
@@ -743,7 +743,7 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_forward_auth" {
 }
 
 resource "juju_integration" "dex_auth_istio_ingress_k8s_unauthenticated" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.dex_auth.app_name
@@ -757,7 +757,7 @@ resource "juju_integration" "dex_auth_istio_ingress_k8s_unauthenticated" {
 }
 
 resource "juju_integration" "istio_k8s_istio_ingress_k8s_ingress_config" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.istio[0].name : local.istio_system_model
 
   application {
     name     = juju_application.istio_k8s.name
@@ -765,13 +765,12 @@ resource "juju_integration" "istio_k8s_istio_ingress_k8s_ingress_config" {
   }
 
   application {
-    name     = juju_application.istio_ingress_k8s.name
-    endpoint = "istio-ingress-config"
+    offer_url = juju_offer.istio_ingress_k8s_ingress_config.url
   }
 }
 
 resource "juju_integration" "jupyter_controller_istio_ingress_k8s_gateway_metadata" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.jupyter_controller.app_name
@@ -785,7 +784,7 @@ resource "juju_integration" "jupyter_controller_istio_ingress_k8s_gateway_metada
 }
 
 resource "juju_integration" "pvcviewer_operator_istio_ingress_k8s_gateway_metadata" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.pvcviewer_operator.app_name
@@ -799,7 +798,7 @@ resource "juju_integration" "pvcviewer_operator_istio_ingress_k8s_gateway_metada
 }
 
 resource "juju_integration" "tensorboard_controller_istio_ingress_k8s_gateway_metadata" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.tensorboard_controller.app_name
@@ -813,7 +812,7 @@ resource "juju_integration" "tensorboard_controller_istio_ingress_k8s_gateway_me
 }
 
 resource "juju_integration" "kserve_controller_istio_ingress_k8s_gateway_metadata" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kserve_controller.app_name
@@ -827,7 +826,7 @@ resource "juju_integration" "kserve_controller_istio_ingress_k8s_gateway_metadat
 }
 
 resource "juju_integration" "kfp_api_kfp_persistence_grpc" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
@@ -841,7 +840,7 @@ resource "juju_integration" "kfp_api_kfp_persistence_grpc" {
 }
 
 resource "juju_integration" "istio_beacon_k8s_training_operator" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -856,7 +855,7 @@ resource "juju_integration" "istio_beacon_k8s_training_operator" {
 
 resource "juju_integration" "istio_beacon_k8s_kubeflow_trainer" {
   count = var.kubeflow_trainer_v2 ? 1 : 0
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = juju_application.istio_beacon_k8s.name
@@ -870,7 +869,7 @@ resource "juju_integration" "istio_beacon_k8s_kubeflow_trainer" {
 }
 
 resource "juju_integration" "kfp_api_kfp_schedwf_grpc" {
-  model = var.create_model ? juju_model.kubeflow[0].name : local.model
+  model = var.create_model ? juju_model.kubeflow[0].name : local.kubeflow_platform_model
 
   application {
     name     = module.kfp_api.app_name
