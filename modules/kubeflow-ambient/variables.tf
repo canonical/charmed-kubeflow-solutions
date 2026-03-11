@@ -381,7 +381,7 @@ variable "istio_k8s_revision" {
 variable "istio_k8s_platform" {
   description = "Platform for istio-k8s"
   type        = string
-  default     = "microk8s"
+  default     = ""
 }
 
 variable "istio_ingress_k8s_revision" {
