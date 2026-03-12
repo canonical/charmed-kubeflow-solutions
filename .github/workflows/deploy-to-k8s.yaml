@@ -35,6 +35,11 @@ jobs:
           - module: kubeflow-feast
             uats:
               env: feast-remote
+          - module: kubeflow-ambient
+            uats_branch: main
+            uats:
+              env: kubeflow-remote
+              extra-args: --include-kubeflow-trainer-tests
 
     steps:
       - name: Checkout repository
@@ -54,8 +59,7 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -95,6 +99,14 @@ jobs:
           sudo concierge prepare --trace
           cd ..
 
+      - name: Configure Cilium for Istio
+        if: matrix.bundle.module == 'kubeflow-ambient'
+        run: |
+          # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
+          kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
+          kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
+          kubectl -n kube-system rollout restart daemonset cilium
+
       - name: Setup terraform
         run: |
           sudo snap install terraform  --channel latest/stable --classic
@@ -106,7 +118,14 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          RISK_ARG="--risk ${{ env.RISK }}"
+          PLATFORM_ARG=""
+          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
+            RISK_ARG=""
+            PLATFORM_ARG="--istio-k8s-platform"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG
 
       - name: Run UATs
         run: |
