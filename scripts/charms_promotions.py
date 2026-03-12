@@ -59,7 +59,7 @@ class Charm:
             raise ValueError(f"Multiple items found: {items}")
 
         if len(items) == 0:
-            raise ValueError(f"No item found")
+            raise ValueError(f"No item found for charm {self}")
 
         item = items[0]
 
