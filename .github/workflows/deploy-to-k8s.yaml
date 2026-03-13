@@ -36,10 +36,10 @@ jobs:
             uats:
               env: feast-remote
           - module: kubeflow-ambient
-            uats_branch: main
+            uats_branch: kf-8491-feat-add-ambient-profile-spoofing-test
             uats:
               env: kubeflow-remote
-              extra-args: --include-kubeflow-trainer-tests
+              extra-args: --include-kubeflow-trainer-tests --include-ambient-tests
 
     steps:
       - name: Checkout repository
