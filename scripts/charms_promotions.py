@@ -4,6 +4,7 @@ import shlex
 import subprocess
 import sys
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -18,7 +19,7 @@ class Charm:
         self.revision = revision
         self.channel = channel
 
-        self._status: dict | None = None
+        self._status: Optional[dict] = None
 
     def __str__(self):
         return f"{self.name}:{self.channel}({self.revision})"
@@ -56,10 +57,10 @@ class Charm:
         items = self.get_status(revision=self.revision, channel=self.channel)
 
         if len(items) > 1:
-            raise ValueError(f"Multiple items found: {items}")
+            raise ValueError(f"Multiple tracks match the provide revision and channel combination: {items}")
 
         if len(items) == 0:
-            raise ValueError(f"No item found for charm {self}")
+            raise ValueError(f"No match found for charm {self}")
 
         item = items[0]
 
@@ -70,7 +71,7 @@ class Charm:
             raise ValueError("The revision does not belong to a risk channel")
 
         if RISKS[risk] <= RISKS[risk_from]:
-            raise ValueError("I cannot promote to a lower risk")
+            raise ValueError("A charm revision cannot be promoted to a lower risk.")
 
         channel_to = str(_channel.parent / risk)
 
@@ -86,8 +87,6 @@ class Charm:
 
         return subprocess.check_output(cmds).decode("utf-8")
 
-
-from enum import Enum
 
 class Format(str,Enum):
     TEXT = "text"
@@ -122,6 +121,25 @@ class YAMLParser:
 
 
 class TextParser:
+    """
+    Parse a juju status output to find the charms deployed and their metadata (channel, revision, etc)
+
+    The `parse` method is used to extract the list of charms, returned as a Bundle class.
+    The reason why simpler parsing methods could not be used, is that the output format of a juju status is
+    made peculiar by some columns header being aligned right instead of left, e.g. see Rev below:
+
+    App                      Version                  Status   Scale  Charm                    Channel         Rev  Address       Exposed  Message
+    ...
+    istio-ingressgateway                              active       1  istio-gateway            1.28/edge      1594  10.0.165.149  no
+    ...
+
+    The algorithm parse the header and finds a first guess for the columns start. When parsing each rows, the algorithm updates the width
+    of each column using the width of the value itself, then treating the remaining chars as the values for the next columns. This algorithm falls short
+    if the values has multiple white spaces (also in headers). However this only happens in the value of the "Message" column, which is accounted for.
+    """
+
+    # The following regex extract the first word that may be preceded by
+    # leading spaces
     word_with_leading_spaces = re.compile(r"^\s*[^\s]+")
 
     @staticmethod
@@ -248,3 +266,5 @@ if __name__ == "__main__":
                         f"WARNING: skipping '{charm.name}' after command failure: {shlex.join(err.cmd)}",
                         file=sys.stderr,
                     )
+        else:
+            print(f"WARNING: excluding charm {charm.name} (see --exclude flag)", file=sys.stderr)
