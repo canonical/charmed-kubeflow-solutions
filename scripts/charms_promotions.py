@@ -14,7 +14,7 @@ RISKS = {"edge": 1, "beta": 2, "candidate": 3, "stable": 4}
 
 class Charm:
 
-    def __init__(self, name: str, revision: int, channel: str):
+    def __init__(self, name: str, revision: int, channel: Optional[str]):
         self.name = name
         self.revision = revision
         self.channel = channel
@@ -30,12 +30,21 @@ class Charm:
     def get_status(self, channel: Optional[str] = None, revision: Optional[int] = None):
 
         if not self._status:
-            output = subprocess.check_output(
+
+            output = subprocess.run(
                 ["charmcraft", "status", self.name, "--format", "json"],
-                stderr=subprocess.STDOUT,
+                capture_output=True
             )
 
-            self._status = json.loads(output.decode("utf-8"))
+            if output.returncode != 0:
+                err_output = (output.stderr or b"").decode("utf-8", errors="replace").strip()
+                output = (output.stdout or b"").decode("utf-8", errors="replace").strip()
+                if "permission-required" in output or "permission-required" in err_output:
+                    raise PermissionError(self.name)
+                else:
+                    raise RuntimeError(charm.name, shlex.join(err.cmd), err)
+
+            self._status = json.loads(output.stdout.decode("utf-8"))
 
         items = [
             mapping["base"] | release
@@ -53,6 +62,9 @@ class Charm:
     def promote_version(self, risk: str, dry_run: bool = True):
         if risk not in RISKS.keys():
             raise ValueError("The risk is not recognized")
+
+        if not self.channel:
+            raise ValueError("channel field is not specified, that is required for promotion")
 
         items = self.get_status(revision=self.revision, channel=self.channel)
 
@@ -83,7 +95,7 @@ class Charm:
         )
 
         if dry_run:
-            return shlex.join(cmds)
+            return "INFO: (dry-run mode) " + shlex.join(cmds)
 
         return subprocess.check_output(cmds).decode("utf-8")
 
@@ -115,7 +127,7 @@ class YAMLParser:
         data = yaml.safe_load(content)
 
         return Bundle([
-            Charm(app["charm-name"], int(app["charm-rev"]), app["charm-channel"])
+            Charm(app["charm-name"], int(app["charm-rev"]), app.get("charm-channel"))
             for _, app in data["applications"].items()
         ])
 
@@ -254,17 +266,17 @@ if __name__ == "__main__":
         if not charm.name in args.exclude:
             try:
                 print(charm.promote_version(args.promote_to, args.dry_run))
-            except subprocess.CalledProcessError as err:
-                output = (err.output or b"").decode("utf-8", errors="replace").strip()
-                if "permission-required" in output:
-                    print(
+            except ValueError as err:
+                print(f"ERROR: skipping {charm.name} due to failure in promotion. Reason: {type(err).__name__} - Details: {','.join(err.args)}")
+            except PermissionError as err:
+                print(
                         f"WARNING: skipping '{charm.name}' due to missing permissions. Add it to --exclude to avoid this warning.",
                         file=sys.stderr,
-                    )
-                else:
-                    print(
-                        f"WARNING: skipping '{charm.name}' after command failure: {shlex.join(err.cmd)}",
-                        file=sys.stderr,
-                    )
+                )
+            except RuntimeError as err:
+                print(
+                    f"WARNING: skipping '{err.args[0]}' after command failure: {err.args[1]}",
+                    file=sys.stderr,
+                )
         else:
             print(f"WARNING: excluding charm {charm.name} (see --exclude flag)", file=sys.stderr)
