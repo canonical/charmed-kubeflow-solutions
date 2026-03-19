@@ -85,7 +85,7 @@ jobs:
         run: |
           pip install tox
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
-          sudo snap install charmcraft --channe=3.x/stable --classic
+          sudo snap install charmcraft --channel=3.x/stable --classic
           sudo snap install terraform --channel=latest/stable --classic
           juju version
           terraform --version
