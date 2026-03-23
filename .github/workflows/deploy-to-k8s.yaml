@@ -14,7 +14,7 @@ on:
       risk:
         description: 'The risk level to be tested'
         required: false
-        default: 'stable'
+        default: 'candidate'
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
@@ -31,11 +31,15 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast" --include-kubeflow-trainer-tests
+              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
-              extra-args: ""
+          - module: kubeflow-ambient
+            uats_branch: main
+            uats:
+              env: kubeflow-remote
+              extra-args: --include-kubeflow-trainer-tests
 
     steps:
       - name: Checkout repository
@@ -53,10 +57,9 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
+          RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -67,7 +70,7 @@ jobs:
           sudo apt-get install -yqq pipx
           pipx ensurepath
           sudo pipx ensurepath
-          
+
           pipx install tox
           pipx install poetry
 
@@ -76,7 +79,7 @@ jobs:
           # Avoiding dockerhub rate limits (see https://canonical-self-hosted-github-runner-docs.readthedocs-hosted.com/en/latest/usage/faq/how-to-avoid-dockerhub-rate-limits/ for more informations)
           if [ -n "$DOCKERHUB_MIRROR" ]; then
           MIRROR_CONFIG=/etc/containerd/hosts.d/docker.io
-            
+
           sudo mkdir -p ${MIRROR_CONFIG}
           sudo chown $USER ${MIRROR_CONFIG}
           cat << EOF > ${MIRROR_CONFIG}/hosts.toml
@@ -84,20 +87,28 @@ jobs:
           capabilities = ["pull", "resolve"]
           EOF
           fi
-          
+
           sudo apt-get remove -y docker.io containerd
           sudo rm -rf /run/containerd
           sudo snap install concierge --classic
           cd .github
-          
+
           # Set the K8s version
           yq -i e '.providers.k8s.channel = "${{ env.K8S_VERSION }}-classic/stable"' concierge.yaml
-          
+
           sudo concierge prepare --trace
           cd ..
 
+      - name: Configure Cilium for Istio
+        if: matrix.bundle.module == 'kubeflow-ambient'
+        run: |
+          # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
+          kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
+          kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
+          kubectl -n kube-system rollout restart daemonset cilium
+
       - name: Setup terraform
-        run: |          
+        run: |
           sudo snap install terraform  --channel latest/stable --classic
           terraform --version
 
@@ -107,7 +118,14 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }}
+          RISK_ARG="--risk ${{ env.RISK }}"
+          PLATFORM_ARG=""
+          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
+            RISK_ARG=""
+            PLATFORM_ARG="--istio-k8s-platform"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG
 
       - name: Run UATs
         run: |
