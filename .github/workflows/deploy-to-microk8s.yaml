@@ -125,6 +125,7 @@ jobs:
           mkdir -p ~/.local/share/juju
 
           sudo microk8s config | juju add-k8s local-k8s --client
+
           juju bootstrap local-k8s microk8s
 
           # for Python's K8s client to find K8s configurations without code or

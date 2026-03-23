@@ -40,7 +40,6 @@ jobs:
             uats:
               env: kubeflow-remote
               extra-args: --include-kubeflow-trainer-tests
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
