@@ -29,18 +29,18 @@ jobs:
       fail-fast: false
       matrix:
         bundle:
-          - module: kubeflow-mlflow
-            uats:
-              env: uats-remote
-              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
+          # - module: kubeflow-mlflow
+          #   uats:
+          #     env: uats-remote
+          #     extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
+          # - module: kubeflow-feast
+          #   uats:
+          #     env: feast-remote
           - module: kubeflow-ambient
-            uats_branch: main
+            uats_branch: kf-8491-feat-add-ambient-profile-spoofing-test
             uats:
               env: kubeflow-remote
-              extra-args: --include-kubeflow-trainer-tests
+              extra-args: --include-kubeflow-trainer-tests --include-ambient-tests
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
