@@ -1,4 +1,4 @@
 CKF_BRANCH: "track/1.10"  
 K8S_VERSION: "1.32"
 JUJU_VERSION: "3.6"
-UATS_BRANCH: "track/1.10"
+UATS_BRANCH: "wip-improve-bundle-check-1.10"
