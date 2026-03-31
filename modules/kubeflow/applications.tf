@@ -276,7 +276,7 @@ module "mlmd" {
 }
 
 module "minio" {
-  source     = "git::https://github.com/canonical/minio-operator//terraform?ref=a778843730a3966690aa2042ff031f862b14d5ec"
+  source     = "git::https://github.com/canonical/minio-operator//terraform?ref=d72b4090c0928d3480da87cefd6799c7b13dc45e"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     access-key               = var.minio_access_key,
@@ -289,7 +289,7 @@ module "minio" {
     minio-data = var.minio_size
   }
   revision = var.minio_revision
-  channel  = "ckf-1.10/${var.risk}"
+  channel  = "1.10/${var.risk}"
 }
 
 module "oidc_gatekeeper" {
