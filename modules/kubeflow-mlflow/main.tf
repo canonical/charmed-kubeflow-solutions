@@ -69,7 +69,7 @@ module "kubeflow" {
 }
 
 module "mlflow" {
-  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=2b1afe5348aa4f3f552414bec73959aca6da8bc9"
+  source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=3dafc7d53ecad47adaa3836dc74665ecacba1759"
   # kubeflow module creates the model
   risk                                  = var.risk
   create_model                          = false
