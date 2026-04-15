@@ -32,7 +32,7 @@ jobs:
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
-              extra-args: --filter "not feast and not spark"
+              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
           - module: kubeflow-feast
             uats:
               env: feast-remote
@@ -40,7 +40,7 @@ jobs:
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args:
+              extra-args: --include-kubeflow-trainer-tests
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
