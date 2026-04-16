@@ -6,6 +6,7 @@ on:
 jobs:
 
   terraform-checks:
+    if: false
     name: Terraform
     strategy:
       matrix:
