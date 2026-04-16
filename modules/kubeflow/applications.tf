@@ -93,6 +93,7 @@ module "katib_db" {
   config = {
     profile-limit-memory = "2048"
   }
+  base         = "ubuntu@24.04"
   storage_size = var.katib_db_size
   revision     = var.katib_db_revision
 }
@@ -131,6 +132,7 @@ module "kfp_db" {
   config = {
     profile-limit-memory = "2048"
   }
+  base         = "ubuntu@24.04"
   storage_size = var.kfp_db_size
   revision     = var.kfp_db_revision
 }
