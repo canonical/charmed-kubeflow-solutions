@@ -6,14 +6,11 @@ on:
 jobs:
 
   terraform-checks:
-    if: false
     name: Terraform
     strategy:
       matrix:
         module:
-          - kubeflow
-          - kubeflow-feast
-          - kubeflow-mlflow
+          - core
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
-      module-path: modules/${{ matrix.module }}
+      module-path: terraform-refactoring/components/${{ matrix.module }}
