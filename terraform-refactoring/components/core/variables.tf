@@ -57,7 +57,6 @@ variable "envoy" {
   default = {}
 }
 
-
 variable "kubeflow_dashboard" {
   description = "Configuration for kubeflow-dashboard application"
   type = object({
@@ -123,12 +122,6 @@ variable "metacontroller_operator" {
   default = {}
 }
 
-#variable "mysql_database_offer" {
-#  description = "Juju offer URL for MySQL database (for cross-component integration)"
-#  type        = string
-#  nullable    = false
-#}
-
 variable "ingress" {
   description = "Ingress provider for core applications (supports same-model endpoint or cross-model offer)"
   type = object({
@@ -179,5 +172,3 @@ variable "istio_ingress_route" {
     error_message = "Valid values for istio_ingress_route.kind are (endpoint, offer)."
   }
 }
-
-
