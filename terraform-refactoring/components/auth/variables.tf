@@ -1,17 +1,6 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-variable "risk" {
-  type        = string
-  description = "Value for the risk to be used"
-  default     = "edge"
-
-  validation {
-    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
-    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
-  }
-}
-
 variable "model_uuid" {
   description = "UUID of the Juju model where auth components are deployed"
   type        = string
@@ -21,6 +10,7 @@ variable "model_uuid" {
 variable "dex_auth" {
   description = "Configuration for dex-auth application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -34,6 +24,7 @@ variable "dex_auth" {
 variable "oidc_gatekeeper" {
   description = "Configuration for oidc-gatekeeper application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)

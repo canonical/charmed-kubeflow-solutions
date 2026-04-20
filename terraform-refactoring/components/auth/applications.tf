@@ -5,7 +5,7 @@
 resource "juju_application" "dex_auth" {
   charm {
     name     = "dex-auth"
-    channel  = "latest/${var.risk}"
+    channel  = var.dex_auth.channel
     revision = var.dex_auth.revision
   }
 
@@ -22,7 +22,7 @@ resource "juju_application" "dex_auth" {
 resource "juju_application" "oidc_gatekeeper" {
   charm {
     name     = "oidc-gatekeeper"
-    channel  = "latest/${var.risk}"
+    channel  = var.oidc_gatekeeper.channel
     revision = var.oidc_gatekeeper.revision
   }
 
