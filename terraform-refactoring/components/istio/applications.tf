@@ -5,7 +5,7 @@
 resource "juju_application" "istio_pilot" {
   charm {
     name     = "istio-pilot"
-    channel  = "1.28/${var.risk}"
+    channel  = var.istio_pilot.channel
     revision = var.istio_pilot.revision
   }
 
@@ -22,7 +22,7 @@ resource "juju_application" "istio_pilot" {
 resource "juju_application" "istio_ingressgateway" {
   charm {
     name     = "istio-gateway"
-    channel  = "1.28/${var.risk}"
+    channel  = var.istio_ingressgateway.channel
     revision = var.istio_ingressgateway.revision
   }
 

@@ -1,17 +1,6 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-variable "risk" {
-  type        = string
-  description = "Value for the risk to be used"
-  default     = "stable"
-
-  validation {
-    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
-    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
-  }
-}
-
 variable "model_uuid" {
   description = "UUID of the Juju model where Istio is deployed"
   type        = string
@@ -21,6 +10,7 @@ variable "model_uuid" {
 variable "istio_pilot" {
   description = "Configuration for istio-pilot application"
   type = object({
+    channel     = optional(string, "1.28/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -34,6 +24,7 @@ variable "istio_pilot" {
 variable "istio_ingressgateway" {
   description = "Configuration for istio-ingressgateway application"
   type = object({
+    channel     = optional(string, "1.28/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
