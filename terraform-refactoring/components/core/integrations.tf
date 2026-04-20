@@ -3,21 +3,6 @@
 
 # Internal relations (within this component)
 
-# MLMD to Envoy gRPC
-resource "juju_integration" "mlmd_envoy_grpc" {
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.mlmd.name
-    endpoint = "grpc"
-  }
-
-  application {
-    name     = juju_application.envoy.name
-    endpoint = "grpc"
-  }
-}
-
 # Kubeflow Profiles to Kubeflow Dashboard
 resource "juju_integration" "kubeflow_profiles_dashboard_kubeflow_profiles" {
   model_uuid = var.model_uuid

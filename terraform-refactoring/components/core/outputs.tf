@@ -7,7 +7,6 @@ output "components" {
     kubeflow_roles     = juju_application.kubeflow_roles
     kubeflow_volumes   = juju_application.kubeflow_volumes
     minio              = juju_application.minio
-    mlmd               = juju_application.mlmd
   }
 }
 
@@ -21,10 +20,6 @@ output "provides" {
     minio_object_storage = {
       name     = juju_application.minio.name
       endpoint = "object-storage"
-    }
-    mlmd_grpc = {
-      name     = juju_application.mlmd.name
-      endpoint = "grpc"
     }
   }
 }
@@ -44,12 +39,12 @@ output "requires" {
       name     = juju_application.kubeflow_volumes.name
       endpoint = "ingress"
     }
-    minio_service_mesh = {
-      name     = juju_application.minio.name
-      endpoint = "service-mesh"
-    }
     kubeflow_dashboard_service_mesh = {
       name     = juju_application.kubeflow_dashboard.name
+      endpoint = "service-mesh"
+    }
+    minio_service_mesh = {
+      name     = juju_application.minio.name
       endpoint = "service-mesh"
     }
     kubeflow_profiles_service_mesh = {
@@ -84,6 +79,5 @@ output "offers" {
   value = {
     kubeflow_dashboard_links = "${juju_application.kubeflow_dashboard.name}:links"
     minio_object_storage     = "${juju_application.minio.name}:object-storage"
-    mlmd_grpc                = "${juju_application.mlmd.name}:grpc"
   }
 }

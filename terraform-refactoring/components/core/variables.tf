@@ -21,20 +21,6 @@ variable "minio" {
   default = {}
 }
 
-variable "mlmd" {
-  description = "Configuration for mlmd application"
-  type = object({
-    channel     = optional(string, "latest/edge")
-    revision    = optional(number)
-    units       = optional(number, 1)
-    trust       = optional(bool, true)
-    constraints = optional(string)
-    config      = optional(map(string), {})
-    resources   = optional(map(string), {})
-  })
-  default = {}
-}
-
 variable "envoy" {
   description = "Configuration for envoy application"
   type = object({

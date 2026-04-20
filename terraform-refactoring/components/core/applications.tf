@@ -18,23 +18,6 @@ resource "juju_application" "minio" {
   resources   = var.minio.resources
 }
 
-# MLMD (ML Metadata) application
-resource "juju_application" "mlmd" {
-  charm {
-    name     = "mlmd"
-    channel  = var.mlmd.channel
-    revision = var.mlmd.revision
-  }
-
-  model_uuid  = var.model_uuid
-  name        = "mlmd"
-  units       = var.mlmd.units
-  trust       = var.mlmd.trust
-  constraints = var.mlmd.constraints
-  config      = var.mlmd.config
-  resources   = var.mlmd.resources
-}
-
 # Envoy proxy application
 resource "juju_application" "envoy" {
   charm {
