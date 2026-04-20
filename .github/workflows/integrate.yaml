@@ -11,9 +11,7 @@ jobs:
     strategy:
       matrix:
         module:
-          - kubeflow
-          - kubeflow-feast
-          - kubeflow-mlflow
+          - ambient
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
-      module-path: modules/${{ matrix.module }}
+      module-path: terraform-refactoring/components/${{ matrix.module }}
