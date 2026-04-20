@@ -19,18 +19,18 @@ resource "juju_application" "istio_pilot" {
 }
 
 # Istio Gateway application (ingress gateway)
-resource "juju_application" "istio_gateway" {
+resource "juju_application" "istio_ingressgateway" {
   charm {
     name     = "istio-gateway"
     channel  = "1.28/${var.risk}"
-    revision = var.istio_gateway.revision
+    revision = var.istio_ingressgateway.revision
   }
 
   model_uuid  = var.model_uuid
-  name        = "istio-gateway"
-  units       = var.istio_gateway.units
-  trust       = var.istio_gateway.trust
-  constraints = var.istio_gateway.constraints
-  config      = var.istio_gateway.config
-  resources   = var.istio_gateway.resources
+  name        = "istio-ingressgateway"
+  units       = var.istio_ingressgateway.units
+  trust       = var.istio_ingressgateway.trust
+  constraints = var.istio_ingressgateway.constraints
+  config      = var.istio_ingressgateway.config
+  resources   = var.istio_ingressgateway.resources
 }

@@ -2,7 +2,7 @@
 # See LICENSE file for licensing details.
 
 # Istio Pilot to Istio Gateway integration
-resource "juju_integration" "istio_pilot_istio_gateway" {
+resource "juju_integration" "istio_pilot_istio_ingressgateway" {
   model_uuid = var.model_uuid
 
   application {
@@ -11,7 +11,7 @@ resource "juju_integration" "istio_pilot_istio_gateway" {
   }
 
   application {
-    name     = juju_application.istio_gateway.name
+    name     = juju_application.istio_ingressgateway.name
     endpoint = "istio-pilot"
   }
 }

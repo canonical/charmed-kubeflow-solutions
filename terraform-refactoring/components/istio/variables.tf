@@ -31,8 +31,8 @@ variable "istio_pilot" {
   default = {}
 }
 
-variable "istio_gateway" {
-  description = "Configuration for istio-gateway application"
+variable "istio_ingressgateway" {
+  description = "Configuration for istio-ingressgateway application"
   type = object({
     revision    = optional(number)
     units       = optional(number, 1)
