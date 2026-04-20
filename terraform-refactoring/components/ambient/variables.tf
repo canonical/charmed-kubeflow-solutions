@@ -1,17 +1,6 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-variable "risk" {
-  type        = string
-  description = "Value for the risk to be used"
-  default     = "edge"
-
-  validation {
-    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
-    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
-  }
-}
-
 variable "model_uuid" {
   description = "UUID of the Juju model where Istio Ambient is deployed"
   type        = string
@@ -21,6 +10,7 @@ variable "model_uuid" {
 variable "istio_k8s" {
   description = "Configuration for istio-k8s application"
   type = object({
+    channel     = optional(string, "2/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -39,6 +29,7 @@ variable "istio_k8s_platform" {
 variable "istio_ingress_k8s" {
   description = "Configuration for istio-ingress-k8s application"
   type = object({
+    channel     = optional(string, "2/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -52,6 +43,7 @@ variable "istio_ingress_k8s" {
 variable "istio_beacon_k8s" {
   description = "Configuration for istio-beacon-k8s application"
   type = object({
+    channel     = optional(string, "2/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)

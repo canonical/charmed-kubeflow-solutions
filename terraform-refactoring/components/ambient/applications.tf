@@ -5,7 +5,7 @@
 resource "juju_application" "istio_k8s" {
   charm {
     name     = "istio-k8s"
-    channel  = "2/${var.risk}"
+    channel  = var.istio_k8s.channel
     revision = var.istio_k8s.revision
   }
 
@@ -24,7 +24,7 @@ resource "juju_application" "istio_k8s" {
 resource "juju_application" "istio_ingress_k8s" {
   charm {
     name     = "istio-ingress-k8s"
-    channel  = "2/${var.risk}"
+    channel  = var.istio_ingress_k8s.channel
     revision = var.istio_ingress_k8s.revision
   }
 
@@ -41,7 +41,7 @@ resource "juju_application" "istio_ingress_k8s" {
 resource "juju_application" "istio_beacon_k8s" {
   charm {
     name     = "istio-beacon-k8s"
-    channel  = "2/${var.risk}"
+    channel  = var.istio_beacon_k8s.channel
     revision = var.istio_beacon_k8s.revision
   }
 
