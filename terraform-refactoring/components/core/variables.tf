@@ -1,17 +1,6 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-variable "risk" {
-  type        = string
-  description = "Value for the risk to be used"
-  default     = "edge"
-
-  validation {
-    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
-    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
-  }
-}
-
 variable "model_uuid" {
   description = "UUID of the Juju model where core components are deployed"
   type        = string
@@ -21,6 +10,7 @@ variable "model_uuid" {
 variable "minio" {
   description = "Configuration for minio application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -34,6 +24,7 @@ variable "minio" {
 variable "mlmd" {
   description = "Configuration for mlmd application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -47,6 +38,7 @@ variable "mlmd" {
 variable "envoy" {
   description = "Configuration for envoy application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -60,6 +52,7 @@ variable "envoy" {
 variable "kubeflow_dashboard" {
   description = "Configuration for kubeflow-dashboard application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -73,6 +66,7 @@ variable "kubeflow_dashboard" {
 variable "kubeflow_profiles" {
   description = "Configuration for kubeflow-profiles application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -86,6 +80,7 @@ variable "kubeflow_profiles" {
 variable "kubeflow_roles" {
   description = "Configuration for kubeflow-roles application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -99,6 +94,7 @@ variable "kubeflow_roles" {
 variable "kubeflow_volumes" {
   description = "Configuration for kubeflow-volumes application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -112,6 +108,7 @@ variable "kubeflow_volumes" {
 variable "metacontroller_operator" {
   description = "Configuration for metacontroller-operator application"
   type = object({
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)

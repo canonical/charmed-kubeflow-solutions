@@ -5,7 +5,7 @@
 resource "juju_application" "minio" {
   charm {
     name     = "minio"
-    channel  = "latest/${var.risk}"
+    channel  = var.minio.channel
     revision = var.minio.revision
   }
 
@@ -22,7 +22,7 @@ resource "juju_application" "minio" {
 resource "juju_application" "mlmd" {
   charm {
     name     = "mlmd"
-    channel  = "latest/${var.risk}"
+    channel  = var.mlmd.channel
     revision = var.mlmd.revision
   }
 
@@ -39,7 +39,7 @@ resource "juju_application" "mlmd" {
 resource "juju_application" "envoy" {
   charm {
     name     = "envoy"
-    channel  = "latest/${var.risk}"
+    channel  = var.envoy.channel
     revision = var.envoy.revision
   }
 
@@ -56,7 +56,7 @@ resource "juju_application" "envoy" {
 resource "juju_application" "kubeflow_dashboard" {
   charm {
     name     = "kubeflow-dashboard"
-    channel  = "latest/${var.risk}"
+    channel  = var.kubeflow_dashboard.channel
     revision = var.kubeflow_dashboard.revision
   }
 
@@ -73,7 +73,7 @@ resource "juju_application" "kubeflow_dashboard" {
 resource "juju_application" "kubeflow_profiles" {
   charm {
     name     = "kubeflow-profiles"
-    channel  = "latest/${var.risk}"
+    channel  = var.kubeflow_profiles.channel
     revision = var.kubeflow_profiles.revision
   }
 
@@ -90,7 +90,7 @@ resource "juju_application" "kubeflow_profiles" {
 resource "juju_application" "kubeflow_roles" {
   charm {
     name     = "kubeflow-roles"
-    channel  = "latest/${var.risk}"
+    channel  = var.kubeflow_roles.channel
     revision = var.kubeflow_roles.revision
   }
 
@@ -107,7 +107,7 @@ resource "juju_application" "kubeflow_roles" {
 resource "juju_application" "kubeflow_volumes" {
   charm {
     name     = "kubeflow-volumes"
-    channel  = "latest/${var.risk}"
+    channel  = var.kubeflow_volumes.channel
     revision = var.kubeflow_volumes.revision
   }
 
@@ -124,7 +124,7 @@ resource "juju_application" "kubeflow_volumes" {
 resource "juju_application" "metacontroller_operator" {
   charm {
     name     = "metacontroller-operator"
-    channel  = "latest/${var.risk}"
+    channel  = var.metacontroller_operator.channel
     revision = var.metacontroller_operator.revision
   }
 
