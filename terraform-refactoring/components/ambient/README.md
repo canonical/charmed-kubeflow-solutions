@@ -1,80 +1,44 @@
-# Ambient Component Module
-
-Terraform component module for deploying Istio Ambient mesh on Kubernetes using Juju charms.
-
-## Overview
-
-This component deploys the Istio Ambient stack consisting of three coordinated charm applications:
-
-| Application | Charm | Channel | Role |
-|---|---|---|---|
-| `istio-k8s` | `istio-k8s` | `2/<risk>` | Control plane and mesh configuration |
-| `istio-ingress-k8s` | `istio-ingress-k8s` | `2/<risk>` | Ingress gateway for external traffic |
-| `istio-beacon-k8s` | `istio-beacon-k8s` | `2/<risk>` | Ambient mesh waypoints and service mesh integration |
-
-The three charms work together through native Kubernetes integration. The only intra-component Juju relation is `istio-ingress-config` between `istio-k8s` and `istio-ingress-k8s`.
-
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-- Terraform >= 1.6
-- Juju provider >= 1.0.0
-- Kubernetes cluster with CNI support for ambient mesh
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.0.0 |
 
-## Usage
+## Providers
 
-```hcl
-module "ambient" {
-  source = "../../components/ambient"
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_juju"></a> [juju](#provider\_juju) | 1.4.2 |
 
-  model_uuid = juju_model.kubeflow.uuid
-  risk       = "stable"
+## Modules
 
-  istio_k8s = {
-    revision = 42
-  }
-  istio_ingress_k8s = {
-    revision = 35
-  }
-  istio_beacon_k8s = {
-    revision = 28
-  }
-}
-```
+No modules.
+
+## Resources
+
+| Name | Type |
+| ---- | ---- |
+| [juju_application.istio_beacon_k8s](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_application.istio_ingress_k8s](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_application.istio_k8s](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_integration.istio_k8s_istio_ingress_k8s_ingress_config](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
 ## Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `model_uuid` | `string` | required | UUID of the Juju model |
-| `risk` | `string` | `"edge"` | Channel risk: `stable`, `candidate`, `beta`, or `edge` |
-| `istio_k8s` | `object` | `{}` | Configuration for `istio-k8s` (revision, units, trust, constraints, resources) |
-| `istio_k8s_platform` | `string` | `""` | Platform config for `istio-k8s` (e.g. `linux/amd64`) |
-| `istio_ingress_k8s` | `object` | `{}` | Configuration for `istio-ingress-k8s` (revision, units, trust, constraints, config, resources) |
-| `istio_beacon_k8s` | `object` | `{}` | Configuration for `istio-beacon-k8s` (revision, units, trust, constraints, config, resources) |
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#input\_istio\_beacon\_k8s) | Configuration for istio-beacon-k8s application | <pre>object({<br/>    channel     = optional(string, "2/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_istio_ingress_k8s"></a> [istio\_ingress\_k8s](#input\_istio\_ingress\_k8s) | Configuration for istio-ingress-k8s application | <pre>object({<br/>    channel     = optional(string, "2/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_istio_k8s"></a> [istio\_k8s](#input\_istio\_k8s) | Configuration for istio-k8s application | <pre>object({<br/>    channel     = optional(string, "2/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where Istio Ambient is deployed | `string` | n/a | yes |
 
 ## Outputs
 
-### `components`
-
-Map of the deployed Juju application objects, keyed by `istio_k8s`, `istio_ingress_k8s`, `istio_beacon_k8s`.
-
-### `provides`
-
-Inter-component endpoints this module exposes to other components:
-
-| Key | Application | Endpoint | Consumed by |
-|---|---|---|---|
-| `istio_ingress_k8s_gateway` | `istio-ingress-k8s` | `gateway` | — |
-| `istio_ingress_k8s_istio_ingress_route` | `istio-ingress-k8s` | `istio-ingress-route` | core: dashboard, volumes, envoy |
-| `istio_ingress_k8s_istio_ingress_route_unauthenticated` | `istio-ingress-k8s` | `istio-ingress-route-unauthenticated` | core: dex-auth, oidc-gatekeeper |
-| `istio_beacon_k8s_service_mesh` | `istio-beacon-k8s` | `service-mesh` | All workloads requiring ambient mesh |
-
-### `requires`
-
-Inter-component endpoints this module requires from other components:
-
-| Key | Application | Endpoint | Provided by |
-|---|---|---|---|
-| `istio_ingress_k8s_forward_auth` | `istio-ingress-k8s` | `forward-auth` | core: `oidc-gatekeeper` |
-
-> **Note:** The `forward-auth` integration creates a circular dependency if passed through module variables (since `module.core` already consumes `module.ambient` outputs). It is wired as a direct `juju_integration` resource in the product's `integrations.tf`.
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_components"></a> [components](#output\_components) | Map of the deployed Istio Ambient applications |
+| <a name="output_provides"></a> [provides](#output\_provides) | Map of endpoints provided by this component to other components (outbound relations) |
+| <a name="output_requires"></a> [requires](#output\_requires) | Map of endpoints required by this component from other components (inbound relations) |
+<!-- END_TF_DOCS -->

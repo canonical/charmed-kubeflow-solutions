@@ -14,9 +14,7 @@ resource "juju_application" "istio_k8s" {
   units       = var.istio_k8s.units
   trust       = var.istio_k8s.trust
   constraints = var.istio_k8s.constraints
-  config = var.istio_k8s_platform != "" ? {
-    platform = var.istio_k8s_platform
-  } : {}
+  config      = var.istio_k8s.config
   resources   = var.istio_k8s.resources
 }
 

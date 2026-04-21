@@ -15,15 +15,10 @@ variable "istio_k8s" {
     units       = optional(number, 1)
     trust       = optional(bool, true)
     constraints = optional(string)
+    config      = optional(map(string), {})
     resources   = optional(map(string), {})
   })
   default = {}
-}
-
-variable "istio_k8s_platform" {
-  description = "Platform configuration for istio-k8s (e.g., 'linux/amd64')"
-  type        = string
-  default     = ""
 }
 
 variable "istio_ingress_k8s" {
