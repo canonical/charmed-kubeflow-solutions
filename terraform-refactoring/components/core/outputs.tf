@@ -4,7 +4,6 @@
 output "components" {
   description = "Map of the deployed core component applications"
   value = {
-    envoy              = juju_application.envoy
     kubeflow_dashboard = juju_application.kubeflow_dashboard
     kubeflow_profiles  = juju_application.kubeflow_profiles
     kubeflow_roles     = juju_application.kubeflow_roles
@@ -30,10 +29,6 @@ output "provides" {
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
-    envoy_ingress = {
-      name     = juju_application.envoy.name
-      endpoint = "ingress"
-    }
     kubeflow_dashboard_ingress = {
       name     = juju_application.kubeflow_dashboard.name
       endpoint = "ingress"
@@ -58,20 +53,12 @@ output "requires" {
       name     = juju_application.kubeflow_volumes.name
       endpoint = "service-mesh"
     }
-    envoy_service_mesh = {
-      name     = juju_application.envoy.name
-      endpoint = "service-mesh"
-    }
     kubeflow_dashboard_istio_ingress_route = {
       name     = juju_application.kubeflow_dashboard.name
       endpoint = "istio-ingress-route"
     }
     kubeflow_volumes_istio_ingress_route = {
       name     = juju_application.kubeflow_volumes.name
-      endpoint = "istio-ingress-route"
-    }
-    envoy_istio_ingress_route = {
-      name     = juju_application.envoy.name
       endpoint = "istio-ingress-route"
     }
   }

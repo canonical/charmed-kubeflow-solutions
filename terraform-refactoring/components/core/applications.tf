@@ -18,23 +18,6 @@ resource "juju_application" "minio" {
   resources   = var.minio.resources
 }
 
-# Envoy proxy application
-resource "juju_application" "envoy" {
-  charm {
-    name     = "envoy"
-    channel  = var.envoy.channel
-    revision = var.envoy.revision
-  }
-
-  model_uuid  = var.model_uuid
-  name        = "envoy"
-  units       = var.envoy.units
-  trust       = var.envoy.trust
-  constraints = var.envoy.constraints
-  config      = var.envoy.config
-  resources   = var.envoy.resources
-}
-
 # Kubeflow Dashboard application
 resource "juju_application" "kubeflow_dashboard" {
   charm {
