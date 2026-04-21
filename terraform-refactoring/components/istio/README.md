@@ -1,64 +1,42 @@
-# Istio Component Module
-
-Terraform component module for deploying Istio service mesh (sidecar mode) on Kubernetes using Juju charms.
-
-## Overview
-
-This component deploys the Istio sidecar stack consisting of two coordinated charm applications:
-
-| Application | Charm | Channel | Role |
-|---|---|---|---|
-| `istio-pilot` | `istio-pilot` | `1.28/<risk>` | Control plane, ingress proxy configuration |
-| `istio-ingressgateway` | `istio-gateway` | `1.28/<risk>` | Ingress gateway for north-south traffic |
-
-The two charms communicate via Kubernetes native integration. There are no intra-component Juju relations.
-
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-- Terraform >= 1.6
-- Juju provider >= 1.0.0
-- Kubernetes cluster with Juju deployed
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.0.0 |
 
-## Usage
+## Providers
 
-```hcl
-module "istio" {
-  source = "../../components/istio"
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_juju"></a> [juju](#provider\_juju) | 1.4.3 |
 
-  model_uuid = juju_model.kubeflow.uuid
-  risk       = "stable"
+## Modules
 
-  istio_pilot = {
-    revision = 42
-  }
-  istio_gateway = {
-    revision = 43
-    config   = { kind = "ingress" }
-  }
-}
-```
+No modules.
+
+## Resources
+
+| Name | Type |
+| ---- | ---- |
+| [juju_application.istio_ingressgateway](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_application.istio_pilot](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_integration.istio_pilot_istio_ingressgateway](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
 ## Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `model_uuid` | `string` | required | UUID of the Juju model |
-| `risk` | `string` | `"edge"` | Channel risk: `stable`, `candidate`, `beta`, or `edge` |
-| `istio_pilot` | `object` | `{}` | Configuration for `istio-pilot` (revision, units, trust, constraints, config, resources) |
-| `istio_gateway` | `object` | `{}` | Configuration for `istio-ingressgateway` (revision, units, trust, constraints, config, resources) |
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_istio_ingressgateway"></a> [istio\_ingressgateway](#input\_istio\_ingressgateway) | Configuration for istio-ingressgateway application | <pre>object({<br/>    channel     = optional(string, "1.28/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_istio_pilot"></a> [istio\_pilot](#input\_istio\_pilot) | Configuration for istio-pilot application | <pre>object({<br/>    channel     = optional(string, "1.28/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where Istio is deployed | `string` | n/a | yes |
 
 ## Outputs
 
-### `components`
-
-Map of the deployed Juju application objects, keyed by `istio_pilot`, `istio_gateway`.
-
-### `provides`
-
-Inter-component endpoints this module exposes to other components:
-
-| Key | Application | Endpoint | Consumed by |
-|---|---|---|---|
-| `istio_ingressgateway_gateway` | `istio-ingressgateway` | `gateway` | — |
-| `istio_pilot_ingress` | `istio-pilot` | `ingress` | core: dex-auth, oidc-gatekeeper, kubeflow-dashboard, kubeflow-volumes, envoy |
-| `istio_pilot_ingress_auth` | `istio-pilot` | `ingress-auth` | core: `oidc-gatekeeper` |
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_components"></a> [components](#output\_components) | Map of the deployed Istio applications |
+| <a name="output_provides"></a> [provides](#output\_provides) | Map of endpoints provided by this component to other components (outbound relations) |
+| <a name="output_requires"></a> [requires](#output\_requires) | Map of endpoints required by this component from other components (inbound relations) |
+<!-- END_TF_DOCS -->

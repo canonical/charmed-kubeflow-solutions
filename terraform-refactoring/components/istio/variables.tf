@@ -10,7 +10,7 @@ variable "model_uuid" {
 variable "istio_pilot" {
   description = "Configuration for istio-pilot application"
   type = object({
-    channel     = optional(string, "1.28/edge")
+    channel     = optional(string, "1.28/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -24,7 +24,7 @@ variable "istio_pilot" {
 variable "istio_ingressgateway" {
   description = "Configuration for istio-ingressgateway application"
   type = object({
-    channel     = optional(string, "1.28/edge")
+    channel     = optional(string, "1.28/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
