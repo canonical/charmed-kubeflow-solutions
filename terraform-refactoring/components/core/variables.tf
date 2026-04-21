@@ -10,7 +10,7 @@ variable "model_uuid" {
 variable "minio" {
   description = "Configuration for minio application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "1.10/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -24,7 +24,7 @@ variable "minio" {
 variable "envoy" {
   description = "Configuration for envoy application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "2.4/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -38,7 +38,7 @@ variable "envoy" {
 variable "kubeflow_dashboard" {
   description = "Configuration for kubeflow-dashboard application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "1.10/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -52,7 +52,7 @@ variable "kubeflow_dashboard" {
 variable "kubeflow_profiles" {
   description = "Configuration for kubeflow-profiles application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "1.10/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -66,7 +66,7 @@ variable "kubeflow_profiles" {
 variable "kubeflow_roles" {
   description = "Configuration for kubeflow-roles application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "1.10/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -80,7 +80,7 @@ variable "kubeflow_roles" {
 variable "kubeflow_volumes" {
   description = "Configuration for kubeflow-volumes application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "1.10/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -94,7 +94,7 @@ variable "kubeflow_volumes" {
 variable "metacontroller_operator" {
   description = "Configuration for metacontroller-operator application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "4.11/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
