@@ -1,119 +1,54 @@
-# Auth Component Module
-
-Terraform component module for deploying Kubeflow authentication services using Juju charms.
-
-## Overview
-
-This component deploys the authentication and authorization services required for Kubeflow:
-
-| Application | Charm | Role |
-|---|---|---|
-| `dex-auth` | `dex-auth` | OpenID Connect identity provider |
-| `oidc-gatekeeper` | `oidc-gatekeeper` | HTTP authorization gateway |
-
-## Intra-Component Relations
-
-Relations wired internally within this component:
-
-- `dex-auth:dex-oidc-config ↔ oidc-gatekeeper:dex-oidc-config`
-- `dex-auth:oidc-client ↔ oidc-gatekeeper:oidc-client`
-
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-- Terraform >= 1.6
-- Juju provider >= 1.0.0
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.0.0 |
 
-## Usage
+## Providers
 
-```hcl
-module "auth" {
-  source = "../../components/auth"
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.0.0 |
 
-  model_uuid = juju_model.kubeflow.uuid
-  risk       = "stable"
+## Modules
 
-  # Service mesh — provide one of ingress (istio) or service_mesh (ambient)
-  ingress = {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  }
-  ingress_auth = {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress_auth.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress_auth.endpoint
-  }
-}
-```
+No modules.
 
-## Inputs
+## Resources
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `model_uuid` | `string` | required | UUID of the Juju model |
-| `risk` | `string` | `"edge"` | Channel risk: `stable`, `candidate`, `beta`, or `edge` |
-| `dex_auth` | `object` | `{}` | Configuration for `dex-auth` |
-| `oidc_gatekeeper` | `object` | `{}` | Configuration for `oidc-gatekeeper` |
-
-All application objects accept: `revision`, `units`, `trust`, `constraints`, `config`, `resources`.
-
-### Service mesh inputs (mutually exclusive — provide one set)
-
-**Istio (sidecar)**
-
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `ingress` | `object` | `null` | `istio-pilot:ingress` endpoint for dex-auth and oidc-gatekeeper |
-| `ingress_auth` | `object` | `null` | `istio-pilot:ingress-auth` endpoint for oidc-gatekeeper |
-
-**Ambient**
-
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `service_mesh` | `object` | `null` | `istio-beacon-k8s:service-mesh` endpoint for dex-auth and oidc-gatekeeper |
-| `istio_ingress_route_unauthenticated` | `object` | `null` | `istio-ingress-k8s:istio-ingress-route-unauthenticated` for dex-auth and oidc-gatekeeper |
-
-All mesh input objects accept `{ kind = "endpoint"|"offer", name, endpoint }` or `{ kind = "offer", url }`.
-
-## Outputs
-
-### `components`
-
-Map of deployed Juju application objects: `dex_auth`, `oidc_gatekeeper`.
-
-### `provides`
-
-| Key | Application | Endpoint | Consumed by |
-|---|---|---|---|
-| `oidc_gatekeeper_forward_auth` | `oidc-gatekeeper` | `forward-auth` | ambient: `istio-ingress-k8s` |
-
-### `requires`
-
-Endpoints required from the service mesh component (all `null`-safe, only wired when the corresponding input variable is set).
-
-**Istio:** `dex_auth_ingress`, `oidc_gatekeeper_ingress`, `oidc_gatekeeper_ingress_auth`
-
-**Ambient (service-mesh):** `dex_auth_service_mesh`, `oidc_gatekeeper_service_mesh`
-
-**Ambient (istio-ingress-route):** `oidc_gatekeeper_istio_ingress_route_unauthenticated`, `dex_auth_istio_ingress_route_unauthenticated`
+| Name | Type |
+| ---- | ---- |
+| [juju_application.dex_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_application.oidc_gatekeeper](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_integration.dex_auth_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.dex_auth_istio_ingress_route_unauthenticated](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.dex_auth_oidc_gatekeeper_dex_oidc_config](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.dex_auth_oidc_gatekeeper_oidc_client](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.dex_auth_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.oidc_gatekeeper_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.oidc_gatekeeper_ingress_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.oidc_gatekeeper_istio_ingress_route_unauthenticated](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.oidc_gatekeeper_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
 ## Inputs
 
-| Variable | Description |
-|----------|-------------|
-| `risk` | Charm channel risk (stable/candidate/beta/edge) |
-| `model_uuid` | UUID of the Juju model |
-| `dex_auth` | Configuration for dex-auth application |
-| `oidc_gatekeeper` | Configuration for oidc-gatekeeper application |
-| `ingress` | Ingress provider (istio sidecar mode) |
-| `ingress_auth` | Ingress-auth provider for oidc-gatekeeper (istio sidecar mode) |
-| `service_mesh` | Service mesh provider (istio ambient mode) |
-| `istio_ingress_route_unauthenticated` | Unauthenticated ingress route (istio ambient mode) |
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_dex_auth"></a> [dex\_auth](#input\_dex\_auth) | Configuration for dex-auth application | <pre>object({<br/>    channel     = optional(string, "latest/edge")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_ingress"></a> [ingress](#input\_ingress) | Ingress provider for auth applications (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_ingress_auth"></a> [ingress\_auth](#input\_ingress\_auth) | Ingress-auth provider for oidc-gatekeeper from istio-pilot:ingress-auth (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_istio_ingress_route_unauthenticated"></a> [istio\_ingress\_route\_unauthenticated](#input\_istio\_ingress\_route\_unauthenticated) | Unauthenticated istio ingress route provider for auth applications from istio-ingress-k8s:istio-ingress-route-unauthenticated (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where auth components are deployed | `string` | n/a | yes |
+| <a name="input_oidc_gatekeeper"></a> [oidc\_gatekeeper](#input\_oidc\_gatekeeper) | Configuration for oidc-gatekeeper application | <pre>object({<br/>    channel     = optional(string, "latest/edge")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_service_mesh"></a> [service\_mesh](#input\_service\_mesh) | Service mesh provider for auth applications from istio-beacon-k8s:service-mesh (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `components` | Map of deployed application resources |
-| `provides` | Endpoints provided to other components (`oidc_gatekeeper_forward_auth`) |
-| `requires` | Endpoints required from other components (ingress, service-mesh, etc.) |
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_components"></a> [components](#output\_components) | Map of the deployed auth component applications |
+| <a name="output_provides"></a> [provides](#output\_provides) | Map of endpoints provided by this component to other components (outbound relations) |
+| <a name="output_requires"></a> [requires](#output\_requires) | Map of endpoints required by this component from other components (inbound relations) |
+<!-- END_TF_DOCS -->
