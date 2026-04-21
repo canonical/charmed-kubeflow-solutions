@@ -10,7 +10,7 @@ variable "model_uuid" {
 variable "dex_auth" {
   description = "Configuration for dex-auth application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "2.41/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
@@ -24,7 +24,7 @@ variable "dex_auth" {
 variable "oidc_gatekeeper" {
   description = "Configuration for oidc-gatekeeper application"
   type = object({
-    channel     = optional(string, "latest/edge")
+    channel     = optional(string, "ckf-1.10/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
