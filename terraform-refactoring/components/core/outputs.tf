@@ -1,3 +1,6 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
 output "components" {
   description = "Map of the deployed core component applications"
   value = {

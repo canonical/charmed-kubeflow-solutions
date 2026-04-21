@@ -118,7 +118,17 @@ variable "ingress" {
 
   validation {
     condition     = var.ingress == null || contains(["endpoint", "offer"], var.ingress.kind)
-    error_message = "Valid values for ingress.kind are (endpoint, offer)."
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.ingress == null || var.ingress.kind != "endpoint" || (var.ingress.kind != null && var.ingress.kind != "" && var.ingress.name != null && var.ingress.name != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.ingress == null || var.ingress.kind != "offer" || (var.ingress.url != null && var.ingress.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }
 
@@ -135,7 +145,17 @@ variable "service_mesh" {
 
   validation {
     condition     = var.service_mesh == null || contains(["endpoint", "offer"], var.service_mesh.kind)
-    error_message = "Valid values for service_mesh.kind are (endpoint, offer)."
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.service_mesh == null || var.service_mesh.kind != "endpoint" || (var.service_mesh.kind != null && var.service_mesh.kind != "" && var.service_mesh.name != null && var.service_mesh.name != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.service_mesh == null || var.service_mesh.kind != "offer" || (var.service_mesh.url != null && var.service_mesh.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }
 
@@ -152,6 +172,16 @@ variable "istio_ingress_route" {
 
   validation {
     condition     = var.istio_ingress_route == null || contains(["endpoint", "offer"], var.istio_ingress_route.kind)
-    error_message = "Valid values for istio_ingress_route.kind are (endpoint, offer)."
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.istio_ingress_route == null || var.istio_ingress_route.kind != "endpoint" || (var.istio_ingress_route.kind != null && var.istio_ingress_route.kind != "" && var.istio_ingress_route.name != null && var.istio_ingress_route.name != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.istio_ingress_route == null || var.istio_ingress_route.kind != "offer" || (var.istio_ingress_route.url != null && var.istio_ingress_route.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }
