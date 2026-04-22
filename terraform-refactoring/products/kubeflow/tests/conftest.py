@@ -4,7 +4,7 @@ import pytest
 MODEL_NAME = "kubeflow"
 
 @pytest.fixture(scope="module")
-def juju(request: pytest.FixtureRequest):
+def juju():
     juju_instance = jubilant.Juju()
     juju_instance.add_model(MODEL_NAME)
 
