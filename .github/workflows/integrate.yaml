@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         module:
+          - istio-sidecar
           - istio-ambient
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
