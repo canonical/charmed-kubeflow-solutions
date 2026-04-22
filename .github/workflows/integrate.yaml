@@ -12,6 +12,7 @@ jobs:
         module:
           - istio-sidecar
           - istio-ambient
+          - auth
     uses: canonical/charmed-kubeflow-workflows/.github/workflows/terraform-checks-solution.yaml@main
     with:
       module-path: terraform-refactoring/components/${{ matrix.module }}
