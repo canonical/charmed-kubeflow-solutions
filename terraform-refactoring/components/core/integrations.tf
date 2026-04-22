@@ -56,22 +56,6 @@ resource "juju_integration" "kubeflow_volumes_ingress" {
 
 # Ambient service-mesh integrations (istio-beacon-k8s:service-mesh -> core apps)
 
-resource "juju_integration" "minio_service_mesh" {
-  count      = var.service_mesh != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.minio.name
-    endpoint = "service-mesh"
-  }
-
-  application {
-    name      = var.service_mesh.kind == "endpoint" ? var.service_mesh.name : null
-    endpoint  = var.service_mesh.kind == "endpoint" ? var.service_mesh.endpoint : null
-    offer_url = var.service_mesh.kind == "offer" ? var.service_mesh.url : null
-  }
-}
-
 resource "juju_integration" "kubeflow_dashboard_service_mesh" {
   count      = var.service_mesh != null ? 1 : 0
   model_uuid = var.model_uuid

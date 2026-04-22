@@ -23,3 +23,19 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_forward_auth" {
     endpoint = module.ambient[0].requires.istio_ingress_k8s_forward_auth.endpoint
   }
 }
+
+# minio service-mesh integration (ambient only)
+resource "juju_integration" "minio_service_mesh" {
+  count      = var.service_mesh_type == "ambient" ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.minio.requires.service_mesh.name
+    endpoint = module.minio.requires.service_mesh.endpoint
+  }
+
+  application {
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  }
+}

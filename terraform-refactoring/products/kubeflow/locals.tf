@@ -12,7 +12,9 @@ locals {
   kubeflow_roles_channel          = "latest/${var.risk}"
   kubeflow_volumes_channel        = "latest/${var.risk}"
   metacontroller_operator_channel = "latest/${var.risk}"
-  minio_channel                   = "latest/${var.risk}"
+
+  # Standalone Charms
+  minio_channel = "latest/${var.risk}"
 
   # Istio Component (sidecar)
   istio_sidecar_channel = "1.28/${var.risk}"

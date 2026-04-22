@@ -1,23 +1,6 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# MinIO object storage application
-resource "juju_application" "minio" {
-  charm {
-    name     = "minio"
-    channel  = var.minio.channel
-    revision = var.minio.revision
-  }
-
-  model_uuid  = var.model_uuid
-  name        = "minio"
-  units       = var.minio.units
-  trust       = var.minio.trust
-  constraints = var.minio.constraints
-  config      = var.minio.config
-  resources   = var.minio.resources
-}
-
 # Kubeflow Dashboard application
 resource "juju_application" "kubeflow_dashboard" {
   charm {

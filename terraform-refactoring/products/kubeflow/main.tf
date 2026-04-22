@@ -90,7 +90,7 @@ module "auth" {
 module "core" {
   depends_on = [module.istio, module.ambient, module.auth]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core?ref=KF-8608-core"
+  source = "../../components/core"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -115,11 +115,6 @@ module "core" {
     revision = var.metacontroller_operator_revision
     config   = var.metacontroller_operator_config
   }
-  minio = {
-    channel  = local.minio_channel
-    revision = var.minio_revision
-    config   = var.minio_config
-  }
 
   ingress = var.service_mesh_type == "istio" ? {
     kind     = "endpoint"
@@ -138,4 +133,15 @@ module "core" {
     name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
     endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
   } : null
+}
+
+module "minio" {
+  depends_on = [module.istio, module.ambient]
+
+  source = "../../charms/minio"
+
+  model_uuid  = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel     = local.minio_channel
+  revision    = var.minio_revision
+  config      = var.minio_config
 }

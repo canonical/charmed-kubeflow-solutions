@@ -7,20 +7,6 @@ variable "model_uuid" {
   nullable    = false
 }
 
-variable "minio" {
-  description = "Configuration for minio application"
-  type = object({
-    channel     = optional(string, "1.10/stable")
-    revision    = optional(number)
-    units       = optional(number, 1)
-    trust       = optional(bool, true)
-    constraints = optional(string)
-    config      = optional(map(string), {})
-    resources   = optional(map(string), {})
-  })
-  default = {}
-}
-
 variable "kubeflow_dashboard" {
   description = "Configuration for kubeflow-dashboard application"
   type = object({

@@ -8,7 +8,6 @@ output "components" {
     kubeflow_profiles  = juju_application.kubeflow_profiles
     kubeflow_roles     = juju_application.kubeflow_roles
     kubeflow_volumes   = juju_application.kubeflow_volumes
-    minio              = juju_application.minio
   }
 }
 
@@ -18,10 +17,6 @@ output "provides" {
     kubeflow_dashboard_links = {
       name     = juju_application.kubeflow_dashboard.name
       endpoint = "links"
-    }
-    minio_object_storage = {
-      name     = juju_application.minio.name
-      endpoint = "object-storage"
     }
   }
 }
@@ -39,10 +34,6 @@ output "requires" {
     }
     kubeflow_dashboard_service_mesh = {
       name     = juju_application.kubeflow_dashboard.name
-      endpoint = "service-mesh"
-    }
-    minio_service_mesh = {
-      name     = juju_application.minio.name
       endpoint = "service-mesh"
     }
     kubeflow_profiles_service_mesh = {
@@ -68,6 +59,5 @@ output "offers" {
   description = "Map of cross-component offer URLs"
   value = {
     kubeflow_dashboard_links = "${juju_application.kubeflow_dashboard.name}:links"
-    minio_object_storage     = "${juju_application.minio.name}:object-storage"
   }
 }
