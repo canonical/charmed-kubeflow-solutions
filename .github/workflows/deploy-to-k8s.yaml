@@ -126,11 +126,11 @@ jobs:
 
           tox -c ./terraform-refactoring/products/kubeflow -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG
 
-      # On failure, capture debugging resources
       - name: Get juju status
-        run: juju status -m kubeflow
-        if: failure() || cancelled()
+        run: juju status -m kubeflow --relations
+        if: always()
 
+      # On failure, capture debugging resources
       - name: Get juju debug logs
         run: juju debug-log --replay --no-tail -m kubeflow
         if: failure() || cancelled()
