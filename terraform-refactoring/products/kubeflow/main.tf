@@ -140,8 +140,8 @@ module "minio" {
 
   source = "../../charms/minio"
 
-  model_uuid  = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  channel     = local.minio_channel
-  revision    = var.minio_revision
-  config      = var.minio_config
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel    = local.minio_channel
+  revision   = var.minio_revision
+  config     = var.minio_config
 }

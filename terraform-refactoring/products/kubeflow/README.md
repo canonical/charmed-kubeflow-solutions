@@ -10,7 +10,7 @@
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_juju"></a> [juju](#provider\_juju) | 1.4.3 |
+| <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.0.0 |
 
 ## Modules
 
@@ -18,7 +18,7 @@
 | ---- | ------ | ------- |
 | <a name="module_ambient"></a> [ambient](#module\_ambient) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient | feat/terraform-refactor |
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
-| <a name="module_core"></a> [core](#module\_core) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core | KF-8608-core |
+| <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_minio"></a> [minio](#module\_minio) | ../../charms/minio | n/a |
 
