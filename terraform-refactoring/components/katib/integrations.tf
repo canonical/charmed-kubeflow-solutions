@@ -103,22 +103,6 @@ resource "juju_integration" "katib_controller_service_mesh" {
   }
 }
 
-resource "juju_integration" "katib_db_manager_service_mesh" {
-  count      = var.service_mesh != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.katib_db_manager.name
-    endpoint = "service-mesh"
-  }
-
-  application {
-    name      = var.service_mesh.kind == "endpoint" ? var.service_mesh.name : null
-    endpoint  = var.service_mesh.kind == "endpoint" ? var.service_mesh.endpoint : null
-    offer_url = var.service_mesh.kind == "offer" ? var.service_mesh.url : null
-  }
-}
-
 resource "juju_integration" "katib_ui_service_mesh" {
   count      = var.service_mesh != null ? 1 : 0
   model_uuid = var.model_uuid
