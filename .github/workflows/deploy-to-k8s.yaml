@@ -14,8 +14,8 @@ on:
       risk:
         description: 'The risk level to be tested'
         required: false
-        default: 'stable'
-  # pull_request:
+        default: 'edge'
+  pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
@@ -28,18 +28,17 @@ jobs:
       fail-fast: false
       matrix:
         bundle:
-          - module: kubeflow-mlflow
+          - product: kubeflow
+            service-mesh-type: sidecar
             uats:
               env: uats-remote
-              extra-args: --filter "not feast and not spark"
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
-          - module: kubeflow-ambient
+              extra-args: --filter "not mlflow and not feast and not spark"
+          - product: kubeflow
+            service-mesh-type: ambient
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args:
+              extra-args: --filter "not mlflow and not feast and not spark"
 
     steps:
       - name: Checkout repository
@@ -100,7 +99,7 @@ jobs:
           cd ..
 
       - name: Configure Cilium for Istio
-        if: matrix.bundle.module == 'kubeflow-ambient'
+        if: matrix.bundle.service-mesh-type == 'ambient'
         run: |
           # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
@@ -120,40 +119,22 @@ jobs:
 
           RISK_ARG="--risk ${{ env.RISK }}"
           PLATFORM_ARG=""
-          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.bundle.service-mesh-type }}"
+          if [[ "${{ matrix.bundle.service-mesh-type }}" == "ambient" ]]; then
             RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform"
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG
-
-      - name: Run UATs
-        run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
-
-      # On failure, capture debugging resources
-      - name: Select model
-        run: juju switch kubeflow
-        if: failure() || cancelled()
+          tox -c ./terraform-refactoring/products/kubeflow -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG
 
       - name: Get juju status
-        run: juju status
-        if: failure() || cancelled()
+        run: juju status -m kubeflow --relations
+        if: always()
 
+      # On failure, capture debugging resources
       - name: Get juju debug logs
-        run: juju debug-log --replay --no-tail
+        run: juju debug-log --replay --no-tail -m kubeflow
         if: failure() || cancelled()
-
-      - name: Get all kubernetes resources
-        run: kubectl get all -A
-        if: failure() || cancelled()
-
-      - name: Describe all pods
-        if: failure() || cancelled()
-        run: kubectl describe pods --all-namespaces
 
       - name: Get logs from pods with status = Pending
         run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
