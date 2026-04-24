@@ -230,6 +230,7 @@ module "katib" {
 }
 
 module "kfp" {
+  count      = var.enable_kfp ? 1 : 0
   depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
 
   source = "../../components/kfp"

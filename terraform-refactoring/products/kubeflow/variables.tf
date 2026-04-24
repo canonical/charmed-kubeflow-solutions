@@ -158,6 +158,12 @@ variable "mysql" {
 
 # KFP Component Applications
 
+variable "enable_kfp" {
+  description = "Whether to deploy the KFP component"
+  type        = bool
+  default     = true
+}
+
 variable "argo_controller_revision" {
   description = "Revision of the argo-controller application"
   type        = number

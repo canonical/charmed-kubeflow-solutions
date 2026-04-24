@@ -43,6 +43,7 @@
 | <a name="input_dex_auth_config"></a> [dex\_auth\_config](#input\_dex\_auth\_config) | Configuration for dex-auth application | `map(string)` | `{}` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
+| <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
