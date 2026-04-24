@@ -132,7 +132,7 @@ jobs:
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
+          tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }} --bundle ""
 
       # On failure, capture debugging resources
       - name: Select model
