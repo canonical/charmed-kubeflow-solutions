@@ -156,3 +156,109 @@ module "minio" {
   revision   = var.minio_revision
   config     = var.minio_config
 }
+
+module "kfp" {
+  depends_on = [module.istio, module.ambient, module.core, module.minio]
+
+  source = "../../components/kfp"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  mysql_database = var.mysql_database
+
+  object_storage = {
+    kind     = "endpoint"
+    name     = module.minio.provides.object_storage.name
+    endpoint = module.minio.provides.object_storage.endpoint
+  }
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  ingress = var.service_mesh_type == "sidecar" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  argo_controller = {
+    channel  = local.argo_controller_channel
+    revision = var.argo_controller_revision
+    config   = var.argo_controller_config
+  }
+
+  envoy = {
+    channel  = local.envoy_channel
+    revision = var.envoy_revision
+    config   = var.envoy_config
+  }
+
+  mlmd = {
+    channel  = local.mlmd_channel
+    revision = var.mlmd_revision
+    config   = var.mlmd_config
+  }
+
+  kfp_api = {
+    channel  = local.kfp_channel
+    revision = var.kfp_api_revision
+    config   = var.kfp_api_config
+  }
+
+  kfp_metadata_writer = {
+    channel  = local.kfp_channel
+    revision = var.kfp_metadata_writer_revision
+    config   = var.kfp_metadata_writer_config
+  }
+
+  kfp_persistence = {
+    channel  = local.kfp_channel
+    revision = var.kfp_persistence_revision
+    config   = var.kfp_persistence_config
+  }
+
+  kfp_profile_controller = {
+    channel  = local.kfp_channel
+    revision = var.kfp_profile_controller_revision
+    config   = var.kfp_profile_controller_config
+  }
+
+  kfp_schedwf = {
+    channel  = local.kfp_channel
+    revision = var.kfp_schedwf_revision
+    config   = var.kfp_schedwf_config
+  }
+
+  kfp_ui = {
+    channel  = local.kfp_channel
+    revision = var.kfp_ui_revision
+    config   = var.kfp_ui_config
+  }
+
+  kfp_viewer = {
+    channel  = local.kfp_channel
+    revision = var.kfp_viewer_revision
+    config   = var.kfp_viewer_config
+  }
+
+  kfp_viz = {
+    channel  = local.kfp_channel
+    revision = var.kfp_viz_revision
+    config   = var.kfp_viz_config
+  }
+}

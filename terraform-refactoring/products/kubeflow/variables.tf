@@ -143,6 +143,167 @@ variable "pvcviewer_operator_config" {
   default     = {}
 }
 
+# KFP Component Applications
+
+variable "mysql_database" {
+  description = "MySQL database provider for kfp-api (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.mysql_database == null || contains(["endpoint", "offer"], var.mysql_database.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.mysql_database == null || var.mysql_database.kind != "endpoint" || (var.mysql_database.name != null && var.mysql_database.name != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.mysql_database == null || var.mysql_database.kind != "offer" || (var.mysql_database.url != null && var.mysql_database.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
+variable "argo_controller_revision" {
+  description = "Revision of the argo-controller application"
+  type        = number
+  default     = null
+}
+
+variable "argo_controller_config" {
+  description = "Configuration for argo-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "envoy_revision" {
+  description = "Revision of the envoy application"
+  type        = number
+  default     = null
+}
+
+variable "envoy_config" {
+  description = "Configuration for envoy application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "mlmd_revision" {
+  description = "Revision of the mlmd application"
+  type        = number
+  default     = null
+}
+
+variable "mlmd_config" {
+  description = "Configuration for mlmd application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_api_revision" {
+  description = "Revision of the kfp-api application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_api_config" {
+  description = "Configuration for kfp-api application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_metadata_writer_revision" {
+  description = "Revision of the kfp-metadata-writer application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_metadata_writer_config" {
+  description = "Configuration for kfp-metadata-writer application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_persistence_revision" {
+  description = "Revision of the kfp-persistence application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_persistence_config" {
+  description = "Configuration for kfp-persistence application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_profile_controller_revision" {
+  description = "Revision of the kfp-profile-controller application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_profile_controller_config" {
+  description = "Configuration for kfp-profile-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_schedwf_revision" {
+  description = "Revision of the kfp-schedwf application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_schedwf_config" {
+  description = "Configuration for kfp-schedwf application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_ui_revision" {
+  description = "Revision of the kfp-ui application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_ui_config" {
+  description = "Configuration for kfp-ui application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_viewer_revision" {
+  description = "Revision of the kfp-viewer application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_viewer_config" {
+  description = "Configuration for kfp-viewer application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_viz_revision" {
+  description = "Revision of the kfp-viz application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_viz_config" {
+  description = "Configuration for kfp-viz application"
+  type        = map(string)
+  default     = {}
+}
+
 # Istio Component Applications
 
 variable "service_mesh_type" {
