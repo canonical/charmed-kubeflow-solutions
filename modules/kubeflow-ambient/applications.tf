@@ -3,14 +3,14 @@ module "admission_webhook" {
   source     = "git::https://github.com/canonical/admission-webhook-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.admission_webhook_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "argo_controller" {
   source     = "git::https://github.com/canonical/argo-operators//charms/argo-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.argo_controller_revision
-  channel    = local.channel_latest_edge
+  channel    = "3.7/${var.risk}"
   config = {
     bucket = var.argo_controller_bucket
   }
@@ -26,21 +26,21 @@ module "dex_auth" {
     "static-password" : var.dex_static_password
   }
   revision = var.dex_auth_revision
-  channel  = local.channel_latest_edge
+  channel  = "2.41/${var.risk}"
 }
 
 module "envoy" {
   source     = "git::https://github.com/canonical/envoy-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.envoy_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.4/${var.risk}"
 }
 
 module "jupyter_controller" {
   source     = "git::https://github.com/canonical/notebook-operators//charms/jupyter-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.jupyter_controller_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "jupyter_ui" {
@@ -48,14 +48,14 @@ module "jupyter_ui" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config     = var.jupyter_ui_config
   revision   = var.jupyter_ui_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "katib_controller" {
   source     = "git::https://github.com/canonical/katib-operators//charms/katib-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.katib_controller_revision
-  channel    = local.channel_latest_edge
+  channel    = "0.19/${var.risk}"
 }
 
 module "katib_db" {
@@ -76,14 +76,14 @@ module "katib_db_manager" {
   source     = "git::https://github.com/canonical/katib-operators//charms/katib-db-manager/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.katib_db_manager_revision
-  channel    = local.channel_latest_edge
+  channel    = "0.19/${var.risk}"
 }
 
 module "katib_ui" {
   source     = "git::https://github.com/canonical/katib-operators//charms/katib-ui/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.katib_ui_revision
-  channel    = local.channel_latest_edge
+  channel    = "0.19/${var.risk}"
 }
 
 module "kfp_api" {
@@ -93,7 +93,7 @@ module "kfp_api" {
   config = {
     object-store-bucket-name = var.kfp_api_object_store_bucket_name
   }
-  channel = local.channel_latest_edge
+  channel = "2.15/${var.risk}"
 }
 
 module "kfp_db" {
@@ -114,49 +114,49 @@ module "kfp_metadata_writer" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-metadata-writer/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_metadata_writer_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kfp_persistence" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-persistence/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_persistence_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kfp_profile_controller" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-profile-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_profile_controller_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kfp_schedwf" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-schedwf/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_schedwf_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kfp_ui" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-ui/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_ui_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kfp_viewer" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viewer/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_viewer_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kfp_viz" {
   source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viz/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_viz_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.15/${var.risk}"
 }
 
 module "kserve_controller" {
@@ -169,7 +169,7 @@ module "kserve_controller" {
     no-proxy        = var.no_proxy,
   }
   revision = var.kserve_controller_revision
-  channel  = local.channel_latest_edge
+  channel  = "0.15/${var.risk}"
 }
 
 module "kubeflow_dashboard" {
@@ -179,7 +179,7 @@ module "kubeflow_dashboard" {
     "registration-flow" : var.kubeflow_dashboard_registration_flow
   }
   revision = var.kubeflow_dashboard_revision
-  channel  = local.channel_latest_edge
+  channel  = "1.10/${var.risk}"
 }
 
 module "kubeflow_profiles" {
@@ -191,14 +191,14 @@ module "kubeflow_profiles" {
     "istio-gateway-service-account" : "istio-ingress-k8s-istio"
   }
   revision = var.kubeflow_profiles_revision
-  channel  = local.channel_latest_edge
+  channel  = "1.10/${var.risk}"
 }
 
 module "kubeflow_roles" {
   source     = "git::https://github.com/canonical/kubeflow-roles-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_roles_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "kubeflow_trainer" {
@@ -206,21 +206,21 @@ module "kubeflow_trainer" {
   source     = "git::https://github.com/canonical/training-operator//terraform?ref=main-v2"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_trainer_revision
-  channel    = local.channel_latest_edge
+  channel    = "2.1/edge"
 }
 
 module "kubeflow_volumes" {
   source     = "git::https://github.com/canonical/kubeflow-volumes-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_volumes_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "metacontroller_operator" {
   source     = "git::https://github.com/canonical/metacontroller-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.metacontroller_operator_revision
-  channel    = local.channel_latest_edge
+  channel    = "4.11/${var.risk}"
 }
 
 module "mlmd" {
@@ -230,7 +230,7 @@ module "mlmd" {
     mlmd-data = var.mlmd_size
   }
   revision = var.mlmd_revision
-  channel  = local.channel_latest_edge
+  channel  = "ckf-1.10/${var.risk}"
 }
 
 module "minio" {
@@ -247,7 +247,7 @@ module "minio" {
     minio-data = var.minio_size
   }
   revision = var.minio_revision
-  channel  = local.channel_latest_edge
+  channel  = "1.10/${var.risk}"
 }
 
 module "oidc_gatekeeper" {
@@ -257,35 +257,35 @@ module "oidc_gatekeeper" {
     ca-bundle = var.oidc_gatekeeper_ca_bundle,
   }
   revision = var.oidc_gatekeeper_revision
-  channel  = local.channel_latest_edge
+  channel  = "ckf-1.10/${var.risk}"
 }
 
 module "pvcviewer_operator" {
   source     = "git::https://github.com/canonical/pvcviewer-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.pvcviewer_operator_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "tensorboard_controller" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboard-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.tensorboard_controller_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "tensorboards_web_app" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboards-web-app/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.tensorboards_web_app_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.10/${var.risk}"
 }
 
 module "training_operator" {
   source     = "git::https://github.com/canonical/training-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.training_operator_revision
-  channel    = local.channel_latest_edge
+  channel    = "1.9/${var.risk}"
 }
 
 resource "juju_application" "istio_k8s" {

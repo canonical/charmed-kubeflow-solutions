@@ -1,3 +1,14 @@
+variable "risk" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = "stable"
+
+  validation {
+    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
+    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
+  }
+}
+
 variable "argo_controller_bucket" {
   description = "The name of the bucket to be used by Argo controller in the object store"
   type        = string
