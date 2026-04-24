@@ -119,6 +119,38 @@ resource "juju_integration" "kubeflow_volumes_service_mesh" {
   }
 }
 
+resource "juju_integration" "pvcviewer_operator_service_mesh" {
+  count      = var.service_mesh != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.pvcviewer_operator.name
+    endpoint = "service-mesh"
+  }
+
+  application {
+    name      = var.service_mesh.kind == "endpoint" ? var.service_mesh.name : null
+    endpoint  = var.service_mesh.kind == "endpoint" ? var.service_mesh.endpoint : null
+    offer_url = var.service_mesh.kind == "offer" ? var.service_mesh.url : null
+  }
+}
+
+resource "juju_integration" "pvcviewer_operator_gateway_metadata" {
+  count      = var.gateway_metadata != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.pvcviewer_operator.name
+    endpoint = "gateway-metadata"
+  }
+
+  application {
+    name      = var.gateway_metadata.kind == "endpoint" ? var.gateway_metadata.name : null
+    endpoint  = var.gateway_metadata.kind == "endpoint" ? var.gateway_metadata.endpoint : null
+    offer_url = var.gateway_metadata.kind == "offer" ? var.gateway_metadata.url : null
+  }
+}
+
 # Ambient istio-ingress-route integrations (istio-ingress-k8s:istio-ingress-route -> core apps)
 
 resource "juju_integration" "kubeflow_dashboard_istio_ingress_route" {

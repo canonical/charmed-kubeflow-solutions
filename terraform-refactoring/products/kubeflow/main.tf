@@ -26,7 +26,7 @@ module "istio" {
 
 module "ambient" {
   count  = var.service_mesh_type == "ambient" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient?ref=feat/terraform-refactor"
+  source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -137,6 +137,12 @@ module "core" {
     kind     = "endpoint"
     name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
     endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  gateway_metadata = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
   } : null
 }
 

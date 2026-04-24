@@ -29,6 +29,10 @@ output "provides" {
       name     = juju_application.istio_ingress_k8s.name
       endpoint = "istio-ingress-route-unauthenticated"
     }
+    istio_ingress_k8s_gateway_metadata = {
+      name     = juju_application.istio_ingress_k8s.name
+      endpoint = "gateway-metadata"
+    }
   }
 }
 

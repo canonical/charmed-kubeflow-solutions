@@ -4,10 +4,11 @@
 output "components" {
   description = "Map of the deployed core component applications"
   value = {
-    kubeflow_dashboard = juju_application.kubeflow_dashboard
-    kubeflow_profiles  = juju_application.kubeflow_profiles
-    kubeflow_roles     = juju_application.kubeflow_roles
-    kubeflow_volumes   = juju_application.kubeflow_volumes
+    kubeflow_dashboard  = juju_application.kubeflow_dashboard
+    kubeflow_profiles   = juju_application.kubeflow_profiles
+    kubeflow_roles      = juju_application.kubeflow_roles
+    kubeflow_volumes    = juju_application.kubeflow_volumes
+    pvcviewer_operator  = juju_application.pvcviewer_operator
   }
 }
 
@@ -51,6 +52,14 @@ output "requires" {
     kubeflow_volumes_istio_ingress_route = {
       name     = juju_application.kubeflow_volumes.name
       endpoint = "istio-ingress-route"
+    }
+    pvcviewer_operator_service_mesh = {
+      name     = juju_application.pvcviewer_operator.name
+      endpoint = "service-mesh"
+    }
+    pvcviewer_operator_gateway_metadata = {
+      name     = juju_application.pvcviewer_operator.name
+      endpoint = "gateway-metadata"
     }
   }
 }

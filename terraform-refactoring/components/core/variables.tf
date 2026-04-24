@@ -171,3 +171,30 @@ variable "istio_ingress_route" {
     error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }
+
+variable "gateway_metadata" {
+  description = "Gateway metadata provider for pvcviewer-operator from istio-ingress-k8s:gateway-metadata (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.gateway_metadata == null || contains(["endpoint", "offer"], var.gateway_metadata.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.gateway_metadata == null || var.gateway_metadata.kind != "endpoint" || (var.gateway_metadata.name != null && var.gateway_metadata.name != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.gateway_metadata == null || var.gateway_metadata.kind != "offer" || (var.gateway_metadata.url != null && var.gateway_metadata.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
