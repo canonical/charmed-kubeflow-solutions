@@ -420,3 +420,35 @@ variable "katib_ui_config" {
   type        = map(string)
   default     = {}
 }
+
+# Tensorboard Component Applications
+
+variable "enable_tensorboard" {
+  description = "Whether to deploy the Tensorboard component"
+  type        = bool
+  default     = true
+}
+
+variable "tensorboard_controller_revision" {
+  description = "Revision of the tensorboard-controller application"
+  type        = number
+  default     = null
+}
+
+variable "tensorboard_controller_config" {
+  description = "Configuration for tensorboard-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "tensorboards_web_app_revision" {
+  description = "Revision of the tensorboards-web-app application"
+  type        = number
+  default     = null
+}
+
+variable "tensorboards_web_app_config" {
+  description = "Configuration for tensorboards-web-app application"
+  type        = map(string)
+  default     = {}
+}

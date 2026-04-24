@@ -338,3 +338,60 @@ module "kfp" {
     config   = var.kfp_viz_config
   }
 }
+
+module "tensorboard" {
+  count      = var.enable_tensorboard ? 1 : 0
+  depends_on = [module.core, module.istio, module.ambient]
+
+  source = "../../components/tensorboard"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  gateway_info = var.service_mesh_type == "istio" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_gateway_info.name
+    endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
+  } : null
+
+  ingress = var.service_mesh_type == "istio" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  gateway_metadata = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  tensorboard_controller = {
+    channel  = local.tensorboard_channel
+    revision = var.tensorboard_controller_revision
+    config   = var.tensorboard_controller_config
+  }
+
+  tensorboards_web_app = {
+    channel  = local.tensorboard_channel
+    revision = var.tensorboards_web_app_revision
+    config   = var.tensorboards_web_app_config
+  }
+}

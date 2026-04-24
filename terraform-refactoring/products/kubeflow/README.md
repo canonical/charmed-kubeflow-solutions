@@ -24,6 +24,7 @@
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
+| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
 
 ## Resources
 
@@ -44,6 +45,7 @@
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
+| <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
@@ -101,6 +103,10 @@
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
+| <a name="input_tensorboard_controller_config"></a> [tensorboard\_controller\_config](#input\_tensorboard\_controller\_config) | Configuration for tensorboard-controller application | `map(string)` | `{}` | no |
+| <a name="input_tensorboard_controller_revision"></a> [tensorboard\_controller\_revision](#input\_tensorboard\_controller\_revision) | Revision of the tensorboard-controller application | `number` | `null` | no |
+| <a name="input_tensorboards_web_app_config"></a> [tensorboards\_web\_app\_config](#input\_tensorboards\_web\_app\_config) | Configuration for tensorboards-web-app application | `map(string)` | `{}` | no |
+| <a name="input_tensorboards_web_app_revision"></a> [tensorboards\_web\_app\_revision](#input\_tensorboards\_web\_app\_revision) | Revision of the tensorboards-web-app application | `number` | `null` | no |
 
 ## Outputs
 
