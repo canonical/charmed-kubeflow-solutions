@@ -15,7 +15,7 @@ find "${TERRAFORM_DIR}" -maxdepth 2 -mindepth 2 -type d | while read -r MODULE_D
   if [ -d "${MODULE_DIR}" ]; then
     cd "${MODULE_DIR}"
 
-    if [ -f "README.md" ]; then
+    if ls *.tf >/dev/null 2>&1; then
       terraform-docs markdown table . \
           --output-mode inject \
           --output-file README.md \
