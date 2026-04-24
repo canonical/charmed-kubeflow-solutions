@@ -370,3 +370,60 @@ variable "istio_beacon_k8s_config" {
   type        = map(string)
   default     = {}
 }
+
+# MySQL Component Applications
+
+variable "mysql" {
+  description = "Configuration for mysql (mysql-k8s) application"
+  type = object({
+    revision     = optional(number)
+    units        = optional(number, 1)
+    storage_size = optional(string, "10G")
+    config       = optional(map(string), {})
+  })
+  default = {}
+}
+
+# Katib Component Applications
+
+variable "enable_katib" {
+  description = "Whether to deploy the Katib component"
+  type        = bool
+  default     = true
+}
+
+variable "katib_controller_revision" {
+  description = "Revision of the katib-controller application"
+  type        = number
+  default     = null
+}
+
+variable "katib_controller_config" {
+  description = "Configuration for katib-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "katib_db_manager_revision" {
+  description = "Revision of the katib-db-manager application"
+  type        = number
+  default     = null
+}
+
+variable "katib_db_manager_config" {
+  description = "Configuration for katib-db-manager application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "katib_ui_revision" {
+  description = "Revision of the katib-ui application"
+  type        = number
+  default     = null
+}
+
+variable "katib_ui_config" {
+  description = "Configuration for katib-ui application"
+  type        = map(string)
+  default     = {}
+}

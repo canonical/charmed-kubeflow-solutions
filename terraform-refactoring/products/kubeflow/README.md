@@ -20,6 +20,7 @@
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
 | <a name="module_core"></a> [core](#module\_core) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core | feat/terraform-refactor |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
+| <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
@@ -41,6 +42,7 @@
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
 | <a name="input_dex_auth_config"></a> [dex\_auth\_config](#input\_dex\_auth\_config) | Configuration for dex-auth application | `map(string)` | `{}` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
+| <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
@@ -54,6 +56,12 @@
 | <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s application | `number` | `null` | no |
 | <a name="input_istio_pilot_config"></a> [istio\_pilot\_config](#input\_istio\_pilot\_config) | Configuration for istio-pilot application | `map(string)` | `{}` | no |
 | <a name="input_istio_pilot_revision"></a> [istio\_pilot\_revision](#input\_istio\_pilot\_revision) | Revision of the istio-pilot application | `number` | `null` | no |
+| <a name="input_katib_controller_config"></a> [katib\_controller\_config](#input\_katib\_controller\_config) | Configuration for katib-controller application | `map(string)` | `{}` | no |
+| <a name="input_katib_controller_revision"></a> [katib\_controller\_revision](#input\_katib\_controller\_revision) | Revision of the katib-controller application | `number` | `null` | no |
+| <a name="input_katib_db_manager_config"></a> [katib\_db\_manager\_config](#input\_katib\_db\_manager\_config) | Configuration for katib-db-manager application | `map(string)` | `{}` | no |
+| <a name="input_katib_db_manager_revision"></a> [katib\_db\_manager\_revision](#input\_katib\_db\_manager\_revision) | Revision of the katib-db-manager application | `number` | `null` | no |
+| <a name="input_katib_ui_config"></a> [katib\_ui\_config](#input\_katib\_ui\_config) | Configuration for katib-ui application | `map(string)` | `{}` | no |
+| <a name="input_katib_ui_revision"></a> [katib\_ui\_revision](#input\_katib\_ui\_revision) | Revision of the katib-ui application | `number` | `null` | no |
 | <a name="input_kfp_api_config"></a> [kfp\_api\_config](#input\_kfp\_api\_config) | Configuration for kfp-api application | `map(string)` | `{}` | no |
 | <a name="input_kfp_api_revision"></a> [kfp\_api\_revision](#input\_kfp\_api\_revision) | Revision of the kfp-api application | `number` | `null` | no |
 | <a name="input_kfp_metadata_writer_config"></a> [kfp\_metadata\_writer\_config](#input\_kfp\_metadata\_writer\_config) | Configuration for kfp-metadata-writer application | `map(string)` | `{}` | no |

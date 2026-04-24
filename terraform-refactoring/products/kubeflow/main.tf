@@ -172,6 +172,63 @@ module "mysql" {
   storage_size = var.mysql.storage_size
 }
 
+module "katib" {
+  count      = var.enable_katib ? 1 : 0
+  depends_on = [module.core, module.mysql, module.istio, module.ambient]
+
+  source = "../../components/katib"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  mysql_database = {
+    kind     = "endpoint"
+    name     = module.mysql.app_name
+    endpoint = module.mysql.provides.database
+  }
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  ingress = var.service_mesh_type == "istio" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  katib_controller = {
+    channel  = local.katib_channel
+    revision = var.katib_controller_revision
+    config   = var.katib_controller_config
+  }
+
+  katib_db_manager = {
+    channel  = local.katib_channel
+    revision = var.katib_db_manager_revision
+    config   = var.katib_db_manager_config
+  }
+
+  katib_ui = {
+    channel  = local.katib_channel
+    revision = var.katib_ui_revision
+    config   = var.katib_ui_config
+  }
+}
+
 module "kfp" {
   depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
 
@@ -220,7 +277,6 @@ module "kfp" {
     revision = var.argo_controller_revision
     config   = var.argo_controller_config
   }
-
   envoy = {
     channel  = local.envoy_channel
     revision = var.envoy_revision
