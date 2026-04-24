@@ -3,6 +3,21 @@
 
 # Internal relations (within this component)
 
+# Kubeflow Volumes to Kubeflow Dashboard (dashboard links)
+resource "juju_integration" "kubeflow_volumes_kubeflow_dashboard_links" {
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kubeflow_dashboard.name
+    endpoint = "links"
+  }
+
+  application {
+    name     = juju_application.kubeflow_volumes.name
+    endpoint = "dashboard-links"
+  }
+}
+
 # Kubeflow Profiles to Kubeflow Dashboard
 resource "juju_integration" "kubeflow_profiles_dashboard_kubeflow_profiles" {
   model_uuid = var.model_uuid
