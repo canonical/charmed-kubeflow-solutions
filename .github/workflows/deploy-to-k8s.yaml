@@ -29,10 +29,12 @@ jobs:
       matrix:
         bundle:
           - product: kubeflow
+            service-mesh-type: sidecar
             uats:
               env: uats-remote
               extra-args: --filter "not mlflow and not feast and not spark"
-          - product: kubeflow-ambient
+          - product: kubeflow
+            service-mesh-type: ambient
             uats_branch: main
             uats:
               env: kubeflow-remote
@@ -97,7 +99,7 @@ jobs:
           cd ..
 
       - name: Configure Cilium for Istio
-        if: matrix.bundle.product == 'kubeflow-ambient'
+        if: matrix.bundle.service-mesh-type == 'ambient'
         run: |
           # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
@@ -117,11 +119,10 @@ jobs:
 
           RISK_ARG="--risk ${{ env.RISK }}"
           PLATFORM_ARG=""
-          SERVICE_MESH_TYPE_ARG=""
-          if [[ "${{ matrix.bundle.product }}" == "kubeflow-ambient" ]]; then
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.bundle.service-mesh-type }}"
+          if [[ "${{ matrix.bundle.service-mesh-type }}" == "ambient" ]]; then
             RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform"
-            SERVICE_MESH_TYPE_ARG="--service-mesh-type=ambient"
           fi
 
           tox -c ./terraform-refactoring/products/kubeflow -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG
