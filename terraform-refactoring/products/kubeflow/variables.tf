@@ -143,34 +143,20 @@ variable "pvcviewer_operator_config" {
   default     = {}
 }
 
-# KFP Component Applications
+# MySQL Component Applications
 
-variable "mysql_database" {
-  description = "MySQL database provider for kfp-api (supports same-model endpoint or cross-model offer)"
+variable "mysql" {
+  description = "Configuration for mysql (mysql-k8s) application"
   type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
+    revision     = optional(number)
+    units        = optional(number, 1)
+    storage_size = optional(string, "10G")
+    config       = optional(map(string), {})
   })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.mysql_database == null || contains(["endpoint", "offer"], var.mysql_database.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.mysql_database == null || var.mysql_database.kind != "endpoint" || (var.mysql_database.name != null && var.mysql_database.name != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.mysql_database == null || var.mysql_database.kind != "offer" || (var.mysql_database.url != null && var.mysql_database.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
+  default = {}
 }
+
+# KFP Component Applications
 
 variable "argo_controller_revision" {
   description = "Revision of the argo-controller application"

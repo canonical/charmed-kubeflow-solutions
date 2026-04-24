@@ -49,7 +49,7 @@ resource "juju_application" "argo_controller" {
   trust       = var.argo_controller.trust
   constraints = var.argo_controller.constraints
   config      = var.argo_controller.config
-  resources = var.argo_controller.resources
+  resources   = var.argo_controller.resources
 }
 
 # KFP API application

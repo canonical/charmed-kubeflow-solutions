@@ -22,6 +22,7 @@
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
+| <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
 
 ## Resources
 
@@ -84,7 +85,7 @@
 | <a name="input_mlmd_config"></a> [mlmd\_config](#input\_mlmd\_config) | Configuration for mlmd application | `map(string)` | `{}` | no |
 | <a name="input_mlmd_revision"></a> [mlmd\_revision](#input\_mlmd\_revision) | Revision of the mlmd application | `number` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing Juju model (required when create\_model is false) | `string` | `null` | no |
-| <a name="input_mysql_database"></a> [mysql\_database](#input\_mysql\_database) | MySQL database provider for kfp-api (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_mysql"></a> [mysql](#input\_mysql) | Configuration for mysql (mysql-k8s) application | <pre>object({<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    storage_size = optional(string, "10G")<br/>    config       = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |

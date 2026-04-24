@@ -157,14 +157,33 @@ module "minio" {
   config     = var.minio_config
 }
 
+module "mysql" {
+  source = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
+
+  model    = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  app_name = "mysql-db"
+  channel  = "8.0/stable"
+  revision = var.mysql.revision
+  units    = var.mysql.units
+  config = merge(
+    { "profile-limit-memory" = "2048" },
+    var.mysql.config
+  )
+  storage_size = var.mysql.storage_size
+}
+
 module "kfp" {
-  depends_on = [module.istio, module.ambient, module.core, module.minio]
+  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
 
   source = "../../components/kfp"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  mysql_database = var.mysql_database
+  mysql_database = {
+    kind     = "endpoint"
+    name     = module.mysql.app_name
+    endpoint = module.mysql.provides.database
+  }
 
   object_storage = {
     kind     = "endpoint"
