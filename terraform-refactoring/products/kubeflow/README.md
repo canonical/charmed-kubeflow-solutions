@@ -16,12 +16,12 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_ambient"></a> [ambient](#module\_ambient) | ../../components/istio-ambient | n/a |
+| <a name="module_ambient"></a> [ambient](#module\_ambient) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient | feat/terraform-refactor |
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
-| <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
+| <a name="module_core"></a> [core](#module\_core) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core | feat/terraform-refactor |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
-| <a name="module_minio"></a> [minio](#module\_minio) | ../../charms/minio | n/a |
+| <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 
 ## Resources
 

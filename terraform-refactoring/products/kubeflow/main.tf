@@ -26,7 +26,7 @@ module "istio" {
 
 module "ambient" {
   count  = var.service_mesh_type == "ambient" ? 1 : 0
-  source = "../../components/istio-ambient"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -90,7 +90,7 @@ module "auth" {
 module "core" {
   depends_on = [module.istio, module.ambient, module.auth]
 
-  source = "../../components/core"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -149,7 +149,7 @@ module "core" {
 module "minio" {
   depends_on = [module.istio, module.ambient]
 
-  source = "../../charms/minio"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   channel    = local.minio_channel
