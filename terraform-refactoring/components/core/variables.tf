@@ -77,6 +77,20 @@ variable "metacontroller_operator" {
   default = {}
 }
 
+variable "pvcviewer_operator" {
+  description = "Configuration for pvcviewer-operator application"
+  type = object({
+    channel     = optional(string, "1.10/stable")
+    revision    = optional(number)
+    units       = optional(number, 1)
+    trust       = optional(bool, true)
+    constraints = optional(string)
+    config      = optional(map(string), {})
+    resources   = optional(map(string), {})
+  })
+  default = {}
+}
+
 variable "ingress" {
   description = "Ingress provider for core applications (supports same-model endpoint or cross-model offer)"
   type = object({

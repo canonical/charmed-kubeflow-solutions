@@ -115,6 +115,11 @@ module "core" {
     revision = var.metacontroller_operator_revision
     config   = var.metacontroller_operator_config
   }
+  pvcviewer_operator = {
+    channel  = local.pvcviewer_operator_channel
+    revision = var.pvcviewer_operator_revision
+    config   = var.pvcviewer_operator_config
+  }
 
   ingress = var.service_mesh_type == "istio" ? {
     kind     = "endpoint"

@@ -85,3 +85,20 @@ resource "juju_application" "metacontroller_operator" {
   config      = var.metacontroller_operator.config
   resources   = var.metacontroller_operator.resources
 }
+
+# PVC Viewer Operator application
+resource "juju_application" "pvcviewer_operator" {
+  charm {
+    name     = "pvcviewer-operator"
+    channel  = var.pvcviewer_operator.channel
+    revision = var.pvcviewer_operator.revision
+  }
+
+  model_uuid  = var.model_uuid
+  name        = "pvcviewer-operator"
+  units       = var.pvcviewer_operator.units
+  trust       = var.pvcviewer_operator.trust
+  constraints = var.pvcviewer_operator.constraints
+  config      = var.pvcviewer_operator.config
+  resources   = var.pvcviewer_operator.resources
+}

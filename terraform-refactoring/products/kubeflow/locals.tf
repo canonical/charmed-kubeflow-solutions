@@ -12,6 +12,7 @@ locals {
   kubeflow_roles_channel          = "latest/${var.risk}"
   kubeflow_volumes_channel        = "latest/${var.risk}"
   metacontroller_operator_channel = "latest/${var.risk}"
+  pvcviewer_operator_channel      = "latest/${var.risk}"
 
   # Standalone Charms
   minio_channel = "latest/${var.risk}"

@@ -131,6 +131,18 @@ variable "metacontroller_operator_config" {
   default     = {}
 }
 
+variable "pvcviewer_operator_revision" {
+  description = "Revision of the pvcviewer-operator application"
+  type        = number
+  default     = null
+}
+
+variable "pvcviewer_operator_config" {
+  description = "Configuration for pvcviewer-operator application"
+  type        = map(string)
+  default     = {}
+}
+
 # Istio Component Applications
 
 variable "service_mesh_type" {
