@@ -143,19 +143,6 @@ variable "pvcviewer_operator_config" {
   default     = {}
 }
 
-# MySQL Component Applications
-
-variable "mysql" {
-  description = "Configuration for mysql (mysql-k8s) application"
-  type = object({
-    revision     = optional(number)
-    units        = optional(number, 1)
-    storage_size = optional(string, "10G")
-    config       = optional(map(string), {})
-  })
-  default = {}
-}
-
 # KFP Component Applications
 
 variable "enable_kfp" {
