@@ -5,8 +5,8 @@ on:
 
 jobs:
 
-  terraform-checks:
-    name: Terraform
+  lint:
+    name: Lint
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository

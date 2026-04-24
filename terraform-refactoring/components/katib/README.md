@@ -60,7 +60,6 @@ No modules.
 | [juju_integration.katib_controller_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.katib_db_manager_katib_controller_k8s_service_info](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.katib_db_manager_mysql_database](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.katib_db_manager_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.katib_ui_dashboard_links](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.katib_ui_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.katib_ui_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
