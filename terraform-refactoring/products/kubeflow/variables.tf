@@ -143,6 +143,153 @@ variable "pvcviewer_operator_config" {
   default     = {}
 }
 
+# MySQL Component Applications
+
+variable "mysql" {
+  description = "Configuration for mysql (mysql-k8s) application"
+  type = object({
+    revision     = optional(number)
+    units        = optional(number, 1)
+    storage_size = optional(string, "10G")
+    config       = optional(map(string), {})
+  })
+  default = {}
+}
+
+# KFP Component Applications
+
+variable "argo_controller_revision" {
+  description = "Revision of the argo-controller application"
+  type        = number
+  default     = null
+}
+
+variable "argo_controller_config" {
+  description = "Configuration for argo-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "envoy_revision" {
+  description = "Revision of the envoy application"
+  type        = number
+  default     = null
+}
+
+variable "envoy_config" {
+  description = "Configuration for envoy application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "mlmd_revision" {
+  description = "Revision of the mlmd application"
+  type        = number
+  default     = null
+}
+
+variable "mlmd_config" {
+  description = "Configuration for mlmd application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_api_revision" {
+  description = "Revision of the kfp-api application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_api_config" {
+  description = "Configuration for kfp-api application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_metadata_writer_revision" {
+  description = "Revision of the kfp-metadata-writer application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_metadata_writer_config" {
+  description = "Configuration for kfp-metadata-writer application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_persistence_revision" {
+  description = "Revision of the kfp-persistence application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_persistence_config" {
+  description = "Configuration for kfp-persistence application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_profile_controller_revision" {
+  description = "Revision of the kfp-profile-controller application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_profile_controller_config" {
+  description = "Configuration for kfp-profile-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_schedwf_revision" {
+  description = "Revision of the kfp-schedwf application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_schedwf_config" {
+  description = "Configuration for kfp-schedwf application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_ui_revision" {
+  description = "Revision of the kfp-ui application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_ui_config" {
+  description = "Configuration for kfp-ui application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_viewer_revision" {
+  description = "Revision of the kfp-viewer application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_viewer_config" {
+  description = "Configuration for kfp-viewer application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kfp_viz_revision" {
+  description = "Revision of the kfp-viz application"
+  type        = number
+  default     = null
+}
+
+variable "kfp_viz_config" {
+  description = "Configuration for kfp-viz application"
+  type        = map(string)
+  default     = {}
+}
+
 # Istio Component Applications
 
 variable "service_mesh_type" {

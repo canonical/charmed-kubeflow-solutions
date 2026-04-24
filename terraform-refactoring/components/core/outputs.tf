@@ -4,11 +4,11 @@
 output "components" {
   description = "Map of the deployed core component applications"
   value = {
-    kubeflow_dashboard  = juju_application.kubeflow_dashboard
-    kubeflow_profiles   = juju_application.kubeflow_profiles
-    kubeflow_roles      = juju_application.kubeflow_roles
-    kubeflow_volumes    = juju_application.kubeflow_volumes
-    pvcviewer_operator  = juju_application.pvcviewer_operator
+    kubeflow_dashboard = juju_application.kubeflow_dashboard
+    kubeflow_profiles  = juju_application.kubeflow_profiles
+    kubeflow_roles     = juju_application.kubeflow_roles
+    kubeflow_volumes   = juju_application.kubeflow_volumes
+    pvcviewer_operator = juju_application.pvcviewer_operator
   }
 }
 

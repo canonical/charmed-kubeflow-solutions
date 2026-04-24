@@ -14,6 +14,12 @@ locals {
   metacontroller_operator_channel = "latest/${var.risk}"
   pvcviewer_operator_channel      = "latest/${var.risk}"
 
+  # KFP Component
+  kfp_channel             = "latest/${var.risk}"
+  argo_controller_channel = "latest/${var.risk}"
+  mlmd_channel            = "latest/${var.risk}"
+  envoy_channel           = "latest/${var.risk}"
+
   # Standalone Charms
   minio_channel = "latest/${var.risk}"
 
