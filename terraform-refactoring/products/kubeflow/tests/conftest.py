@@ -22,9 +22,10 @@ def pytest_addoption(parser):
     parser.addoption(
         "--service-mesh-type",
         nargs="?",
-        default="istio",
+        default="sidecar",
+        choices=["sidecar", "ambient"],
         type=str,
-        help="Service mesh type (istio or ambient)",
+        help="Service mesh type (sidecar or ambient)",
     )
     parser.addoption(
         "--risk",

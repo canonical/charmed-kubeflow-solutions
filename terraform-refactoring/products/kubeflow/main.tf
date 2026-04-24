@@ -7,7 +7,7 @@ resource "juju_model" "kubeflow" {
 }
 
 module "istio" {
-  count  = var.service_mesh_type == "istio" ? 1 : 0
+  count  = var.service_mesh_type == "sidecar" ? 1 : 0
   source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -62,13 +62,13 @@ module "auth" {
     config   = var.oidc_gatekeeper_config
   }
 
-  ingress = var.service_mesh_type == "istio" ? {
+  ingress = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  ingress_auth = var.service_mesh_type == "istio" ? {
+  ingress_auth = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress_auth.name
     endpoint = module.istio[0].provides.istio_pilot_ingress_auth.endpoint
@@ -121,7 +121,7 @@ module "core" {
     config   = var.pvcviewer_operator_config
   }
 
-  ingress = var.service_mesh_type == "istio" ? {
+  ingress = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint

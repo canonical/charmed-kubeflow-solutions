@@ -148,11 +148,11 @@ variable "pvcviewer_operator_config" {
 variable "service_mesh_type" {
   description = "Which service mesh component to deploy: 'istio' (sidecar) or 'ambient'"
   type        = string
-  default     = "istio"
+  default     = "sidecar"
 
   validation {
-    condition     = contains(["istio", "ambient"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (istio, ambient)."
+    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
+    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
   }
 }
 
