@@ -3,7 +3,7 @@ module "admission_webhook" {
   source     = "git::https://github.com/canonical/admission-webhook-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.admission_webhook_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "2.0/${var.risk}"
 }
 
 module "argo_controller" {
@@ -40,7 +40,7 @@ module "jupyter_controller" {
   source     = "git::https://github.com/canonical/notebook-operators//charms/jupyter-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.jupyter_controller_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "jupyter_ui" {
@@ -48,7 +48,7 @@ module "jupyter_ui" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config     = var.jupyter_ui_config
   revision   = var.jupyter_ui_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "katib_controller" {
@@ -179,7 +179,7 @@ module "kubeflow_dashboard" {
     "registration-flow" : var.kubeflow_dashboard_registration_flow
   }
   revision = var.kubeflow_dashboard_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "2.0/${var.risk}"
 }
 
 module "kubeflow_profiles" {
@@ -191,7 +191,7 @@ module "kubeflow_profiles" {
     "istio-gateway-service-account" : "istio-ingress-k8s-istio"
   }
   revision = var.kubeflow_profiles_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "2.0/${var.risk}"
 }
 
 module "kubeflow_roles" {
@@ -213,7 +213,7 @@ module "kubeflow_volumes" {
   source     = "git::https://github.com/canonical/kubeflow-volumes-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_volumes_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "metacontroller_operator" {
@@ -264,21 +264,21 @@ module "pvcviewer_operator" {
   source     = "git::https://github.com/canonical/pvcviewer-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.pvcviewer_operator_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "tensorboard_controller" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboard-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.tensorboard_controller_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "tensorboards_web_app" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboards-web-app/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.tensorboards_web_app_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "training_operator" {
