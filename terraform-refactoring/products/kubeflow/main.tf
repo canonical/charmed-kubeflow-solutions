@@ -343,7 +343,7 @@ module "tensorboard" {
   count      = var.enable_tensorboard ? 1 : 0
   depends_on = [module.core, module.istio, module.ambient]
 
-  source = "../../components/tensorboard"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
