@@ -176,7 +176,7 @@ module "katib" {
   count      = var.enable_katib ? 1 : 0
   depends_on = [module.core, module.mysql, module.istio, module.ambient]
 
-  source = "../../components/katib"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -192,7 +192,7 @@ module "katib" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  ingress = var.service_mesh_type == "istio" ? {
+  ingress = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -233,7 +233,7 @@ module "kfp" {
   count      = var.enable_kfp ? 1 : 0
   depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
 
-  source = "../../components/kfp"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -353,13 +353,13 @@ module "tensorboard" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  gateway_info = var.service_mesh_type == "istio" ? {
+  gateway_info = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_gateway_info.name
     endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
   } : null
 
-  ingress = var.service_mesh_type == "istio" ? {
+  ingress = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
