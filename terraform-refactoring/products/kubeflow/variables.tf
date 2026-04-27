@@ -452,3 +452,23 @@ variable "tensorboards_web_app_config" {
   type        = map(string)
   default     = {}
 }
+
+# KServe Component Applications
+
+variable "enable_kserve" {
+  description = "Whether to deploy the KServe component"
+  type        = bool
+  default     = true
+}
+
+variable "kserve_controller_revision" {
+  description = "Revision of the kserve-controller application"
+  type        = number
+  default     = null
+}
+
+variable "kserve_controller_config" {
+  description = "Configuration for kserve-controller application"
+  type        = map(string)
+  default     = {}
+}

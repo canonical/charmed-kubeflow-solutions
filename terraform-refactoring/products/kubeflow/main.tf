@@ -395,3 +395,30 @@ module "tensorboard" {
     config   = var.tensorboards_web_app_config
   }
 }
+
+module "kserve" {
+  count      = var.enable_kserve ? 1 : 0
+  depends_on = [module.istio, module.ambient]
+
+  source = "../../components/kserve"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  gateway_info = var.service_mesh_type == "sidecar" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_gateway_info.name
+    endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  kserve_controller = {
+    channel  = local.kserve_channel
+    revision = var.kserve_controller_revision
+    config   = var.kserve_controller_config
+  }
+}

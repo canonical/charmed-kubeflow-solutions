@@ -20,8 +20,9 @@
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
 | <a name="module_core"></a> [core](#module\_core) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core | feat/terraform-refactor |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
-| <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
-| <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
+| <a name="module_katib"></a> [katib](#module\_katib) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib | feat/terraform-refactor |
+| <a name="module_kfp"></a> [kfp](#module\_kfp) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp | feat/terraform-refactor |
+| <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
@@ -45,6 +46,7 @@
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
+| <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
@@ -81,6 +83,8 @@
 | <a name="input_kfp_viewer_revision"></a> [kfp\_viewer\_revision](#input\_kfp\_viewer\_revision) | Revision of the kfp-viewer application | `number` | `null` | no |
 | <a name="input_kfp_viz_config"></a> [kfp\_viz\_config](#input\_kfp\_viz\_config) | Configuration for kfp-viz application | `map(string)` | `{}` | no |
 | <a name="input_kfp_viz_revision"></a> [kfp\_viz\_revision](#input\_kfp\_viz\_revision) | Revision of the kfp-viz application | `number` | `null` | no |
+| <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for kserve-controller application | `map(string)` | `{}` | no |
+| <a name="input_kserve_controller_revision"></a> [kserve\_controller\_revision](#input\_kserve\_controller\_revision) | Revision of the kserve-controller application | `number` | `null` | no |
 | <a name="input_kubeflow_dashboard_config"></a> [kubeflow\_dashboard\_config](#input\_kubeflow\_dashboard\_config) | Configuration for kubeflow-dashboard application | `map(string)` | `{}` | no |
 | <a name="input_kubeflow_dashboard_revision"></a> [kubeflow\_dashboard\_revision](#input\_kubeflow\_dashboard\_revision) | Revision of the kubeflow-dashboard application | `number` | `null` | no |
 | <a name="input_kubeflow_profiles_config"></a> [kubeflow\_profiles\_config](#input\_kubeflow\_profiles\_config) | Configuration for kubeflow-profiles application | `map(string)` | `{}` | no |
