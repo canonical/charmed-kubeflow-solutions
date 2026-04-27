@@ -125,7 +125,7 @@ jobs:
             PLATFORM_ARG="--istio-k8s-platform"
           fi
 
-          tox -c ./terraform-refactoring/products/kubeflow -e test_deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG
+          tox -c ./terraform-refactoring/products/kubeflow -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG
 
       - name: Get juju status
         run: juju status -m kubeflow --relations

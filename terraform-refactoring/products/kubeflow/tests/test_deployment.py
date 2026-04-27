@@ -1,3 +1,4 @@
+import logging
 import subprocess
 
 import aiohttp
@@ -5,6 +6,9 @@ import jubilant
 import lightkube
 import pytest
 from lightkube.resources.core_v1 import Service
+
+
+logging.getLogger("jubilant.wait").setLevel("WARNING")
 
 
 @pytest.fixture()
@@ -15,21 +19,31 @@ def lightkube_client() -> lightkube.Client:
 
 class TestCharm:
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(self, juju: jubilant.Juju, tf_vars, service_mesh_type):
+    async def test_apply_terraform_solution(
+        self, juju: jubilant.Juju, tf_vars, service_mesh_type
+    ):
         """Initialize and apply the kubeflow-ambient Terraform solution module."""
-        subprocess.run(["terraform", "init"], check=True)
+        subprocess.run(
+            ["terraform", "init"],
+            check=True,
+        )
         subprocess.run(
             [
                 "terraform",
                 "apply",
                 "-auto-approve",
-                "-var", f"model_uuid={juju.show_model().model_uuid}"
-            ] + tf_vars + service_mesh_type,
+                "-var",
+                f"model_uuid={juju.show_model().model_uuid}",
+            ]
+            + tf_vars
+            + service_mesh_type,
             check=True,
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
-    async def test_assert_deployment(self, juju: jubilant.Juju, lightkube_client, request):
+    async def test_assert_deployment(
+        self, juju: jubilant.Juju, lightkube_client, request
+    ):
         """
         Wait for the applications to become active and idle and verify its public URL access.
         """
@@ -50,7 +64,9 @@ class TestCharm:
         assert "Password" in result_text
 
 
-def get_public_url(lightkube_client: lightkube.Client, bundle_name: str, service_name: str):
+def get_public_url(
+    lightkube_client: lightkube.Client, bundle_name: str, service_name: str
+):
     """Extracts public URL from service istio-ingress-k8s-istio."""
     istio_ingress_k8s_svc = lightkube_client.get(
         Service, service_name, namespace=bundle_name
