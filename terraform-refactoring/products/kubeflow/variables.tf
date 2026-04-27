@@ -305,7 +305,7 @@ variable "istio_pilot_revision" {
 variable "istio_pilot_config" {
   description = "Configuration for istio-pilot application"
   type        = map(string)
-  default     = {}
+  default     = { default-gateway = "kubeflow-gateway" }
 }
 
 variable "istio_ingressgateway_revision" {
@@ -417,6 +417,38 @@ variable "katib_ui_revision" {
 
 variable "katib_ui_config" {
   description = "Configuration for katib-ui application"
+  type        = map(string)
+  default     = {}
+}
+
+# Notebooks Component Applications
+
+variable "enable_notebooks" {
+  description = "Whether to deploy the Notebooks component"
+  type        = bool
+  default     = true
+}
+
+variable "jupyter_controller_revision" {
+  description = "Revision of the jupyter-controller application"
+  type        = number
+  default     = null
+}
+
+variable "jupyter_controller_config" {
+  description = "Configuration for jupyter-controller application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "jupyter_ui_revision" {
+  description = "Revision of the jupyter-ui application"
+  type        = number
+  default     = null
+}
+
+variable "jupyter_ui_config" {
+  description = "Configuration for jupyter-ui application"
   type        = map(string)
   default     = {}
 }

@@ -29,6 +29,9 @@ locals {
   # Katib Component
   katib_channel = "latest/${var.risk}"
 
+  # Notebooks Component
+  notebooks_channel = "latest/${var.risk}"
+
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"
 
