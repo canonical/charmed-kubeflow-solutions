@@ -72,3 +72,48 @@ variable "kserve_controller" {
   })
   default = {}
 }
+
+variable "knative_operator" {
+  description = "Configuration for knative-operator application"
+  type = object({
+    app_name    = optional(string, "knative-operator")
+    channel     = optional(string, "1.16/stable")
+    revision    = optional(number)
+    units       = optional(number, 1)
+    trust       = optional(bool, true)
+    constraints = optional(string, "arch=amd64")
+    config      = optional(map(string), {})
+    resources   = optional(map(string), {})
+  })
+  default = {}
+}
+
+variable "knative_serving" {
+  description = "Configuration for knative-serving application"
+  type = object({
+    app_name    = optional(string, "knative-serving")
+    channel     = optional(string, "1.16/stable")
+    revision    = optional(number)
+    units       = optional(number, 1)
+    trust       = optional(bool, true)
+    constraints = optional(string, "arch=amd64")
+    config      = optional(map(string), {})
+    resources   = optional(map(string), {})
+  })
+  default = {}
+}
+
+variable "knative_eventing" {
+  description = "Configuration for knative-eventing application"
+  type = object({
+    app_name    = optional(string, "knative-eventing")
+    channel     = optional(string, "1.16/stable")
+    revision    = optional(number)
+    units       = optional(number, 1)
+    trust       = optional(bool, true)
+    constraints = optional(string, "arch=amd64")
+    config      = optional(map(string), {})
+    resources   = optional(map(string), {})
+  })
+  default = {}
+}

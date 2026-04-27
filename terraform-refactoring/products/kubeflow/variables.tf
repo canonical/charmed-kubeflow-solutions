@@ -472,3 +472,39 @@ variable "kserve_controller_config" {
   type        = map(string)
   default     = {}
 }
+
+variable "knative_operator_revision" {
+  description = "Revision of the knative-operator application"
+  type        = number
+  default     = null
+}
+
+variable "knative_operator_config" {
+  description = "Configuration for knative-operator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "knative_serving_revision" {
+  description = "Revision of the knative-serving application"
+  type        = number
+  default     = null
+}
+
+variable "knative_serving_config" {
+  description = "Configuration for knative-serving application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "knative_eventing_revision" {
+  description = "Revision of the knative-eventing application"
+  type        = number
+  default     = null
+}
+
+variable "knative_eventing_config" {
+  description = "Configuration for knative-eventing application"
+  type        = map(string)
+  default     = {}
+}

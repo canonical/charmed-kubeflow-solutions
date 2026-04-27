@@ -421,4 +421,25 @@ module "kserve" {
     revision = var.kserve_controller_revision
     config   = var.kserve_controller_config
   }
+
+  knative_operator = {
+    channel  = local.knative_channel
+    revision = var.knative_operator_revision
+    config   = var.knative_operator_config
+  }
+
+  knative_serving = {
+    channel  = local.knative_channel
+    revision = var.knative_serving_revision
+    config = merge({
+      "istio.gateway.namespace" = var.create_model ? juju_model.kubeflow[0].name : "kubeflow"
+      "istio.gateway.name"      = "kubeflow-gateway"
+    }, var.knative_serving_config)
+  }
+
+  knative_eventing = {
+    channel  = local.knative_channel
+    revision = var.knative_eventing_revision
+    config   = var.knative_eventing_config
+  }
 }

@@ -83,6 +83,12 @@
 | <a name="input_kfp_viewer_revision"></a> [kfp\_viewer\_revision](#input\_kfp\_viewer\_revision) | Revision of the kfp-viewer application | `number` | `null` | no |
 | <a name="input_kfp_viz_config"></a> [kfp\_viz\_config](#input\_kfp\_viz\_config) | Configuration for kfp-viz application | `map(string)` | `{}` | no |
 | <a name="input_kfp_viz_revision"></a> [kfp\_viz\_revision](#input\_kfp\_viz\_revision) | Revision of the kfp-viz application | `number` | `null` | no |
+| <a name="input_knative_eventing_config"></a> [knative\_eventing\_config](#input\_knative\_eventing\_config) | Configuration for knative-eventing application | `map(string)` | `{}` | no |
+| <a name="input_knative_eventing_revision"></a> [knative\_eventing\_revision](#input\_knative\_eventing\_revision) | Revision of the knative-eventing application | `number` | `null` | no |
+| <a name="input_knative_operator_config"></a> [knative\_operator\_config](#input\_knative\_operator\_config) | Configuration for knative-operator application | `map(string)` | `{}` | no |
+| <a name="input_knative_operator_revision"></a> [knative\_operator\_revision](#input\_knative\_operator\_revision) | Revision of the knative-operator application | `number` | `null` | no |
+| <a name="input_knative_serving_config"></a> [knative\_serving\_config](#input\_knative\_serving\_config) | Configuration for knative-serving application | `map(string)` | `{}` | no |
+| <a name="input_knative_serving_revision"></a> [knative\_serving\_revision](#input\_knative\_serving\_revision) | Revision of the knative-serving application | `number` | `null` | no |
 | <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for kserve-controller application | `map(string)` | `{}` | no |
 | <a name="input_kserve_controller_revision"></a> [kserve\_controller\_revision](#input\_kserve\_controller\_revision) | Revision of the kserve-controller application | `number` | `null` | no |
 | <a name="input_kubeflow_dashboard_config"></a> [kubeflow\_dashboard\_config](#input\_kubeflow\_dashboard\_config) | Configuration for kubeflow-dashboard application | `map(string)` | `{}` | no |

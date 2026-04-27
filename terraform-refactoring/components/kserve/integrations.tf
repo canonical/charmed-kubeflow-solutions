@@ -18,6 +18,22 @@ resource "juju_integration" "kserve_controller_gateway_info" {
   }
 }
 
+# KServe Controller local-gateway integration - intra-component (knative-serving:local-gateway -> kserve-controller)
+resource "juju_integration" "kserve_controller_knative_serving_local_gateway" {
+  count      = var.gateway_info != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kserve_controller.name
+    endpoint = "local-gateway"
+  }
+
+  application {
+    name     = juju_application.knative_serving[0].name
+    endpoint = "local-gateway"
+  }
+}
+
 # KServe Controller service-mesh integration - ambient (istio-beacon-k8s:service-mesh -> kserve-controller)
 resource "juju_integration" "kserve_controller_service_mesh" {
   count      = var.service_mesh != null ? 1 : 0
