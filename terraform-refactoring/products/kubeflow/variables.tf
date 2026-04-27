@@ -59,6 +59,18 @@ variable "oidc_gatekeeper_config" {
 
 # Core Component Applications
 
+variable "admission_webhook_revision" {
+  description = "Revision of the admission-webhook application"
+  type        = number
+  default     = null
+}
+
+variable "admission_webhook_config" {
+  description = "Configuration for admission-webhook application"
+  type        = map(string)
+  default     = {}
+}
+
 variable "kubeflow_dashboard_revision" {
   description = "Revision of the kubeflow-dashboard application"
   type        = number

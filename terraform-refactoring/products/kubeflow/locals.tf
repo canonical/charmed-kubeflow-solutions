@@ -7,6 +7,7 @@ locals {
   oidc_gatekeeper_channel = "latest/${var.risk}"
 
   # Core Component
+  admission_webhook_channel       = "latest/${var.risk}"
   kubeflow_dashboard_channel      = "latest/${var.risk}"
   kubeflow_profiles_channel       = "latest/${var.risk}"
   kubeflow_roles_channel          = "latest/${var.risk}"

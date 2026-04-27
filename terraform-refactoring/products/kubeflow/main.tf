@@ -90,10 +90,15 @@ module "auth" {
 module "core" {
   depends_on = [module.istio, module.ambient, module.auth]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core?ref=feat/terraform-refactor"
+  source = "../../components/core"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
+  admission_webhook = {
+    channel  = local.admission_webhook_channel
+    revision = var.admission_webhook_revision
+    config   = var.admission_webhook_config
+  }
   kubeflow_dashboard = {
     channel  = local.kubeflow_dashboard_channel
     revision = var.kubeflow_dashboard_revision

@@ -18,7 +18,7 @@
 | ---- | ------ | ------- |
 | <a name="module_ambient"></a> [ambient](#module\_ambient) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient | feat/terraform-refactor |
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
-| <a name="module_core"></a> [core](#module\_core) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core | feat/terraform-refactor |
+| <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_katib"></a> [katib](#module\_katib) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib | feat/terraform-refactor |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp | feat/terraform-refactor |
@@ -39,6 +39,8 @@
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_admission_webhook_config"></a> [admission\_webhook\_config](#input\_admission\_webhook\_config) | Configuration for admission-webhook application | `map(string)` | `{}` | no |
+| <a name="input_admission_webhook_revision"></a> [admission\_webhook\_revision](#input\_admission\_webhook\_revision) | Revision of the admission-webhook application | `number` | `null` | no |
 | <a name="input_argo_controller_config"></a> [argo\_controller\_config](#input\_argo\_controller\_config) | Configuration for argo-controller application | `map(string)` | `{}` | no |
 | <a name="input_argo_controller_revision"></a> [argo\_controller\_revision](#input\_argo\_controller\_revision) | Revision of the argo-controller application | `number` | `null` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
