@@ -452,3 +452,41 @@ variable "tensorboards_web_app_config" {
   type        = map(string)
   default     = {}
 }
+
+# Training Component Applications
+
+variable "enable_training" {
+  description = "Whether to deploy the Training component"
+  type        = bool
+  default     = true
+}
+
+variable "enable_training_v2" {
+  description = "Whether to deploy the kubeflow-trainer application (v2 training operator)"
+  type        = bool
+  default     = false
+}
+
+variable "training_operator_revision" {
+  description = "Revision of the training-operator application"
+  type        = number
+  default     = null
+}
+
+variable "training_operator_config" {
+  description = "Configuration for training-operator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kubeflow_trainer_revision" {
+  description = "Revision of the kubeflow-trainer application"
+  type        = number
+  default     = null
+}
+
+variable "kubeflow_trainer_config" {
+  description = "Configuration for kubeflow-trainer application"
+  type        = map(string)
+  default     = {}
+}
