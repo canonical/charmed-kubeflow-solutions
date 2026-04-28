@@ -32,6 +32,9 @@ locals {
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"
 
+  # Resource Dispatcher Charm
+  resource_dispatcher_channel = "latest/${var.risk}"
+
   # KServe Component
   kserve_channel  = "latest/${var.risk}"
   knative_channel = "latest/${var.risk}"

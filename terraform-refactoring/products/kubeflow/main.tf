@@ -396,6 +396,18 @@ module "tensorboard" {
   }
 }
 
+module "resource_dispatcher" {
+  count      = var.enable_mlflow ? 1 : 0
+  depends_on = [module.istio, module.ambient]
+
+  source = "../../charms/resource-dispatcher"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel    = local.resource_dispatcher_channel
+  revision   = var.resource_dispatcher_revision
+  config     = var.resource_dispatcher_config
+}
+
 module "kserve" {
   count      = var.enable_kserve ? 1 : 0
   depends_on = [module.istio, module.ambient]

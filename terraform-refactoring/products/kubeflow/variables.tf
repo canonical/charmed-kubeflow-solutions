@@ -453,6 +453,26 @@ variable "tensorboards_web_app_config" {
   default     = {}
 }
 
+# Resource Dispatcher Charm
+
+variable "enable_mlflow" {
+  description = "Whether to deploy the resource-dispatcher charm (required for MLflow integration)"
+  type        = bool
+  default     = true
+}
+
+variable "resource_dispatcher_revision" {
+  description = "Revision of the resource-dispatcher application"
+  type        = number
+  default     = null
+}
+
+variable "resource_dispatcher_config" {
+  description = "Configuration for resource-dispatcher application"
+  type        = map(string)
+  default     = {}
+}
+
 # KServe Component Applications
 
 variable "enable_kserve" {
