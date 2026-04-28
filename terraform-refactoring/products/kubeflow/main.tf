@@ -408,8 +408,47 @@ module "resource_dispatcher" {
   config     = var.resource_dispatcher_config
 }
 
+module "mlflow" {
+  count      = var.enable_mlflow ? 1 : 0
+  depends_on = [module.istio, module.ambient, module.minio]
+
+  source = "../../components/mlflow"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  object_storage = {
+    kind     = "endpoint"
+    name     = module.minio.provides.object_storage.name
+    endpoint = module.minio.provides.object_storage.endpoint
+  }
+
+  ingress = var.service_mesh_type == "sidecar" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  mlflow_server = {
+    channel  = local.mlflow_channel
+    revision = var.mlflow_server_revision
+    config   = var.mlflow_server_config
+  }
+}
+
 module "kserve" {
-  count      = var.enable_kserve ? 1 : 0
+  count      = local.deploy_kserve ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../components/kserve"

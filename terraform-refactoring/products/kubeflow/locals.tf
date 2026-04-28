@@ -35,9 +35,13 @@ locals {
   # Resource Dispatcher Charm
   resource_dispatcher_channel = "latest/${var.risk}"
 
+  # MLflow Component
+  mlflow_channel = "latest/${var.risk}"
+
   # KServe Component
   kserve_channel  = "latest/${var.risk}"
   knative_channel = "latest/${var.risk}"
+  deploy_kserve   = var.enable_kserve || var.enable_mlflow
 
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"

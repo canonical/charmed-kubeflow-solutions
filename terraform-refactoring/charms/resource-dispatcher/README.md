@@ -46,4 +46,32 @@ Terraform module deploying the resource-dispatcher charm for Charmed Kubeflow.
 ## Modules
 
 No modules.
+
+## Resources
+
+| Name | Type |
+| ---- | ---- |
+| [juju_application.resource_dispatcher](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Name to give the deployed application. | `string` | `"resource-dispatcher"` | no |
+| <a name="input_channel"></a> [channel](#input\_channel) | Channel of the charm. | `string` | `"2.0/stable"` | no |
+| <a name="input_config"></a> [config](#input\_config) | Map for configuration options. | `map(string)` | `{}` | no |
+| <a name="input_constraints"></a> [constraints](#input\_constraints) | String listing constraints for this application. | `string` | `null` | no |
+| <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | Reference to an existing model uuid. | `string` | n/a | yes |
+| <a name="input_revision"></a> [revision](#input\_revision) | Revision number of the charm. | `number` | `null` | no |
+| <a name="input_trust"></a> [trust](#input\_trust) | Whether the application should be trusted. | `bool` | `true` | no |
+| <a name="input_units"></a> [units](#input\_units) | Unit count. | `number` | `1` | no |
+
+## Outputs
+
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_app_name"></a> [app\_name](#output\_app\_name) | Name of the deployed resource-dispatcher application. |
+| <a name="output_application"></a> [application](#output\_application) | Object representing the deployed application. |
+| <a name="output_provides"></a> [provides](#output\_provides) | Map of provided endpoints. |
+| <a name="output_requires"></a> [requires](#output\_requires) | Map of required endpoints. |
 <!-- END_TF_DOCS -->

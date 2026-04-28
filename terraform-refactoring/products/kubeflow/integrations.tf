@@ -39,3 +39,36 @@ resource "juju_integration" "minio_service_mesh" {
     endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
   }
 }
+
+# kserve-controller object-storage integration (minio:object-storage -> kserve-controller)
+# Only deployed when MLflow is enabled, since kserve uses minio to read MLflow model artifacts
+resource "juju_integration" "kserve_controller_object_storage" {
+  count      = (var.enable_mlflow && var.enable_kserve) ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.kserve[0].requires.kserve_controller_object_storage.name
+    endpoint = module.kserve[0].requires.kserve_controller_object_storage.endpoint
+  }
+
+  application {
+    name     = module.minio.provides.object_storage.name
+    endpoint = module.minio.provides.object_storage.endpoint
+  }
+}
+
+# resource-dispatcher service-mesh integration (ambient only)
+resource "juju_integration" "resource_dispatcher_service_mesh" {
+  count      = (var.enable_mlflow && var.service_mesh_type == "ambient") ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.resource_dispatcher[0].requires.service_mesh.name
+    endpoint = module.resource_dispatcher[0].requires.service_mesh.endpoint
+  }
+
+  application {
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  }
+}

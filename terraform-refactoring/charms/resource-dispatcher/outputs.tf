@@ -11,6 +11,16 @@ output "app_name" {
   value       = juju_application.resource_dispatcher.name
 }
 
+output "requires" {
+  description = "Map of required endpoints."
+  value = {
+    service_mesh = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "service-mesh"
+    }
+  }
+}
+
 output "provides" {
   description = "Map of provided endpoints."
   value = {

@@ -453,13 +453,27 @@ variable "tensorboards_web_app_config" {
   default     = {}
 }
 
-# Resource Dispatcher Charm
+# MLflow Component
 
 variable "enable_mlflow" {
-  description = "Whether to deploy the resource-dispatcher charm (required for MLflow integration)"
+  description = "Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher"
   type        = bool
   default     = true
 }
+
+variable "mlflow_server_revision" {
+  description = "Revision of the mlflow-server application"
+  type        = number
+  default     = null
+}
+
+variable "mlflow_server_config" {
+  description = "Configuration for mlflow-server application"
+  type        = map(string)
+  default     = {}
+}
+
+# Resource Dispatcher Charm
 
 variable "resource_dispatcher_revision" {
   description = "Revision of the resource-dispatcher application"
