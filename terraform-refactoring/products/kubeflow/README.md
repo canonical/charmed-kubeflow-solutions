@@ -51,7 +51,7 @@
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
-| <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher | `bool` | `true` | no |
+| <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher | `bool` | `false` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |

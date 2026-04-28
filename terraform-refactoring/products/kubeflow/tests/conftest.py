@@ -37,6 +37,11 @@ def pytest_addoption(parser):
         type=str,
         help="Risk to be used when deploying the terraform module",
     )
+    parser.addoption(
+        "--enable-mlflow",
+        action="store_true",
+        help="Enable to deploy also mlflow",
+    )
 
 
 @pytest.fixture(scope="module")
@@ -57,9 +62,22 @@ def risk(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def tf_vars(risk) -> list[str]:
+def enable_mlflow(request) -> list[str]:
+    """Terraform module customization for MLFlow deployment."""
+    if request.config.getoption("--enable-mlflow"):
+        return ["-var", "enable_mlflow=true"]
+    return []
+
+
+@pytest.fixture(scope="module")
+def tf_vars(risk, service_mesh_type, enable_mlflow) -> list[str]:
     """Overall Terraform module customization."""
-    return risk + [
-        "-var",
-        "create_model=false",
-    ]
+    return (
+        enable_mlflow
+        + service_mesh_type
+        + risk
+        + [
+            "-var",
+            "create_model=false",
+        ]
+    )

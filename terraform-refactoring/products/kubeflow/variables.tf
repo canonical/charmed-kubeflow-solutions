@@ -458,7 +458,7 @@ variable "tensorboards_web_app_config" {
 variable "enable_mlflow" {
   description = "Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "mlflow_server_revision" {
