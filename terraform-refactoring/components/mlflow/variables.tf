@@ -7,6 +7,33 @@ variable "model_uuid" {
   nullable    = false
 }
 
+variable "mysql_database" {
+  description = "MySQL database provider for mlflow-server from mysql-k8s:database (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.mysql_database == null || contains(["endpoint", "offer"], var.mysql_database.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.mysql_database == null || var.mysql_database.kind != "endpoint" || (var.mysql_database.name != null && var.mysql_database.name != "" && var.mysql_database.endpoint != null && var.mysql_database.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.mysql_database == null || var.mysql_database.kind != "offer" || (var.mysql_database.url != null && var.mysql_database.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
 variable "object_storage" {
   description = "Object storage provider for mlflow-server from minio:object-storage (supports same-model endpoint or cross-model offer)"
   type = object({
@@ -111,6 +138,60 @@ variable "service_mesh" {
 
   validation {
     condition     = var.service_mesh == null || var.service_mesh.kind != "offer" || (var.service_mesh.url != null && var.service_mesh.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
+variable "secrets" {
+  description = "Secrets provider for mlflow-server from resource-dispatcher:secrets (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.secrets == null || contains(["endpoint", "offer"], var.secrets.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.secrets == null || var.secrets.kind != "endpoint" || (var.secrets.name != null && var.secrets.name != "" && var.secrets.endpoint != null && var.secrets.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.secrets == null || var.secrets.kind != "offer" || (var.secrets.url != null && var.secrets.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
+variable "pod_defaults" {
+  description = "Pod defaults provider for mlflow-server from resource-dispatcher:pod-defaults (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.pod_defaults == null || contains(["endpoint", "offer"], var.pod_defaults.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.pod_defaults == null || var.pod_defaults.kind != "endpoint" || (var.pod_defaults.name != null && var.pod_defaults.name != "" && var.pod_defaults.endpoint != null && var.pod_defaults.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.pod_defaults == null || var.pod_defaults.kind != "offer" || (var.pod_defaults.url != null && var.pod_defaults.url != "")
     error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }

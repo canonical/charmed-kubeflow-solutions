@@ -410,16 +410,34 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.minio]
+  depends_on = [module.istio, module.ambient, module.minio, module.mysql, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
+  mysql_database = {
+    kind     = "endpoint"
+    name     = module.mysql.app_name
+    endpoint = module.mysql.provides.database
+  }
+
   object_storage = {
     kind     = "endpoint"
     name     = module.minio.provides.object_storage.name
     endpoint = module.minio.provides.object_storage.endpoint
+  }
+
+  secrets = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher[0].provides.secrets.name
+    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+  }
+
+  pod_defaults = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher[0].provides.pod_defaults.name
+    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
   }
 
   ingress = var.service_mesh_type == "sidecar" ? {

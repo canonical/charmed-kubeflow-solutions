@@ -11,6 +11,10 @@ output "components" {
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
+    mlflow_server_relational_db = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "relational-db"
+    }
     mlflow_server_object_storage = {
       name     = juju_application.mlflow_server.name
       endpoint = "object-storage"
@@ -26,6 +30,14 @@ output "requires" {
     mlflow_server_service_mesh = {
       name     = juju_application.mlflow_server.name
       endpoint = "service-mesh"
+    }
+    mlflow_server_secrets = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "secrets"
+    }
+    mlflow_server_pod_defaults = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "pod-defaults"
     }
   }
 }
