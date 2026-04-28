@@ -45,6 +45,9 @@ locals {
   deploy_minio    = var.enable_kfp || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
+  # Feast Component
+  feast_channel = "0.49/${var.risk}"
+
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"
     "istio-gateway-service-account" = "istio-ingress-k8s-istio"

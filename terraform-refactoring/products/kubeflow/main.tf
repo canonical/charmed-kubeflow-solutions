@@ -399,7 +399,7 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  count      = var.enable_mlflow ? 1 : 0
+  count      = (var.enable_mlflow || var.enable_feast) ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../charms/resource-dispatcher"
@@ -526,5 +526,95 @@ module "kserve" {
     channel  = local.knative_channel
     revision = var.knative_eventing_revision
     config   = var.knative_eventing_config
+  }
+}
+
+module "postgresql_k8s" {
+  count      = var.enable_feast ? 1 : 0
+  depends_on = [module.istio, module.ambient]
+
+  source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
+
+  model_uuid         = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  app_name           = "feast-postgresql"
+  channel            = "14/stable"
+  revision           = var.postgresql_k8s.revision
+  units              = var.postgresql_k8s.units
+  storage_directives = var.postgresql_k8s.storage_directives
+  config             = var.postgresql_k8s.config
+}
+
+module "feast" {
+  count      = var.enable_feast ? 1 : 0
+  depends_on = [module.istio, module.ambient, module.core, module.resource_dispatcher, module.postgresql_k8s]
+
+  source = "../../components/feast"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  offline_store = {
+    kind     = "endpoint"
+    name     = module.postgresql_k8s[0].app_name
+    endpoint = module.postgresql_k8s[0].provides.database
+  }
+
+  online_store = {
+    kind     = "endpoint"
+    name     = module.postgresql_k8s[0].app_name
+    endpoint = module.postgresql_k8s[0].provides.database
+  }
+
+  registry = {
+    kind     = "endpoint"
+    name     = module.postgresql_k8s[0].app_name
+    endpoint = module.postgresql_k8s[0].provides.database
+  }
+
+  secrets = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher[0].provides.secrets.name
+    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+  }
+
+  pod_defaults = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher[0].provides.pod_defaults.name
+    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+  }
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  ingress = var.service_mesh_type == "sidecar" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  feast_integrator = {
+    channel  = local.feast_channel
+    revision = var.feast_integrator_revision
+    config   = var.feast_integrator_config
+  }
+
+  feast_ui = {
+    channel  = local.feast_channel
+    revision = var.feast_ui_revision
+    config   = var.feast_ui_config
   }
 }

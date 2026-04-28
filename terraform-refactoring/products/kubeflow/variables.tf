@@ -542,3 +542,48 @@ variable "knative_eventing_config" {
   type        = map(string)
   default     = {}
 }
+
+# Feast Component Applications
+
+variable "enable_feast" {
+  description = "Whether to deploy the Feast component (feast-integrator and feast-ui)"
+  type        = bool
+  default     = false
+}
+
+variable "feast_integrator_revision" {
+  description = "Revision of the feast-integrator application"
+  type        = number
+  default     = null
+}
+
+variable "feast_integrator_config" {
+  description = "Configuration for feast-integrator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "feast_ui_revision" {
+  description = "Revision of the feast-ui application"
+  type        = number
+  default     = null
+}
+
+variable "feast_ui_config" {
+  description = "Configuration for feast-ui application"
+  type        = map(string)
+  default     = {}
+}
+
+# PostgreSQL for Feast
+
+variable "postgresql_k8s" {
+  description = "Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry)"
+  type = object({
+    revision           = optional(number)
+    units              = optional(number, 1)
+    storage_directives = optional(map(string), { pgdata = "10G" })
+    config             = optional(map(string), { "profile_limit_memory" = "2048" })
+  })
+  default = {}
+}
