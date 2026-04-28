@@ -142,6 +142,33 @@ variable "service_mesh" {
   }
 }
 
+variable "dashboard_links" {
+  description = "Kubeflow Dashboard links provider for mlflow-server from kubeflow-dashboard:links (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.dashboard_links == null || contains(["endpoint", "offer"], var.dashboard_links.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.dashboard_links == null || var.dashboard_links.kind != "endpoint" || (var.dashboard_links.name != null && var.dashboard_links.name != "" && var.dashboard_links.endpoint != null && var.dashboard_links.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.dashboard_links == null || var.dashboard_links.kind != "offer" || (var.dashboard_links.url != null && var.dashboard_links.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
 variable "secrets" {
   description = "Secrets provider for mlflow-server from resource-dispatcher:secrets (supports same-model endpoint or cross-model offer)"
   type = object({

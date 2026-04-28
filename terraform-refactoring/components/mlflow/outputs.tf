@@ -11,6 +11,10 @@ output "components" {
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
+    mlflow_server_dashboard_links = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "dashboard-links"
+    }
     mlflow_server_relational_db = {
       name     = juju_application.mlflow_server.name
       endpoint = "relational-db"

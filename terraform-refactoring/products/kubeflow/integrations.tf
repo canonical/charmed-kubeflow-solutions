@@ -72,3 +72,37 @@ resource "juju_integration" "resource_dispatcher_service_mesh" {
     endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
   }
 }
+
+# kserve-controller secrets integration (resource-dispatcher:secrets -> kserve-controller)
+# Only deployed when MLflow is enabled
+resource "juju_integration" "kserve_controller_secrets" {
+  count      = var.enable_mlflow ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.kserve[0].requires.kserve_controller_secrets.name
+    endpoint = module.kserve[0].requires.kserve_controller_secrets.endpoint
+  }
+
+  application {
+    name     = module.resource_dispatcher[0].provides.secrets.name
+    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+  }
+}
+
+# kserve-controller service-accounts integration (resource-dispatcher:pod-defaults -> kserve-controller:service-accounts)
+# Only deployed when MLflow is enabled
+resource "juju_integration" "kserve_controller_service_accounts" {
+  count      = var.enable_mlflow ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.kserve[0].requires.kserve_controller_service_accounts.name
+    endpoint = module.kserve[0].requires.kserve_controller_service_accounts.endpoint
+  }
+
+  application {
+    name     = module.resource_dispatcher[0].provides.pod_defaults.name
+    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+  }
+}

@@ -412,11 +412,17 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.minio, module.mysql, module.resource_dispatcher]
+  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
 
   mysql_database = {
     kind     = "endpoint"

@@ -1,6 +1,23 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+# MLflow Server dashboard-links integration (kubeflow-dashboard:links -> mlflow-server)
+resource "juju_integration" "mlflow_server_dashboard_links" {
+  count      = var.dashboard_links != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.mlflow_server.name
+    endpoint = "dashboard-links"
+  }
+
+  application {
+    name      = var.dashboard_links.kind == "endpoint" ? var.dashboard_links.name : null
+    endpoint  = var.dashboard_links.kind == "endpoint" ? var.dashboard_links.endpoint : null
+    offer_url = var.dashboard_links.kind == "offer" ? var.dashboard_links.url : null
+  }
+}
+
 # MLflow Server relational-db integration (mysql-k8s:database -> mlflow-server)
 resource "juju_integration" "mlflow_server_mysql_database" {
   count      = var.mysql_database != null ? 1 : 0

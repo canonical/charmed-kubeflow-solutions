@@ -49,6 +49,7 @@ No modules.
 | Name | Type |
 | ---- | ---- |
 | [juju_application.mlflow_server](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_integration.mlflow_server_dashboard_links](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.mlflow_server_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.mlflow_server_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.mlflow_server_mysql_database](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -61,6 +62,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_dashboard_links"></a> [dashboard\_links](#input\_dashboard\_links) | Kubeflow Dashboard links provider for mlflow-server from kubeflow-dashboard:links (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_ingress"></a> [ingress](#input\_ingress) | Ingress provider for mlflow-server from istio-pilot:ingress (sidecar; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_istio_ingress_route"></a> [istio\_ingress\_route](#input\_istio\_ingress\_route) | Istio ingress route provider for mlflow-server from istio-ingress-k8s:istio-ingress-route (ambient; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_mlflow_server"></a> [mlflow\_server](#input\_mlflow\_server) | Configuration for mlflow-server application | <pre>object({<br/>    app_name    = optional(string, "mlflow-server")<br/>    channel     = optional(string, "2.22/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
