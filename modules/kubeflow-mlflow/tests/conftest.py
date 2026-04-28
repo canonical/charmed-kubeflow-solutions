@@ -31,8 +31,8 @@ def pytest_addoption(parser):
         "--risk",
         nargs="?",
         choices=["stable", "candidate", "beta", "edge"],
-        const="stable",
-        default="stable",
+        const="edge",
+        default="edge",
         type=str,
         help="Risk to be used when deploying the terraform module",
     )

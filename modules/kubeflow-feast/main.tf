@@ -60,3 +60,7 @@ module "kubeflow" {
   training_operator_revision            = var.training_operator_revision
   opentelemetry_collector_k8s_revision  = var.opentelemetry_collector_k8s_revision
 }
+
+locals {
+  track = "latest"
+}

@@ -1,17 +1,17 @@
 module "feast_integrator" {
   # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/feast-operators//charms/feast-integrator/terraform?ref=track/0.49"
+  source     = "git::https://github.com/canonical/feast-operators//charms/feast-integrator/terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.feast_integrator_revision
-  channel    = "0.49/${var.risk}"
+  channel    = "${var.track}/${var.risk}"
 }
 
 module "feast_ui" {
   # tflint-ignore: terraform_module_pinned_source
-  source     = "git::https://github.com/canonical/feast-operators//charms/feast-ui/terraform?ref=track/0.49"
+  source     = "git::https://github.com/canonical/feast-operators//charms/feast-ui/terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.feast_ui_revision
-  channel    = "0.49/${var.risk}"
+  channel    = "${var.track}/${var.risk}"
 }
 
 module "feast_offline_store" {
@@ -57,8 +57,8 @@ module "feast_registry" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "2.0/${var.risk}"
+  channel    = "${var.track}/${var.risk}"
 }
