@@ -39,7 +39,7 @@ jobs:
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args:
+              extra-args: --bundle "file:assets/versions-ambient.yaml"
 
     steps:
       - name: Checkout repository
