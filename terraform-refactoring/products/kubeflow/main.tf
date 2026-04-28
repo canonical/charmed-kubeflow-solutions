@@ -410,6 +410,12 @@ module "kserve" {
     endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
   } : null
 
+  gateway_metadata = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+  } : null
+
   service_mesh = var.service_mesh_type == "ambient" ? {
     kind     = "endpoint"
     name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
@@ -419,7 +425,9 @@ module "kserve" {
   kserve_controller = {
     channel  = local.kserve_channel
     revision = var.kserve_controller_revision
-    config   = var.kserve_controller_config
+    config = merge({
+      "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard"
+    }, var.kserve_controller_config)
   }
 
   knative_operator = {
