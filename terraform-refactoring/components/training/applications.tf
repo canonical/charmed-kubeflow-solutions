@@ -1,8 +1,10 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# Training Operator application
+# Training Operator application (optional, enabled with enable_v1)
 resource "juju_application" "training_operator" {
+  count = var.enable_v1 ? 1 : 0
+
   charm {
     name     = "training-operator"
     channel  = var.training_operator.channel

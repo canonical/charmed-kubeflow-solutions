@@ -397,13 +397,14 @@ module "tensorboard" {
 }
 
 module "training" {
-  count      = var.enable_training ? 1 : 0
+  count      = (var.enable_training_v1 || var.enable_training_v2) ? 1 : 0
   depends_on = [module.core, module.istio, module.ambient]
 
   source = "../../components/training"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
+  enable_v1 = var.enable_training_v1
   enable_v2 = var.enable_training_v2
 
   dashboard_links = {

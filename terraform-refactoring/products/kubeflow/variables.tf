@@ -455,8 +455,8 @@ variable "tensorboards_web_app_config" {
 
 # Training Component Applications
 
-variable "enable_training" {
-  description = "Whether to deploy the Training component"
+variable "enable_training_v1" {
+  description = "Whether to deploy the training-operator application (v1 training operator)"
   type        = bool
   default     = true
 }

@@ -3,11 +3,11 @@
 
 # Training Operator dashboard-links integration (kubeflow-dashboard:links -> training-operator)
 resource "juju_integration" "training_operator_dashboard_links" {
-  count      = var.dashboard_links != null ? 1 : 0
+  count      = var.enable_v1 && var.dashboard_links != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
-    name     = juju_application.training_operator.name
+    name     = juju_application.training_operator[0].name
     endpoint = "dashboard-links"
   }
 
@@ -37,11 +37,11 @@ resource "juju_integration" "kubeflow_trainer_dashboard_links" {
 
 # Ambient service-mesh integration (istio-beacon-k8s:service-mesh -> training-operator)
 resource "juju_integration" "training_operator_service_mesh" {
-  count      = var.service_mesh != null ? 1 : 0
+  count      = var.enable_v1 && var.service_mesh != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
-    name     = juju_application.training_operator.name
+    name     = juju_application.training_operator[0].name
     endpoint = "service-mesh"
   }
 

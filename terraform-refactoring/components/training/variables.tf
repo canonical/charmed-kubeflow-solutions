@@ -7,6 +7,12 @@ variable "model_uuid" {
   nullable    = false
 }
 
+variable "enable_v1" {
+  description = "Whether to deploy the training-operator application (v1 training operator)"
+  type        = bool
+  default     = false
+}
+
 variable "enable_v2" {
   description = "Whether to deploy the kubeflow-trainer application (v2 training operator)"
   type        = bool

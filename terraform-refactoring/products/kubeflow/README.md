@@ -24,7 +24,7 @@
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp | feat/terraform-refactor |
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
-| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
+| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard | feat/terraform-refactor |
 | <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
 
 ## Resources
@@ -47,7 +47,7 @@
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
-| <a name="input_enable_training"></a> [enable\_training](#input\_enable\_training) | Whether to deploy the Training component | `bool` | `true` | no |
+| <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Whether to deploy the training-operator application (v1 training operator) | `bool` | `true` | no |
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
