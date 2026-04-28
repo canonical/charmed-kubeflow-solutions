@@ -364,6 +364,12 @@ module "notebooks" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
+  gateway_metadata = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+  } : null
+
   service_mesh = var.service_mesh_type == "ambient" ? {
     kind     = "endpoint"
     name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
