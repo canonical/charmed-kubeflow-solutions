@@ -3,7 +3,7 @@ module "feast_integrator" {
   source     = "git::https://github.com/canonical/feast-operators//charms/feast-integrator/terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.feast_integrator_revision
-  channel    = "${var.track}/${var.risk}"
+  channel    = "${local.track}/${var.risk}"
 }
 
 module "feast_ui" {
@@ -11,7 +11,7 @@ module "feast_ui" {
   source     = "git::https://github.com/canonical/feast-operators//charms/feast-ui/terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.feast_ui_revision
-  channel    = "${var.track}/${var.risk}"
+  channel    = "${local.track}/${var.risk}"
 }
 
 module "feast_offline_store" {
@@ -60,5 +60,5 @@ module "resource_dispatcher" {
   source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "${var.track}/${var.risk}"
+  channel    = "${local.track}/${var.risk}"
 }
