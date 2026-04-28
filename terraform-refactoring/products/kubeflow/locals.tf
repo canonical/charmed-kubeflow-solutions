@@ -42,6 +42,8 @@ locals {
   kserve_channel  = "latest/${var.risk}"
   knative_channel = "latest/${var.risk}"
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
+  deploy_minio    = var.enable_kfp || var.enable_mlflow
+  deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"

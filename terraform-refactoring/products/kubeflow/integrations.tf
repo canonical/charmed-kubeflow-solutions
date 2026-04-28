@@ -30,8 +30,8 @@ resource "juju_integration" "minio_service_mesh" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.minio.requires.service_mesh.name
-    endpoint = module.minio.requires.service_mesh.endpoint
+    name     = module.minio[0].requires.service_mesh.name
+    endpoint = module.minio[0].requires.service_mesh.endpoint
   }
 
   application {
@@ -52,8 +52,8 @@ resource "juju_integration" "kserve_controller_object_storage" {
   }
 
   application {
-    name     = module.minio.provides.object_storage.name
-    endpoint = module.minio.provides.object_storage.endpoint
+    name     = module.minio[0].provides.object_storage.name
+    endpoint = module.minio[0].provides.object_storage.endpoint
   }
 }
 
