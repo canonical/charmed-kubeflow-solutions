@@ -19,6 +19,7 @@ on:
   schedule:
     - cron: "17 02 * * 1"
 
+
 jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
