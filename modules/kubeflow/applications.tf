@@ -232,7 +232,7 @@ module "kubeflow_dashboard" {
     "registration-flow" : var.kubeflow_dashboard_registration_flow
   }
   revision = var.kubeflow_dashboard_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "2.0/${var.risk}"
 }
 
 module "kubeflow_profiles" {
@@ -242,7 +242,7 @@ module "kubeflow_profiles" {
     "security-policy" : var.kubeflow_profiles_security_policy
   }
   revision = var.kubeflow_profiles_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "2.0/${var.risk}"
 }
 
 module "kubeflow_roles" {

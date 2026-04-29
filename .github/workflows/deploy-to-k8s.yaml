@@ -38,7 +38,7 @@ jobs:
           - module: kubeflow-ambient
             uats:
               env: kubeflow-remote
-              extra-args: --bundle "file:assets/versions-ambient.yaml"
+              extra-args: --include-ambient-tests
 
     steps:
       - name: Checkout repository
