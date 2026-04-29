@@ -160,7 +160,7 @@ module "kfp_viz" {
 }
 
 module "kserve_controller" {
-  source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/0.17"
+  source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     deployment-mode = "standard",
