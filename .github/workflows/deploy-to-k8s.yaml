@@ -36,7 +36,6 @@ jobs:
             uats:
               env: feast-remote
           - module: kubeflow-ambient
-            uats_branch: main
             uats:
               env: kubeflow-remote
               extra-args: --bundle "file:assets/versions-ambient.yaml"
