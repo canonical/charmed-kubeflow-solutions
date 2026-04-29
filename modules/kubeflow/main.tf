@@ -11,4 +11,5 @@ resource "juju_model" "kubeflow" {
 
 locals {
   model = "kubeflow"
+  track = "latest"
 }
