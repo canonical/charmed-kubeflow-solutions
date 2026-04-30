@@ -39,6 +39,18 @@ jobs:
             uats:
               env: kubeflow-remote
               extra-args: --filter "not mlflow and not feast and not spark"
+          - product: mlflow
+            service-mesh-type: sidecar
+            uats_branch: main
+            uats:
+              env: kubeflow-remote
+              extra-args: --filter "not feast and not spark"
+          - product: mlflow
+            service-mesh-type: ambient
+            uats_branch: main
+            uats:
+              env: kubeflow-remote
+              extra-args: --filter "not feast and not spark"
 
     steps:
       - name: Checkout repository
@@ -120,12 +132,16 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           PLATFORM_ARG=""
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.bundle.service-mesh-type }}"
+          MLFLOW_ARG=""
           if [[ "${{ matrix.bundle.service-mesh-type }}" == "ambient" ]]; then
             RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform"
           fi
+          if [[ "${{ matrix.bundle.product }}" == "mlflow" ]]; then
+            MLFLOW_ARG="--enable-mlflow"
+          fi
 
-          tox -c ./terraform-refactoring/products/kubeflow -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG
+          tox -c ./terraform-refactoring/products/kubeflow -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $MLFLOW_ARG
 
       - name: Get juju status
         run: juju status -m kubeflow --relations

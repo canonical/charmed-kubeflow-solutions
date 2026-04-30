@@ -152,6 +152,7 @@ module "core" {
 }
 
 module "minio" {
+  count      = local.deploy_minio ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio?ref=feat/terraform-refactor"
@@ -163,6 +164,7 @@ module "minio" {
 }
 
 module "mysql" {
+  count  = local.deploy_mysql ? 1 : 0
   source = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
 
   model    = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -187,8 +189,8 @@ module "katib" {
 
   mysql_database = {
     kind     = "endpoint"
-    name     = module.mysql.app_name
-    endpoint = module.mysql.provides.database
+    name     = module.mysql[0].app_name
+    endpoint = module.mysql[0].provides.database
   }
 
   dashboard_links = {
@@ -244,14 +246,14 @@ module "kfp" {
 
   mysql_database = {
     kind     = "endpoint"
-    name     = module.mysql.app_name
-    endpoint = module.mysql.provides.database
+    name     = module.mysql[0].app_name
+    endpoint = module.mysql[0].provides.database
   }
 
   object_storage = {
     kind     = "endpoint"
-    name     = module.minio.provides.object_storage.name
-    endpoint = module.minio.provides.object_storage.endpoint
+    name     = module.minio[0].provides.object_storage.name
+    endpoint = module.minio[0].provides.object_storage.endpoint
   }
 
   dashboard_links = {
@@ -452,8 +454,83 @@ module "tensorboard" {
   }
 }
 
+module "resource_dispatcher" {
+  count      = var.enable_mlflow ? 1 : 0
+  depends_on = [module.istio, module.ambient]
+
+  source = "../../charms/resource-dispatcher"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel    = local.resource_dispatcher_channel
+  revision   = var.resource_dispatcher_revision
+  config     = var.resource_dispatcher_config
+}
+
+module "mlflow" {
+  count      = var.enable_mlflow ? 1 : 0
+  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql, module.resource_dispatcher]
+
+  source = "../../components/mlflow"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  mysql_database = {
+    kind     = "endpoint"
+    name     = module.mysql[0].app_name
+    endpoint = module.mysql[0].provides.database
+  }
+
+  object_storage = {
+    kind     = "endpoint"
+    name     = module.minio[0].provides.object_storage.name
+    endpoint = module.minio[0].provides.object_storage.endpoint
+  }
+
+  secrets = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher[0].provides.secrets.name
+    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+  }
+
+  pod_defaults = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher[0].provides.pod_defaults.name
+    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+  }
+
+  ingress = var.service_mesh_type == "sidecar" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  mlflow_server = {
+    channel  = local.mlflow_channel
+    revision = var.mlflow_server_revision
+    config   = var.mlflow_server_config
+  }
+}
+
 module "kserve" {
-  count      = var.enable_kserve ? 1 : 0
+  count      = local.deploy_kserve ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../components/kserve"

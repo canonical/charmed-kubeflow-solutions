@@ -20,5 +20,17 @@ output "requires" {
       name     = juju_application.kserve_controller.name
       endpoint = "ingress-gateway"
     }
+    kserve_controller_object_storage = {
+      name     = juju_application.kserve_controller.name
+      endpoint = "object-storage"
+    }
+    kserve_controller_secrets = {
+      name     = juju_application.kserve_controller.name
+      endpoint = "secrets"
+    }
+    kserve_controller_service_accounts = {
+      name     = juju_application.kserve_controller.name
+      endpoint = "service-accounts"
+    }
   }
 }

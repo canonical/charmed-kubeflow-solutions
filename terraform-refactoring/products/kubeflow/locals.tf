@@ -36,9 +36,18 @@ locals {
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"
 
+  # Resource Dispatcher Charm
+  resource_dispatcher_channel = "latest/${var.risk}"
+
+  # MLflow Component
+  mlflow_channel = "latest/${var.risk}"
+
   # KServe Component
   kserve_channel  = "latest/${var.risk}"
   knative_channel = "latest/${var.risk}"
+  deploy_kserve   = var.enable_kserve || var.enable_mlflow
+  deploy_minio    = var.enable_kfp || var.enable_mlflow
+  deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   # Training Component
   training_operator_channel = "latest/${var.risk}"
