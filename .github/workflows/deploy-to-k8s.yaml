@@ -27,34 +27,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bundle:
+        product: [kubeflow, mlflow, feast]
+        service-mesh-type: [sidecar, ambient]
+        include:
           - product: kubeflow
             service-mesh-type: sidecar
             uats:
-              env: uats-remote
-              extra-args: --filter "not mlflow and not feast and not spark"
+              env: kubeflow-remote
           - product: kubeflow
             service-mesh-type: ambient
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args: --filter "not mlflow and not feast and not spark"
           - product: mlflow
-            service-mesh-type: sidecar
             uats:
-              env: kubeflow-remote
-              extra-args: --filter "not feast and not spark"
-          - product: mlflow
-            service-mesh-type: ambient
-            uats:
-              env: kubeflow-remote
-              extra-args: --filter "not feast and not spark"
+              env: mlflow-remote
           - product: feast
-            service-mesh-type: sidecar
-            uats:
-              env: feast-remote
-          - product: feast
-            service-mesh-type: ambient
             uats:
               env: feast-remote
 
@@ -76,7 +64,7 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
+          UATS_BRANCH=${{ matrix.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -117,7 +105,7 @@ jobs:
           cd ..
 
       - name: Configure Cilium for Istio
-        if: matrix.bundle.service-mesh-type == 'ambient'
+        if: matrix.service-mesh-type == 'ambient'
         run: |
           # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
@@ -137,16 +125,16 @@ jobs:
 
           RISK_ARG="--risk ${{ env.RISK }}"
           PLATFORM_ARG=""
-          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.bundle.service-mesh-type }}"
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           MLFLOW_ARG=""
           FEAST_ARG=""
-          if [[ "${{ matrix.bundle.service-mesh-type }}" == "ambient" ]]; then
+          if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
             RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform"
           fi
-          if [[ "${{ matrix.bundle.product }}" == "mlflow" ]]; then
+          if [[ "${{ matrix.product }}" == "mlflow" ]]; then
             MLFLOW_ARG="--enable-mlflow"
-          elif [[ "${{ matrix.bundle.product }}" == "feast" ]]; then
+          elif [[ "${{ matrix.product }}" == "feast" ]]; then
             FEAST_ARG="--enable-feast"
           fi
 
