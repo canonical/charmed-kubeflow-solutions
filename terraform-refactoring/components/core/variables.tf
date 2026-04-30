@@ -1,6 +1,20 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+variable "admission_webhook" {
+  description = "Configuration for admission-webhook application"
+  type = object({
+    channel     = optional(string, "1.10/stable")
+    revision    = optional(number)
+    units       = optional(number, 1)
+    trust       = optional(bool, true)
+    constraints = optional(string)
+    config      = optional(map(string), {})
+    resources   = optional(map(string), {})
+  })
+  default = {}
+}
+
 variable "model_uuid" {
   description = "UUID of the Juju model where core components are deployed"
   type        = string

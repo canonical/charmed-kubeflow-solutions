@@ -7,6 +7,7 @@ locals {
   oidc_gatekeeper_channel = "latest/${var.risk}"
 
   # Core Component
+  admission_webhook_channel       = "latest/${var.risk}"
   kubeflow_dashboard_channel      = "latest/${var.risk}"
   kubeflow_profiles_channel       = "latest/${var.risk}"
   kubeflow_roles_channel          = "latest/${var.risk}"
@@ -28,6 +29,9 @@ locals {
 
   # Katib Component
   katib_channel = "latest/${var.risk}"
+
+  # Notebooks Component
+  notebooks_channel = "latest/${var.risk}"
 
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"

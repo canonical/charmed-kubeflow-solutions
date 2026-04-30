@@ -135,6 +135,22 @@ resource "juju_integration" "pvcviewer_operator_service_mesh" {
   }
 }
 
+resource "juju_integration" "admission_webhook_service_mesh" {
+  count      = var.service_mesh != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.admission_webhook.name
+    endpoint = "service-mesh"
+  }
+
+  application {
+    name      = var.service_mesh.kind == "endpoint" ? var.service_mesh.name : null
+    endpoint  = var.service_mesh.kind == "endpoint" ? var.service_mesh.endpoint : null
+    offer_url = var.service_mesh.kind == "offer" ? var.service_mesh.url : null
+  }
+}
+
 resource "juju_integration" "pvcviewer_operator_gateway_metadata" {
   count      = var.gateway_metadata != null ? 1 : 0
   model_uuid = var.model_uuid

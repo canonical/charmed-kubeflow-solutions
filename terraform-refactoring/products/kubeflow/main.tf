@@ -90,10 +90,15 @@ module "auth" {
 module "core" {
   depends_on = [module.istio, module.ambient, module.auth]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core?ref=feat/terraform-refactor"
+  source = "../../components/core"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
+  admission_webhook = {
+    channel  = local.admission_webhook_channel
+    revision = var.admission_webhook_revision
+    config   = var.admission_webhook_config
+  }
   kubeflow_dashboard = {
     channel  = local.kubeflow_dashboard_channel
     revision = var.kubeflow_dashboard_revision
@@ -336,6 +341,57 @@ module "kfp" {
     channel  = local.kfp_channel
     revision = var.kfp_viz_revision
     config   = var.kfp_viz_config
+  }
+}
+
+module "notebooks" {
+  count      = var.enable_notebooks ? 1 : 0
+  depends_on = [module.core, module.istio, module.ambient]
+
+  source = "../../components/notebooks"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  ingress = var.service_mesh_type == "sidecar" ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  gateway_metadata = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  jupyter_controller = {
+    channel  = local.notebooks_channel
+    revision = var.jupyter_controller_revision
+    config   = var.jupyter_controller_config
+  }
+
+  jupyter_ui = {
+    channel  = local.notebooks_channel
+    revision = var.jupyter_ui_revision
+    config   = var.jupyter_ui_config
   }
 }
 

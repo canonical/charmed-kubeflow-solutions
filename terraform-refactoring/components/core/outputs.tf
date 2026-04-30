@@ -4,6 +4,7 @@
 output "components" {
   description = "Map of the deployed core component applications"
   value = {
+    admission_webhook  = juju_application.admission_webhook
     kubeflow_dashboard = juju_application.kubeflow_dashboard
     kubeflow_profiles  = juju_application.kubeflow_profiles
     kubeflow_roles     = juju_application.kubeflow_roles
@@ -60,6 +61,10 @@ output "requires" {
     pvcviewer_operator_gateway_metadata = {
       name     = juju_application.pvcviewer_operator.name
       endpoint = "gateway-metadata"
+    }
+    admission_webhook_service_mesh = {
+      name     = juju_application.admission_webhook.name
+      endpoint = "service-mesh"
     }
   }
 }
