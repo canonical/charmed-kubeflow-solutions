@@ -505,6 +505,11 @@ variable "kserve_controller_config" {
   description = "Configuration for kserve-controller application"
   type        = map(string)
   default     = {}
+
+  validation {
+    condition     = !(var.service_mesh_type == "ambient" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
+    error_message = "deployment-mode cannot be set to 'knative' when service_mesh_type is 'ambient'."
+  }
 }
 
 variable "knative_operator_revision" {
