@@ -50,7 +50,7 @@ locals {
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   # Feast Component
-  feast_channel = "0.49/${var.risk}"
+  feast_channel = "latest/${var.risk}"
 
   # Training Component
   training_operator_channel = "latest/${var.risk}"
