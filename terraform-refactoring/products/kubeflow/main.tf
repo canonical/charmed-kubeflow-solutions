@@ -343,7 +343,7 @@ module "tensorboard" {
   count      = var.enable_tensorboard ? 1 : 0
   depends_on = [module.core, module.istio, module.ambient]
 
-  source = "../../components/tensorboard"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard?ref=feat/terraform-refactor"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -449,5 +449,41 @@ module "kserve" {
     channel  = local.knative_channel
     revision = var.knative_eventing_revision
     config   = var.knative_eventing_config
+  }
+}
+
+module "training" {
+  count      = (var.enable_training_v1 || var.enable_training_v2) ? 1 : 0
+  depends_on = [module.core, module.istio, module.ambient]
+
+  source = "../../components/training"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  enable_v1 = var.enable_training_v1
+  enable_v2 = var.enable_training_v2
+
+  dashboard_links = {
+    kind     = "endpoint"
+    name     = module.core.provides.kubeflow_dashboard_links.name
+    endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
+  }
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  training_operator = {
+    channel  = local.training_operator_channel
+    revision = var.training_operator_revision
+    config   = var.training_operator_config
+  }
+
+  kubeflow_trainer = {
+    channel  = local.kubeflow_trainer_channel
+    revision = var.kubeflow_trainer_revision
+    config   = var.kubeflow_trainer_config
   }
 }
