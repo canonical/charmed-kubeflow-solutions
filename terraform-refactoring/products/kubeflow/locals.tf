@@ -40,6 +40,10 @@ locals {
   kserve_channel  = "latest/${var.risk}"
   knative_channel = "latest/${var.risk}"
 
+  # Training Component
+  training_operator_channel = "latest/${var.risk}"
+  kubeflow_trainer_channel  = "latest/${var.risk}"
+
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"
     "istio-gateway-service-account" = "istio-ingress-k8s-istio"

@@ -26,7 +26,8 @@
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
-| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
+| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard | feat/terraform-refactor |
+| <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
 
 ## Resources
 
@@ -52,6 +53,8 @@
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
 | <a name="input_enable_notebooks"></a> [enable\_notebooks](#input\_enable\_notebooks) | Whether to deploy the Notebooks component | `bool` | `true` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
+| <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Whether to deploy the training-operator application (v1 training operator) | `bool` | `true` | no |
+| <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
@@ -105,6 +108,8 @@
 | <a name="input_kubeflow_profiles_revision"></a> [kubeflow\_profiles\_revision](#input\_kubeflow\_profiles\_revision) | Revision of the kubeflow-profiles application | `number` | `null` | no |
 | <a name="input_kubeflow_roles_config"></a> [kubeflow\_roles\_config](#input\_kubeflow\_roles\_config) | Configuration for kubeflow-roles application | `map(string)` | `{}` | no |
 | <a name="input_kubeflow_roles_revision"></a> [kubeflow\_roles\_revision](#input\_kubeflow\_roles\_revision) | Revision of the kubeflow-roles application | `number` | `null` | no |
+| <a name="input_kubeflow_trainer_config"></a> [kubeflow\_trainer\_config](#input\_kubeflow\_trainer\_config) | Configuration for kubeflow-trainer application | `map(string)` | `{}` | no |
+| <a name="input_kubeflow_trainer_revision"></a> [kubeflow\_trainer\_revision](#input\_kubeflow\_trainer\_revision) | Revision of the kubeflow-trainer application | `number` | `null` | no |
 | <a name="input_kubeflow_volumes_config"></a> [kubeflow\_volumes\_config](#input\_kubeflow\_volumes\_config) | Configuration for kubeflow-volumes application | `map(string)` | `{}` | no |
 | <a name="input_kubeflow_volumes_revision"></a> [kubeflow\_volumes\_revision](#input\_kubeflow\_volumes\_revision) | Revision of the kubeflow-volumes application | `number` | `null` | no |
 | <a name="input_metacontroller_operator_config"></a> [metacontroller\_operator\_config](#input\_metacontroller\_operator\_config) | Configuration for metacontroller-operator application | `map(string)` | `{}` | no |
@@ -125,6 +130,8 @@
 | <a name="input_tensorboard_controller_revision"></a> [tensorboard\_controller\_revision](#input\_tensorboard\_controller\_revision) | Revision of the tensorboard-controller application | `number` | `null` | no |
 | <a name="input_tensorboards_web_app_config"></a> [tensorboards\_web\_app\_config](#input\_tensorboards\_web\_app\_config) | Configuration for tensorboards-web-app application | `map(string)` | `{}` | no |
 | <a name="input_tensorboards_web_app_revision"></a> [tensorboards\_web\_app\_revision](#input\_tensorboards\_web\_app\_revision) | Revision of the tensorboards-web-app application | `number` | `null` | no |
+| <a name="input_training_operator_config"></a> [training\_operator\_config](#input\_training\_operator\_config) | Configuration for training-operator application | `map(string)` | `{}` | no |
+| <a name="input_training_operator_revision"></a> [training\_operator\_revision](#input\_training\_operator\_revision) | Revision of the training-operator application | `number` | `null` | no |
 
 ## Outputs
 
