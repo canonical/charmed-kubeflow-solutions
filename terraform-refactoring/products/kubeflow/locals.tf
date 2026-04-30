@@ -32,6 +32,10 @@ locals {
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"
 
+  # KServe Component
+  kserve_channel  = "latest/${var.risk}"
+  knative_channel = "latest/${var.risk}"
+
   # Training Component
   training_operator_channel = "latest/${var.risk}"
   kubeflow_trainer_channel  = "latest/${var.risk}"
