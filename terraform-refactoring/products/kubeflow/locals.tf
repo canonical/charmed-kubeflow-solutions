@@ -7,6 +7,7 @@ locals {
   oidc_gatekeeper_channel = "latest/${var.risk}"
 
   # Core Component
+  admission_webhook_channel       = "latest/${var.risk}"
   kubeflow_dashboard_channel      = "latest/${var.risk}"
   kubeflow_profiles_channel       = "latest/${var.risk}"
   kubeflow_roles_channel          = "latest/${var.risk}"
@@ -29,6 +30,9 @@ locals {
   # Katib Component
   katib_channel = "latest/${var.risk}"
 
+  # Notebooks Component
+  notebooks_channel = "latest/${var.risk}"
+
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"
 
@@ -44,6 +48,10 @@ locals {
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
   deploy_minio    = var.enable_kfp || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
+
+  # Training Component
+  training_operator_channel = "latest/${var.risk}"
+  kubeflow_trainer_channel  = "latest/${var.risk}"
 
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"
