@@ -36,6 +36,10 @@ locals {
   # Tensorboard Component
   tensorboard_channel = "latest/${var.risk}"
 
+  # KServe Component
+  kserve_channel  = "latest/${var.risk}"
+  knative_channel = "latest/${var.risk}"
+
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"
     "istio-gateway-service-account" = "istio-ingress-k8s-istio"

@@ -496,3 +496,64 @@ variable "tensorboards_web_app_config" {
   type        = map(string)
   default     = {}
 }
+
+# KServe Component Applications
+
+variable "enable_kserve" {
+  description = "Whether to deploy the KServe component"
+  type        = bool
+  default     = true
+}
+
+variable "kserve_controller_revision" {
+  description = "Revision of the kserve-controller application"
+  type        = number
+  default     = null
+}
+
+variable "kserve_controller_config" {
+  description = "Configuration for kserve-controller application"
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = !(var.service_mesh_type == "ambient" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
+    error_message = "deployment-mode cannot be set to 'knative' when service_mesh_type is 'ambient'."
+  }
+}
+
+variable "knative_operator_revision" {
+  description = "Revision of the knative-operator application"
+  type        = number
+  default     = null
+}
+
+variable "knative_operator_config" {
+  description = "Configuration for knative-operator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "knative_serving_revision" {
+  description = "Revision of the knative-serving application"
+  type        = number
+  default     = null
+}
+
+variable "knative_serving_config" {
+  description = "Configuration for knative-serving application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "knative_eventing_revision" {
+  description = "Revision of the knative-eventing application"
+  type        = number
+  default     = null
+}
+
+variable "knative_eventing_config" {
+  description = "Configuration for knative-eventing application"
+  type        = map(string)
+  default     = {}
+}
