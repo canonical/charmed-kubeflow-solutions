@@ -1,6 +1,23 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+# Admission Webhook application
+resource "juju_application" "admission_webhook" {
+  charm {
+    name     = "admission-webhook"
+    channel  = var.admission_webhook.channel
+    revision = var.admission_webhook.revision
+  }
+
+  model_uuid  = var.model_uuid
+  name        = "admission-webhook"
+  units       = var.admission_webhook.units
+  trust       = var.admission_webhook.trust
+  constraints = var.admission_webhook.constraints
+  config      = var.admission_webhook.config
+  resources   = var.admission_webhook.resources
+}
+
 # Kubeflow Dashboard application
 resource "juju_application" "kubeflow_dashboard" {
   charm {

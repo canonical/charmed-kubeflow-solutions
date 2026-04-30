@@ -18,7 +18,7 @@
 | ---- | ------ | ------- |
 | <a name="module_ambient"></a> [ambient](#module\_ambient) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient | feat/terraform-refactor |
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
-| <a name="module_core"></a> [core](#module\_core) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/core | feat/terraform-refactor |
+| <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_katib"></a> [katib](#module\_katib) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib | feat/terraform-refactor |
@@ -27,9 +27,11 @@
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
+| <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
 | <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
-| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
+| <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard | feat/terraform-refactor |
+| <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
 
 ## Resources
 
@@ -47,6 +49,8 @@
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_admission_webhook_config"></a> [admission\_webhook\_config](#input\_admission\_webhook\_config) | Configuration for admission-webhook application | `map(string)` | `{}` | no |
+| <a name="input_admission_webhook_revision"></a> [admission\_webhook\_revision](#input\_admission\_webhook\_revision) | Revision of the admission-webhook application | `number` | `null` | no |
 | <a name="input_argo_controller_config"></a> [argo\_controller\_config](#input\_argo\_controller\_config) | Configuration for argo-controller application | `map(string)` | `{}` | no |
 | <a name="input_argo_controller_revision"></a> [argo\_controller\_revision](#input\_argo\_controller\_revision) | Revision of the argo-controller application | `number` | `null` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
@@ -57,7 +61,10 @@
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
 | <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher | `bool` | `false` | no |
+| <a name="input_enable_notebooks"></a> [enable\_notebooks](#input\_enable\_notebooks) | Whether to deploy the Notebooks component | `bool` | `true` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
+| <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Whether to deploy the training-operator application (v1 training operator) | `bool` | `true` | no |
+| <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
 | <a name="input_feast_integrator_config"></a> [feast\_integrator\_config](#input\_feast\_integrator\_config) | Configuration for feast-integrator application | `map(string)` | `{}` | no |
@@ -73,8 +80,12 @@
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for istio-k8s application | `map(string)` | `{}` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform configuration for istio-k8s | `string` | `""` | no |
 | <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s application | `number` | `null` | no |
-| <a name="input_istio_pilot_config"></a> [istio\_pilot\_config](#input\_istio\_pilot\_config) | Configuration for istio-pilot application | `map(string)` | `{}` | no |
+| <a name="input_istio_pilot_config"></a> [istio\_pilot\_config](#input\_istio\_pilot\_config) | Configuration for istio-pilot application | `map(string)` | <pre>{<br/>  "default-gateway": "kubeflow-gateway"<br/>}</pre> | no |
 | <a name="input_istio_pilot_revision"></a> [istio\_pilot\_revision](#input\_istio\_pilot\_revision) | Revision of the istio-pilot application | `number` | `null` | no |
+| <a name="input_jupyter_controller_config"></a> [jupyter\_controller\_config](#input\_jupyter\_controller\_config) | Configuration for jupyter-controller application | `map(string)` | `{}` | no |
+| <a name="input_jupyter_controller_revision"></a> [jupyter\_controller\_revision](#input\_jupyter\_controller\_revision) | Revision of the jupyter-controller application | `number` | `null` | no |
+| <a name="input_jupyter_ui_config"></a> [jupyter\_ui\_config](#input\_jupyter\_ui\_config) | Configuration for jupyter-ui application | `map(string)` | `{}` | no |
+| <a name="input_jupyter_ui_revision"></a> [jupyter\_ui\_revision](#input\_jupyter\_ui\_revision) | Revision of the jupyter-ui application | `number` | `null` | no |
 | <a name="input_katib_controller_config"></a> [katib\_controller\_config](#input\_katib\_controller\_config) | Configuration for katib-controller application | `map(string)` | `{}` | no |
 | <a name="input_katib_controller_revision"></a> [katib\_controller\_revision](#input\_katib\_controller\_revision) | Revision of the katib-controller application | `number` | `null` | no |
 | <a name="input_katib_db_manager_config"></a> [katib\_db\_manager\_config](#input\_katib\_db\_manager\_config) | Configuration for katib-db-manager application | `map(string)` | `{}` | no |
@@ -111,6 +122,8 @@
 | <a name="input_kubeflow_profiles_revision"></a> [kubeflow\_profiles\_revision](#input\_kubeflow\_profiles\_revision) | Revision of the kubeflow-profiles application | `number` | `null` | no |
 | <a name="input_kubeflow_roles_config"></a> [kubeflow\_roles\_config](#input\_kubeflow\_roles\_config) | Configuration for kubeflow-roles application | `map(string)` | `{}` | no |
 | <a name="input_kubeflow_roles_revision"></a> [kubeflow\_roles\_revision](#input\_kubeflow\_roles\_revision) | Revision of the kubeflow-roles application | `number` | `null` | no |
+| <a name="input_kubeflow_trainer_config"></a> [kubeflow\_trainer\_config](#input\_kubeflow\_trainer\_config) | Configuration for kubeflow-trainer application | `map(string)` | `{}` | no |
+| <a name="input_kubeflow_trainer_revision"></a> [kubeflow\_trainer\_revision](#input\_kubeflow\_trainer\_revision) | Revision of the kubeflow-trainer application | `number` | `null` | no |
 | <a name="input_kubeflow_volumes_config"></a> [kubeflow\_volumes\_config](#input\_kubeflow\_volumes\_config) | Configuration for kubeflow-volumes application | `map(string)` | `{}` | no |
 | <a name="input_kubeflow_volumes_revision"></a> [kubeflow\_volumes\_revision](#input\_kubeflow\_volumes\_revision) | Revision of the kubeflow-volumes application | `number` | `null` | no |
 | <a name="input_metacontroller_operator_config"></a> [metacontroller\_operator\_config](#input\_metacontroller\_operator\_config) | Configuration for metacontroller-operator application | `map(string)` | `{}` | no |
@@ -136,6 +149,8 @@
 | <a name="input_tensorboard_controller_revision"></a> [tensorboard\_controller\_revision](#input\_tensorboard\_controller\_revision) | Revision of the tensorboard-controller application | `number` | `null` | no |
 | <a name="input_tensorboards_web_app_config"></a> [tensorboards\_web\_app\_config](#input\_tensorboards\_web\_app\_config) | Configuration for tensorboards-web-app application | `map(string)` | `{}` | no |
 | <a name="input_tensorboards_web_app_revision"></a> [tensorboards\_web\_app\_revision](#input\_tensorboards\_web\_app\_revision) | Revision of the tensorboards-web-app application | `number` | `null` | no |
+| <a name="input_training_operator_config"></a> [training\_operator\_config](#input\_training\_operator\_config) | Configuration for training-operator application | `map(string)` | `{}` | no |
+| <a name="input_training_operator_revision"></a> [training\_operator\_revision](#input\_training\_operator\_revision) | Revision of the training-operator application | `number` | `null` | no |
 
 ## Outputs
 
