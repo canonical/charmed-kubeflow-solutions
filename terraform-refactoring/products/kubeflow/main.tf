@@ -594,18 +594,6 @@ module "feast" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
-
   feast_integrator = {
     channel  = local.feast_channel
     revision = var.feast_integrator_revision

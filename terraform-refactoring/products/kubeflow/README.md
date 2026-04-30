@@ -27,7 +27,7 @@
 | <a name="module_minio"></a> [minio](#module\_minio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio | feat/terraform-refactor |
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
-| <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | ../../charms/postgresql-k8s | n/a |
+| <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
 
@@ -36,8 +36,8 @@
 | Name | Type |
 | ---- | ---- |
 | [juju_integration.kserve_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.kserve_controller_pod_defaults](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kserve_controller_service_accounts](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.minio_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.oidc_gatekeeper_istio_ingress_k8s_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -125,7 +125,7 @@
 | <a name="input_mysql"></a> [mysql](#input\_mysql) | Configuration for mysql (mysql-k8s) application | <pre>object({<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    storage_size = optional(string, "10G")<br/>    config       = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
-| <a name="input_postgresql_k8s"></a> [postgresql\_k8s](#input\_postgresql\_k8s) | Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry) | <pre>object({<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    storage_size = optional(string, "10G")<br/>    config       = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_postgresql_k8s"></a> [postgresql\_k8s](#input\_postgresql\_k8s) | Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry) | <pre>object({<br/>    revision           = optional(number)<br/>    units              = optional(number, 1)<br/>    storage_directives = optional(map(string), { pgdata = "10G" })<br/>    config             = optional(map(string), { "profile_limit_memory" = "2048" })<br/>  })</pre> | `{}` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
