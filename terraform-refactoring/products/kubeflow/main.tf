@@ -536,7 +536,7 @@ module "postgresql_k8s" {
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
   model_uuid         = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  app_name           = "feast-postgresql"
+  app_name           = "postgresql-k8s"
   channel            = "14/stable"
   revision           = var.postgresql_k8s.revision
   units              = var.postgresql_k8s.units
@@ -592,6 +592,18 @@ module "feast" {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
+  istio_ingress_route = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
   } : null
 
   feast_integrator = {

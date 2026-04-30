@@ -118,7 +118,7 @@ resource "juju_integration" "feast_ui_dashboard_links" {
   }
 }
 
-# Feast UI ingress integration - sidecar (istio-pilot:ingress -> feast-ui)
+# Feast UI ingress integration (istio-pilot:ingress -> feast-ui)
 resource "juju_integration" "feast_ui_ingress" {
   count      = var.ingress != null ? 1 : 0
   model_uuid = var.model_uuid
@@ -132,6 +132,40 @@ resource "juju_integration" "feast_ui_ingress" {
     name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
     endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
     offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
+  }
+}
+
+# Feast UI istio-ingress-route integration - ambient (istio-ingress-k8s:istio-ingress-route -> feast-ui)
+resource "juju_integration" "feast_ui_istio_ingress_route" {
+  count      = var.istio_ingress_route != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.feast_ui.name
+    endpoint = "istio-ingress-route"
+  }
+
+  application {
+    name      = var.istio_ingress_route.kind == "endpoint" ? var.istio_ingress_route.name : null
+    endpoint  = var.istio_ingress_route.kind == "endpoint" ? var.istio_ingress_route.endpoint : null
+    offer_url = var.istio_ingress_route.kind == "offer" ? var.istio_ingress_route.url : null
+  }
+}
+
+# Feast UI service-mesh integration - ambient (istio-beacon-k8s:service-mesh -> feast-ui)
+resource "juju_integration" "feast_ui_service_mesh" {
+  count      = var.service_mesh != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.feast_ui.name
+    endpoint = "service-mesh"
+  }
+
+  application {
+    name      = var.service_mesh.kind == "endpoint" ? var.service_mesh.name : null
+    endpoint  = var.service_mesh.kind == "endpoint" ? var.service_mesh.endpoint : null
+    offer_url = var.service_mesh.kind == "offer" ? var.service_mesh.url : null
   }
 }
 
