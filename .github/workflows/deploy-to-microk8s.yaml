@@ -41,8 +41,6 @@ jobs:
               env: kubeflow-remote
               extra-args: --include-ambient-tests
           - module: kubeflow-spark
-            uats_branch: main
-            # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
             tf-vars-file: examples/tfvars.json
             uats:
               env: spark-remote
