@@ -45,6 +45,10 @@ jobs:
           - product: feast
             uats:
               env: feast-remote
+        exclude:
+          # disabled due to https://github.com/canonical/mlflow-operator/issues/410
+          - product: mlflow
+            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
