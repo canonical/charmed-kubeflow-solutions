@@ -21,7 +21,7 @@ output "provides" {
     }
     opentelemetry_collector_k8s_loki_push = {
       name     = juju_application.opentelemetry_collector_k8s.name
-      endpoint = "loki-push"
+      endpoint = "send-loki-logs"
     }
   }
 }

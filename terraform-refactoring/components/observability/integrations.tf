@@ -39,7 +39,7 @@ resource "juju_integration" "opentelemetry_collector_k8s_loki" {
 
   application {
     name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "loki-push"
+    endpoint = "send-loki-logs"
   }
 
   application {

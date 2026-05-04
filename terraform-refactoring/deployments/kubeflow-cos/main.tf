@@ -9,8 +9,9 @@ resource "juju_model" "cos" {
 module "cos" {
   source = "git::https://github.com/canonical/observability-stack//terraform/cos-lite?ref=04ab6c618dbbec62292a052a61cdb402d80e5974"
 
-  model_uuid = var.create_cos_model ? juju_model.cos[0].uuid : var.cos_model_uuid
-  channel    = var.cos_channel
+  model_uuid   = var.create_cos_model ? juju_model.cos[0].uuid : var.cos_model_uuid
+  channel      = var.cos_channel
+  internal_tls = false
 }
 
 module "kubeflow" {
