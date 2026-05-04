@@ -49,6 +49,9 @@ locals {
   deploy_minio    = var.enable_kfp || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
+  # Feast Component
+  feast_channel = "latest/${var.risk}"
+
   # Training Component
   training_operator_channel = "latest/${var.risk}"
   kubeflow_trainer_channel  = "latest/${var.risk}"

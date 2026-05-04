@@ -42,6 +42,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="Enable to deploy also mlflow",
     )
+    parser.addoption(
+        "--enable-feast",
+        action="store_true",
+        help="Enable to deploy also Feast",
+    )
 
 
 @pytest.fixture(scope="module")
@@ -68,12 +73,19 @@ def enable_mlflow(request) -> list[str]:
         return ["-var", "enable_mlflow=true"]
     return []
 
+@pytest.fixture(scope="module")
+def enable_feast(request) -> list[str]:
+    """Terraform module customization for Feast deployment."""
+    if request.config.getoption("--enable-feast"):
+        return ["-var", "enable_feast=true"]
+    return []
 
 @pytest.fixture(scope="module")
-def tf_vars(risk, service_mesh_type, enable_mlflow) -> list[str]:
+def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast) -> list[str]:
     """Overall Terraform module customization."""
     return (
         enable_mlflow
+        + enable_feast
         + service_mesh_type
         + risk
         + [

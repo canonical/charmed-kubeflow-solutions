@@ -59,7 +59,7 @@ resource "juju_integration" "kserve_controller_object_storage" {
 
 # resource-dispatcher service-mesh integration (ambient only)
 resource "juju_integration" "resource_dispatcher_service_mesh" {
-  count      = (var.enable_mlflow && var.service_mesh_type == "ambient") ? 1 : 0
+  count      = ((var.enable_mlflow || var.enable_feast) && var.service_mesh_type == "ambient") ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {

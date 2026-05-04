@@ -19,6 +19,7 @@
 | <a name="module_ambient"></a> [ambient](#module\_ambient) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient | feat/terraform-refactor |
 | <a name="module_auth"></a> [auth](#module\_auth) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth | feat/terraform-refactor |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
+| <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_katib"></a> [katib](#module\_katib) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib | feat/terraform-refactor |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp | feat/terraform-refactor |
@@ -27,6 +28,7 @@
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
+| <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard | feat/terraform-refactor |
 | <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
@@ -54,6 +56,7 @@
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
 | <a name="input_dex_auth_config"></a> [dex\_auth\_config](#input\_dex\_auth\_config) | Configuration for dex-auth application | `map(string)` | `{}` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
+| <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Whether to deploy the Feast component (feast-integrator and feast-ui) | `bool` | `false` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
@@ -64,6 +67,10 @@
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
+| <a name="input_feast_integrator_config"></a> [feast\_integrator\_config](#input\_feast\_integrator\_config) | Configuration for feast-integrator application | `map(string)` | `{}` | no |
+| <a name="input_feast_integrator_revision"></a> [feast\_integrator\_revision](#input\_feast\_integrator\_revision) | Revision of the feast-integrator application | `number` | `null` | no |
+| <a name="input_feast_ui_config"></a> [feast\_ui\_config](#input\_feast\_ui\_config) | Configuration for feast-ui application | `map(string)` | `{}` | no |
+| <a name="input_feast_ui_revision"></a> [feast\_ui\_revision](#input\_feast\_ui\_revision) | Revision of the feast-ui application | `number` | `null` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
 | <a name="input_istio_beacon_k8s_revision"></a> [istio\_beacon\_k8s\_revision](#input\_istio\_beacon\_k8s\_revision) | Revision of the istio-beacon-k8s application | `number` | `null` | no |
 | <a name="input_istio_ingress_k8s_config"></a> [istio\_ingress\_k8s\_config](#input\_istio\_ingress\_k8s\_config) | Configuration for istio-ingress-k8s application | `map(string)` | `{}` | no |
@@ -131,6 +138,7 @@
 | <a name="input_mysql"></a> [mysql](#input\_mysql) | Configuration for mysql (mysql-k8s) application | <pre>object({<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    storage_size = optional(string, "10G")<br/>    config       = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
+| <a name="input_postgresql_k8s"></a> [postgresql\_k8s](#input\_postgresql\_k8s) | Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry) | <pre>object({<br/>    revision           = optional(number)<br/>    units              = optional(number, 1)<br/>    storage_directives = optional(map(string), { pgdata = "10G" })<br/>    config             = optional(map(string), { "profile_limit_memory" = "2048" })<br/>  })</pre> | `{}` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
