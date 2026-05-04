@@ -47,7 +47,7 @@ module "ambient" {
 module "auth" {
   depends_on = [module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth?ref=feat/terraform-refactor"
+  source = "../../components/auth"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -155,7 +155,7 @@ module "minio" {
   count      = local.deploy_minio ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio?ref=feat/terraform-refactor"
+  source = "../../charms/minio"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   channel    = local.minio_channel
@@ -183,7 +183,7 @@ module "katib" {
   count      = var.enable_katib ? 1 : 0
   depends_on = [module.core, module.mysql, module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib?ref=feat/terraform-refactor"
+  source = "../../components/katib"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -240,7 +240,7 @@ module "kfp" {
   count      = var.enable_kfp ? 1 : 0
   depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp?ref=feat/terraform-refactor"
+  source = "../../components/kfp"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -401,7 +401,7 @@ module "tensorboard" {
   count      = var.enable_tensorboard ? 1 : 0
   depends_on = [module.core, module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard?ref=feat/terraform-refactor"
+  source = "../../components/tensorboard"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
