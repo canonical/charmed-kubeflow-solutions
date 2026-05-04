@@ -118,7 +118,7 @@ jobs:
 
       - name: Setup terraform
         run: |
-          sudo snap install terraform  --channel latest/stable --classic
+          sudo snap install terraform --revision=859 --classic
           terraform --version
 
       - name: Deploy solution
