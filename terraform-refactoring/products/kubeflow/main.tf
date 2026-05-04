@@ -750,23 +750,23 @@ module "observability" {
   oidc_gatekeeper_logging    = module.auth.requires.oidc_gatekeeper_logging
 
   # KFP
-  argo_controller_grafana_dashboard  = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null
-  argo_controller_metrics_endpoint   = var.enable_kfp ? module.kfp[0].provides.argo_controller_metrics_endpoint : null
-  envoy_grafana_dashboard            = var.enable_kfp ? module.kfp[0].provides.envoy_grafana_dashboard : null
-  envoy_metrics_endpoint             = var.enable_kfp ? module.kfp[0].provides.envoy_metrics_endpoint : null
-  kfp_api_grafana_dashboard          = var.enable_kfp ? module.kfp[0].provides.kfp_api_grafana_dashboard : null
-  kfp_api_metrics_endpoint           = var.enable_kfp ? module.kfp[0].provides.kfp_api_metrics_endpoint : null
-  argo_controller_logging            = var.enable_kfp ? module.kfp[0].requires.argo_controller_logging : null
-  envoy_logging                      = var.enable_kfp ? module.kfp[0].requires.envoy_logging : null
-  kfp_api_logging                    = var.enable_kfp ? module.kfp[0].requires.kfp_api_logging : null
-  kfp_metadata_writer_logging        = var.enable_kfp ? module.kfp[0].requires.kfp_metadata_writer_logging : null
-  kfp_persistence_logging            = var.enable_kfp ? module.kfp[0].requires.kfp_persistence_logging : null
-  kfp_profile_controller_logging     = var.enable_kfp ? module.kfp[0].requires.kfp_profile_controller_logging : null
-  kfp_schedwf_logging                = var.enable_kfp ? module.kfp[0].requires.kfp_schedwf_logging : null
-  kfp_ui_logging                     = var.enable_kfp ? module.kfp[0].requires.kfp_ui_logging : null
-  kfp_viewer_logging                 = var.enable_kfp ? module.kfp[0].requires.kfp_viewer_logging : null
-  kfp_viz_logging                    = var.enable_kfp ? module.kfp[0].requires.kfp_viz_logging : null
-  mlmd_logging                       = var.enable_kfp ? module.kfp[0].requires.mlmd_logging : null
+  argo_controller_grafana_dashboard = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null
+  argo_controller_metrics_endpoint  = var.enable_kfp ? module.kfp[0].provides.argo_controller_metrics_endpoint : null
+  envoy_grafana_dashboard           = var.enable_kfp ? module.kfp[0].provides.envoy_grafana_dashboard : null
+  envoy_metrics_endpoint            = var.enable_kfp ? module.kfp[0].provides.envoy_metrics_endpoint : null
+  kfp_api_grafana_dashboard         = var.enable_kfp ? module.kfp[0].provides.kfp_api_grafana_dashboard : null
+  kfp_api_metrics_endpoint          = var.enable_kfp ? module.kfp[0].provides.kfp_api_metrics_endpoint : null
+  argo_controller_logging           = var.enable_kfp ? module.kfp[0].requires.argo_controller_logging : null
+  envoy_logging                     = var.enable_kfp ? module.kfp[0].requires.envoy_logging : null
+  kfp_api_logging                   = var.enable_kfp ? module.kfp[0].requires.kfp_api_logging : null
+  kfp_metadata_writer_logging       = var.enable_kfp ? module.kfp[0].requires.kfp_metadata_writer_logging : null
+  kfp_persistence_logging           = var.enable_kfp ? module.kfp[0].requires.kfp_persistence_logging : null
+  kfp_profile_controller_logging    = var.enable_kfp ? module.kfp[0].requires.kfp_profile_controller_logging : null
+  kfp_schedwf_logging               = var.enable_kfp ? module.kfp[0].requires.kfp_schedwf_logging : null
+  kfp_ui_logging                    = var.enable_kfp ? module.kfp[0].requires.kfp_ui_logging : null
+  kfp_viewer_logging                = var.enable_kfp ? module.kfp[0].requires.kfp_viewer_logging : null
+  kfp_viz_logging                   = var.enable_kfp ? module.kfp[0].requires.kfp_viz_logging : null
+  mlmd_logging                      = var.enable_kfp ? module.kfp[0].requires.mlmd_logging : null
 
   # Katib
   katib_controller_grafana_dashboard = var.enable_katib ? module.katib[0].provides.katib_controller_grafana_dashboard : null

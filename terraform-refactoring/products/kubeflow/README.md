@@ -28,6 +28,7 @@
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
+| <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard | feat/terraform-refactor |
@@ -54,6 +55,7 @@
 | <a name="input_argo_controller_config"></a> [argo\_controller\_config](#input\_argo\_controller\_config) | Configuration for argo-controller application | `map(string)` | `{}` | no |
 | <a name="input_argo_controller_revision"></a> [argo\_controller\_revision](#input\_argo\_controller\_revision) | Revision of the argo-controller application | `number` | `null` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
+| <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | URL of the grafana\_dashboard interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_dex_auth_config"></a> [dex\_auth\_config](#input\_dex\_auth\_config) | Configuration for dex-auth application | `map(string)` | `{}` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
 | <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Whether to deploy the Feast component (feast-integrator and feast-ui) | `bool` | `false` | no |
@@ -62,6 +64,7 @@
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
 | <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher | `bool` | `false` | no |
 | <a name="input_enable_notebooks"></a> [enable\_notebooks](#input\_enable\_notebooks) | Whether to deploy the Notebooks component | `bool` | `true` | no |
+| <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Whether to deploy the observability component (opentelemetry-collector-k8s) | `bool` | `false` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
 | <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Whether to deploy the training-operator application (v1 training operator) | `bool` | `true` | no |
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
@@ -126,8 +129,10 @@
 | <a name="input_kubeflow_trainer_revision"></a> [kubeflow\_trainer\_revision](#input\_kubeflow\_trainer\_revision) | Revision of the kubeflow-trainer application | `number` | `null` | no |
 | <a name="input_kubeflow_volumes_config"></a> [kubeflow\_volumes\_config](#input\_kubeflow\_volumes\_config) | Configuration for kubeflow-volumes application | `map(string)` | `{}` | no |
 | <a name="input_kubeflow_volumes_revision"></a> [kubeflow\_volumes\_revision](#input\_kubeflow\_volumes\_revision) | Revision of the kubeflow-volumes application | `number` | `null` | no |
+| <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | URL of the loki\_push\_api interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_metacontroller_operator_config"></a> [metacontroller\_operator\_config](#input\_metacontroller\_operator\_config) | Configuration for metacontroller-operator application | `map(string)` | `{}` | no |
 | <a name="input_metacontroller_operator_revision"></a> [metacontroller\_operator\_revision](#input\_metacontroller\_operator\_revision) | Revision of the metacontroller-operator application | `number` | `null` | no |
+| <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | URL of the prometheus\_remote\_write interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_minio_config"></a> [minio\_config](#input\_minio\_config) | Configuration for minio application | `map(string)` | `{}` | no |
 | <a name="input_minio_revision"></a> [minio\_revision](#input\_minio\_revision) | Revision of the minio application | `number` | `null` | no |
 | <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | `{}` | no |
@@ -138,9 +143,11 @@
 | <a name="input_mysql"></a> [mysql](#input\_mysql) | Configuration for mysql (mysql-k8s) application | <pre>object({<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    storage_size = optional(string, "10G")<br/>    config       = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
+| <a name="input_opentelemetry_collector_k8s"></a> [opentelemetry\_collector\_k8s](#input\_opentelemetry\_collector\_k8s) | Configuration for the opentelemetry-collector-k8s application | <pre>object({<br/>    channel      = optional(string, "2/stable")<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    trust        = optional(bool, true)<br/>    constraints  = optional(string)<br/>    config       = optional(map(string), {})<br/>    resources    = optional(map(string), {})<br/>    storage_size = optional(string, "10G")<br/>  })</pre> | `{}` | no |
 | <a name="input_postgresql_k8s"></a> [postgresql\_k8s](#input\_postgresql\_k8s) | Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry) | <pre>object({<br/>    revision           = optional(number)<br/>    units              = optional(number, 1)<br/>    storage_directives = optional(map(string), { pgdata = "10G" })<br/>    config             = optional(map(string), { "profile_limit_memory" = "2048" })<br/>  })</pre> | `{}` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
+| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
 | <a name="input_resource_dispatcher_revision"></a> [resource\_dispatcher\_revision](#input\_resource\_dispatcher\_revision) | Revision of the resource-dispatcher application | `number` | `null` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |

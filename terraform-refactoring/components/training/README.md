@@ -73,5 +73,6 @@ No modules.
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_components"></a> [components](#output\_components) | Map of the deployed Training applications |
+| <a name="output_provides"></a> [provides](#output\_provides) | Map of endpoints provided by this component to other components (outbound relations) |
 | <a name="output_requires"></a> [requires](#output\_requires) | Map of endpoints required by this component from other components (inbound relations) |
 <!-- END_TF_DOCS -->
