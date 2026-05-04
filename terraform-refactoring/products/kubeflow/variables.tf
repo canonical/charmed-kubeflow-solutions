@@ -641,6 +641,47 @@ variable "kubeflow_trainer_config" {
   default     = {}
 }
 
+# Observability Component
+
+variable "enable_observability" {
+  description = "Whether to deploy the observability component (opentelemetry-collector-k8s)"
+  type        = bool
+  default     = false
+}
+
+variable "dashboards_offer" {
+  description = "URL of the grafana_dashboard interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "logging_offer" {
+  description = "URL of the loki_push_api interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "metrics_offer" {
+  description = "URL of the prometheus_remote_write interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s" {
+  description = "Configuration for the opentelemetry-collector-k8s application"
+  type = object({
+    channel      = optional(string, "2/stable")
+    revision     = optional(number)
+    units        = optional(number, 1)
+    trust        = optional(bool, true)
+    constraints  = optional(string)
+    config       = optional(map(string), {})
+    resources    = optional(map(string), {})
+    storage_size = optional(string, "10G")
+  })
+  default = {}
+}
+
 # Feast Component Applications
 
 variable "enable_feast" {
