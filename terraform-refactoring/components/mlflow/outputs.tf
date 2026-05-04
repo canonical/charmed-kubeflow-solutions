@@ -8,6 +8,20 @@ output "components" {
   }
 }
 
+output "provides" {
+  description = "Map of endpoints provided by this component to other components (outbound relations)"
+  value = {
+    mlflow_server_grafana_dashboard = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "grafana-dashboard"
+    }
+    mlflow_server_metrics_endpoint = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "metrics-endpoint"
+    }
+  }
+}
+
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
@@ -42,6 +56,10 @@ output "requires" {
     mlflow_server_pod_defaults = {
       name     = juju_application.mlflow_server.name
       endpoint = "pod-defaults"
+    }
+    mlflow_server_logging = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "logging"
     }
   }
 }

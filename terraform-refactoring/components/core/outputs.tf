@@ -20,6 +20,34 @@ output "provides" {
       name     = juju_application.kubeflow_dashboard.name
       endpoint = "links"
     }
+    kubeflow_dashboard_grafana_dashboard = {
+      name     = juju_application.kubeflow_dashboard.name
+      endpoint = "grafana-dashboard"
+    }
+    kubeflow_dashboard_metrics_endpoint = {
+      name     = juju_application.kubeflow_dashboard.name
+      endpoint = "metrics-endpoint"
+    }
+    kubeflow_profiles_metrics_endpoint = {
+      name     = juju_application.kubeflow_profiles.name
+      endpoint = "metrics-endpoint"
+    }
+    metacontroller_operator_grafana_dashboard = {
+      name     = juju_application.metacontroller_operator.name
+      endpoint = "grafana-dashboard"
+    }
+    metacontroller_operator_metrics_endpoint = {
+      name     = juju_application.metacontroller_operator.name
+      endpoint = "metrics-endpoint"
+    }
+    pvcviewer_operator_grafana_dashboard = {
+      name     = juju_application.pvcviewer_operator.name
+      endpoint = "grafana-dashboard"
+    }
+    pvcviewer_operator_metrics_endpoint = {
+      name     = juju_application.pvcviewer_operator.name
+      endpoint = "metrics-endpoint"
+    }
   }
 }
 
@@ -65,6 +93,26 @@ output "requires" {
     admission_webhook_service_mesh = {
       name     = juju_application.admission_webhook.name
       endpoint = "service-mesh"
+    }
+    admission_webhook_logging = {
+      name     = juju_application.admission_webhook.name
+      endpoint = "logging"
+    }
+    kubeflow_dashboard_logging = {
+      name     = juju_application.kubeflow_dashboard.name
+      endpoint = "logging"
+    }
+    kubeflow_profiles_logging = {
+      name     = juju_application.kubeflow_profiles.name
+      endpoint = "logging"
+    }
+    kubeflow_volumes_logging = {
+      name     = juju_application.kubeflow_volumes.name
+      endpoint = "logging"
+    }
+    pvcviewer_operator_logging = {
+      name     = juju_application.pvcviewer_operator.name
+      endpoint = "logging"
     }
   }
 }
