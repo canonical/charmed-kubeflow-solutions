@@ -1,6 +1,8 @@
 # Charmed Kubeflow Terraform solution
 
 
+#TODO: Remove this addition to the README.md
+
 This is a Terraform module facilitating the deployment of Charmed Kubeflow, using the [Terraform juju provider](https://github.com/juju/terraform-provider-juju/). For more information, refer to the provider [documentation](https://registry.terraform.io/providers/juju/juju/latest/docs). 
 
 ## API
