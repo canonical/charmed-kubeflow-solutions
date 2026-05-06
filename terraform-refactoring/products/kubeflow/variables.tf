@@ -3,6 +3,17 @@
 
 # Juju Settings
 
+variable "release" {
+  type        = string
+  description = "Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks."
+  default     = "latest"
+
+  validation {
+    condition     = contains(["1.11", "latest"], var.release)
+    error_message = "Valid values for var: release are (1.11 and latest)."
+  }
+}
+
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"
