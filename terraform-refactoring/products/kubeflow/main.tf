@@ -807,6 +807,12 @@ module "observability" {
   minio_grafana_dashboard = local.deploy_minio ? module.minio[0].provides.grafana_dashboard : null
   minio_metrics_endpoint  = local.deploy_minio ? module.minio[0].provides.metrics_endpoint : null
 
+  # Service mesh (ambient only)
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
   # MLflow
   mlflow_server_grafana_dashboard = var.enable_mlflow ? module.mlflow[0].provides.mlflow_server_grafana_dashboard : null
   mlflow_server_metrics_endpoint  = var.enable_mlflow ? module.mlflow[0].provides.mlflow_server_metrics_endpoint : null

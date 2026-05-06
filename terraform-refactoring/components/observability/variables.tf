@@ -22,6 +22,13 @@ variable "opentelemetry_collector_k8s" {
   default = {}
 }
 
+variable "service_mesh" {
+  description = "Service mesh endpoint from istio-beacon-k8s:service-mesh (ambient only; supports same-model endpoint or cross-model offer)"
+  type        = object({ name = string, endpoint = string })
+  nullable    = true
+  default     = null
+}
+
 variable "dashboards_offer" {
   description = "URL of the `grafana_dashboard` interface offer from the COS stack."
   type        = string

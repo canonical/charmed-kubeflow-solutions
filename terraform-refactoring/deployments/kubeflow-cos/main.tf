@@ -24,9 +24,6 @@ module "kubeflow" {
   service_mesh_type  = var.service_mesh_type
   istio_k8s_platform = var.istio_k8s_platform
 
-  mysql          = var.mysql
-  postgresql_k8s = var.postgresql_k8s
-
   enable_kfp         = var.enable_kfp
   enable_katib       = var.enable_katib
   enable_notebooks   = var.enable_notebooks
@@ -38,9 +35,8 @@ module "kubeflow" {
   enable_feast       = var.enable_feast
 
   # Observability is always enabled in kubeflow-cos and automatically wired to COS
-  enable_observability        = true
-  dashboards_offer            = module.cos.offers.grafana_dashboards.url
-  logging_offer               = module.cos.offers.loki_logging.url
-  metrics_offer               = module.cos.offers.prometheus_receive_remote_write.url
-  opentelemetry_collector_k8s = var.opentelemetry_collector_k8s
+  enable_observability = true
+  dashboards_offer     = module.cos.offers.grafana_dashboards.url
+  logging_offer        = module.cos.offers.loki_logging.url
+  metrics_offer        = module.cos.offers.prometheus_receive_remote_write.url
 }

@@ -260,6 +260,7 @@ No modules.
 | [juju_integration.opentelemetry_collector_k8s_grafana_dashboards](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.opentelemetry_collector_k8s_loki](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.opentelemetry_collector_k8s_prometheus](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.opentelemetry_collector_k8s_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.pvcviewer_operator_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.pvcviewer_operator_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.pvcviewer_operator_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -337,6 +338,7 @@ No modules.
 | <a name="input_pvcviewer_operator_grafana_dashboard"></a> [pvcviewer\_operator\_grafana\_dashboard](#input\_pvcviewer\_operator\_grafana\_dashboard) | Grafana dashboard endpoint from core pvcviewer-operator application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_pvcviewer_operator_logging"></a> [pvcviewer\_operator\_logging](#input\_pvcviewer\_operator\_logging) | Logging endpoint from core pvcviewer-operator application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_pvcviewer_operator_metrics_endpoint"></a> [pvcviewer\_operator\_metrics\_endpoint](#input\_pvcviewer\_operator\_metrics\_endpoint) | Metrics endpoint from core pvcviewer-operator application | `object({ name = string, endpoint = string })` | `null` | no |
+| <a name="input_service_mesh"></a> [service\_mesh](#input\_service\_mesh) | Service mesh endpoint from istio-beacon-k8s:service-mesh (ambient only; supports same-model endpoint or cross-model offer) | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_tensorboard_controller_logging"></a> [tensorboard\_controller\_logging](#input\_tensorboard\_controller\_logging) | Logging endpoint from tensorboard tensorboard-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_tensorboard_controller_metrics_endpoint"></a> [tensorboard\_controller\_metrics\_endpoint](#input\_tensorboard\_controller\_metrics\_endpoint) | Metrics endpoint from tensorboard tensorboard-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_tensorboards_web_app_logging"></a> [tensorboards\_web\_app\_logging](#input\_tensorboards\_web\_app\_logging) | Logging endpoint from tensorboard tensorboards-web-app application | `object({ name = string, endpoint = string })` | `null` | no |

@@ -2,6 +2,25 @@
 # See LICENSE file for licensing details.
 
 # ---------------------------------------------------------------------------
+# Service mesh integration (ambient only)
+# ---------------------------------------------------------------------------
+
+resource "juju_integration" "opentelemetry_collector_k8s_service_mesh" {
+  count      = var.service_mesh != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.opentelemetry_collector_k8s.name
+    endpoint = "service-mesh"
+  }
+
+  application {
+    name     = var.service_mesh.name
+    endpoint = var.service_mesh.endpoint
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Cross-model COS offer data sources
 # ---------------------------------------------------------------------------
 

@@ -56,7 +56,6 @@ terraform apply
 | `enable_mlflow` | Deploy the MLflow component | `false` |
 | `enable_kserve` | Deploy the KServe component | `true` |
 | `enable_feast` | Deploy the Feast component | `false` |
-| `opentelemetry_collector_k8s` | opentelemetry-collector-k8s configuration object | `{}` |
 
 > **Note:** `enable_observability` is always `true` in this product. The COS
 > offer URLs are derived automatically from the deployed COS Lite module.
@@ -110,9 +109,6 @@ terraform apply
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform configuration for istio-k8s (ambient mode only) | `string` | `""` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing Juju model for Kubeflow (required when create\_model is false) | `string` | `null` | no |
-| <a name="input_mysql"></a> [mysql](#input\_mysql) | Configuration for mysql (mysql-k8s) application | <pre>object({<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    storage_size = optional(string, "10G")<br/>    config       = optional(map(string), {})<br/>  })</pre> | `{}` | no |
-| <a name="input_opentelemetry_collector_k8s"></a> [opentelemetry\_collector\_k8s](#input\_opentelemetry\_collector\_k8s) | Configuration for the opentelemetry-collector-k8s application | <pre>object({<br/>    channel      = optional(string, "2/stable")<br/>    revision     = optional(number)<br/>    units        = optional(number, 1)<br/>    trust        = optional(bool, true)<br/>    constraints  = optional(string)<br/>    config       = optional(map(string), {})<br/>    resources    = optional(map(string), {})<br/>    storage_size = optional(string, "10G")<br/>  })</pre> | `{}` | no |
-| <a name="input_postgresql_k8s"></a> [postgresql\_k8s](#input\_postgresql\_k8s) | Configuration for the postgresql-k8s instance used by Feast | <pre>object({<br/>    revision           = optional(number)<br/>    units              = optional(number, 1)<br/>    storage_directives = optional(map(string), { pgdata = "10G" })<br/>    config             = optional(map(string), { "profile_limit_memory" = "2048" })<br/>  })</pre> | `{}` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'sidecar' (Istio sidecar) or 'ambient' (Istio ambient) | `string` | `"sidecar"` | no |

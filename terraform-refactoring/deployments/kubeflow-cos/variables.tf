@@ -95,36 +95,6 @@ variable "istio_k8s_platform" {
 }
 
 # ---------------------------------------------------------------------------
-# MySQL
-# ---------------------------------------------------------------------------
-
-variable "mysql" {
-  description = "Configuration for mysql (mysql-k8s) application"
-  type = object({
-    revision     = optional(number)
-    units        = optional(number, 1)
-    storage_size = optional(string, "10G")
-    config       = optional(map(string), {})
-  })
-  default = {}
-}
-
-# ---------------------------------------------------------------------------
-# PostgreSQL (Feast)
-# ---------------------------------------------------------------------------
-
-variable "postgresql_k8s" {
-  description = "Configuration for the postgresql-k8s instance used by Feast"
-  type = object({
-    revision           = optional(number)
-    units              = optional(number, 1)
-    storage_directives = optional(map(string), { pgdata = "10G" })
-    config             = optional(map(string), { "profile_limit_memory" = "2048" })
-  })
-  default = {}
-}
-
-# ---------------------------------------------------------------------------
 # Component Toggles
 # ---------------------------------------------------------------------------
 
@@ -180,25 +150,4 @@ variable "enable_feast" {
   description = "Whether to deploy the Feast component"
   type        = bool
   default     = false
-}
-
-# ---------------------------------------------------------------------------
-# Observability (opentelemetry-collector-k8s)
-# Observability is always enabled in kubeflow-cos; the COS offers are wired
-# automatically. Use this variable to customise the collector application.
-# ---------------------------------------------------------------------------
-
-variable "opentelemetry_collector_k8s" {
-  description = "Configuration for the opentelemetry-collector-k8s application"
-  type = object({
-    channel      = optional(string, "2/stable")
-    revision     = optional(number)
-    units        = optional(number, 1)
-    trust        = optional(bool, true)
-    constraints  = optional(string)
-    config       = optional(map(string), {})
-    resources    = optional(map(string), {})
-    storage_size = optional(string, "10G")
-  })
-  default = {}
 }
