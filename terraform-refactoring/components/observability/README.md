@@ -236,8 +236,11 @@ No modules.
 | [juju_integration.kfp_ui_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_viewer_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_viz_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.knative_eventing_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.knative_operator_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.knative_operator_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.knative_operator_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.knative_serving_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kubeflow_dashboard_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -310,8 +313,11 @@ No modules.
 | <a name="input_kfp_ui_logging"></a> [kfp\_ui\_logging](#input\_kfp\_ui\_logging) | Logging endpoint from kfp kfp-ui application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kfp_viewer_logging"></a> [kfp\_viewer\_logging](#input\_kfp\_viewer\_logging) | Logging endpoint from kfp kfp-viewer application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kfp_viz_logging"></a> [kfp\_viz\_logging](#input\_kfp\_viz\_logging) | Logging endpoint from kfp kfp-viz application | `object({ name = string, endpoint = string })` | `null` | no |
+| <a name="input_knative_eventing_otel_collector"></a> [knative\_eventing\_otel\_collector](#input\_knative\_eventing\_otel\_collector) | OTel collector endpoint from kserve knative-eventing application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_knative_operator_logging"></a> [knative\_operator\_logging](#input\_knative\_operator\_logging) | Logging endpoint from kserve knative-operator application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_knative_operator_metrics_endpoint"></a> [knative\_operator\_metrics\_endpoint](#input\_knative\_operator\_metrics\_endpoint) | Metrics endpoint from kserve knative-operator application | `object({ name = string, endpoint = string })` | `null` | no |
+| <a name="input_knative_operator_otel_collector"></a> [knative\_operator\_otel\_collector](#input\_knative\_operator\_otel\_collector) | OTel collector endpoint from kserve knative-operator application | `object({ name = string, endpoint = string })` | `null` | no |
+| <a name="input_knative_serving_otel_collector"></a> [knative\_serving\_otel\_collector](#input\_knative\_serving\_otel\_collector) | OTel collector endpoint from kserve knative-serving application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kserve_controller_logging"></a> [kserve\_controller\_logging](#input\_kserve\_controller\_logging) | Logging endpoint from kserve kserve-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kserve_controller_metrics_endpoint"></a> [kserve\_controller\_metrics\_endpoint](#input\_kserve\_controller\_metrics\_endpoint) | Metrics endpoint from kserve kserve-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kubeflow_dashboard_grafana_dashboard"></a> [kubeflow\_dashboard\_grafana\_dashboard](#input\_kubeflow\_dashboard\_grafana\_dashboard) | Grafana dashboard endpoint from core kubeflow-dashboard application | `object({ name = string, endpoint = string })` | `null` | no |

@@ -778,8 +778,11 @@ module "observability" {
   # KServe
   kserve_controller_metrics_endpoint = local.deploy_kserve ? module.kserve[0].provides.kserve_controller_metrics_endpoint : null
   knative_operator_metrics_endpoint  = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_metrics_endpoint, null) : null
+  knative_operator_otel_collector    = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_otel_collector, null) : null
   kserve_controller_logging          = local.deploy_kserve ? module.kserve[0].requires.kserve_controller_logging : null
   knative_operator_logging           = local.deploy_kserve ? try(module.kserve[0].requires.knative_operator_logging, null) : null
+  knative_serving_otel_collector     = local.deploy_kserve ? try(module.kserve[0].requires.knative_serving_otel_collector, null) : null
+  knative_eventing_otel_collector    = local.deploy_kserve ? try(module.kserve[0].requires.knative_eventing_otel_collector, null) : null
 
   # Notebooks
   jupyter_controller_grafana_dashboard = var.enable_notebooks ? module.notebooks[0].provides.jupyter_controller_grafana_dashboard : null

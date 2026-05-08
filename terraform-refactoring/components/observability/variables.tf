@@ -437,6 +437,31 @@ variable "knative_operator_logging" {
   default     = null
 }
 
+# ---------------------------------------------------------------------------
+# OTel collector endpoints (knative apps require — collector provides OTLP)
+# ---------------------------------------------------------------------------
+
+variable "knative_operator_otel_collector" {
+  description = "OTel collector endpoint from kserve knative-operator application"
+  type        = object({ name = string, endpoint = string })
+  nullable    = true
+  default     = null
+}
+
+variable "knative_serving_otel_collector" {
+  description = "OTel collector endpoint from kserve knative-serving application"
+  type        = object({ name = string, endpoint = string })
+  nullable    = true
+  default     = null
+}
+
+variable "knative_eventing_otel_collector" {
+  description = "OTel collector endpoint from kserve knative-eventing application"
+  type        = object({ name = string, endpoint = string })
+  nullable    = true
+  default     = null
+}
+
 variable "jupyter_controller_logging" {
   description = "Logging endpoint from notebooks jupyter-controller application"
   type        = object({ name = string, endpoint = string })
