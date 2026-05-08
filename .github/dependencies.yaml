@@ -1,5 +1,5 @@
 CKF_BRANCH: "track/1.11-rc"
 K8S_VERSION: "1.32"
 JUJU_VERSION: "3.6"
-UATS_BRANCH: "track/1.11-rc"
+UATS_BRANCH: "kf-8655-rc-branch"
 RISK: "stable"
