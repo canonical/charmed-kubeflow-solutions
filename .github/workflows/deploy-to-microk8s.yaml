@@ -40,7 +40,7 @@ jobs:
             uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args:
+              extra-args: --bundle "file:assets/versions-ambient.yaml"
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
