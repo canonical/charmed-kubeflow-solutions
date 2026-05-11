@@ -71,10 +71,10 @@ module "kubeflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=893c73d48f49023f0cf3aa13927a609167d53bf7"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=bce2eb9c7c4f76b0f4356b0625164a3940e68f9f"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "latest/edge" # TODO: fix hardcoded value
+  channel    = "latest/edge/pr-159" # TODO: fix hardcoded value
 }
 
 
@@ -95,7 +95,7 @@ resource "juju_application" "kubeflow_integrator" {
   name  = "kubeflow-integrator"
   charm {
     name    = "data-kubeflow-integrator"
-    channel = "1/edge" # TODO: fix hardcoded value
+    channel = "1/edge/pra-90" # TODO: fix hardcoded value
   }
   units       = 1
   constraints = "arch=amd64"
