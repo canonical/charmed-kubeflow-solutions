@@ -389,15 +389,16 @@ variable "istio_beacon_k8s_config" {
 
 # MySQL Component Applications
 
-variable "mysql" {
-  description = "Configuration for mysql (mysql-k8s) application"
-  type = object({
-    revision     = optional(number)
-    units        = optional(number, 1)
-    storage_size = optional(string, "10G")
-    config       = optional(map(string), {})
-  })
-  default = {}
+variable "mysql_revision" {
+  description = "Revision of the mysql-db application"
+  type        = number
+  default     = null
+}
+
+variable "mysql_config" {
+  description = "Configuration for the mysql-db application"
+  type        = map(string)
+  default     = {}
 }
 
 # Katib Component Applications
@@ -667,19 +668,16 @@ variable "metrics_offer" {
   default     = null
 }
 
-variable "opentelemetry_collector_k8s" {
+variable "opentelemetry_collector_k8s_revision" {
+  description = "Revision of the opentelemetry-collector-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_config" {
   description = "Configuration for the opentelemetry-collector-k8s application"
-  type = object({
-    channel      = optional(string, "2/stable")
-    revision     = optional(number)
-    units        = optional(number, 1)
-    trust        = optional(bool, true)
-    constraints  = optional(string)
-    config       = optional(map(string), {})
-    resources    = optional(map(string), {})
-    storage_size = optional(string, "10G")
-  })
-  default = {}
+  type        = map(string)
+  default     = {}
 }
 
 # Feast Component Applications
@@ -716,13 +714,14 @@ variable "feast_ui_config" {
 
 # PostgreSQL for Feast
 
-variable "postgresql_k8s" {
-  description = "Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry)"
-  type = object({
-    revision           = optional(number)
-    units              = optional(number, 1)
-    storage_directives = optional(map(string), { pgdata = "10G" })
-    config             = optional(map(string), { "profile_limit_memory" = "2048" })
-  })
-  default = {}
+variable "postgresql_k8s_revision" {
+  description = "Revision of the postgresql-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "postgresql_k8s_config" {
+  description = "Configuration for the postgresql-k8s application"
+  type        = map(string)
+  default     = {}
 }

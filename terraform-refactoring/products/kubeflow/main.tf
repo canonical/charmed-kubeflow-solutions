@@ -170,13 +170,11 @@ module "mysql" {
   model    = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   app_name = "mysql-db"
   channel  = "8.0/stable"
-  revision = var.mysql.revision
-  units    = var.mysql.units
+  revision = var.mysql_revision
   config = merge(
     { "profile-limit-memory" = "2048" },
-    var.mysql.config
+    var.mysql_config
   )
-  storage_size = var.mysql.storage_size
 }
 
 module "katib" {
@@ -627,13 +625,11 @@ module "postgresql_k8s" {
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
-  model_uuid         = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  app_name           = "postgresql-k8s"
-  channel            = "14/stable"
-  revision           = var.postgresql_k8s.revision
-  units              = var.postgresql_k8s.units
-  storage_directives = var.postgresql_k8s.storage_directives
-  config             = var.postgresql_k8s.config
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  app_name   = "postgresql-k8s"
+  channel    = "14/stable"
+  revision   = var.postgresql_k8s_revision
+  config     = var.postgresql_k8s_config
 }
 
 module "feast" {
@@ -727,7 +723,10 @@ module "observability" {
   logging_offer    = var.logging_offer
   metrics_offer    = var.metrics_offer
 
-  opentelemetry_collector_k8s = var.opentelemetry_collector_k8s
+  opentelemetry_collector_k8s = {
+    revision = var.opentelemetry_collector_k8s_revision
+    config   = var.opentelemetry_collector_k8s_config
+  }
 
   # Core
   kubeflow_dashboard_grafana_dashboard      = module.core.provides.kubeflow_dashboard_grafana_dashboard
