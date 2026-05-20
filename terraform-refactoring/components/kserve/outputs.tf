@@ -1,15 +1,25 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+locals {
+  knative_deployed = var.gateway_info != null
+
+  knative_operator = local.knative_deployed ? juju_application.knative_operator[0] : null
+  knative_serving  = local.knative_deployed ? juju_application.knative_serving[0] : null
+  knative_eventing = local.knative_deployed ? juju_application.knative_eventing[0] : null
+}
+
 output "components" {
   description = "Map of the deployed KServe applications"
   value = merge(
     {
       kserve_controller = juju_application.kserve_controller
     },
-    length(juju_application.knative_operator) > 0 ? { knative_operator = juju_application.knative_operator[0] } : {},
-    length(juju_application.knative_serving) > 0 ? { knative_serving = juju_application.knative_serving[0] } : {},
-    length(juju_application.knative_eventing) > 0 ? { knative_eventing = juju_application.knative_eventing[0] } : {},
+    local.knative_deployed ? {
+      knative_operator = local.knative_operator
+      knative_serving  = local.knative_serving
+      knative_eventing = local.knative_eventing
+    } : {},
   )
 }
 
@@ -22,13 +32,13 @@ output "provides" {
         endpoint = "metrics-endpoint"
       }
     },
-    length(juju_application.knative_operator) > 0 ? {
+    local.knative_deployed ? {
       knative_operator_metrics_endpoint = {
-        name     = juju_application.knative_operator[0].name
+        name     = local.knative_operator.name
         endpoint = "metrics-endpoint"
       }
       knative_operator_otel_collector = {
-        name     = juju_application.knative_operator[0].name
+        name     = local.knative_operator.name
         endpoint = "otel-collector"
       }
     } : {}
@@ -60,21 +70,17 @@ output "requires" {
         endpoint = "logging"
       }
     },
-    length(juju_application.knative_operator) > 0 ? {
+    local.knative_deployed ? {
       knative_operator_logging = {
-        name     = juju_application.knative_operator[0].name
+        name     = local.knative_operator.name
         endpoint = "logging"
       }
-    } : {},
-    length(juju_application.knative_serving) > 0 ? {
       knative_serving_otel_collector = {
-        name     = juju_application.knative_serving[0].name
+        name     = local.knative_serving.name
         endpoint = "otel-collector"
       }
-    } : {},
-    length(juju_application.knative_eventing) > 0 ? {
       knative_eventing_otel_collector = {
-        name     = juju_application.knative_eventing[0].name
+        name     = local.knative_eventing.name
         endpoint = "otel-collector"
       }
     } : {}
