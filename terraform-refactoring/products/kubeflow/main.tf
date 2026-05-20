@@ -47,7 +47,7 @@ module "ambient" {
 module "auth" {
   depends_on = [module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/auth?ref=feat/terraform-refactor"
+  source = "../../components/auth"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -155,7 +155,7 @@ module "minio" {
   count      = local.deploy_minio ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/charms/minio?ref=feat/terraform-refactor"
+  source = "../../charms/minio"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   channel    = local.minio_channel
@@ -170,20 +170,18 @@ module "mysql" {
   model    = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   app_name = "mysql-db"
   channel  = "8.0/stable"
-  revision = var.mysql.revision
-  units    = var.mysql.units
+  revision = var.mysql_revision
   config = merge(
     { "profile-limit-memory" = "2048" },
-    var.mysql.config
+    var.mysql_config
   )
-  storage_size = var.mysql.storage_size
 }
 
 module "katib" {
   count      = var.enable_katib ? 1 : 0
   depends_on = [module.core, module.mysql, module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/katib?ref=feat/terraform-refactor"
+  source = "../../components/katib"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -240,7 +238,7 @@ module "kfp" {
   count      = var.enable_kfp ? 1 : 0
   depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/kfp?ref=feat/terraform-refactor"
+  source = "../../components/kfp"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -401,7 +399,7 @@ module "tensorboard" {
   count      = var.enable_tensorboard ? 1 : 0
   depends_on = [module.core, module.istio, module.ambient]
 
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/tensorboard?ref=feat/terraform-refactor"
+  source = "../../components/tensorboard"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -627,13 +625,11 @@ module "postgresql_k8s" {
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
-  model_uuid         = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  app_name           = "postgresql-k8s"
-  channel            = "14/stable"
-  revision           = var.postgresql_k8s.revision
-  units              = var.postgresql_k8s.units
-  storage_directives = var.postgresql_k8s.storage_directives
-  config             = var.postgresql_k8s.config
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  app_name   = "postgresql-k8s"
+  channel    = "14/stable"
+  revision   = var.postgresql_k8s_revision
+  config     = var.postgresql_k8s_config
 }
 
 module "feast" {
@@ -709,4 +705,118 @@ module "feast" {
     revision = var.feast_ui_revision
     config   = var.feast_ui_config
   }
+}
+
+module "observability" {
+  count = var.enable_observability ? 1 : 0
+  depends_on = [
+    module.auth, module.core, module.istio, module.ambient,
+    module.kfp, module.katib, module.kserve, module.notebooks,
+    module.tensorboard, module.training, module.mlflow, module.minio,
+  ]
+
+  source = "../../components/observability"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  dashboards_offer = var.dashboards_offer
+  logging_offer    = var.logging_offer
+  metrics_offer    = var.metrics_offer
+
+  opentelemetry_collector_k8s = {
+    revision = var.opentelemetry_collector_k8s_revision
+    config   = var.opentelemetry_collector_k8s_config
+  }
+
+  # Core
+  kubeflow_dashboard_grafana_dashboard      = module.core.provides.kubeflow_dashboard_grafana_dashboard
+  kubeflow_dashboard_metrics_endpoint       = module.core.provides.kubeflow_dashboard_metrics_endpoint
+  kubeflow_profiles_metrics_endpoint        = module.core.provides.kubeflow_profiles_metrics_endpoint
+  metacontroller_operator_grafana_dashboard = module.core.provides.metacontroller_operator_grafana_dashboard
+  metacontroller_operator_metrics_endpoint  = module.core.provides.metacontroller_operator_metrics_endpoint
+  pvcviewer_operator_grafana_dashboard      = module.core.provides.pvcviewer_operator_grafana_dashboard
+  pvcviewer_operator_metrics_endpoint       = module.core.provides.pvcviewer_operator_metrics_endpoint
+  admission_webhook_logging                 = module.core.requires.admission_webhook_logging
+  kubeflow_dashboard_logging                = module.core.requires.kubeflow_dashboard_logging
+  kubeflow_profiles_logging                 = module.core.requires.kubeflow_profiles_logging
+  kubeflow_volumes_logging                  = module.core.requires.kubeflow_volumes_logging
+  pvcviewer_operator_logging                = module.core.requires.pvcviewer_operator_logging
+
+  # Auth
+  dex_auth_grafana_dashboard = module.auth.provides.dex_auth_grafana_dashboard
+  dex_auth_metrics_endpoint  = module.auth.provides.dex_auth_metrics_endpoint
+  dex_auth_logging           = module.auth.requires.dex_auth_logging
+  oidc_gatekeeper_logging    = module.auth.requires.oidc_gatekeeper_logging
+
+  # KFP
+  argo_controller_grafana_dashboard = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null
+  argo_controller_metrics_endpoint  = var.enable_kfp ? module.kfp[0].provides.argo_controller_metrics_endpoint : null
+  envoy_grafana_dashboard           = var.enable_kfp ? module.kfp[0].provides.envoy_grafana_dashboard : null
+  envoy_metrics_endpoint            = var.enable_kfp ? module.kfp[0].provides.envoy_metrics_endpoint : null
+  kfp_api_grafana_dashboard         = var.enable_kfp ? module.kfp[0].provides.kfp_api_grafana_dashboard : null
+  kfp_api_metrics_endpoint          = var.enable_kfp ? module.kfp[0].provides.kfp_api_metrics_endpoint : null
+  argo_controller_logging           = var.enable_kfp ? module.kfp[0].requires.argo_controller_logging : null
+  envoy_logging                     = var.enable_kfp ? module.kfp[0].requires.envoy_logging : null
+  kfp_api_logging                   = var.enable_kfp ? module.kfp[0].requires.kfp_api_logging : null
+  kfp_metadata_writer_logging       = var.enable_kfp ? module.kfp[0].requires.kfp_metadata_writer_logging : null
+  kfp_persistence_logging           = var.enable_kfp ? module.kfp[0].requires.kfp_persistence_logging : null
+  kfp_profile_controller_logging    = var.enable_kfp ? module.kfp[0].requires.kfp_profile_controller_logging : null
+  kfp_schedwf_logging               = var.enable_kfp ? module.kfp[0].requires.kfp_schedwf_logging : null
+  kfp_ui_logging                    = var.enable_kfp ? module.kfp[0].requires.kfp_ui_logging : null
+  kfp_viewer_logging                = var.enable_kfp ? module.kfp[0].requires.kfp_viewer_logging : null
+  kfp_viz_logging                   = var.enable_kfp ? module.kfp[0].requires.kfp_viz_logging : null
+  mlmd_logging                      = var.enable_kfp ? module.kfp[0].requires.mlmd_logging : null
+
+  # Katib
+  katib_controller_grafana_dashboard = var.enable_katib ? module.katib[0].provides.katib_controller_grafana_dashboard : null
+  katib_controller_metrics_endpoint  = var.enable_katib ? module.katib[0].provides.katib_controller_metrics_endpoint : null
+  katib_controller_logging           = var.enable_katib ? module.katib[0].requires.katib_controller_logging : null
+  katib_db_manager_logging           = var.enable_katib ? module.katib[0].requires.katib_db_manager_logging : null
+  katib_ui_logging                   = var.enable_katib ? module.katib[0].requires.katib_ui_logging : null
+
+  # KServe
+  kserve_controller_metrics_endpoint = local.deploy_kserve ? module.kserve[0].provides.kserve_controller_metrics_endpoint : null
+  knative_operator_metrics_endpoint  = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_metrics_endpoint, null) : null
+  knative_operator_otel_collector    = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_otel_collector, null) : null
+  kserve_controller_logging          = local.deploy_kserve ? module.kserve[0].requires.kserve_controller_logging : null
+  knative_operator_logging           = local.deploy_kserve ? try(module.kserve[0].requires.knative_operator_logging, null) : null
+  knative_serving_otel_collector     = local.deploy_kserve ? try(module.kserve[0].requires.knative_serving_otel_collector, null) : null
+  knative_eventing_otel_collector    = local.deploy_kserve ? try(module.kserve[0].requires.knative_eventing_otel_collector, null) : null
+
+  # Notebooks
+  jupyter_controller_grafana_dashboard = var.enable_notebooks ? module.notebooks[0].provides.jupyter_controller_grafana_dashboard : null
+  jupyter_controller_metrics_endpoint  = var.enable_notebooks ? module.notebooks[0].provides.jupyter_controller_metrics_endpoint : null
+  jupyter_controller_logging           = var.enable_notebooks ? module.notebooks[0].requires.jupyter_controller_logging : null
+  jupyter_ui_logging                   = var.enable_notebooks ? module.notebooks[0].requires.jupyter_ui_logging : null
+
+  # Training
+  training_operator_grafana_dashboard = (var.enable_training_v1 || var.enable_training_v2) ? try(module.training[0].provides.training_operator_grafana_dashboard, null) : null
+  training_operator_metrics_endpoint  = (var.enable_training_v1 || var.enable_training_v2) ? try(module.training[0].provides.training_operator_metrics_endpoint, null) : null
+  kubeflow_trainer_grafana_dashboard  = (var.enable_training_v1 || var.enable_training_v2) ? try(module.training[0].provides.kubeflow_trainer_grafana_dashboard, null) : null
+  kubeflow_trainer_metrics_endpoint   = (var.enable_training_v1 || var.enable_training_v2) ? try(module.training[0].provides.kubeflow_trainer_metrics_endpoint, null) : null
+
+  # Tensorboard
+  tensorboard_controller_metrics_endpoint = var.enable_tensorboard ? module.tensorboard[0].provides.tensorboard_controller_metrics_endpoint : null
+  tensorboard_controller_logging          = var.enable_tensorboard ? module.tensorboard[0].requires.tensorboard_controller_logging : null
+  tensorboards_web_app_logging            = var.enable_tensorboard ? module.tensorboard[0].requires.tensorboards_web_app_logging : null
+
+  # Istio Sidecar
+  istio_ingressgateway_metrics_endpoint = var.service_mesh_type == "sidecar" ? module.istio[0].provides.istio_ingressgateway_metrics_endpoint : null
+  istio_pilot_grafana_dashboard         = var.service_mesh_type == "sidecar" ? module.istio[0].provides.istio_pilot_grafana_dashboard : null
+  istio_pilot_metrics_endpoint          = var.service_mesh_type == "sidecar" ? module.istio[0].provides.istio_pilot_metrics_endpoint : null
+
+  # Minio
+  minio_grafana_dashboard = local.deploy_minio ? module.minio[0].provides.grafana_dashboard : null
+  minio_metrics_endpoint  = local.deploy_minio ? module.minio[0].provides.metrics_endpoint : null
+
+  # Service mesh (ambient only)
+  service_mesh = var.service_mesh_type == "ambient" ? {
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  # MLflow
+  mlflow_server_grafana_dashboard = var.enable_mlflow ? module.mlflow[0].provides.mlflow_server_grafana_dashboard : null
+  mlflow_server_metrics_endpoint  = var.enable_mlflow ? module.mlflow[0].provides.mlflow_server_metrics_endpoint : null
+  mlflow_server_logging           = var.enable_mlflow ? module.mlflow[0].requires.mlflow_server_logging : null
 }

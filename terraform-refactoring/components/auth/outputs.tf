@@ -16,6 +16,14 @@ output "provides" {
       name     = juju_application.oidc_gatekeeper.name
       endpoint = "forward-auth"
     }
+    dex_auth_grafana_dashboard = {
+      name     = juju_application.dex_auth.name
+      endpoint = "grafana-dashboard"
+    }
+    dex_auth_metrics_endpoint = {
+      name     = juju_application.dex_auth.name
+      endpoint = "metrics-endpoint"
+    }
   }
 }
 
@@ -49,6 +57,14 @@ output "requires" {
     dex_auth_istio_ingress_route_unauthenticated = {
       name     = juju_application.dex_auth.name
       endpoint = "istio-ingress-route-unauthenticated"
+    }
+    dex_auth_logging = {
+      name     = juju_application.dex_auth.name
+      endpoint = "logging"
+    }
+    oidc_gatekeeper_logging = {
+      name     = juju_application.oidc_gatekeeper.name
+      endpoint = "logging"
     }
   }
 }

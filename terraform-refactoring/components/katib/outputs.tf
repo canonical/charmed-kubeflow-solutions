@@ -10,6 +10,20 @@ output "components" {
   }
 }
 
+output "provides" {
+  description = "Map of endpoints provided by this component to other components (outbound relations)"
+  value = {
+    katib_controller_grafana_dashboard = {
+      name     = juju_application.katib_controller.name
+      endpoint = "grafana-dashboard"
+    }
+    katib_controller_metrics_endpoint = {
+      name     = juju_application.katib_controller.name
+      endpoint = "metrics-endpoint"
+    }
+  }
+}
+
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
@@ -28,6 +42,18 @@ output "requires" {
     katib_ui_istio_ingress_route = {
       name     = juju_application.katib_ui.name
       endpoint = "istio-ingress-route"
+    }
+    katib_controller_logging = {
+      name     = juju_application.katib_controller.name
+      endpoint = "logging"
+    }
+    katib_db_manager_logging = {
+      name     = juju_application.katib_db_manager.name
+      endpoint = "logging"
+    }
+    katib_ui_logging = {
+      name     = juju_application.katib_ui.name
+      endpoint = "logging"
     }
   }
 }

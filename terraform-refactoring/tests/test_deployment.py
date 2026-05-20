@@ -24,10 +24,11 @@ class TestCharm:
         juju: jubilant.Juju,
         tf_vars,
     ):
-        """Initialize and apply the kubeflow-ambient Terraform solution module."""
+        """Initialize and apply the kubeflow-cos Terraform solution module."""
         subprocess.run(
             ["terraform", "init"],
             check=True,
+            cwd="./kubeflow-cos",
         )
         subprocess.run(
             [
@@ -39,6 +40,7 @@ class TestCharm:
             ]
             + tf_vars,
             check=True,
+            cwd="./kubeflow-cos",
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
