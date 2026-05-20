@@ -163,7 +163,7 @@ module "kserve_controller" {
   source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/0.15"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
-    deployment-mode = "standard",
+    deployment-mode = "RawDeployment",
     http-proxy      = var.http_proxy,
     https-proxy     = var.https_proxy,
     no-proxy        = var.no_proxy,
