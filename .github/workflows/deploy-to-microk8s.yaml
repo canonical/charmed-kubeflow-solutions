@@ -37,10 +37,9 @@ jobs:
             uats:
               env: feast-remote
           - module: kubeflow-ambient
-            uats_branch: main
             uats:
               env: kubeflow-remote
-              extra-args: --bundle "file:assets/versions-ambient.yaml"
+              extra-args: --include-ambient-tests
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
