@@ -71,7 +71,7 @@ module "kubeflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=893c73d48f49023f0cf3aa13927a609167d53bf7"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
   channel    = "latest/edge" # TODO: fix hardcoded value
@@ -83,7 +83,7 @@ resource "juju_application" "integration_hub" {
   name  = "integration-hub"
   charm {
     name    = "spark-integration-hub-k8s"
-    channel = "3/edge" # TODO: fix hardcoded value
+    channel = "3/${var.risk}" # TODO: fix hardcoded value
   }
   units       = 1
   trust       = true
