@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kserve-sa
+  namespace: {{ namespace }}
+secrets:
+  - name: hf-secret
+---
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "qwen25-3b-native"
+  namespace: {{ namespace }}
+  labels:
+    serving.kserve.io/inferenceservice: "qwen25-3b-native"
+spec:
+  predictor:
+    minReplicas: 1
+    maxReplicas: 3
+    model:
+      modelFormat:
+        name: huggingface # Tells KServe to use its built-in Hugging Face runtime
+      storageUri: "hf://Qwen/Qwen2.5-3B-Instruct" # Direct link to the Hugging Face Hub repository
+      args:
+        - "--max-model-len"
+        - "32768" # Qwen 2.5 supports up to 128k, but 32k or lower keeps VRAM allocation stable
+        - "--gpu-memory-utilization"
+        - "0.90"
+      resources:
+        limits:
+          cpu: "4"
+          memory: 16Gi
+          nvidia.com/gpu: "1" # Allocates 1 GPU (e.g., L4, A10G, or T4)
+        requests:
+          cpu: "2"
+          memory: 8Gi
+          nvidia.com/gpu: "1"
