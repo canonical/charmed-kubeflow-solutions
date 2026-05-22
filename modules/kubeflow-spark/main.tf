@@ -71,7 +71,7 @@ module "kubeflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=wip-general-backport"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
   channel    = "latest/edge" # TODO: fix hardcoded value
