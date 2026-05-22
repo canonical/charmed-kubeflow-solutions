@@ -13,6 +13,14 @@ output "provides" {
       name     = juju_application.minio.name
       endpoint = "object-storage"
     }
+    grafana_dashboard = {
+      name     = juju_application.minio.name
+      endpoint = "grafana-dashboard"
+    }
+    metrics_endpoint = {
+      name     = juju_application.minio.name
+      endpoint = "metrics-endpoint"
+    }
   }
 }
 

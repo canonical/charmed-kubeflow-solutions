@@ -389,15 +389,16 @@ variable "istio_beacon_k8s_config" {
 
 # MySQL Component Applications
 
-variable "mysql" {
-  description = "Configuration for mysql (mysql-k8s) application"
-  type = object({
-    revision     = optional(number)
-    units        = optional(number, 1)
-    storage_size = optional(string, "10G")
-    config       = optional(map(string), {})
-  })
-  default = {}
+variable "mysql_revision" {
+  description = "Revision of the mysql-db application"
+  type        = number
+  default     = null
+}
+
+variable "mysql_config" {
+  description = "Configuration for the mysql-db application"
+  type        = map(string)
+  default     = {}
 }
 
 # Katib Component Applications
@@ -641,6 +642,44 @@ variable "kubeflow_trainer_config" {
   default     = {}
 }
 
+# Observability Component
+
+variable "enable_observability" {
+  description = "Whether to deploy the observability component (opentelemetry-collector-k8s)"
+  type        = bool
+  default     = false
+}
+
+variable "dashboards_offer" {
+  description = "URL of the grafana_dashboard interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "logging_offer" {
+  description = "URL of the loki_push_api interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "metrics_offer" {
+  description = "URL of the prometheus_remote_write interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_revision" {
+  description = "Revision of the opentelemetry-collector-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_config" {
+  description = "Configuration for the opentelemetry-collector-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
 # Feast Component Applications
 
 variable "enable_feast" {
@@ -675,13 +714,14 @@ variable "feast_ui_config" {
 
 # PostgreSQL for Feast
 
-variable "postgresql_k8s" {
-  description = "Configuration for the postgresql-k8s instance used by Feast (offline store, online store, and registry)"
-  type = object({
-    revision           = optional(number)
-    units              = optional(number, 1)
-    storage_directives = optional(map(string), { pgdata = "10G" })
-    config             = optional(map(string), { "profile_limit_memory" = "2048" })
-  })
-  default = {}
+variable "postgresql_k8s_revision" {
+  description = "Revision of the postgresql-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "postgresql_k8s_config" {
+  description = "Configuration for the postgresql-k8s application"
+  type        = map(string)
+  default     = {}
 }

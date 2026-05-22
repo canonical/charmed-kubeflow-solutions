@@ -9,6 +9,20 @@ output "components" {
   }
 }
 
+output "provides" {
+  description = "Map of endpoints provided by this component to other components (outbound relations)"
+  value = {
+    jupyter_controller_grafana_dashboard = {
+      name     = juju_application.jupyter_controller.name
+      endpoint = "grafana-dashboard"
+    }
+    jupyter_controller_metrics_endpoint = {
+      name     = juju_application.jupyter_controller.name
+      endpoint = "metrics-endpoint"
+    }
+  }
+}
+
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
@@ -27,6 +41,14 @@ output "requires" {
     jupyter_controller_gateway_metadata = {
       name     = juju_application.jupyter_controller.name
       endpoint = "gateway-metadata"
+    }
+    jupyter_controller_logging = {
+      name     = juju_application.jupyter_controller.name
+      endpoint = "logging"
+    }
+    jupyter_ui_logging = {
+      name     = juju_application.jupyter_ui.name
+      endpoint = "logging"
     }
   }
 }

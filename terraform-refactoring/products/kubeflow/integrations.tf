@@ -26,7 +26,7 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_forward_auth" {
 
 # minio service-mesh integration (ambient only)
 resource "juju_integration" "minio_service_mesh" {
-  count      = var.service_mesh_type == "ambient" ? 1 : 0
+  count      = (local.deploy_minio && var.service_mesh_type == "ambient") ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
