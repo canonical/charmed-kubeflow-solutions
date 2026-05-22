@@ -435,5 +435,5 @@ variable "kubeflow_spark_service_account" {
 variable "kubeflow_spark_profile" {
   description = "The name of the Kubeflow profile where Spark needs to be accessible."
   type        = string
-  default     = "admin"
+  default     = "*"
 }
