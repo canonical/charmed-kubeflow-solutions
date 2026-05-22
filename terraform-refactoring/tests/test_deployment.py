@@ -28,7 +28,7 @@ class TestCharm:
         subprocess.run(
             ["terraform", "init"],
             check=True,
-            cwd="./kubeflow-cos",
+            cwd="./../products/kubeflow",
         )
         subprocess.run(
             [
@@ -40,7 +40,7 @@ class TestCharm:
             ]
             + tf_vars,
             check=True,
-            cwd="./kubeflow-cos",
+            cwd="./../products/kubeflow",
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
