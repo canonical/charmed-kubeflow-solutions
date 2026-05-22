@@ -59,4 +59,5 @@ module "kubeflow" {
   tensorboards_web_app_revision         = var.tensorboards_web_app_revision
   training_operator_revision            = var.training_operator_revision
   opentelemetry_collector_k8s_revision  = var.opentelemetry_collector_k8s_revision
+  kserve_custom_images                  = var.kserve_custom_images
 }

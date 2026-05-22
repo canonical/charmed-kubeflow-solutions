@@ -220,6 +220,7 @@ module "kserve_controller" {
     http-proxy      = var.http_proxy,
     https-proxy     = var.https_proxy,
     no-proxy        = var.no_proxy,
+    custom_images   = var.kserve_custom_images
   }
   revision = var.kserve_controller_revision
   channel  = "0.17/${var.risk}"

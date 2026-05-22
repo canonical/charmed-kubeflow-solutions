@@ -418,3 +418,10 @@ variable "training_operator_revision" {
   type        = number
   default     = null
 }
+
+variable "kserve_custom_images" {
+  description = "List of custom images to be used for KServe"
+  type        = string
+  default     = ""
+}
+
