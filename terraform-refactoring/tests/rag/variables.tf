@@ -5,23 +5,6 @@
 # COS Settings
 # ---------------------------------------------------------------------------
 
-variable "create_cos_model" {
-  description = "Create a Juju model for the COS deployment"
-  type        = bool
-  default     = true
-}
-
-variable "cos_model_uuid" {
-  description = "UUID of an existing Juju model to deploy COS into (required when create_cos_model is false)"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.create_cos_model || var.cos_model_uuid != null
-    error_message = "cos_model_uuid must be provided when create_cos_model is false."
-  }
-}
-
 variable "cos_model_name" {
   description = "Name of the Juju model to create for COS"
   type        = string
@@ -36,29 +19,19 @@ variable "cos_channel" {
 
 # DB
 
-variable "create_db_model" {
-  description = "Create a Juju model for the COS deployment"
-  type        = bool
-  default     = true
-}
-
-variable "db_model_uuid" {
-  description = "UUID of an existing Juju model to deploy COS into (required when create_db_model is false)"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.create_db_model || var.db_model_uuid != null
-    error_message = "db_model_uuid must be provided when create_db_model is false."
-  }
-}
-
 variable "db_model_name" {
   description = "Name of the Juju model to create for COS"
   type        = string
-  default     = "cos"
+  default     = "database"
 }
 
+# DB
+
+variable "kubeflow_model_name" {
+  description = "Name of the Juju model to create for COS"
+  type        = string
+  default     = "kubeflow"
+}
 
 # ---------------------------------------------------------------------------
 # Kubeflow Settings
@@ -116,6 +89,24 @@ variable "service_mesh_type" {
 
 variable "istio_k8s_platform" {
   description = "Platform configuration for istio-k8s (ambient mode only)"
+  type        = string
+  default     = ""
+}
+
+variable "http_proxy" {
+  description = "Value of the http_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "https_proxy" {
+  description = "Value of the https_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "no_proxy" {
+  description = "Value of the no_proxy environment variable"
   type        = string
   default     = ""
 }
