@@ -106,3 +106,26 @@ resource "juju_integration" "kserve_controller_service_accounts" {
     endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
   }
 }
+
+resource "juju_integration" "resource_dispatcher_kubeflow_integrator_roles" {
+  for_each = {
+    for pair in setproduct(keys(var.integrations), ["roles", "role-bindings", "secrets", "pod-defaults", "service-accounts"]) : 
+    "${pair[0]}-${pair[1]}" => {
+      app_name = pair[0]
+      endpoint = pair[1]
+    }
+  }
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = each.value.app_name
+    endpoint = each.value.endpoint
+  }
+
+  application {
+    name     = module.resource_dispatcher[0].provides.roles.name
+    endpoint = each.value.endpoint
+  }
+}
+

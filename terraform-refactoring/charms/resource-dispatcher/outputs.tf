@@ -32,5 +32,17 @@ output "provides" {
       name     = juju_application.resource_dispatcher.name
       endpoint = "pod-defaults"
     }
+    roles = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "roles"
+    }
+    role_bindings = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "role-bindings"
+    }
+    service_accounts = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "service-accounts"
+    }
   }
 }

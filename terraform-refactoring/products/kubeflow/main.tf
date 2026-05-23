@@ -453,7 +453,7 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  count      = (var.enable_mlflow || var.enable_feast) ? 1 : 0
+  count      = (var.enable_mlflow || var.enable_feast || length(var.integrations) > 0) ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../charms/resource-dispatcher"
@@ -705,6 +705,21 @@ module "feast" {
     revision = var.feast_ui_revision
     config   = var.feast_ui_config
   }
+}
+
+module "integrations" {
+  for_each = var.integrations
+  
+  source = "../../charms/data-kubeflow-integrator"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  app_name   = each.key
+  profile    = each.value.profile
+
+  mysql = each.value.mysql
+  postgresql = each.value.postgresql
+  spark = each.value.spark
 }
 
 module "observability" {

@@ -517,6 +517,39 @@ variable "enable_mlflow" {
   default     = false
 }
 
+# Enable integrations
+
+variable "integrations" {
+  description = "External integrations"
+  type = map(object({
+    profile = string
+    mysql = optional(object({
+      kind     = string
+      name     = optional(string, null)
+      endpoint = optional(string, null)
+      url      = optional(string, null)
+      database_name  = optional(string, null)
+      extra_user_roles = optional(string, null)
+    }), null)
+    postgresql = optional(object({
+      kind     = string
+      name     = optional(string, null)
+      endpoint = optional(string, null)
+      url      = optional(string, null)
+      database_name  = optional(string, null)
+      extra_user_roles = optional(string, null)
+    }), null)
+    spark      = optional(object({
+      kind     = string
+      name     = optional(string, null)
+      endpoint = optional(string, null)
+      url      = optional(string, null)
+      service_account  = optional(string, null)
+    }), null)
+  }))
+  default = {}
+}
+
 variable "mlflow_server_revision" {
   description = "Revision of the mlflow-server application"
   type        = number
