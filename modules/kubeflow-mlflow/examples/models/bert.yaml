@@ -1,0 +1,18 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: huggingface-bert-served
+  annotations:
+    sidecar.istio.io/inject: 'false'
+spec:
+  predictor:
+    model:
+      imagePullPolicy: Always
+      modelFormat:
+        name: huggingface
+      args:
+        - --model_name=bert
+      storageUri: "hf://google-bert/bert-base-uncased"
+      resources:
+        limits:
+          nvidia.com/gpu: "1"

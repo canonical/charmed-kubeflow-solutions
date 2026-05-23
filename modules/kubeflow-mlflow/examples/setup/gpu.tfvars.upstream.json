@@ -1,0 +1,11 @@
+{
+    "dex_static_username": "admin",
+    "dex_static_password": "admin",
+    "katib_db_size": "1GB",
+    "kfp_db_size": "1GB",
+    "minio_size": "10GB",
+    "mlmd_size": "10GB",
+    "mlflow_minio_size": "10GB",
+    "mlflow_mysql_size": "1GB",
+    "kserve_custom_images": "{\"serving_runtimes__huggingfaceserver\": \"kserve/huggingfaceserver:v0.17.1\", \"serving_runtimes__huggingfaceserver__multinode\": \"kserve/huggingfaceserver:v0.17.1\"}"
+}

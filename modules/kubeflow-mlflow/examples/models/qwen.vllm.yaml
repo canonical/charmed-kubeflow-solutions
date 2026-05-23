@@ -1,0 +1,32 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "qwen25-3b-vllm"
+  annotations:
+    sidecar.istio.io/inject: 'false'
+spec:
+  predictor:
+    containers:
+      - name: "kserve-container"
+        image: "vllm/vllm-openai:v0.4.3" # This image includes all necessary C libraries for Triton
+        args:
+          - "--model"
+          - "Qwen/Qwen2.5-3B-Instruct"
+          - "--port"
+          - "8080"
+          - "--max-model-len"
+          - "32768"
+          - "--gpu-memory-utilization"
+          - "0.90"
+          - "--dtype"
+          - "half"
+        ports:
+          - containerPort: 8080
+            protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+            memory: 16Gi
+          requests:
+            nvidia.com/gpu: "1"
+            memory: 8Gi
