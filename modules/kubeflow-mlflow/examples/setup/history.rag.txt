@@ -1,0 +1,209 @@
+    1  exit
+    2  ls
+    3  cd testflinger/
+    4  ls
+    5  cat setup.sh 
+    6  chmod +x setup.sh 
+    7  ./setup.sh 
+    8  ls
+    9  cd charmed-kubeflow-solutions/
+   10  cd ..
+   11  mv charmed-kubeflow-solutions ../.
+   12  ls
+   13  cd ..
+   14  ls
+   15  cd charmed-kubeflow-solutions/
+   16  git fetch 
+   17  git checkout wip-external-integrations 
+   18  ls
+   19  cd terraform-refactoring/
+   20  ls
+   21  cd tests/
+   22  ls
+   23  cd rag/
+   24  ls
+   25  terraform init
+   26  juju status
+   27  juju controllers
+   28  juju bootstrap localhost overlord
+   29  ls
+   30  juju add-model opensearch 
+   31  juju models
+   32  juju controllers
+   33  juju switch concierge-k8s
+   34  juju status
+   35  juju models
+   36  juju switch controller
+   37  juju destroy-model testing --destroy-storage
+   38  juju status
+   39  juju switch overlord
+   40  juju status
+   41  juju deploy opensearch --channel 2/stable -n3
+   42  juju status
+   43  juju deploy tls-certificates-operator certificates
+   44  juju config certificates generate-self-signed-certificates="true" ca-common-name="Tutorial CA"
+   45  juju relate certificates opensearch
+   46  juju status
+   47  juju switch concierge-k8s
+   48  juju status
+   49  kubectl get pod -A
+   50  ls
+   51  terraform plan 
+   52  git log
+   53  screen -ls
+   54  screen -S deployment
+   55  ls
+   56  screen -r deployment
+   57  tail -f tf.out 
+   58  juju status
+   59  juju models
+   60  juju switch kubeflow
+   61  juju status
+   62  juju list-models
+   63  juju switch opensearch
+   64  juju switch overlord:opensearch
+   65  juju status
+   66  juju remove-application opensearch 
+   67  juju status
+   68  juju storage 
+   69  juju status
+   70  juju storage 
+   71  sudo sysctl -a | grep -E 'swappiness|max_map_count|tcp_retries2'
+   72  sudo sysctl -a | grep -E 'swappiness|max_map_count|tcp_retries2' > ~/kernel.params.txt
+   73  sudo tee -a /etc/sysctl.conf > /dev/null <<EOT
+   74  vm.max_map_count=262144
+   75  vm.swappiness=0
+   76  net.ipv4.tcp_retries2=5
+   77  fs.file-max=1048576
+   78  EOT
+   79  sudo sysctl -p
+   80  juju status
+   81  cat <<EOF > cloudinit-userdata.yaml
+   82  cloudinit-userdata: |
+   83    postruncmd:
+   84      - [ 'echo', 'vm.max_map_count=262144', '>>', '/etc/sysctl.conf' ]
+   85      - [ 'echo', 'vm.swappiness=0', '>>', '/etc/sysctl.conf' ]
+   86      - [ 'echo', 'net.ipv4.tcp_retries2=5', '>>', '/etc/sysctl.conf' ]
+   87      - [ 'echo', 'fs.file-max=1048576', '>>', '/etc/sysctl.conf' ]
+   88      - [ 'sysctl', '-p' ]
+   89  EOF
+   90  juju model-config --file=./cloudinit-userdata.yaml
+   91  ls
+   92  juju deploy opensearch --channel 2/stable -n3
+   93  juju relate certificates opensearch
+   94  juju status
+   95  juju offers
+   96  juju status --relations
+   97  juju offer opensearch:opensearch-client
+   98  juju status
+   99  juju switch concierge-k8s:kubeflow
+  100  juju find-offers overlord:
+  101  juju consume overlord:admin/opensearch.opensearch
+  102  juju status
+  103  juju config general 
+  104  juju config general opensearch-extra-user-roles=admin 
+  105  juju config general opensearch-index-name=rag
+  106  juju config general 
+  107  juju status
+  108  juju relate general opensearch
+  109  juju status
+  110  watch juju status
+  111  watch -c juju status --color
+  112  juju status
+  113  juju config dex-auth static-username=admin
+  114  juju config dex-auth static-password=admin
+  115  kubectl get svc -n kubeflow istio-ingressgateway-workload -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  116  exit
+  117  kubectl get Profile
+  118  kubectl get secret -n admin 
+  119  kubectl get pod -A
+  120  ls
+  121  cd charmed-kubeflow-solutions/
+  122  git status
+  123  cd ..
+  124  ls
+  125  mkdir examples
+  126  cd examples/
+  127  ls
+  128  emacs -nw model.yaml
+  129  vi model.yaml
+  130  vi model.yaml 
+  131  kubectl apply -f model.yaml -n admin 
+  132  kubectl get pod -A
+  133  kubectl get pod -n admin 
+  134  watch kubectl get pod -n admin 
+  135  kubectl describe pod llama3-8b-predictor-00001-deployment-dbc8bf684-8x7s6 -n admin 
+  136  watch kubectl get pod -n admin 
+  137  kubectl describe pod llama3-8b-predictor-00001-deployment-dbc8bf684-8x7s6 -n admin 
+  138  kubectl get isvc -n admin 
+  139  curl  http://llama3-8b.admin.10.64.140.43.nip.io
+  140  cat model.yaml 
+  141  kubectl svc -n admin 
+  142  kubectl get svc -n admin 
+  143  juju status
+  144  kubectl get svc -n admin 
+  145  cat model.yaml 
+  146  kubectl get svc -n kubeflow
+  147  kubectl get ingress -n kubeflow
+  148  kubectl get isvc -n admin 
+  149  kubectl get pod 
+  150  nslookup llama3-8b.admin.10.64.140.43.nip.io 
+  151  curl http://llama3-8b.admin.10.64.140.43.nip.io
+  152  kubectl get isvc -n admin 
+  153  kubectl get ingress -n kubeflow
+  154  kubectl get Ingress -A
+  155  kubectl get svc istio-ingressgateway -n istio-system --watch
+  156  kubectl get svc istio-ingressgateway -A
+  157  kubectl get svc istio-ingressgateway 
+  158  kubectl get svc -A
+  159  kubectl get svc -A | grep istio
+  160  kubectl get pod -A
+  161  kubectl get isvc -A
+  162  kubectl delete llama3-8b -n admin 
+  163  kubectl delete isvc llama3-8b -n admin 
+  164  juju config kserve-controller
+  165  juju config kserve-controller deployment-mode="Standard"
+  166  juju status
+  167  kubectl get pod -n admin 
+  168  kubectl get pod -A
+  169  ls
+  170  kubectl apply -f model.yaml -n admin 
+  171  kubectl delete isvc llama3-8b -n admin 
+  172  kubectl get pod -A
+  173  kubectl get pod -n admin 
+  174  emacs -nw model.yaml 
+  175  vi model.yaml 
+  176  kubectl apply -f model.yaml -n admin 
+  177  watch kubectl get pod -n admin 
+  178  kubectl get isvc -n admin 
+  179  kubectl get svc -n admin 
+  180  curl http://10.152.183.107
+  181  curl http://10.152.183.107/openai/v1/completions -d "{\"model\":\"flan-t5-small\", \"prompt\":\"What is kubeflow?\",\"max_tokens\":80,\"temperature\":0.2,\"stream\": false}" -XPOST
+  182  curl http://10.152.183.107/openai/v1/completions -d "{\"model\":\"flan-t5-small\", \"prompt\":\"What is kubeflow?\",\"max_tokens\":80,\"temperature\":0.2,\"stream\": false}" -XPOST -H 'Content-Type: application/json'
+  183  k8s kubectl get pod 
+  184  sudo k8s kubectl get pod 
+  185  sudo k8s kubectl get pod -A
+  186  juju status
+  187  juju switch overlord:opensearch 
+  188  juju status
+  189  juju ssh opensearch/3
+  190  ls
+  191  cat model.yaml 
+  192  ls
+  193  history
+  194  ls
+  195  cd ..
+  196  ls
+  197  cd charmed-kubeflow-solutions/
+  198  ls
+  199  git status
+  200  git checkout wip-upgrade-kserve 
+  201  ls
+  202  cd modules/kubeflow-mlflow/examples/
+  203  ls
+  204  cd seup
+  205  cd setup/
+  206  ls
+  207  cat clusterstoragecontainer.yaml 
+  208  history 
+  209  history > history.rag.txt
