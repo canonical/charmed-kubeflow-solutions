@@ -12,6 +12,7 @@ resource "juju_application" "integrator" {
   }
 
   config      = merge(
+    {"profile": var.profile},
     var.mysql != null ? {
       mysql-database-name = var.mysql.database_name,
       mysql-extra-user-roles = var.mysql.extra_user_roles

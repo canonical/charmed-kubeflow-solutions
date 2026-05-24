@@ -27,7 +27,7 @@ variable "db_model_name" {
 
 # DB
 
-variable "kubeflow_model_name" {
+variable "kf_model_name" {
   description = "Name of the Juju model to create for COS"
   type        = string
   default     = "kubeflow"

@@ -901,55 +901,6 @@ resource "juju_integration" "knative_operator_logging" {
   }
 }
 
-# ---------------------------------------------------------------------------
-# OTel collector integrations (knative apps → opentelemetry-collector-k8s)
-# ---------------------------------------------------------------------------
-
-resource "juju_integration" "knative_operator_otel_collector" {
-  count      = var.knative_operator_otel_collector != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_operator_otel_collector.name
-    endpoint = var.knative_operator_otel_collector.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "otel-collector"
-  }
-}
-
-resource "juju_integration" "knative_serving_otel_collector" {
-  count      = var.knative_serving_otel_collector != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_serving_otel_collector.name
-    endpoint = var.knative_serving_otel_collector.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "otel-collector"
-  }
-}
-
-resource "juju_integration" "knative_eventing_otel_collector" {
-  count      = var.knative_eventing_otel_collector != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_eventing_otel_collector.name
-    endpoint = var.knative_eventing_otel_collector.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "otel-collector"
-  }
-}
-
 resource "juju_integration" "jupyter_controller_logging" {
   count      = var.jupyter_controller_logging != null ? 1 : 0
   model_uuid = var.model_uuid

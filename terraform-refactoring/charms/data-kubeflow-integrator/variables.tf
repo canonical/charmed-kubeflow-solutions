@@ -4,14 +4,14 @@
 variable "app_name" {
   description = "Name to give the deployed application."
   type        = string
-  default     = "resource-dispatcher"
+  default     = "data-kubeflow-integrator"
   nullable    = false
 }
 
 variable "channel" {
   description = "Channel of the charm."
   type        = string
-  default     = "2.0/stable"
+  default     = "1/stable"
   nullable    = false
 }
 

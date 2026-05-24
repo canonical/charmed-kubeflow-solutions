@@ -717,6 +717,8 @@ module "integrations" {
   app_name   = each.key
   profile    = each.value.profile
 
+  channel = "1/edge"
+
   mysql = each.value.mysql
   postgresql = each.value.postgresql
   spark = each.value.spark
