@@ -73,6 +73,11 @@ module "kubeflow" {
   enable_kserve      = true
   enable_feast       = false
 
+  kserve_controller_config = {
+    deployment-mode="standard"
+    custom_images="{\"serving_runtimes__huggingfaceserver\": \"kserve/huggingfaceserver:v0.17.1\", \"serving_runtimes__huggingfaceserver__multinode\": \"kserve/huggingfaceserver:v0.17.1\"}"
+  }
+
   # Observability is always enabled in kubeflow-cos and automatically wired to COS
   enable_observability = true
   dashboards_offer     = module.cos.offers.grafana_dashboards.url
