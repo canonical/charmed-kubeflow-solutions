@@ -1,22 +1,22 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-resource "juju_model" "cos" {
-  name  = var.cos_model_name
-  config = {
-    juju-http-proxy  = var.http_proxy
-    juju-https-proxy = var.https_proxy
-    juju-no-proxy    = var.no_proxy
-  }
-}
+# resource "juju_model" "cos" {
+#   name  = var.cos_model_name
+#   config = {
+#     juju-http-proxy  = var.http_proxy
+#     juju-https-proxy = var.https_proxy
+#     juju-no-proxy    = var.no_proxy
+#   }
+# }
 
-module "cos" {
-  source = "git::https://github.com/canonical/observability-stack//terraform/cos-lite?ref=04ab6c618dbbec62292a052a61cdb402d80e5974"
-
-  model_uuid   = juju_model.cos.uuid
-  channel      = var.cos_channel
-  internal_tls = false
-}
+# module "cos" {
+#  source = "git::https://github.com/canonical/observability-stack//terraform/cos-lite?ref=04ab6c618dbbec62292a052a61cdb402d80e5974"
+#
+#   model_uuid   = juju_model.cos.uuid
+#   channel      = var.cos_channel
+#   internal_tls = false
+# }
 
 resource "juju_model" "database" {
   name  = var.db_model_name
@@ -79,10 +79,10 @@ module "kubeflow" {
   }
 
   # Observability is always enabled in kubeflow-cos and automatically wired to COS
-  enable_observability = true
-  dashboards_offer     = module.cos.offers.grafana_dashboards.url
-  logging_offer        = module.cos.offers.loki_logging.url
-  metrics_offer        = module.cos.offers.prometheus_receive_remote_write.url
+  # enable_observability = true
+  # dashboards_offer     = module.cos.offers.grafana_dashboards.url
+  # logging_offer        = module.cos.offers.loki_logging.url
+  # metrics_offer        = module.cos.offers.prometheus_receive_remote_write.url
 
   # External integrations
   integrations = {
@@ -92,6 +92,15 @@ module "kubeflow" {
         database_name = "general"
         kind = "offer"
         url = juju_offer.postgresql.url
+      }
+    }
+    profile1 = {
+      profile="profile1",
+      kafka = {
+
+      }
+      opensearch = {
+
       }
     }
   }
