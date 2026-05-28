@@ -254,7 +254,7 @@ module "kubeflow_roles" {
 
 module "kubeflow_trainer" {
   count      = var.kubeflow_trainer_v2 ? 1 : 0
-  source     = "git::https://github.com/canonical/training-operator//terraform?ref=track/2.1"
+  source     = "git::https://github.com/canonical/kubeflow-trainer-operator//terraform?ref=track/2.1"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_trainer_revision
   channel    = "2.1/edge"
