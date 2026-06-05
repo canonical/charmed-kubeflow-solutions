@@ -71,10 +71,10 @@ module "kubeflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=wip-general-backport"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "latest/edge" # TODO: fix hardcoded value
+  channel    = "2.0/{var.risk}"
 }
 
 
@@ -95,7 +95,7 @@ resource "juju_application" "kubeflow_integrator" {
   name  = "kubeflow-integrator"
   charm {
     name    = "data-kubeflow-integrator"
-    channel = "1/edge" # TODO: fix hardcoded value
+    channel = "1/${var.risk}"
   }
   units       = 1
   constraints = "arch=amd64"
@@ -105,4 +105,3 @@ resource "juju_application" "kubeflow_integrator" {
     profile               = var.kubeflow_spark_profile
   }
 }
-
