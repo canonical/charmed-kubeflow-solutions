@@ -158,7 +158,6 @@ jobs:
           PLATFORM_ARG=""
           if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
             CNI_ARGS=""
-            RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform microk8s"
           fi
 
