@@ -133,9 +133,7 @@ jobs:
             TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
           fi
 
-          echo "tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_VAR $TF_VARS_ARG $PLATFORM_ARG"
-
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_VAR $TF_VARS_ARG $PLATFORM_ARG
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $TF_VARS_ARG $PLATFORM_ARG
 
       - name: Run UATs
         run: |
