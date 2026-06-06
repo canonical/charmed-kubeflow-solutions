@@ -23,6 +23,7 @@ class TestCharm:
         # Due to https://github.com/canonical/mysql-k8s-operator/issues/504,
         # we need to pin instances of mysql-k8s (using the one from 8.0/beta).
         # Otherwise, mysql will error out with COS configuration enabled.
+        print(f"tf_vars: {tf_vars}") 
         subprocess.run(
             [
                 "terraform",
