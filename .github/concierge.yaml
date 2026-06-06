@@ -1,6 +1,5 @@
 juju:
   channel: 3.6/stable
-  agent-version: 3.6.9 # TODO: remove pin once Spark can work on recent Juju agent versions
   model-defaults:
     logging-config: <root>=INFO; unit=DEBUG
 
