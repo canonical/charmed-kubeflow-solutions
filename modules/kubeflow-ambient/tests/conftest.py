@@ -42,11 +42,35 @@ def pytest_addoption(parser):
         help="Pod security standards enforced in Profiles' namespaces",
     )
     parser.addoption(
+        "--risk",
+        nargs="?",
+        choices=["stable", "candidate", "beta", "edge"],
+        const="stable",
+        default="stable",
+        type=str,
+        help="Risk to be used when deploying the terraform module",
+    )
+    parser.addoption(
         "--db-size",
         default="1G",
         type=str,
         help="Size to be used for the databases.",
     )
+    parser.addoption(
+        "--tf-vars-file",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Custom TF vars for the terraform module.",
+    )
+
+
+@pytest.fixture(scope="module")
+def risk(request) -> list[str]:
+    """Terraform module customization for the risk."""
+    risk = request.config.getoption("--risk") or "stable"
+    return ["-var", f"risk={risk}"]
 
 @pytest.fixture(scope="module")
 def db_sizes(request) -> list[str]:
@@ -73,10 +97,18 @@ def pss(request) -> list[str]:
     ]
 
 @pytest.fixture(scope="module")
-def tf_vars(request, db_sizes, pss) -> list[str]:
+def tf_vars_file(request) -> list[str]:
+    """Custom TF vars for the terraform module."""
+    tfvars_file = request.config.getoption("--tf-vars-file")
+    if tfvars_file:
+        return ["-var-file", tfvars_file]
+    return []
+
+@pytest.fixture(scope="module")
+def tf_vars(risk, pss, db_sizes, tf_vars_file) -> list[str]:
     """Overall Terraform module customization."""
-    return db_sizes + pss + [
+    return risk + pss + db_sizes + [
         "-var", "create_model=false",
         "-var", "cos_configuration=true",
         "-var", "kubeflow_trainer_v2=true",
-    ]
+    ] + tf_vars_file
