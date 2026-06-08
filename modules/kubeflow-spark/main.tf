@@ -70,11 +70,15 @@ module "kubeflow" {
   training_operator_revision            = var.training_operator_revision
 }
 
+locals {
+  track = "latest"
+}
+
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "2.0/${var.risk}"
+  channel    = "${local.track}/${var.risk}"
 }
 
 
@@ -83,7 +87,7 @@ resource "juju_application" "integration_hub" {
   name  = "integration-hub"
   charm {
     name    = "spark-integration-hub-k8s"
-    channel = "3/${var.risk}" # TODO: fix hardcoded value
+    channel = "${local.track}/${var.risk}"
   }
   units       = 1
   trust       = true
@@ -95,7 +99,7 @@ resource "juju_application" "kubeflow_integrator" {
   name  = "kubeflow-integrator"
   charm {
     name    = "data-kubeflow-integrator"
-    channel = "1/${var.risk}"
+    channel = "${local.track}/${var.risk}"
   }
   units       = 1
   constraints = "arch=amd64"

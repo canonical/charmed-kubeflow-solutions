@@ -11,5 +11,6 @@ resource "juju_model" "kubeflow" {
 
 locals {
   model               = "kubeflow"
-  channel_latest_edge = "latest/edge"
+  track               = "latest"
+  channel_latest_edge = "${local.track}/${var.risk}"
 }
