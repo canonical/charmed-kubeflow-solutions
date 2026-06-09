@@ -87,7 +87,7 @@ resource "juju_application" "integration_hub" {
   name  = "integration-hub"
   charm {
     name    = "spark-integration-hub-k8s"
-    channel = "${local.track}/${var.risk}"
+    channel = "1/${var.risk}"
   }
   units       = 1
   trust       = true
