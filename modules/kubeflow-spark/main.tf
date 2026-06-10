@@ -87,7 +87,7 @@ resource "juju_application" "integration_hub" {
   name  = "integration-hub"
   charm {
     name    = "spark-integration-hub-k8s"
-    channel = "1/${var.risk}"
+    channel = "${local.track}/${var.risk}"
   }
   units       = 1
   trust       = true
@@ -99,7 +99,7 @@ resource "juju_application" "kubeflow_integrator" {
   name  = "kubeflow-integrator"
   charm {
     name    = "data-kubeflow-integrator"
-    channel = "${local.track}/${var.risk}"
+    channel = "1/${var.risk}"
   }
   units       = 1
   constraints = "arch=amd64"
