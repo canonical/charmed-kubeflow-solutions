@@ -42,7 +42,7 @@ jobs:
             uats_branch: pra-7-backport-uats
             uats:
               env: spark-remote
-              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bunlde ""
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
 
     steps:
       - name: Checkout repository
