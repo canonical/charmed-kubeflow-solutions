@@ -17,7 +17,7 @@ The solution module offers the following configurable inputs:
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
 | `dex_static_password`| string | dex-auth static password | False |
 | `dex_static_username`| string | dex-auth static username value | False |
-| `enable_mlflow_nodeport`| bool | Boolean value that enables the NodePort service for MLFlow | False |
+| `enable_mlflow_nodeport`| bool | Boolean value that enables the NodePort service for MLflow | False |
 | `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
@@ -40,13 +40,13 @@ The solution module offers the following configurable inputs:
 | `minio_storage_service_endpoint`| string | MinIO storage service endpoint, required if minio_mode is 'gateway' | False |
 | `mlflow_dashboard_link`| bool | Boolean value that enables MLflow link in Kubeflow's dashboard | False |
 | `mlflow_default_artifact_root`| string | The default bucket MLflow uses for artifacts | False |
-| `mlflow_kserve_integration`| bool | Boolean value that enables MLFlow-KServe configuration | False |
+| `mlflow_kserve_integration`| bool | Boolean value that enables MLflow-KServe configuration | False |
 | `mlflow_minio_access_key`| string | MinIO access key for MLflow | False |
 | `mlflow_minio_gateway_storage_service`| string | Gateway storage service configuration for MinIO when in 'gateway' mode for MLflow | False |
 | `mlflow_minio_mode`| string | MinIO mode for MLflow, either 'server' or 'gateway' | False |
 | `mlflow_minio_secret_key`| string | MinIO secret key for MLflow | False |
 | `mlflow_minio_size`| string | MinIO database storage size | False |
-| `mlflow_minio_storage_service_endpoint`| string | MinIO storage service endpoint for MLflow, required if minio_mode is 'gateway' | False |
+| `mlflow_minio_storage_service_endpoint`| string | MinIO storage service endpoint for MLflow, required if mlflow_minio_mode is 'gateway' | False |
 | `mlflow_mysql_size`| string | Size allocated for mysql data | False |
 | `mlflow_nodeport`| number | The nodeport for MLflow | False |
 | `mlmd_size`| string | MLMD database storage size | False |
