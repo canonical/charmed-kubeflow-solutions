@@ -40,6 +40,12 @@ jobs:
             uats:
               env: kubeflow-remote
               extra-args: --include-ambient-tests
+          - module: kubeflow-spark
+            tf-vars-file: examples/tfvars.json
+            uats:
+              env: spark-remote
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
+
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
@@ -124,7 +130,13 @@ jobs:
           mkdir -p ~/.local/share/juju
 
           sudo microk8s config | juju add-k8s local-k8s --client
-          juju bootstrap local-k8s microk8s
+
+          AGENT_VERSION_ARG=""
+          if [[ -n "${{ matrix.bundle.juju-agent-version }}" ]]; then
+            AGENT_VERSION_ARG="--agent-version=${{ matrix.bundle.juju-agent-version }}"
+          fi
+      
+          juju bootstrap local-k8s microk8s $AGENT_VERSION_ARG
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
@@ -146,11 +158,15 @@ jobs:
           PLATFORM_ARG=""
           if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
             CNI_ARGS=""
-            RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform microk8s"
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $CNI_ARGS $PLATFORM_ARG --pss ${{ matrix.pod-security-standards.policy }}
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
+            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $CNI_ARGS $PLATFORM_ARG --pss ${{ matrix.pod-security-standards.policy }} $TF_VARS_ARG
 
       - name: Run UATs
         run: |
