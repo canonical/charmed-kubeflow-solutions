@@ -10,12 +10,11 @@ The solution module offers the following configurable inputs:
 
 | Name | Type | Description | Required |
 | - | - | - | - |
-| `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
-| `risk`| string | Value for the risk to be used. Valid values are (stable, candidate, beta and edge)   | False |
-| `create_model` | bool | Allows to skip Juju model creation and re-use a model created in a higher level module. When re-using a model, if this is created by Terraform, make sure that the current module depends on the resource using the `depends_on` option. | False |
+| `risk`| string | Value for the risk to be used | False |
 | `cos_configuration`| bool | Boolean value that enables COS configuration | False |
+| `create_model`| bool | Allows to skip Juju model creation and re-use a model created in a higher level module | False |
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
-| `dex_static_username`| string | dex-auth static username | False |
+| `dex_static_username`| string | dex-auth static username value | False |
 | `dex_static_password`| string | dex-auth static password | False |
 | `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
 | `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
@@ -31,12 +30,11 @@ The solution module offers the following configurable inputs:
 | `minio_size`| string | MinIO database storage size | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
+| `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
+| `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
 | `feast_offline_store_size`| string | offline store storage size | False |
 | `feast_online_store_size`| string | online store storage size | False |
-| `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
 | `feast_registry_size`| string | feast_registry storage size | False |
-
-
 ### Outputs
 Upon applied, the solution module exports the following outputs:
 

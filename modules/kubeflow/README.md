@@ -10,15 +10,15 @@ The solution module offers the following configurable inputs:
 
 | Name | Type | Description | Required |
 | - | - | - | - |
-| `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
-| `risk`| string | Value for the risk to be used. Valid values are (stable, candidate, beta and edge)   | False |
-| `create_model`| bool | Allows to skip Juju model creation and re-use a model created in a higher level module | False |
+| `risk`| string | Value for the risk to be used | False |
+| `argo_controller_bucket`| string | The name of the bucket to be used by Argo controller in the object store | False |
 | `cos_configuration`| bool | Boolean value that enables COS configuration | False |
+| `create_model`| bool | Allows to skip Juju model creation and re-use a model created in a higher level module | False |
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
-| `dex_static_username`| string | dex-auth static username | False |
+| `dex_static_username`| string | dex-auth static username value | False |
 | `dex_static_password`| string | dex-auth static password | False |
 | `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
-| `opentelemetry_collector_k8s_size`| string | opentelemetry-collector storage size | False |
+| `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
 | `istio_cni_bin_dir`| string | Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path. | False |
@@ -26,14 +26,23 @@ The solution module offers the following configurable inputs:
 | `istio_tls_secret_id`| string | The juju secret id for the tls key/cert for istio-pilot | False |
 | `jupyter_ui_config`| map(string) | Map of config values passed to jupyter-ui | False |
 | `katib_db_size`| string | Katib database storage size | False |
+| `kfp_api_object_store_bucket_name`| string | The name of the bucket to be used by KFP API in the object store | False |
 | `kfp_db_size`| string | KFP database storage size | False |
 | `kubeflow_profiles_security_policy`| string | Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported | False |
 | `kubeflow_trainer_v2`| bool | Boolean value that enables deployment of Kubeflow Trainer V2 (experimental) | False |
+| `minio_access_key`| string | MinIO access key | False |
+| `minio_gateway_storage_service`| string | Gateway storage service configuration for MinIO when in 'gateway' mode | False |
+| `minio_mode`| string | MinIO mode, either 'server' or 'gateway' | False |
+| `minio_secret_key`| string | MinIO secret key | False |
 | `minio_size`| string | MinIO database storage size | False |
+| `minio_storage_service_endpoint`| string | MinIO storage service endpoint, required if minio_mode is 'gateway' | False |
 | `mlmd_size`| string | MLMD database storage size | False |
+| `oidc_gatekeeper_ca_bundle`| string | Custom CA to be trusted by OIDC gatekeeper | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
 | `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
-
+| `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
+| `istio_ingressgateway_annotations`| string | A comma-separated list of annotations to apply to the Ingress Service to enable customisation for cloud providers or integrations. | False |
+| `kubeflow_dashboard_registration_flow`| string | Whether to enable the registration flow on sign-in for kubeflow-dashboard | False |
 ### Outputs
 Upon applied, the solution module exports the following outputs:
 
