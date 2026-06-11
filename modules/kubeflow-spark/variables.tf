@@ -1,7 +1,8 @@
+
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"
-  default     = "edge"
+  default     = "stable"
 
   validation {
     condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
@@ -15,16 +16,16 @@ variable "argo_controller_bucket" {
   default     = "mlpipeline"
 }
 
+variable "create_model" {
+  description = "Allows to skip Juju model creation and re-use a model created in a higher level module. When re-using a model, if this is created by Terraform, make sure that the current module depends on the resource using the depends_on option."
+  type        = bool
+  default     = true
+}
+
 variable "cos_configuration" {
   description = "Boolean value that enables COS configuration"
   type        = bool
   default     = false
-}
-
-variable "create_model" {
-  description = "Allows to skip Juju model creation and re-use a model created in a higher level module"
-  type        = bool
-  default     = true
 }
 
 variable "dex_connectors" {
@@ -71,6 +72,24 @@ variable "https_proxy" {
   default     = ""
 }
 
+variable "istio_cni_bin_dir" {
+  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_cni_conf_dir" {
+  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
+  type        = string
+  default     = ""
+}
+
+variable "istio_tls_secret_id" {
+  description = "The juju secret id for the tls key/cert for istio-pilot"
+  type        = string
+  default     = ""
+}
+
 variable "jupyter_ui_config" {
   description = "Map of config values passed to jupyter-ui"
   type        = map(string)
@@ -105,11 +124,6 @@ variable "kubeflow_profiles_security_policy" {
     error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)"
   }
 }
-variable "kubeflow_trainer_v2" {
-  description = "Boolean value that enables deployment of Kubeflow Trainer V2 (experimental)"
-  type        = bool
-  default     = false
-}
 
 variable "minio_access_key" {
   description = "MinIO access key"
@@ -130,17 +144,16 @@ variable "minio_mode" {
   default     = "server"
 }
 
+variable "minio_size" {
+  description = "MinIO database storage size"
+  type        = string
+  default     = "10G"
+}
 variable "minio_secret_key" {
   description = "MinIO secret key"
   type        = string
   default     = ""
   sensitive   = true
-}
-
-variable "minio_size" {
-  description = "MinIO database storage size"
-  type        = string
-  default     = "10G"
 }
 
 variable "minio_storage_service_endpoint" {
@@ -155,14 +168,14 @@ variable "mlmd_size" {
   default     = "10G"
 }
 
-variable "oidc_gatekeeper_ca_bundle" {
-  description = "Custom CA to be trusted by OIDC gatekeeper"
+variable "no_proxy" {
+  description = "Value of the no_proxy environment variable"
   type        = string
   default     = ""
 }
 
-variable "no_proxy" {
-  description = "Value of the no_proxy environment variable"
+variable "oidc_gatekeeper_ca_bundle" {
+  description = "Custom CA to be trusted by OIDC gatekeeper"
   type        = string
   default     = ""
 }
@@ -197,8 +210,20 @@ variable "envoy_revision" {
   default     = null
 }
 
-variable "opentelemetry_collector_k8s_revision" {
-  description = "Charm revision for opentelemetry-collector-k8s"
+variable "istio_ingressgateway_revision" {
+  description = "Charm revision for istio-ingressgateway"
+  type        = number
+  default     = null
+}
+
+variable "istio_ingressgateway_annotations" {
+  description = "A comma-separated list of annotations to apply to the Ingress Service to enable customisation for cloud providers or integrations."
+  type        = string
+  default     = null
+}
+
+variable "istio_pilot_revision" {
+  description = "Charm revision for istio-pilot"
   type        = number
   default     = null
 }
@@ -293,6 +318,24 @@ variable "kfp_viz_revision" {
   default     = null
 }
 
+variable "knative_eventing_revision" {
+  description = "Charm revision for knative-eventing"
+  type        = number
+  default     = null
+}
+
+variable "knative_operator_revision" {
+  description = "Charm revision for knative-operator"
+  type        = number
+  default     = null
+}
+
+variable "knative_serving_revision" {
+  description = "Charm revision for knative-serving"
+  type        = number
+  default     = null
+}
+
 variable "kserve_controller_revision" {
   description = "Charm revision for kserve-controller"
   type        = number
@@ -319,12 +362,6 @@ variable "kubeflow_profiles_revision" {
 
 variable "kubeflow_roles_revision" {
   description = "Charm revision for kubeflow-roles"
-  type        = number
-  default     = null
-}
-
-variable "kubeflow_trainer_revision" {
-  description = "Charm revision for kubeflow-trainer"
   type        = number
   default     = null
 }
@@ -365,6 +402,12 @@ variable "pvcviewer_operator_revision" {
   default     = null
 }
 
+variable "resource_dispatcher_revision" {
+  description = "Charm revision for resource-dispatcher"
+  type        = number
+  default     = null
+}
+
 variable "tensorboard_controller_revision" {
   description = "Charm revision for tensorboard-controller"
   type        = number
@@ -383,26 +426,14 @@ variable "training_operator_revision" {
   default     = null
 }
 
-variable "istio_k8s_revision" {
-  description = "Charm revision for istio-k8s"
-  type        = number
-  default     = null
-}
-
-variable "istio_k8s_platform" {
-  description = "Platform for istio-k8s"
+variable "kubeflow_spark_service_account" {
+  description = "Name of service account to be used for KF notebooks and pipelines"
   type        = string
-  default     = ""
+  default     = "spark"
 }
 
-variable "istio_ingress_k8s_revision" {
-  description = "Charm revision for istio-ingress-k8s"
-  type        = number
-  default     = null
-}
-
-variable "istio_beacon_k8s_revision" {
-  description = "Charm revision for istio-beacon-k8s"
-  type        = number
-  default     = null
+variable "kubeflow_spark_profile" {
+  description = "The name of the Kubeflow profile where Spark needs to be accessible."
+  type        = string
+  default     = "*"
 }
