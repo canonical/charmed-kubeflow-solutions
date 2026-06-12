@@ -69,5 +69,24 @@ locals {
     revision = var.kubeflow_profiles_revision
     config   = merge(local.kubeflow_profiles_service_mesh_config, var.kubeflow_profiles_config)
   }
+
+  integrations = merge(
+    var.integrations,
+    var.enable_spark ? {
+      spark-integrator = {
+        profile = "*"
+        mysql      = null
+        postgresql = null
+        spark = {
+          kind            = "endpoint"
+          name            = module.spark[0].provides.integration_hub_service_account.name
+          endpoint        = module.spark[0].provides.integration_hub_service_account.endpoint
+          url             = null
+          service_account = null
+        }
+      }
+    } : {}
+  )
+       
 }
 

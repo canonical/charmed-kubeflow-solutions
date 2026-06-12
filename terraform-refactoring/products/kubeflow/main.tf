@@ -707,8 +707,80 @@ module "feast" {
   }
 }
 
+# ===============
+# Spark solutions
+# ===============
+
+resource "juju_secret" "s3_secret" {
+  depends_on = [juju_model.kubeflow]
+  count      = var.enable_spark ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  name       = "s3_secret"
+  value = {
+    secret-key = var.s3_secret_key
+    access-key = var.s3_access_key
+  }
+  info = "This is the access key and secret key for the S3 storage"
+}
+
+module "s3" {
+  depends_on = [juju_model.spark, juju_secret.s3_secret]
+  count      = var.enable_spark ? 1 : 0
+  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=wip-split-components"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  channel = "2/stable"
+  config = merge(
+    var.s3_config,
+    {
+      credentials = "secret:${juju_secret.s3_secret[0].secret_id}"
+    }
+  )
+  constraints = "arch=amd64"
+  revision    = var.s3_revision
+}
+
+resource "juju_access_secret" "s3_secret_access" {
+  depends_on = [juju_model.spark, juju_secret.s3_secret, module.s3]
+  count      = var.enable_spark ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  applications = [
+    module.s3[0].application.name
+  ]
+  secret_id = juju_secret.s3_secret[0].secret_id
+}
+
+module "spark" {
+  count      = var.enable_spark ? 1 : 0
+
+  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=wip-split-components"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  risk       = var.spark_risk
+
+  history_server = {
+    revision    = var.spark_history_server_revision
+    resources   = var.spark_history_server_image != null ? { spark-history-server-image = var.spark_history_server_image } : {}
+  }
+  integration_hub = {
+    config      = var.spark_integration_hub_config
+    constraints = "arch=amd64"
+    revision    = var.spark_integration_hub_revision
+    resources   = var.spark_integration_hub_image != null ? { integration-hub-image = var.spark_integration_hub_image } : null
+  }
+
+  # Integrations
+
+  object_storage           = merge({ kind = "endpoint" }, module.s3[0].provides.s3_credentials)
+  object_storage_interface = module.s3[0].provides.s3_credentials.endpoint
+}
+
 module "integrations" {
-  for_each = var.integrations
+  for_each   = local.integrations
+  depends_on = [module.spark]
   
   source = "../../charms/data-kubeflow-integrator"
 

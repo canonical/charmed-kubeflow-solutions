@@ -758,3 +758,84 @@ variable "postgresql_k8s_config" {
   type        = map(string)
   default     = {}
 }
+
+# Spark component
+
+variable "enable_spark" {
+  description = "Whether to deploy the Spark component"
+  type        = bool
+  default     = false
+}
+
+# S3 Integrator variables
+
+variable "s3_secret_key" {
+  description = "S3 secret key for object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_access_key" {
+  description = "S3 access key for object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_config" {
+  description = "Configuration for s3-integrator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_revision" {
+  description = "Revision of the s3-integrator application"
+  type        = number
+  default     = null
+}
+
+# Spark Core component variables
+
+variable "spark_risk" {
+  description = "Risk channel for Spark charm deployments"
+  type        = string
+  default     = "stable"
+
+  validation {
+    condition     = contains(["edge", "beta", "candidate", "stable"], var.spark_risk)
+    error_message = "Valid values for spark_risk are (edge, beta, candidate, stable)."
+  }
+}
+
+variable "spark_history_server_revision" {
+  description = "Revision of the spark-history-server application"
+  type        = number
+  default     = null
+}
+
+variable "spark_history_server_image" {
+  description = "Container image resource for spark-history-server"
+  type        = string
+  default     = null
+}
+
+variable "spark_integration_hub_revision" {
+  description = "Revision of the spark-integration-hub application"
+  type        = number
+  default     = null
+}
+
+variable "spark_integration_hub_config" {
+  description = "Configuration for spark-integration-hub application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "spark_integration_hub_image" {
+  description = "Container image resource for spark-integration-hub"
+  type        = string
+  default     = null
+}
+
+
