@@ -463,7 +463,7 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  count      = (var.enable_mlflow || var.enable_feast || length(var.integrations) > 0) ? 1 : 0
+  count      = (var.enable_mlflow || var.enable_feast || length(local.integrations) > 0) ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../charms/resource-dispatcher"
