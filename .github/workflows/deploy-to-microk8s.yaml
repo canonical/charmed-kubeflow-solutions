@@ -39,7 +39,7 @@ jobs:
               extra-args: ""
           - module: kubeflow-spark
             risk: stable
-            uats_branch: pra-7-backport-uats 
+            uats_branch: track/1.10
             tf-vars-file: examples/tfvars.json
             uats:
               env: spark-remote

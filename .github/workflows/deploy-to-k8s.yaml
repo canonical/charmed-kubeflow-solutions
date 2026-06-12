@@ -39,7 +39,7 @@ jobs:
           - module: kubeflow-spark
             tf-vars-file: examples/tfvars.json
             risk: stable
-            uats_branch: pra-7-backport-uats
+            uats_branch: track/1.10
             uats:
               env: spark-remote
               extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
