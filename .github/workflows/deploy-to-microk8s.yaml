@@ -38,12 +38,12 @@ jobs:
               env: feast-remote
               extra-args: ""
           - module: kubeflow-spark
-            risk: edge # TODO: Run Spark tests with Kubeflow from `stable` risk once all changes for Spark integration are released to stable
-            uats_branch: main # TODO: Run Spark tests against ${{ inputs.uats_branch }} once UATs backported to track/1.x
+            risk: stable
+            uats_branch: track/1.10
             tf-vars-file: examples/tfvars.json
             uats:
               env: spark-remote
-              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_edge@sha256:72a6e89985e35e0920fb40c063b3287425760ebf823b129a87143d5ec0e99af7
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
