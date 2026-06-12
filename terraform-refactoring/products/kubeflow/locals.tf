@@ -81,7 +81,7 @@ locals {
           kind            = "endpoint"
           name            = module.spark[0].provides.integration_hub_service_account.name
           endpoint        = module.spark[0].provides.integration_hub_service_account.endpoint
-          service_account = "*"
+          service_account = "spark-user"
 	  url = null
         }
       }
