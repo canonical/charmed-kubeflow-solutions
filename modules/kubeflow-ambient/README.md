@@ -17,13 +17,12 @@ The solution module offers the following configurable inputs:
 | - | - | - | - |
 | `<charm_name>_revision`| number | For each charm of the solution, the revision of the charm to deploy | False |
 | `argo_controller_bucket`| string | The name of the bucket to be used by Argo controller in the object store | False |
-| `create_model` | bool | Allows to skip Juju model creation and re-use a model created in a higher level module. When re-using a model, if this is created by Terraform, make sure that the current module depends on the resource using the `depends_on` option. | False |
 | `cos_configuration`| bool | Boolean value that enables COS configuration | False |
+| `create_model`| bool | Allows to skip Juju model creation and re-use a model created in a higher level module | False |
 | `dex_connectors`| string | dex-auth connectors in yaml format | False |
-| `dex_static_username`| string | dex-auth static username | False |
 | `dex_static_password`| string | dex-auth static password | False |
+| `dex_static_username`| string | dex-auth static username value | False |
 | `existing_opentelemetry_collector_name`| string | Name of an existing opentelemetry-collector-k8s deployment | False |
-| `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `http_proxy`| string | Value of the http_proxy environment variable | False |
 | `https_proxy`| string | Value of the https_proxy environment variable | False |
 | `istio_k8s_platform`| string | Platform for istio-k8s | False |
@@ -43,8 +42,9 @@ The solution module offers the following configurable inputs:
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
 | `oidc_gatekeeper_ca_bundle`| string | Custom CA to be trusted by OIDC gatekeeper | False |
+| `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
-
+| `risk`| string | Value for the risk to be used | False |
 ### Outputs
 Upon applied, the solution module exports the following outputs:
 
