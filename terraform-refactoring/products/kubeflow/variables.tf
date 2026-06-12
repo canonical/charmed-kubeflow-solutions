@@ -50,10 +50,18 @@ variable "dex_auth_revision" {
   default     = null
 }
 
-variable "dex_auth_config" {
-  description = "Configuration for dex-auth application"
-  type        = map(string)
-  default     = {}
+variable "dex_static_username" {
+  description = "dex-auth static username value"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "dex_static_password" {
+  description = "dex-auth static password"
+  type        = string
+  default     = ""
+  sensitive   = true
 }
 
 variable "oidc_gatekeeper_revision" {
@@ -783,6 +791,18 @@ variable "s3_access_key" {
   sensitive   = true
 }
 
+variable "s3_endpoint" {
+  description = "S3 endpoint for object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket" {
+  description = "S3 bucket for object storage integration"
+  type        = string
+  default     = ""
+}
+
 variable "s3_config" {
   description = "Configuration for s3-integrator application"
   type        = map(string)
@@ -838,4 +858,20 @@ variable "spark_integration_hub_image" {
   default     = null
 }
 
+variable "http_proxy" {
+  description = "Value of the http_proxy environment variable"
+  type        = string
+  default     = ""
+}
 
+variable "https_proxy" {
+  description = "Value of the https_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "no_proxy" {
+  description = "Value of the no_proxy environment variable"
+  type        = string
+  default     = ""
+}

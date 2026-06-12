@@ -4,6 +4,12 @@
 resource "juju_model" "kubeflow" {
   count = var.create_model ? 1 : 0
   name  = "kubeflow"
+
+  config = {
+    juju-http-proxy  = var.http_proxy
+    juju-https-proxy = var.https_proxy
+    juju-no-proxy    = var.no_proxy
+  }
 }
 
 module "istio" {
@@ -54,8 +60,12 @@ module "auth" {
   dex_auth = {
     channel  = local.dex_auth_channel
     revision = var.dex_auth_revision
-    config   = var.dex_auth_config
+    config   = {
+      "static-username" : var.dex_static_username
+      "static-password" : var.dex_static_password
+    }
   }
+
   oidc_gatekeeper = {
     channel  = local.oidc_gatekeeper_channel
     revision = var.oidc_gatekeeper_revision
@@ -724,7 +734,7 @@ resource "juju_secret" "s3_secret" {
 }
 
 module "s3" {
-  depends_on = [juju_model.spark, juju_secret.s3_secret]
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
   count      = var.enable_spark ? 1 : 0
   source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=wip-split-components"
 
@@ -732,17 +742,19 @@ module "s3" {
 
   channel = "2/stable"
   config = merge(
-    var.s3_config,
     {
+      bucket = var.s3_bucket,
+      endpoint = var.s3_endpoint,
+      path = "spark-events",
       credentials = "secret:${juju_secret.s3_secret[0].secret_id}"
-    }
+    }, var.s3_config
   )
   constraints = "arch=amd64"
   revision    = var.s3_revision
 }
 
 resource "juju_access_secret" "s3_secret_access" {
-  depends_on = [juju_model.spark, juju_secret.s3_secret, module.s3]
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret, module.s3]
   count      = var.enable_spark ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
