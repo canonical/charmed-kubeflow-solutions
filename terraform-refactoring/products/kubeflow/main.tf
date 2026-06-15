@@ -567,7 +567,10 @@ module "kserve" {
     channel  = local.kserve_channel
     revision = var.kserve_controller_revision
     config = merge({
-      "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard"
+      "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard",
+      "http-proxy" = var.http_proxy,
+      "https-proxy" =  var.https_proxy,
+      "no-proxy" = var.no_proxy,
     }, var.kserve_controller_config)
   }
 
