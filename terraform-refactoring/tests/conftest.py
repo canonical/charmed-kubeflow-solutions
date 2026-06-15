@@ -47,6 +47,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="Enable to deploy also Feast",
     )
+    parser.addoption(
+        "--enable-spark",
+        action="store_true",
+        help="Enable to deploy also Spark",
+    )
 
 
 @pytest.fixture(scope="module")
@@ -81,11 +86,20 @@ def enable_feast(request) -> list[str]:
     return []
 
 @pytest.fixture(scope="module")
-def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast) -> list[str]:
+def enable_spark(request) -> list[str]:
+    """Terraform module customization for Spark deployment."""
+    if request.config.getoption("--enable-spark"):
+        return ["-var", "enable_spark=true"]
+    return []
+
+
+@pytest.fixture(scope="module")
+def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark) -> list[str]:
     """Overall Terraform module customization."""
     return (
         enable_mlflow
         + enable_feast
+        + enable_spark
         + service_mesh_type
         + risk
         + [

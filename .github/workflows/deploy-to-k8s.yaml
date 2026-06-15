@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow, mlflow, feast]
+        product: [kubeflow, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
         include:
           - product: kubeflow
@@ -45,6 +45,14 @@ jobs:
           - product: feast
             uats:
               env: feast-remote
+          - product: spark
+            uats:
+              env: spark-remote
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+        exclude:
+          - product: spark
+            service-mesh-type: ambient
+
 
     steps:
       - name: Checkout repository
@@ -126,19 +134,22 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           PLATFORM_ARG=""
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
-          MLFLOW_ARG=""
-          FEAST_ARG=""
+          
+          EXTRA_COMPONENTS_ARG=""
+
           if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
-            RISK_ARG=""
             PLATFORM_ARG="--istio-k8s-platform"
           fi
+
           if [[ "${{ matrix.product }}" == "mlflow" ]]; then
-            MLFLOW_ARG="--enable-mlflow"
+            EXTRA_COMPONENTS_ARG="--enable-mlflow"
           elif [[ "${{ matrix.product }}" == "feast" ]]; then
-            FEAST_ARG="--enable-feast"
+            EXTRA_COMPONENTS_ARG="--enable-feast"
+          elif [[ "${{ matrix.product }}" == "spark" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $MLFLOW_ARG $FEAST_ARG
+          tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
         run: |
