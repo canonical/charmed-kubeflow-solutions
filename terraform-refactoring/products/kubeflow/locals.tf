@@ -74,19 +74,19 @@ locals {
     var.integrations,
     var.enable_spark ? {
       spark-integrator = {
-        profile = "*"
-	mysql = null
-	postgresql = null
+        profile    = "*"
+        mysql      = null
+        postgresql = null
         spark = {
           kind            = "endpoint"
           name            = module.spark[0].provides.integration_hub_service_account.name
           endpoint        = module.spark[0].provides.integration_hub_service_account.endpoint
           service_account = "spark-user"
-	  url = null
+          url             = null
         }
       }
     } : {}
   )
-       
+
 }
 

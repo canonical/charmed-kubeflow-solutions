@@ -11,27 +11,27 @@ resource "juju_application" "integrator" {
     revision = var.revision
   }
 
-  config      = merge(
-    {"profile": var.profile},
+  config = merge(
+    { "profile" : var.profile },
     var.mysql != null ? {
-      mysql-database-name = var.mysql.database_name,
+      mysql-database-name    = var.mysql.database_name,
       mysql-extra-user-roles = var.mysql.extra_user_roles
     } : {},
     var.postgresql != null ? {
-      postgresql-database-name = var.postgresql.database_name,
+      postgresql-database-name    = var.postgresql.database_name,
       postgresql-extra-user-roles = var.postgresql.extra_user_roles
     } : {},
     var.spark != null ? {
-      spark-service-account =  var.spark.service_account
+      spark-service-account = var.spark.service_account
     } : {}
   )
-  units       = 1
-  trust       = true
+  units = 1
+  trust = true
 }
 
 
 resource "juju_integration" "mysql" {
-  count = var.mysql != null ? 1 : 0
+  count      = var.mysql != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
@@ -47,7 +47,7 @@ resource "juju_integration" "mysql" {
 }
 
 resource "juju_integration" "postgresql" {
-  count = var.postgresql != null ? 1 : 0
+  count      = var.postgresql != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
@@ -63,7 +63,7 @@ resource "juju_integration" "postgresql" {
 }
 
 resource "juju_integration" "spark" {
-  count = var.spark != null ? 1 : 0
+  count      = var.spark != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {

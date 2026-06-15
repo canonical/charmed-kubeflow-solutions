@@ -35,11 +35,11 @@ variable "profile" {
 
 variable "mysql" {
   type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-    database_name  = optional(string, null)
+    kind             = string
+    name             = optional(string, null)
+    endpoint         = optional(string, null)
+    url              = optional(string, null)
+    database_name    = optional(string, null)
     extra_user_roles = optional(string, null)
   })
   default = null
@@ -48,11 +48,11 @@ variable "mysql" {
 
 variable "postgresql" {
   type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-    database_name  = optional(string, null)
+    kind             = string
+    name             = optional(string, null)
+    endpoint         = optional(string, null)
+    url              = optional(string, null)
+    database_name    = optional(string, null)
     extra_user_roles = optional(string, null)
   })
   default = null
@@ -60,11 +60,11 @@ variable "postgresql" {
 
 variable "spark" {
   type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-    service_account  = optional(string, null)
+    kind            = string
+    name            = optional(string, null)
+    endpoint        = optional(string, null)
+    url             = optional(string, null)
+    service_account = optional(string, null)
   })
   default = null
 }

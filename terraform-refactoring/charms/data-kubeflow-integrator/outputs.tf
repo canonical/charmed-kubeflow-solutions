@@ -39,5 +39,5 @@ output "requires" {
 
 output "provides" {
   description = "Map of provided endpoints."
-  value = {}
+  value       = {}
 }

@@ -60,7 +60,7 @@ module "auth" {
   dex_auth = {
     channel  = local.dex_auth_channel
     revision = var.dex_auth_revision
-    config   = {
+    config = {
       "static-username" : var.dex_static_username
       "static-password" : var.dex_static_password
     }
@@ -568,9 +568,9 @@ module "kserve" {
     revision = var.kserve_controller_revision
     config = merge({
       "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard",
-      "http-proxy" = var.http_proxy,
-      "https-proxy" =  var.https_proxy,
-      "no-proxy" = var.no_proxy,
+      "http-proxy"      = var.http_proxy,
+      "https-proxy"     = var.https_proxy,
+      "no-proxy"        = var.no_proxy,
     }, var.kserve_controller_config)
   }
 
@@ -739,16 +739,16 @@ resource "juju_secret" "s3_secret" {
 module "s3" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
   count      = var.enable_spark ? 1 : 0
-  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=wip-split-components"
+  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=wip-split-components"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   channel = "2/stable"
   config = merge(
     {
-      bucket = var.s3_bucket,
-      endpoint = var.s3_endpoint,
-      path = "spark-events",
+      bucket      = var.s3_bucket,
+      endpoint    = var.s3_endpoint,
+      path        = "spark-events",
       credentials = "secret:${juju_secret.s3_secret[0].secret_id}"
     }, var.s3_config
   )
@@ -768,17 +768,17 @@ resource "juju_access_secret" "s3_secret_access" {
 }
 
 module "spark" {
-  count      = var.enable_spark ? 1 : 0
+  count = var.enable_spark ? 1 : 0
 
   source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=wip-split-components"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  risk       = var.spark_risk
+  risk = var.spark_risk
 
   history_server = {
-    revision    = var.spark_history_server_revision
-    resources   = var.spark_history_server_image != null ? { spark-history-server-image = var.spark_history_server_image } : {}
+    revision  = var.spark_history_server_revision
+    resources = var.spark_history_server_image != null ? { spark-history-server-image = var.spark_history_server_image } : {}
   }
   integration_hub = {
     config      = var.spark_integration_hub_config
@@ -796,19 +796,19 @@ module "spark" {
 module "integrations" {
   for_each   = local.integrations
   depends_on = [module.spark]
-  
+
   source = "../../charms/data-kubeflow-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  app_name   = each.key
-  profile    = each.value.profile
+  app_name = each.key
+  profile  = each.value.profile
 
   channel = "1/edge"
 
-  mysql = each.value.mysql
+  mysql      = each.value.mysql
   postgresql = each.value.postgresql
-  spark = each.value.spark
+  spark      = each.value.spark
 }
 
 module "observability" {

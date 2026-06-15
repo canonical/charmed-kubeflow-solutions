@@ -19,7 +19,7 @@
 # }
 
 resource "juju_model" "database" {
-  name  = var.db_model_name
+  name = var.db_model_name
 
   config = {
     juju-http-proxy  = var.http_proxy
@@ -37,14 +37,14 @@ module "postgresql" {
 }
 
 resource "juju_offer" "postgresql" {
-  model_uuid = juju_model.database.uuid
+  model_uuid       = juju_model.database.uuid
   application_name = module.postgresql.app_name
   endpoints        = ["database"]
 }
 
 resource "juju_model" "kubeflow" {
-  name  = var.kf_model_name
-  
+  name = var.kf_model_name
+
   config = {
     juju-http-proxy  = var.http_proxy
     juju-https-proxy = var.https_proxy
@@ -74,8 +74,8 @@ module "kubeflow" {
   enable_feast       = false
 
   kserve_controller_config = {
-    deployment-mode="standard"
-    custom_images="{\"serving_runtimes__huggingfaceserver\": \"kserve/huggingfaceserver:v0.17.1\", \"serving_runtimes__huggingfaceserver__multinode\": \"kserve/huggingfaceserver:v0.17.1\"}"
+    deployment-mode = "standard"
+    custom_images   = "{\"serving_runtimes__huggingfaceserver\": \"kserve/huggingfaceserver:v0.17.1\", \"serving_runtimes__huggingfaceserver__multinode\": \"kserve/huggingfaceserver:v0.17.1\"}"
   }
 
   # Observability is always enabled in kubeflow-cos and automatically wired to COS
@@ -90,12 +90,12 @@ module "kubeflow" {
       profile = "*"
       postgresql = {
         database_name = "general"
-        kind = "offer"
-        url = juju_offer.postgresql.url
+        kind          = "offer"
+        url           = juju_offer.postgresql.url
       }
     }
     profile1 = {
-      profile="profile1",
+      profile = "profile1",
       kafka = {
 
       }
