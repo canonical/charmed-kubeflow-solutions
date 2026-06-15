@@ -1,6 +1,8 @@
 import jubilant
 import pytest
 
+import os
+
 MODEL_NAME = "kubeflow"
 
 
@@ -88,10 +90,17 @@ def enable_feast(request) -> list[str]:
 @pytest.fixture(scope="module")
 def enable_spark(request) -> list[str]:
     """Terraform module customization for Spark deployment."""
-    if request.config.getoption("--enable-spark"):
-        return ["-var", "enable_spark=true"]
+    if request.config.getoption("--enable-spark"):        
+        extra_args = [
+            "-var", "enable_spark=true", 
+            "-var", "s3_bucket=spark-demo",
+            "-var", f"s3_secret_key=${os.environ.get('S3_SECRET_KEY')}",
+            "-var", f"s3_access_key=${os.environ.get('S3_ACCESS_KEY')}",
+            "-var", f"s3_endpoint=${os.environ.get('S3_SERVER_URL')}",
+        ]
+        print(f"Extra args for Spark deployment: {extra_args}")
+        return extra_args
     return []
-
 
 @pytest.fixture(scope="module")
 def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark) -> list[str]:
