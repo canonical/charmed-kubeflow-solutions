@@ -1011,7 +1011,7 @@ resource "juju_integration" "mlflow_server_logging" {
 }
 
 resource "juju_integration" "knative_serving_otel_collector" {
-  count      = var.knative_operator_otel_collector != null & var.knative_serving_otel_collector != null ? 1 : 0
+  count      = var.knative_operator_otel_collector != null && var.knative_serving_otel_collector != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
@@ -1026,7 +1026,7 @@ resource "juju_integration" "knative_serving_otel_collector" {
 }
 
 resource "juju_integration" "knative_eventing_otel_collector" {
-  count      = var.knative_operator_otel_collector != null & var.knative_eventing_otel_collector != null ? 1 : 0
+  count      = var.knative_operator_otel_collector != null && var.knative_eventing_otel_collector != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
