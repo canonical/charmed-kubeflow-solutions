@@ -1009,3 +1009,33 @@ resource "juju_integration" "mlflow_server_logging" {
     endpoint = "receive-loki-logs"
   }
 }
+
+resource "juju_integration" "knative_serving_otel_collector" {
+  count      = var.knative_operator_otel_collector != null & var.knative_serving_otel_collector != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = var.knative_operator_otel_collector.name
+    endpoint = var.knative_operator_otel_collector.endpoint
+  }
+
+  application {
+    name     = var.knative_serving_otel_collector.name
+    endpoint = var.knative_serving_otel_collector.endpoint
+  }
+}
+
+resource "juju_integration" "knative_eventing_otel_collector" {
+  count      = var.knative_operator_otel_collector != null & var.knative_eventing_otel_collector != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = var.knative_operator_otel_collector.name
+    endpoint = var.knative_operator_otel_collector.endpoint
+  }
+
+  application {
+    name     = var.knative_eventing_otel_collector.name
+    endpoint = var.knative_eventing_otel_collector.endpoint
+  }
+}
