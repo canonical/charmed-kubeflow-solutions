@@ -1,10 +1,12 @@
 import jubilant
 import pytest
 
+from dotenv import load_dotenv
 import os
 
 MODEL_NAME = "kubeflow"
 
+load_dotenv()
 
 @pytest.fixture(scope="module")
 def juju():
