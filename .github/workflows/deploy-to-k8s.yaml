@@ -122,7 +122,7 @@ jobs:
 
       - name: Setup spark object storage
         id: spark-object-storage
-        if: ${{ inputs.storage-backend == 's3' }}
+        if: matrix.product == 'spark'
         shell: bash
         env:
           CLOUD_INIT_FILE: |
