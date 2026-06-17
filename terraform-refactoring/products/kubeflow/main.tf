@@ -797,18 +797,22 @@ module "integrations" {
   for_each   = local.integrations
   depends_on = [module.spark]
 
-  source = "../../charms/data-kubeflow-integrator"
+  source = "../../components/data-kubeflow-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  app_name = each.key
   profile  = each.value.profile
 
-  channel = "1/edge"
+  data_kubeflow_integrator = {
+    channel = "1/edge",
+    app_name = each.key
+  }
 
   mysql      = each.value.mysql
   postgresql = each.value.postgresql
   spark      = each.value.spark
+
+  resource_dispatcher_endpoints = module.resource_dispatcher[0].provides
 }
 
 module "observability" {

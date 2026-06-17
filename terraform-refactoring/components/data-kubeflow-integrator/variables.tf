@@ -1,36 +1,30 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-variable "app_name" {
-  description = "Name to give the deployed application."
-  type        = string
-  default     = "data-kubeflow-integrator"
-  nullable    = false
-}
-
-variable "channel" {
-  description = "Channel of the charm."
-  type        = string
-  default     = "1/stable"
-  nullable    = false
-}
-
 variable "model_uuid" {
   description = "Reference to an existing model uuid."
   type        = string
   nullable    = false
 }
 
-variable "revision" {
-  description = "Revision number of the charm."
-  type        = number
-  default     = null
-}
-
 variable "profile" {
   description = "Name of profiles to apply this to"
   type        = string
   default     = "*"
+}
+
+variable "data_kubeflow_integrator" {
+  description = "Configuration for data-kubeflow-integrator application"
+  type = object({
+    app_name    = optional(string, "data-kubeflow-integrator")
+    channel     = optional(string, "1/stable")
+    revision    = optional(number)
+    units       = optional(number, 1)
+    trust       = optional(bool, false)
+    constraints = optional(string)
+    config      = optional(map(string), {})
+  })
+  default = {}
 }
 
 variable "mysql" {
@@ -67,4 +61,13 @@ variable "spark" {
     service_account = optional(string, null)
   })
   default = null
+}
+
+variable "resource_dispatcher_endpoints" {
+  description = "Pointers for the resource dispatcher endpoints"
+  type = map(object({
+    name = string
+    endpoint = string
+  }))
+  default = {}
 }

@@ -2,14 +2,14 @@
 # See LICENSE file for licensing details.
 
 resource "juju_application" "integrator" {
-  name       = var.app_name
-  model_uuid = var.model_uuid
-
   charm {
     name     = "data-kubeflow-integrator"
-    channel  = var.channel
-    revision = var.revision
+    channel  = var.data_kubeflow_integrator.channel
+    revision = var.data_kubeflow_integrator.revision
   }
+
+  model_uuid = var.model_uuid
+  name        = var.data_kubeflow_integrator.app_name
 
   config = merge(
     { "profile" : var.profile },
@@ -23,10 +23,13 @@ resource "juju_application" "integrator" {
     } : {},
     var.spark != null ? {
       spark-service-account = var.spark.service_account
-    } : {}
+    } : {},
+    var.data_kubeflow_integrator.config
   )
-  units = 1
-  trust = true
+
+  units = var.data_kubeflow_integrator.units
+  trust = var.data_kubeflow_integrator.trust
+  constraints = var.data_kubeflow_integrator.constraints
 }
 
 
@@ -75,5 +78,21 @@ resource "juju_integration" "spark" {
     name      = var.spark.kind == "endpoint" ? var.spark.name : null
     endpoint  = var.spark.kind == "endpoint" ? var.spark.endpoint : null
     offer_url = var.spark.kind == "offer" ? var.spark.url : null
+  }
+}
+
+resource "juju_integration" "resource_dispatcher_kubeflow_integrator" {
+  for_each = tomap(var.resource_dispatcher_endpoints)
+
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.integrator.name
+    endpoint = each.value.endpoint
+  }
+
+  application {
+    name     = each.value.name
+    endpoint = each.value.endpoint
   }
 }
