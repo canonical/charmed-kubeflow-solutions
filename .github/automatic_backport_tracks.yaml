@@ -1,3 +1,4 @@
 automatic_backport_tracks:
 - track/1.10
 - track/1.11
+- track/1.11-rc
