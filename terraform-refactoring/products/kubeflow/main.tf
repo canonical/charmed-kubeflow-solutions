@@ -801,10 +801,10 @@ module "integrations" {
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  profile  = each.value.profile
+  profile = each.value.profile
 
   data_kubeflow_integrator = {
-    channel = "1/edge",
+    channel  = "1/edge",
     app_name = each.key
   }
 

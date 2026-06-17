@@ -66,7 +66,7 @@ variable "spark" {
 variable "resource_dispatcher_endpoints" {
   description = "Pointers for the resource dispatcher endpoints"
   type = map(object({
-    name = string
+    name     = string
     endpoint = string
   }))
   default = {}

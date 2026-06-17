@@ -9,7 +9,7 @@ resource "juju_application" "integrator" {
   }
 
   model_uuid = var.model_uuid
-  name        = var.data_kubeflow_integrator.app_name
+  name       = var.data_kubeflow_integrator.app_name
 
   config = merge(
     { "profile" : var.profile },
@@ -27,8 +27,8 @@ resource "juju_application" "integrator" {
     var.data_kubeflow_integrator.config
   )
 
-  units = var.data_kubeflow_integrator.units
-  trust = var.data_kubeflow_integrator.trust
+  units       = var.data_kubeflow_integrator.units
+  trust       = var.data_kubeflow_integrator.trust
   constraints = var.data_kubeflow_integrator.constraints
 }
 
