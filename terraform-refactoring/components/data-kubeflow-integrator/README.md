@@ -1,25 +1,24 @@
-# Resource Dispatcher Charm
+# Data Kubeflow Integrator Component
 
-Terraform module deploying the resource-dispatcher charm for Charmed Kubeflow.
+Terraform module deploying the `data-kubeflow-integrator` charm for Charmed Kubeflow. This charm integrates data services (MySQL, PostgreSQL, Spark) with Kubeflow user profiles via the resource-dispatcher.
 
 ## Applications
 
 | Name | Charm | Description |
 | ---- | ----- | ----------- |
-| resource-dispatcher | resource-dispatcher | Dispatches Kubernetes resources (Secrets, PodDefaults) into user namespaces |
+| data-kubeflow-integrator | data-kubeflow-integrator | Integrates data services with Kubeflow user namespaces |
 
 ## Inputs
 
 | Name | Description | Required |
 | ---- | ----------- | :------: |
 | `model_uuid` | UUID of the Juju model | yes |
-| `app_name` | Name to give the deployed application | no |
-| `channel` | Channel of the charm | no |
-| `revision` | Revision number of the charm | no |
-| `config` | Map for configuration options | no |
-| `units` | Unit count | no |
-| `trust` | Whether the application should be trusted | no |
-| `constraints` | String listing constraints | no |
+| `profile` | Kubeflow profile name(s) to apply integrations to | no |
+| `data_kubeflow_integrator` | Application configuration object (app_name, channel, revision, etc.) | no |
+| `mysql` | MySQL integration endpoint or offer | no |
+| `postgresql` | PostgreSQL integration endpoint or offer | no |
+| `spark` | Spark integration endpoint or offer | no |
+| `resource_dispatcher_endpoints` | Map of resource-dispatcher endpoints to integrate with | no |
 
 ## Outputs
 
@@ -27,7 +26,8 @@ Terraform module deploying the resource-dispatcher charm for Charmed Kubeflow.
 | ---- | ----------- |
 | `application` | The deployed juju_application object |
 | `app_name` | Name of the deployed application |
-| `provides` | Provided endpoints: `secrets`, `pod_defaults` |
+| `requires` | Required endpoints: `secrets`, `pod_defaults`, `service_accounts`, `roles`, `role_bindings` |
+| `provides` | Provided endpoints (empty map) |
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -51,26 +51,29 @@ No modules.
 
 | Name | Type |
 | ---- | ---- |
-| [juju_application.resource_dispatcher](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_application.integrator](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_integration.mysql](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.postgresql](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.resource_dispatcher_kubeflow_integrator](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Name to give the deployed application. | `string` | `"resource-dispatcher"` | no |
-| <a name="input_channel"></a> [channel](#input\_channel) | Channel of the charm. | `string` | `"2.0/stable"` | no |
-| <a name="input_config"></a> [config](#input\_config) | Map for configuration options. | `map(string)` | `{}` | no |
-| <a name="input_constraints"></a> [constraints](#input\_constraints) | String listing constraints for this application. | `string` | `null` | no |
+| <a name="input_data_kubeflow_integrator"></a> [data\_kubeflow\_integrator](#input\_data\_kubeflow\_integrator) | Configuration for data-kubeflow-integrator application | `object({...})` | `{}` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | Reference to an existing model uuid. | `string` | n/a | yes |
-| <a name="input_revision"></a> [revision](#input\_revision) | Revision number of the charm. | `number` | `null` | no |
-| <a name="input_trust"></a> [trust](#input\_trust) | Whether the application should be trusted. | `bool` | `true` | no |
-| <a name="input_units"></a> [units](#input\_units) | Unit count. | `number` | `1` | no |
+| <a name="input_mysql"></a> [mysql](#input\_mysql) | MySQL integration endpoint or offer | `object({...})` | `null` | no |
+| <a name="input_postgresql"></a> [postgresql](#input\_postgresql) | PostgreSQL integration endpoint or offer | `object({...})` | `null` | no |
+| <a name="input_profile"></a> [profile](#input\_profile) | Name of profiles to apply this to | `string` | `"*"` | no |
+| <a name="input_resource_dispatcher_endpoints"></a> [resource\_dispatcher\_endpoints](#input\_resource\_dispatcher\_endpoints) | Pointers for the resource dispatcher endpoints | `map(object({...}))` | `{}` | no |
+| <a name="input_spark"></a> [spark](#input\_spark) | Spark integration endpoint or offer | `object({...})` | `null` | no |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_app_name"></a> [app\_name](#output\_app\_name) | Name of the deployed resource-dispatcher application. |
+| <a name="output_app_name"></a> [app\_name](#output\_app\_name) | Name of the deployed data-kubeflow integrator. |
 | <a name="output_application"></a> [application](#output\_application) | Object representing the deployed application. |
 | <a name="output_provides"></a> [provides](#output\_provides) | Map of provided endpoints. |
 | <a name="output_requires"></a> [requires](#output\_requires) | Map of required endpoints. |
