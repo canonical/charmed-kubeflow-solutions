@@ -646,7 +646,7 @@ module "postgresql_k8s" {
   config     = var.postgresql_k8s_config
   storage_directives = var.profile == "testing" ? {
     pgdata = "1GB"
-  } : {
+    } : {
     pgdata = "10GB"
   }
 }
