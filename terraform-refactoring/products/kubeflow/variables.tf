@@ -16,7 +16,7 @@ variable "release" {
 
 variable "profile" {
   type        = string
-  description = "Value for the risk to be used"
+  description = "Deployment profile used for sizing/defaults (testing or production)"
   default     = "production"
 
   validation {

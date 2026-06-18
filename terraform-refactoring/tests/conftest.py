@@ -96,9 +96,9 @@ def enable_spark(request) -> list[str]:
         extra_args = [
             "-var", "enable_spark=true", 
             "-var", "s3_bucket=spark-demo",
-            "-var", f"s3_secret_key={os.environ.get('S3_SECRET_KEY')}",
-            "-var", f"s3_access_key={os.environ.get('S3_ACCESS_KEY')}",
-            "-var", f"s3_endpoint={os.environ.get('S3_SERVER_URL')}",
+            "-var", f"s3_secret_key={os.environ['S3_SECRET_KEY']}",
+            "-var", f"s3_access_key={os.environ['S3_ACCESS_KEY']}",
+            "-var", f"s3_endpoint={os.environ['S3_SERVER_URL']}",
         ]
         print(f"Extra args for Spark deployment: {extra_args}")
         return extra_args

@@ -38,6 +38,17 @@ variable "mysql" {
   })
   default = null
 
+  validation {
+    condition = (
+      var.mysql == null ||
+      (
+        contains(["endpoint", "offer"], var.mysql.kind) &&
+        (var.mysql.kind != "endpoint" || (var.mysql.name != null && var.mysql.endpoint != null)) &&
+        (var.mysql.kind != "offer" || var.mysql.url != null)
+      )
+    )
+    error_message = "If mysql is set, kind must be 'endpoint' (requires name and endpoint) or 'offer' (requires url)."
+  }
 }
 
 variable "postgresql" {
@@ -50,6 +61,18 @@ variable "postgresql" {
     extra_user_roles = optional(string, null)
   })
   default = null
+
+  validation {
+    condition = (
+      var.postgresql == null ||
+      (
+        contains(["endpoint", "offer"], var.postgresql.kind) &&
+        (var.postgresql.kind != "endpoint" || (var.postgresql.name != null && var.postgresql.endpoint != null)) &&
+        (var.postgresql.kind != "offer" || var.postgresql.url != null)
+      )
+    )
+    error_message = "If postgresql is set, kind must be 'endpoint' (requires name and endpoint) or 'offer' (requires url)."
+  }
 }
 
 variable "spark" {
@@ -61,6 +84,18 @@ variable "spark" {
     service_account = optional(string, null)
   })
   default = null
+
+  validation {
+    condition = (
+      var.spark == null ||
+      (
+        contains(["endpoint", "offer"], var.spark.kind) &&
+        (var.spark.kind != "endpoint" || (var.spark.name != null && var.spark.endpoint != null)) &&
+        (var.spark.kind != "offer" || var.spark.url != null)
+      )
+    )
+    error_message = "If spark is set, kind must be 'endpoint' (requires name and endpoint) or 'offer' (requires url)."
+  }
 }
 
 variable "resource_dispatcher_endpoints" {
