@@ -14,6 +14,17 @@ variable "release" {
   }
 }
 
+variable "profile" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = "production"
+
+  validation {
+    condition     = contains(["testing", "production"], var.profile)
+    error_message = "Valid values for var: profile are (testing, production)."
+  }
+}
+
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"

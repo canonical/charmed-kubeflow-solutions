@@ -185,6 +185,7 @@ module "mysql" {
     { "profile-limit-memory" = "2048" },
     var.mysql_config
   )
+  storage_size = var.profile == "testing" ? "1GB" : "10GB"
 }
 
 module "katib" {
@@ -643,6 +644,11 @@ module "postgresql_k8s" {
   channel    = "14/stable"
   revision   = var.postgresql_k8s_revision
   config     = var.postgresql_k8s_config
+  storage_directives = var.profile == "testing" ? {
+    pgdata = "1GB"
+  } : {
+    pgdata = "10GB"
+  }
 }
 
 module "feast" {

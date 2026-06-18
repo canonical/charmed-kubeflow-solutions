@@ -114,7 +114,7 @@ def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark) 
         + service_mesh_type
         + risk
         + [
-            "-var",
-            "create_model=false",
+            "-var", "create_model=false",
+            "-var", "profile=testing"
         ]
     )
