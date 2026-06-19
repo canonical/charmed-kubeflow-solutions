@@ -12,10 +12,10 @@ resource "juju_application" "minio" {
     base     = var.base
   }
 
-  config      = var.config
-  units       = var.units
-  trust       = var.trust
-  constraints = var.constraints
+  config             = var.config
+  units              = var.units
+  trust              = var.trust
+  constraints        = var.constraints
   storage_directives = var.storage_directives
 }
 

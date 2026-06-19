@@ -63,7 +63,7 @@ variable "units" {
 
 variable "storage_directives" {
   description = "Storage directives"
-  type = map(string)
+  type        = map(string)
   default = {
     minio-data = "10G"
   }
