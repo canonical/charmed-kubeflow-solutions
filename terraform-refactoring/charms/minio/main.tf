@@ -16,5 +16,6 @@ resource "juju_application" "minio" {
   units       = var.units
   trust       = var.trust
   constraints = var.constraints
+  storage_directives = var.storage_directives
 }
 

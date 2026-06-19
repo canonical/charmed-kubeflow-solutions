@@ -210,6 +210,9 @@ variable "mlmd" {
     constraints = optional(string)
     config      = optional(map(string), {})
     resources   = optional(map(string), {})
+    storage_directives = optional(map(string), {
+      mlmd-data = "10G"
+    })
   })
   default = {}
 }

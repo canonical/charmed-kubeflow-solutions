@@ -171,6 +171,10 @@ module "minio" {
   channel    = local.minio_channel
   revision   = var.minio_revision
   config     = var.minio_config
+
+  storage_directives = {
+    minio-data = var.minio_storage_size
+  }
 }
 
 module "mysql" {
@@ -185,7 +189,7 @@ module "mysql" {
     { "profile-limit-memory" = "2048" },
     var.mysql_config
   )
-  storage_size = var.profile == "testing" ? "1GB" : "10GB"
+  storage_size = var.mysql_storage_size
 }
 
 module "katib" {
@@ -304,6 +308,9 @@ module "kfp" {
     channel  = local.mlmd_channel
     revision = var.mlmd_revision
     config   = var.mlmd_config
+    storage_directives = {
+      mlmd-data = var.mlmd_storage_size
+    }
   }
 
   kfp_api = {
