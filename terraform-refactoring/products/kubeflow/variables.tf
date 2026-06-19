@@ -161,6 +161,12 @@ variable "minio_config" {
   default     = {}
 }
 
+variable "minio_storage_size" {
+  description = "MinIO database storage size"
+  type        = string
+  default     = "10G"
+}
+
 variable "metacontroller_operator_revision" {
   description = "Revision of the metacontroller-operator application"
   type        = number
@@ -228,6 +234,13 @@ variable "mlmd_config" {
   type        = map(string)
   default     = {}
 }
+
+variable "mlmd_storage_size" {
+  description = "MLMD database storage size"
+  type        = string
+  default     = "10G"
+}
+
 
 variable "kfp_api_revision" {
   description = "Revision of the kfp-api application"
@@ -418,6 +431,12 @@ variable "mysql_config" {
   description = "Configuration for the mysql-db application"
   type        = map(string)
   default     = {}
+}
+
+variable "mysql_storage_size" {
+  description = "MySQL database storage size"
+  type        = string
+  default     = "10G"
 }
 
 # Katib Component Applications
