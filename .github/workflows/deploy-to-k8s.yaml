@@ -146,6 +146,7 @@ jobs:
           lxc exec ceph -- cloud-init status --wait
           
           echo -e "S3_SERVER_URL=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/\nS3_ACCESS_KEY=foo\nS3_SECRET_KEY=bar" > .env
+          echo -e "S3_BUCKET=spark-demo" >> .env
           lxc list
           cat .env
 

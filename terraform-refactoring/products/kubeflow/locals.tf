@@ -70,8 +70,8 @@ locals {
     config   = merge(local.kubeflow_profiles_service_mesh_config, var.kubeflow_profiles_config)
   }
 
-  integrations = merge(
-    var.integrations,
+  external_integrations = merge(
+    var.external_integrations,
     var.enable_spark ? {
       spark-integrator = {
         profile    = "*"

@@ -8,7 +8,7 @@ variable "model_uuid" {
 }
 
 variable "profile" {
-  description = "Name of profiles to apply this to"
+  description = "Name of Kubeflow profile to apply this to. Use `*` to apply the integration to all profiles."
   type        = string
   default     = "*"
 }

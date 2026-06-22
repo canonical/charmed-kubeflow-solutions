@@ -16,7 +16,7 @@ variable "release" {
 
 variable "profile" {
   type        = string
-  description = "Deployment profile used for sizing/defaults (testing or production)"
+  description = "Deployment profile used for sizing/defaults (testing or production). Note that this variable does not refer to Kubeflow profiles, but it is used to set sensible defaults for different kind of environments, similarly as done for other charms (e.g. Kafka, ZooKeeper, OpenSearch)."
   default     = "production"
 
   validation {
@@ -538,7 +538,7 @@ variable "enable_mlflow" {
 
 # Enable integrations
 
-variable "integrations" {
+variable "external_integrations" {
   description = "External integrations"
   type = map(object({
     profile = string

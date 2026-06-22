@@ -95,7 +95,7 @@ def enable_spark(request) -> list[str]:
     if request.config.getoption("--enable-spark"):        
         extra_args = [
             "-var", "enable_spark=true", 
-            "-var", "s3_bucket=spark-demo",
+            "-var", f"s3_bucket={os.environ['S3_BUCKET']}",
             "-var", f"s3_secret_key={os.environ['S3_SECRET_KEY']}",
             "-var", f"s3_access_key={os.environ['S3_ACCESS_KEY']}",
             "-var", f"s3_endpoint={os.environ['S3_SERVER_URL']}",
