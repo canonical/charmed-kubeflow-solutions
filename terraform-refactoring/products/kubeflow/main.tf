@@ -651,7 +651,9 @@ module "postgresql" {
   channel            = "14/stable"
   revision           = var.postgresql_revision
   config             = var.postgresql_config
-  storage_directives = var.postgresql_storage_size
+  storage_directives = {
+    pgdata = var.postgresql_storage_size
+  }
 }
 
 module "feast" {
