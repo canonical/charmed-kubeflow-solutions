@@ -130,7 +130,7 @@ def tf_vars(
             "-var",
             "mysql_storage_size=1G",
             "-var",
-            "minio_storage_size=1G",
+            "minio_storage_size=10G",
             "-var",
             "mlmd_storage_size=1G",
             "-var",
