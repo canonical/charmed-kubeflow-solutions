@@ -646,11 +646,11 @@ module "postgresql" {
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
-  model_uuid         = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  app_name           = "postgresql"
-  channel            = "14/stable"
-  revision           = var.postgresql_revision
-  config             = var.postgresql_config
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  app_name   = "postgresql"
+  channel    = "14/stable"
+  revision   = var.postgresql_revision
+  config     = var.postgresql_config
   storage_directives = {
     pgdata = var.postgresql_storage_size
   }
