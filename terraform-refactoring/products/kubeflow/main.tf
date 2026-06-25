@@ -175,7 +175,7 @@ module "minio" {
 
 module "mysql" {
   count  = local.deploy_mysql ? 1 : 0
-  source = "git::https://github.com/canonical/mysql-k8s-operator//terraform?ref=58072079edc97bace08b6ff9c8f380b94867ebd4"
+  source = "git::https://github.com/canonical/mysql-operators//kubernetes/terraform?ref=d7d75f78016006cdb883110706f8526b46785f2b"
 
   model    = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   app_name = "mysql-db"

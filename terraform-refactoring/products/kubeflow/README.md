@@ -27,7 +27,7 @@
 | <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | ../../charms/minio | n/a |
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
-| <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-k8s-operator//terraform | 58072079edc97bace08b6ff9c8f380b94867ebd4 |
+| <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-operators//kubernetes/terraform | d7d75f78016006cdb883110706f8526b46785f2b |
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
