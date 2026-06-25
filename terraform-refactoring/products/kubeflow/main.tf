@@ -640,27 +640,23 @@ module "training" {
   }
 }
 
-module "postgresql_k8s" {
+module "postgresql" {
   count      = var.enable_feast ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
-  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  app_name   = "postgresql-k8s"
-  channel    = "14/stable"
-  revision   = var.postgresql_k8s_revision
-  config     = var.postgresql_k8s_config
-  storage_directives = var.profile == "testing" ? {
-    pgdata = "1GB"
-    } : {
-    pgdata = "10GB"
-  }
+  model_uuid         = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  app_name           = "postgresql"
+  channel            = "14/stable"
+  revision           = var.postgresql_revision
+  config             = var.postgresql_config
+  storage_directives = var.postgresql_storage_size
 }
 
 module "feast" {
   count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.resource_dispatcher, module.postgresql_k8s]
+  depends_on = [module.istio, module.ambient, module.core, module.resource_dispatcher, module.postgresql]
 
   source = "../../components/feast"
 
@@ -668,20 +664,20 @@ module "feast" {
 
   offline_store = {
     kind     = "endpoint"
-    name     = module.postgresql_k8s[0].app_name
-    endpoint = module.postgresql_k8s[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
   online_store = {
     kind     = "endpoint"
-    name     = module.postgresql_k8s[0].app_name
-    endpoint = module.postgresql_k8s[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
   registry = {
     kind     = "endpoint"
-    name     = module.postgresql_k8s[0].app_name
-    endpoint = module.postgresql_k8s[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
   secrets = {
