@@ -750,7 +750,7 @@ resource "juju_secret" "s3_secret" {
 module "s3" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
   count      = var.enable_spark ? 1 : 0
-  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=terraform-cc008"
+  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=f50a2ab225a096a3ba7a82d1db3597f7a2428cce"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -781,7 +781,7 @@ resource "juju_access_secret" "s3_secret_access" {
 module "spark" {
   count = var.enable_spark ? 1 : 0
 
-  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=terraform-cc008"
+  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=f50a2ab225a096a3ba7a82d1db3597f7a2428cce"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
