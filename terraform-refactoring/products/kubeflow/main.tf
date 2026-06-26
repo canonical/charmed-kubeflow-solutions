@@ -171,6 +171,10 @@ module "minio" {
   channel    = local.minio_channel
   revision   = var.minio_revision
   config     = var.minio_config
+
+  storage_directives = {
+    minio-data = var.minio_storage_size
+  }
 }
 
 module "mysql" {
@@ -185,7 +189,7 @@ module "mysql" {
     { "profile-limit-memory" = "2048" },
     var.mysql_config
   )
-  storage_size = var.profile == "testing" ? "1GB" : "10GB"
+  storage_size = var.mysql_storage_size
 }
 
 module "katib" {
@@ -304,6 +308,9 @@ module "kfp" {
     channel  = local.mlmd_channel
     revision = var.mlmd_revision
     config   = var.mlmd_config
+    storage_directives = {
+      mlmd-data = var.mlmd_storage_size
+    }
   }
 
   kfp_api = {
@@ -633,27 +640,25 @@ module "training" {
   }
 }
 
-module "postgresql_k8s" {
+module "postgresql" {
   count      = var.enable_feast ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  app_name   = "postgresql-k8s"
+  app_name   = "postgresql"
   channel    = "14/stable"
-  revision   = var.postgresql_k8s_revision
-  config     = var.postgresql_k8s_config
-  storage_directives = var.profile == "testing" ? {
-    pgdata = "1GB"
-    } : {
-    pgdata = "10GB"
+  revision   = var.postgresql_revision
+  config     = var.postgresql_config
+  storage_directives = {
+    pgdata = var.postgresql_storage_size
   }
 }
 
 module "feast" {
   count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.resource_dispatcher, module.postgresql_k8s]
+  depends_on = [module.istio, module.ambient, module.core, module.resource_dispatcher, module.postgresql]
 
   source = "../../components/feast"
 
@@ -661,20 +666,20 @@ module "feast" {
 
   offline_store = {
     kind     = "endpoint"
-    name     = module.postgresql_k8s[0].app_name
-    endpoint = module.postgresql_k8s[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
   online_store = {
     kind     = "endpoint"
-    name     = module.postgresql_k8s[0].app_name
-    endpoint = module.postgresql_k8s[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
   registry = {
     kind     = "endpoint"
-    name     = module.postgresql_k8s[0].app_name
-    endpoint = module.postgresql_k8s[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
   secrets = {
@@ -745,7 +750,7 @@ resource "juju_secret" "s3_secret" {
 module "s3" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
   count      = var.enable_spark ? 1 : 0
-  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=terraform-cc008"
+  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=f50a2ab225a096a3ba7a82d1db3597f7a2428cce"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -776,7 +781,7 @@ resource "juju_access_secret" "s3_secret_access" {
 module "spark" {
   count = var.enable_spark ? 1 : 0
 
-  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=terraform-cc008"
+  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=f50a2ab225a096a3ba7a82d1db3597f7a2428cce"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 

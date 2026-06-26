@@ -14,17 +14,6 @@ variable "release" {
   }
 }
 
-variable "profile" {
-  type        = string
-  description = "Deployment profile used for sizing/defaults (testing or production). Note that this variable does not refer to Kubeflow profiles, but it is used to set sensible defaults for different kind of environments, similarly as done for other charms (e.g. Kafka, ZooKeeper, OpenSearch)."
-  default     = "production"
-
-  validation {
-    condition     = contains(["testing", "production"], var.profile)
-    error_message = "Valid values for var: profile are (testing, production)."
-  }
-}
-
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"
@@ -161,6 +150,12 @@ variable "minio_config" {
   default     = {}
 }
 
+variable "minio_storage_size" {
+  description = "MinIO database storage size"
+  type        = string
+  default     = "10G"
+}
+
 variable "metacontroller_operator_revision" {
   description = "Revision of the metacontroller-operator application"
   type        = number
@@ -228,6 +223,13 @@ variable "mlmd_config" {
   type        = map(string)
   default     = {}
 }
+
+variable "mlmd_storage_size" {
+  description = "MLMD database storage size"
+  type        = string
+  default     = "10G"
+}
+
 
 variable "kfp_api_revision" {
   description = "Revision of the kfp-api application"
@@ -418,6 +420,12 @@ variable "mysql_config" {
   description = "Configuration for the mysql-db application"
   type        = map(string)
   default     = {}
+}
+
+variable "mysql_storage_size" {
+  description = "MySQL database storage size"
+  type        = string
+  default     = "10G"
 }
 
 # Katib Component Applications
@@ -766,16 +774,22 @@ variable "feast_ui_config" {
 
 # PostgreSQL for Feast
 
-variable "postgresql_k8s_revision" {
-  description = "Revision of the postgresql-k8s application"
+variable "postgresql_revision" {
+  description = "Revision of the postgresql application"
   type        = number
   default     = null
 }
 
-variable "postgresql_k8s_config" {
-  description = "Configuration for the postgresql-k8s application"
+variable "postgresql_config" {
+  description = "Configuration for the postgresql application"
   type        = map(string)
   default     = {}
+}
+
+variable "postgresql_storage_size" {
+  description = "PostgreSQL database storage size"
+  type        = string
+  default     = "10G"
 }
 
 # Spark component
