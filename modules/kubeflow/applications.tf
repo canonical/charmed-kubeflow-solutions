@@ -304,11 +304,9 @@ module "minio" {
 module "oidc_gatekeeper" {
   source     = "git::https://github.com/canonical/oidc-gatekeeper-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
-  config = {
-    ca-bundle = var.oidc_gatekeeper_ca_bundle,
-  }
-  revision = var.oidc_gatekeeper_revision
-  channel  = "${local.track}/${var.risk}"
+  config     = var.oidc_gatekeeper_config
+  revision   = var.oidc_gatekeeper_revision
+  channel    = "${local.track}/${var.risk}"
 }
 
 module "pvcviewer_operator" {

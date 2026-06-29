@@ -63,7 +63,7 @@ module "kubeflow" {
   mlmd_revision                         = var.mlmd_revision
   minio_revision                        = var.minio_revision
   oidc_gatekeeper_revision              = var.oidc_gatekeeper_revision
-  oidc_gatekeeper_ca_bundle             = var.oidc_gatekeeper_ca_bundle
+  oidc_gatekeeper_config                = var.oidc_gatekeeper_config
   pvcviewer_operator_revision           = var.pvcviewer_operator_revision
   tensorboard_controller_revision       = var.tensorboard_controller_revision
   tensorboards_web_app_revision         = var.tensorboards_web_app_revision
