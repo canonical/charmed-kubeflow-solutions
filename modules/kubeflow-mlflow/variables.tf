@@ -247,10 +247,10 @@ variable "no_proxy" {
   default     = ""
 }
 
-variable "oidc_gatekeeper_ca_bundle" {
-  description = "Custom CA to be trusted by OIDC gatekeeper"
-  type        = string
-  default     = ""
+variable "oidc_gatekeeper_config" {
+  description = "Config options for OIDC gatekeeper"
+  type        = map(string)
+  default     = {}
 }
 
 variable "public_url" {

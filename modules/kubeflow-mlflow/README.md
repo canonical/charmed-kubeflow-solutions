@@ -51,7 +51,7 @@ The solution module offers the following configurable inputs:
 | `mlflow_nodeport`| number | The nodeport for MLflow | False |
 | `mlmd_size`| string | MLMD database storage size | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
-| `oidc_gatekeeper_ca_bundle`| string | Custom CA to be trusted by OIDC gatekeeper | False |
+| `oidc_gatekeeper_config`| map(string) | Config options for OIDC gatekeeper | False |
 | `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
 | `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
 | `risk`| string | Value for the risk to be used | False |
