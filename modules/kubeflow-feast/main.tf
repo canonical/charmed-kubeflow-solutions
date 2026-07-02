@@ -21,6 +21,7 @@ module "kubeflow" {
   mlmd_size                             = var.mlmd_size
   no_proxy                              = var.no_proxy
   public_url                            = var.public_url
+  model_name                            = var.model_name
   admission_webhook_revision            = var.admission_webhook_revision
   argo_controller_revision              = var.argo_controller_revision
   dex_auth_revision                     = var.dex_auth_revision
