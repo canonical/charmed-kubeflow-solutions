@@ -14,6 +14,17 @@ variable "release" {
   }
 }
 
+variable "profile" {
+  type        = string
+  description = "Deployment profile used for sizing/defaults (testing or production). Note that this variable does not refer to Kubeflow profiles, but it is used to set sensible defaults for different kind of environments, similarly as done for other charms (e.g. Kafka, ZooKeeper, OpenSearch)."
+  default     = "production"
+
+  validation {
+    condition     = contains(["testing", "production"], var.profile)
+    error_message = "Valid values for var: profile are (testing, production)."
+  }
+}
+
 variable "risk" {
   type        = string
   description = "Value for the risk to be used"
@@ -50,10 +61,18 @@ variable "dex_auth_revision" {
   default     = null
 }
 
-variable "dex_auth_config" {
-  description = "Configuration for dex-auth application"
-  type        = map(string)
-  default     = {}
+variable "dex_static_username" {
+  description = "dex-auth static username value"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "dex_static_password" {
+  description = "dex-auth static password"
+  type        = string
+  default     = ""
+  sensitive   = true
 }
 
 variable "oidc_gatekeeper_revision" {
@@ -517,6 +536,39 @@ variable "enable_mlflow" {
   default     = false
 }
 
+# Enable integrations
+
+variable "external_integrations" {
+  description = "External integrations"
+  type = map(object({
+    profile = string
+    mysql = optional(object({
+      kind             = string
+      name             = optional(string, null)
+      endpoint         = optional(string, null)
+      url              = optional(string, null)
+      database_name    = optional(string, null)
+      extra_user_roles = optional(string, null)
+    }), null)
+    postgresql = optional(object({
+      kind             = string
+      name             = optional(string, null)
+      endpoint         = optional(string, null)
+      url              = optional(string, null)
+      database_name    = optional(string, null)
+      extra_user_roles = optional(string, null)
+    }), null)
+    spark = optional(object({
+      kind            = string
+      name            = optional(string, null)
+      endpoint        = optional(string, null)
+      url             = optional(string, null)
+      service_account = optional(string, null)
+    }), null)
+  }))
+  default = {}
+}
+
 variable "mlflow_server_revision" {
   description = "Revision of the mlflow-server application"
   type        = number
@@ -724,4 +776,113 @@ variable "postgresql_k8s_config" {
   description = "Configuration for the postgresql-k8s application"
   type        = map(string)
   default     = {}
+}
+
+# Spark component
+
+variable "enable_spark" {
+  description = "Whether to deploy the Spark component"
+  type        = bool
+  default     = false
+}
+
+# S3 Integrator variables
+
+variable "s3_secret_key" {
+  description = "S3 secret key for object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_access_key" {
+  description = "S3 access key for object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_endpoint" {
+  description = "S3 endpoint for object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket" {
+  description = "S3 bucket for object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_config" {
+  description = "Configuration for s3-integrator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_revision" {
+  description = "Revision of the s3-integrator application"
+  type        = number
+  default     = null
+}
+
+# Spark Core component variables
+
+variable "spark_risk" {
+  description = "Risk channel for Spark charm deployments"
+  type        = string
+  default     = "stable"
+
+  validation {
+    condition     = contains(["edge", "beta", "candidate", "stable"], var.spark_risk)
+    error_message = "Valid values for spark_risk are (edge, beta, candidate, stable)."
+  }
+}
+
+variable "spark_history_server_revision" {
+  description = "Revision of the spark-history-server application"
+  type        = number
+  default     = null
+}
+
+variable "spark_history_server_image" {
+  description = "Container image resource for spark-history-server"
+  type        = string
+  default     = null
+}
+
+variable "spark_integration_hub_revision" {
+  description = "Revision of the spark-integration-hub application"
+  type        = number
+  default     = null
+}
+
+variable "spark_integration_hub_config" {
+  description = "Configuration for spark-integration-hub application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "spark_integration_hub_image" {
+  description = "Container image resource for spark-integration-hub"
+  type        = string
+  default     = null
+}
+
+variable "http_proxy" {
+  description = "Value of the http_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "https_proxy" {
+  description = "Value of the https_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "no_proxy" {
+  description = "Value of the no_proxy environment variable"
+  type        = string
+  default     = ""
 }

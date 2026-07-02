@@ -10,6 +10,6 @@ resource "juju_model" "kubeflow" {
 }
 
 locals {
-  model                 = "kubeflow"
-  channel_latest_edge   = "latest/edge"
+  model               = "kubeflow"
+  channel_latest_edge = "latest/edge"
 }

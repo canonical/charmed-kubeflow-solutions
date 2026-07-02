@@ -106,3 +106,4 @@ resource "juju_integration" "kserve_controller_service_accounts" {
     endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
   }
 }
+

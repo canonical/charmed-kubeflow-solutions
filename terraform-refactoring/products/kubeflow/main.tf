@@ -4,6 +4,12 @@
 resource "juju_model" "kubeflow" {
   count = var.create_model ? 1 : 0
   name  = "kubeflow"
+
+  config = {
+    juju-http-proxy  = var.http_proxy
+    juju-https-proxy = var.https_proxy
+    juju-no-proxy    = var.no_proxy
+  }
 }
 
 module "istio" {
@@ -54,8 +60,12 @@ module "auth" {
   dex_auth = {
     channel  = local.dex_auth_channel
     revision = var.dex_auth_revision
-    config   = var.dex_auth_config
+    config = {
+      "static-username" : var.dex_static_username
+      "static-password" : var.dex_static_password
+    }
   }
+
   oidc_gatekeeper = {
     channel  = local.oidc_gatekeeper_channel
     revision = var.oidc_gatekeeper_revision
@@ -175,6 +185,7 @@ module "mysql" {
     { "profile-limit-memory" = "2048" },
     var.mysql_config
   )
+  storage_size = var.profile == "testing" ? "1GB" : "10GB"
 }
 
 module "katib" {
@@ -453,7 +464,7 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  count      = (var.enable_mlflow || var.enable_feast) ? 1 : 0
+  count      = (var.enable_mlflow || var.enable_feast || length(local.external_integrations) > 0) ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../charms/resource-dispatcher"
@@ -557,7 +568,10 @@ module "kserve" {
     channel  = local.kserve_channel
     revision = var.kserve_controller_revision
     config = merge({
-      "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard"
+      "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard",
+      "http-proxy"      = var.http_proxy,
+      "https-proxy"     = var.https_proxy,
+      "no-proxy"        = var.no_proxy,
     }, var.kserve_controller_config)
   }
 
@@ -630,6 +644,11 @@ module "postgresql_k8s" {
   channel    = "14/stable"
   revision   = var.postgresql_k8s_revision
   config     = var.postgresql_k8s_config
+  storage_directives = var.profile == "testing" ? {
+    pgdata = "1GB"
+    } : {
+    pgdata = "10GB"
+  }
 }
 
 module "feast" {
@@ -705,6 +724,101 @@ module "feast" {
     revision = var.feast_ui_revision
     config   = var.feast_ui_config
   }
+}
+
+# ===============
+# Spark solutions
+# ===============
+
+resource "juju_secret" "s3_secret" {
+  depends_on = [juju_model.kubeflow]
+  count      = var.enable_spark ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  name       = "s3_secret"
+  value = {
+    secret-key = var.s3_secret_key
+    access-key = var.s3_access_key
+  }
+  info = "This is the access key and secret key for the S3 storage"
+}
+
+module "s3" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
+  count      = var.enable_spark ? 1 : 0
+  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=terraform-cc008"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  channel = "2/stable"
+  config = merge(
+    {
+      bucket      = var.s3_bucket,
+      endpoint    = var.s3_endpoint,
+      path        = "spark-events",
+      credentials = "secret:${juju_secret.s3_secret[0].secret_id}"
+    }, var.s3_config
+  )
+  constraints = "arch=amd64"
+  revision    = var.s3_revision
+}
+
+resource "juju_access_secret" "s3_secret_access" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret, module.s3]
+  count      = var.enable_spark ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  applications = [
+    module.s3[0].application.name
+  ]
+  secret_id = juju_secret.s3_secret[0].secret_id
+}
+
+module "spark" {
+  count = var.enable_spark ? 1 : 0
+
+  source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=terraform-cc008"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  risk = var.spark_risk
+
+  history_server = {
+    revision  = var.spark_history_server_revision
+    resources = var.spark_history_server_image != null ? { spark-history-server-image = var.spark_history_server_image } : {}
+  }
+  integration_hub = {
+    config      = var.spark_integration_hub_config
+    constraints = "arch=amd64"
+    revision    = var.spark_integration_hub_revision
+    resources   = var.spark_integration_hub_image != null ? { integration-hub-image = var.spark_integration_hub_image } : null
+  }
+
+  # Integrations
+
+  object_storage           = merge({ kind = "endpoint" }, module.s3[0].provides.s3_credentials)
+  object_storage_interface = module.s3[0].provides.s3_credentials.endpoint
+}
+
+module "external_integrations" {
+  for_each   = local.external_integrations
+  depends_on = [module.spark]
+
+  source = "../../components/data-kubeflow-integrator"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  profile = each.value.profile
+
+  data_kubeflow_integrator = {
+    channel  = "1/edge",
+    app_name = each.key
+  }
+
+  mysql      = each.value.mysql
+  postgresql = each.value.postgresql
+  spark      = each.value.spark
+
+  resource_dispatcher_endpoints = module.resource_dispatcher[0].provides
 }
 
 module "observability" {

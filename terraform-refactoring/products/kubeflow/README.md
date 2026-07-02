@@ -20,6 +20,7 @@
 | <a name="module_auth"></a> [auth](#module\_auth) | ../../components/auth | n/a |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
+| <a name="module_integrations"></a> [integrations](#module\_integrations) | ../../components/data-kubeflow-integrator | n/a |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
@@ -31,6 +32,8 @@
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
+| <a name="module_s3"></a> [s3](#module\_s3) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | wip-split-components |
+| <a name="module_spark"></a> [spark](#module\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core | wip-split-components |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
 | <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
 
@@ -38,6 +41,7 @@
 
 | Name | Type |
 | ---- | ---- |
+| [juju_access_secret.s3_secret_access](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_integration.kserve_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_service_accounts](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -45,6 +49,7 @@
 | [juju_integration.oidc_gatekeeper_istio_ingress_k8s_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_model.kubeflow](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
+| [juju_secret.s3_secret](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
 
 ## Inputs
 
@@ -65,6 +70,7 @@
 | <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher | `bool` | `false` | no |
 | <a name="input_enable_notebooks"></a> [enable\_notebooks](#input\_enable\_notebooks) | Whether to deploy the Notebooks component | `bool` | `true` | no |
 | <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Whether to deploy the observability component (opentelemetry-collector-k8s) | `bool` | `false` | no |
+| <a name="input_enable_spark"></a> [enable\_spark](#input\_enable\_spark) | Whether to deploy the Spark component | `bool` | `false` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Whether to deploy the Tensorboard component | `bool` | `true` | no |
 | <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Whether to deploy the training-operator application (v1 training operator) | `bool` | `true` | no |
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
@@ -74,6 +80,7 @@
 | <a name="input_feast_integrator_revision"></a> [feast\_integrator\_revision](#input\_feast\_integrator\_revision) | Revision of the feast-integrator application | `number` | `null` | no |
 | <a name="input_feast_ui_config"></a> [feast\_ui\_config](#input\_feast\_ui\_config) | Configuration for feast-ui application | `map(string)` | `{}` | no |
 | <a name="input_feast_ui_revision"></a> [feast\_ui\_revision](#input\_feast\_ui\_revision) | Revision of the feast-ui application | `number` | `null` | no |
+| <a name="input_integrations"></a> [integrations](#input\_integrations) | External integrations | `map(object({...}))` | `{}` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
 | <a name="input_istio_beacon_k8s_revision"></a> [istio\_beacon\_k8s\_revision](#input\_istio\_beacon\_k8s\_revision) | Revision of the istio-beacon-k8s application | `number` | `null` | no |
 | <a name="input_istio_ingress_k8s_config"></a> [istio\_ingress\_k8s\_config](#input\_istio\_ingress\_k8s\_config) | Configuration for istio-ingress-k8s application | `map(string)` | `{}` | no |
@@ -154,7 +161,17 @@
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
 | <a name="input_resource_dispatcher_revision"></a> [resource\_dispatcher\_revision](#input\_resource\_dispatcher\_revision) | Revision of the resource-dispatcher application | `number` | `null` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
+| <a name="input_s3_access_key"></a> [s3\_access\_key](#input\_s3\_access\_key) | S3 access key for object storage integration | `string` | `""` | no |
+| <a name="input_s3_config"></a> [s3\_config](#input\_s3\_config) | Configuration for s3-integrator application | `map(string)` | `{}` | no |
+| <a name="input_s3_revision"></a> [s3\_revision](#input\_s3\_revision) | Revision of the s3-integrator application | `number` | `null` | no |
+| <a name="input_s3_secret_key"></a> [s3\_secret\_key](#input\_s3\_secret\_key) | S3 secret key for object storage integration | `string` | `""` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
+| <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |
+| <a name="input_spark_history_server_revision"></a> [spark\_history\_server\_revision](#input\_spark\_history\_server\_revision) | Revision of the spark-history-server application | `number` | `null` | no |
+| <a name="input_spark_integration_hub_config"></a> [spark\_integration\_hub\_config](#input\_spark\_integration\_hub\_config) | Configuration for spark-integration-hub application | `map(string)` | `{}` | no |
+| <a name="input_spark_integration_hub_image"></a> [spark\_integration\_hub\_image](#input\_spark\_integration\_hub\_image) | Container image resource for spark-integration-hub | `string` | `null` | no |
+| <a name="input_spark_integration_hub_revision"></a> [spark\_integration\_hub\_revision](#input\_spark\_integration\_hub\_revision) | Revision of the spark-integration-hub application | `number` | `null` | no |
+| <a name="input_spark_risk"></a> [spark\_risk](#input\_spark\_risk) | Risk channel for Spark charm deployments | `string` | `"stable"` | no |
 | <a name="input_tensorboard_controller_config"></a> [tensorboard\_controller\_config](#input\_tensorboard\_controller\_config) | Configuration for tensorboard-controller application | `map(string)` | `{}` | no |
 | <a name="input_tensorboard_controller_revision"></a> [tensorboard\_controller\_revision](#input\_tensorboard\_controller\_revision) | Revision of the tensorboard-controller application | `number` | `null` | no |
 | <a name="input_tensorboards_web_app_config"></a> [tensorboards\_web\_app\_config](#input\_tensorboards\_web\_app\_config) | Configuration for tensorboards-web-app application | `map(string)` | `{}` | no |
