@@ -20,7 +20,7 @@ module "dex_auth" {
   source     = "git::https://github.com/canonical/dex-auth-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
-    "public-url" : var.public_url,
+    "public-url" : local.public_url,
     "connectors" : var.dex_connectors
     "static-username" : var.dex_static_username
     "static-password" : var.dex_static_password
