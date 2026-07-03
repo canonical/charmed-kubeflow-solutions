@@ -10,7 +10,7 @@ resource "juju_model" "kubeflow" {
 }
 
 locals {
-  model = var.model_name
-  track = "latest"
+  model      = var.model_name
+  track      = "latest"
   public_url = var.public_url != null ? var.public_url : "http://dex-auth.${local.model}.svc:5556"
 }
