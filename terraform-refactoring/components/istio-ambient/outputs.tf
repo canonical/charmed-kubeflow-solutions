@@ -4,44 +4,40 @@
 output "components" {
   description = "Map of the deployed Istio Ambient applications"
   value = {
-    istio_k8s         = juju_application.istio_k8s
-    istio_ingress_k8s = juju_application.istio_ingress_k8s
-    istio_beacon_k8s  = juju_application.istio_beacon_k8s
+    istio_ingress_k8s_ui  = module.istio_ingress_k8s_ui.application
+    istio_ingress_k8s_m2m = module.istio_ingress_k8s_m2m.application
+    istio_beacon_k8s      = module.istio_beacon_k8s.application
   }
 }
 
 output "provides" {
   description = "Map of endpoints provided by this component to other components (outbound relations)"
   value = {
-    istio_ingress_k8s_gateway = {
-      name     = juju_application.istio_ingress_k8s.name
-      endpoint = "gateway"
-    }
-    istio_beacon_k8s_service_mesh = {
-      name     = juju_application.istio_beacon_k8s.name
-      endpoint = "service-mesh"
-    }
-    istio_ingress_k8s_istio_ingress_route = {
-      name     = juju_application.istio_ingress_k8s.name
-      endpoint = "istio-ingress-route"
-    }
-    istio_ingress_k8s_istio_ingress_route_unauthenticated = {
-      name     = juju_application.istio_ingress_k8s.name
-      endpoint = "istio-ingress-route-unauthenticated"
-    }
-    istio_ingress_k8s_gateway_metadata = {
-      name     = juju_application.istio_ingress_k8s.name
-      endpoint = "gateway-metadata"
-    }
+    # UI gateway
+    istio_ingress_k8s_ui_istio_ingress_route                 = module.istio_ingress_k8s_ui.provides.istio_ingress_route
+    istio_ingress_k8s_ui_istio_ingress_route_unauthenticated = module.istio_ingress_k8s_ui.provides.istio_ingress_route_unauthenticated
+    istio_ingress_k8s_ui_gateway_metadata                    = module.istio_ingress_k8s_ui.provides.gateway_metadata
+    istio_ingress_k8s_ui_istio_request_auth                  = module.istio_ingress_k8s_ui.provides.istio_request_auth
+    istio_ingress_k8s_ui_metrics_endpoint                    = module.istio_ingress_k8s_ui.provides.metrics_endpoint
+
+    # M2M gateway
+    istio_ingress_k8s_m2m_istio_ingress_route                 = module.istio_ingress_k8s_m2m.provides.istio_ingress_route
+    istio_ingress_k8s_m2m_istio_ingress_route_unauthenticated = module.istio_ingress_k8s_m2m.provides.istio_ingress_route_unauthenticated
+    istio_ingress_k8s_m2m_gateway_metadata                    = module.istio_ingress_k8s_m2m.provides.gateway_metadata
+    istio_ingress_k8s_m2m_istio_request_auth                  = module.istio_ingress_k8s_m2m.provides.istio_request_auth
+    istio_ingress_k8s_m2m_metrics_endpoint                    = module.istio_ingress_k8s_m2m.provides.metrics_endpoint
+
+    # Beacon
+    istio_beacon_k8s_service_mesh     = module.istio_beacon_k8s.provides.service_mesh
+    istio_beacon_k8s_provide_cmr_mesh = module.istio_beacon_k8s.provides.provide_cmr_mesh
+    istio_beacon_k8s_metrics_endpoint = module.istio_beacon_k8s.provides.metrics_endpoint
   }
 }
 
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
-    istio_ingress_k8s_forward_auth = {
-      name     = juju_application.istio_ingress_k8s.name
-      endpoint = "forward-auth"
-    }
+    istio_ingress_k8s_ui_forward_auth  = module.istio_ingress_k8s_ui.requires.forward_auth
+    istio_ingress_k8s_m2m_forward_auth = module.istio_ingress_k8s_m2m.requires.forward_auth
   }
 }

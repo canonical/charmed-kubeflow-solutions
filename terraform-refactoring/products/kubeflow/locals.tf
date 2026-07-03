@@ -27,6 +27,15 @@ locals {
   # Istio Component (sidecar)
   istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
 
+  # Istio Component (ambient gateways + beacon)
+  istio_ingress_k8s_channel = var.release == "1.11" ? "2/${var.risk}" : "latest/${var.risk}"
+  istio_beacon_k8s_channel  = var.release == "1.11" ? "2/${var.risk}" : "latest/${var.risk}"
+
+  # IAM Auth Charms (ambient)
+  oauth2_proxy_channel                        = "latest/${var.risk}"
+  request_authentication_configurator_channel = "latest/${var.risk}"
+  github_profiles_automator_channel           = "latest/${var.risk}"
+
   # Katib Component
   katib_channel = var.release == "1.11" ? "0.19/${var.risk}" : "latest/${var.risk}"
 
@@ -58,7 +67,7 @@ locals {
 
   kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
     "service-mesh-mode"             = "istio-ambient"
-    "istio-gateway-service-account" = "istio-ingress-k8s-istio"
+    "istio-gateway-service-account" = "istio-ingress-k8s-ui-istio"
     } : {
     "service-mesh-mode"             = "istio-sidecar"
     "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
@@ -87,6 +96,37 @@ locals {
       }
     } : {}
   )
+
+  # ------------------------------------------------------------------
+  # Ambient gateway / service-mesh selectors (null when sidecar).
+  # istio-k8s runs in the istio-system model; the two gateways and the
+  # beacon are deployed by the istio-ambient component in this model.
+  # ------------------------------------------------------------------
+  ambient = var.service_mesh_type == "ambient"
+
+  ui_istio_ingress_route = local.ambient ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+  } : null
+
+  ui_gateway_metadata = local.ambient ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
+  } : null
+
+  m2m_gateway_metadata = local.ambient ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+  } : null
+
+  service_mesh = local.ambient ? {
+    kind     = "endpoint"
+    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
 
 }
 

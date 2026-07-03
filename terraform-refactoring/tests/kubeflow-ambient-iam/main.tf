@@ -1,0 +1,88 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+# ===========================================================================
+# istio-system model: Istio ambient control plane (istio-k8s).
+# The control plane is deployed in its own model and its istio-ingress-config
+# endpoint is offered cross-model so the gateways in the kubeflow model can
+# attach to it.
+# ===========================================================================
+
+resource "juju_model" "istio_system" {
+  count = var.create_istio_system_model ? 1 : 0
+  name  = var.istio_system_model_name
+}
+
+locals {
+  istio_system_model_uuid = var.create_istio_system_model ? juju_model.istio_system[0].uuid : var.istio_system_model_uuid
+}
+
+module "istio_k8s" {
+  source = "../../charms/istio-k8s"
+
+  model_uuid = local.istio_system_model_uuid
+  channel    = var.istio_k8s_channel
+  revision   = var.istio_k8s_revision
+  config     = merge(var.istio_k8s_config, var.istio_k8s_platform != "" ? { platform = var.istio_k8s_platform } : {})
+}
+
+resource "juju_offer" "istio_ingress_config" {
+  name             = "istio-ingress-config"
+  application_name = module.istio_k8s.requires.istio_ingress_config.name
+  endpoints        = [module.istio_k8s.requires.istio_ingress_config.endpoint]
+  model_uuid       = local.istio_system_model_uuid
+}
+
+# ===========================================================================
+# iam model: Canonical Identity Platform (Hydra / Kratos / Login UI).
+# Exposes oauth_offer_url (Hydra oauth), consumed cross-model by oauth2-proxy
+# and request-authentication-configurator in the kubeflow model.
+# ===========================================================================
+
+module "iam" {
+  source = "../../products/iam"
+
+  create_model = var.create_iam_model
+  model_name   = var.iam_model_name
+  model_uuid   = var.iam_model_uuid
+
+  enable_kratos_external_idp_integrator = var.enable_kratos_external_idp_integrator
+  kratos_external_idp_integrator        = var.kratos_external_idp_integrator
+}
+
+# ===========================================================================
+# kubeflow model: Kubeflow applications + the two ambient gateways + beacon +
+# the IAM auth stack. Consumes the istio-system and iam offers cross-model.
+# ===========================================================================
+
+module "kubeflow" {
+  source = "../../products/kubeflow"
+
+  release           = var.release
+  risk              = var.risk
+  create_model      = var.create_model
+  model_uuid        = var.model_uuid
+  service_mesh_type = "ambient"
+
+  # Cross-model wiring
+  istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url
+  oauth_offer_url                = module.iam.oauth_offer_url
+
+  enable_kfp         = var.enable_kfp
+  enable_katib       = var.enable_katib
+  enable_notebooks   = var.enable_notebooks
+  enable_tensorboard = var.enable_tensorboard
+  enable_training_v1 = var.enable_training_v1
+  enable_training_v2 = var.enable_training_v2
+  enable_mlflow      = var.enable_mlflow
+  enable_kserve      = var.enable_kserve
+  enable_feast       = var.enable_feast
+
+  enable_github_profiles_automator = var.enable_github_profiles_automator
+  github_profiles_automator_config = var.github_profiles_automator_config
+
+  enable_observability = var.enable_observability
+  dashboards_offer     = var.dashboards_offer
+  logging_offer        = var.logging_offer
+  metrics_offer        = var.metrics_offer
+}

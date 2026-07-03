@@ -61,13 +61,13 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_data_kubeflow_integrator"></a> [data\_kubeflow\_integrator](#input\_data\_kubeflow\_integrator) | Configuration for data-kubeflow-integrator application | `object({...})` | `{}` | no |
+| <a name="input_data_kubeflow_integrator"></a> [data\_kubeflow\_integrator](#input\_data\_kubeflow\_integrator) | Configuration for data-kubeflow-integrator application | <pre>object({<br/>    app_name    = optional(string, "data-kubeflow-integrator")<br/>    channel     = optional(string, "1/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, false)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | Reference to an existing model uuid. | `string` | n/a | yes |
-| <a name="input_mysql"></a> [mysql](#input\_mysql) | MySQL integration endpoint or offer | `object({...})` | `null` | no |
-| <a name="input_postgresql"></a> [postgresql](#input\_postgresql) | PostgreSQL integration endpoint or offer | `object({...})` | `null` | no |
-| <a name="input_profile"></a> [profile](#input\_profile) | Name of profiles to apply this to | `string` | `"*"` | no |
-| <a name="input_resource_dispatcher_endpoints"></a> [resource\_dispatcher\_endpoints](#input\_resource\_dispatcher\_endpoints) | Pointers for the resource dispatcher endpoints | `map(object({...}))` | `{}` | no |
-| <a name="input_spark"></a> [spark](#input\_spark) | Spark integration endpoint or offer | `object({...})` | `null` | no |
+| <a name="input_mysql"></a> [mysql](#input\_mysql) | n/a | <pre>object({<br/>    kind             = string<br/>    name             = optional(string, null)<br/>    endpoint         = optional(string, null)<br/>    url              = optional(string, null)<br/>    database_name    = optional(string, null)<br/>    extra_user_roles = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_postgresql"></a> [postgresql](#input\_postgresql) | n/a | <pre>object({<br/>    kind             = string<br/>    name             = optional(string, null)<br/>    endpoint         = optional(string, null)<br/>    url              = optional(string, null)<br/>    database_name    = optional(string, null)<br/>    extra_user_roles = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_profile"></a> [profile](#input\_profile) | Name of Kubeflow profile to apply this to. Use `*` to apply the integration to all profiles. | `string` | `"*"` | no |
+| <a name="input_resource_dispatcher_endpoints"></a> [resource\_dispatcher\_endpoints](#input\_resource\_dispatcher\_endpoints) | Pointers for the resource dispatcher endpoints | <pre>map(object({<br/>    name     = string<br/>    endpoint = string<br/>  }))</pre> | `{}` | no |
+| <a name="input_spark"></a> [spark](#input\_spark) | n/a | <pre>object({<br/>    kind            = string<br/>    name            = optional(string, null)<br/>    endpoint        = optional(string, null)<br/>    url             = optional(string, null)<br/>    service_account = optional(string, null)<br/>  })</pre> | `null` | no |
 
 ## Outputs
 

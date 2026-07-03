@@ -14,7 +14,7 @@ resource "juju_model" "kubeflow" {
 
 module "istio" {
   count  = var.service_mesh_type == "sidecar" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar?ref=feat/terraform-refactor"
+  source = "../../components/istio-sidecar"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -30,28 +30,95 @@ module "istio" {
   }
 }
 
+# === Ambient service mesh (control plane lives in the istio-system model) ===
+# istio-k8s runs in the dedicated istio-system model. The istio-ambient
+# component deploys the two gateways (UI / M2M) and the beacon in this model;
+# the gateways consume istio-k8s:istio-ingress-config through a cross-model
+# offer.
+
 module "ambient" {
   count  = var.service_mesh_type == "ambient" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient?ref=feat/terraform-refactor"
+  source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  istio_k8s = {
-    revision = var.istio_k8s_revision
-    config   = merge(var.istio_k8s_config, var.istio_k8s_platform != "" ? { platform = var.istio_k8s_platform } : {})
-  }
   istio_ingress_k8s = {
+    channel  = local.istio_ingress_k8s_channel
     revision = var.istio_ingress_k8s_revision
     config   = var.istio_ingress_k8s_config
   }
+  istio_ingress_k8s_ui_config  = var.istio_ingress_k8s_ui_config
+  istio_ingress_k8s_m2m_config = var.istio_ingress_k8s_m2m_config
+
   istio_beacon_k8s = {
+    channel  = local.istio_beacon_k8s_channel
     revision = var.istio_beacon_k8s_revision
     config   = var.istio_beacon_k8s_config
   }
+
+  istio_ingress_config = var.istio_ingress_config_offer_url != null ? {
+    kind = "offer"
+    url  = var.istio_ingress_config_offer_url
+  } : null
+}
+
+# === IAM forward-auth + request-auth stack (ambient only) ===================
+# oauth2-proxy provides browser session forward-auth to the UI gateway.
+# request-authentication-configurator installs JWT RequestAuthentication on both
+# gateways. Both consume Hydra oauth from the iam model cross-model.
+
+module "oauth2_proxy" {
+  count  = var.service_mesh_type == "ambient" ? 1 : 0
+  source = "../../charms/oauth2-proxy-k8s"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel    = local.oauth2_proxy_channel
+  revision   = var.oauth2_proxy_revision
+  config = merge({
+    # Forward the verified identity to upstream apps as an Authorization header.
+    set_authorization_header = true
+  }, var.oauth2_proxy_config)
+
+  oauth = var.oauth_offer_url != null ? {
+    kind = "offer"
+    url  = var.oauth_offer_url
+  } : null
+}
+
+module "request_authentication_configurator" {
+  count  = var.service_mesh_type == "ambient" ? 1 : 0
+  source = "../../charms/request-authentication-configurator"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel    = local.request_authentication_configurator_channel
+  revision   = var.request_authentication_configurator_revision
+  config = merge({
+    # JWT claim carrying the user identity, exposed downstream as this header.
+    "user-id-header-name" = "kubeflow-userid"
+  }, var.request_authentication_configurator_config)
+
+  oauth = var.oauth_offer_url != null ? {
+    kind = "offer"
+    url  = var.oauth_offer_url
+  } : null
+}
+
+module "github_profiles_automator" {
+  count  = (var.service_mesh_type == "ambient" && var.enable_github_profiles_automator) ? 1 : 0
+  source = "../../charms/github-profiles-automator"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  channel    = local.github_profiles_automator_channel
+  revision   = var.github_profiles_automator_revision
+  config     = var.github_profiles_automator_config
 }
 
 module "auth" {
-  depends_on = [module.istio, module.ambient]
+  # Legacy Dex/OIDC auth is used only on the (frozen) sidecar path. The ambient
+  # path uses the IAM stack (oauth2-proxy + request-authentication-configurator).
+  count = var.service_mesh_type == "sidecar" ? 1 : 0
+
+  depends_on = [module.istio]
 
   source = "../../components/auth"
 
@@ -72,29 +139,17 @@ module "auth" {
     config   = var.oidc_gatekeeper_config
   }
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
+  }
 
-  ingress_auth = var.service_mesh_type == "sidecar" ? {
+  ingress_auth = {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress_auth.name
     endpoint = module.istio[0].provides.istio_pilot_ingress_auth.endpoint
-  } : null
-
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route_unauthenticated = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.endpoint
-  } : null
+  }
 }
 
 module "core" {
@@ -142,23 +197,9 @@ module "core" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
-
-  gateway_metadata = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
-  } : null
+  service_mesh        = local.service_mesh
+  istio_ingress_route = local.ui_istio_ingress_route
+  gateway_metadata    = local.ui_gateway_metadata
 }
 
 module "minio" {
@@ -214,17 +255,8 @@ module "katib" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
+  service_mesh        = local.service_mesh
+  istio_ingress_route = local.ui_istio_ingress_route
 
   katib_controller = {
     channel  = local.katib_channel
@@ -271,17 +303,8 @@ module "kfp" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
+  service_mesh        = local.service_mesh
+  istio_ingress_route = local.ui_istio_ingress_route
 
   ingress = var.service_mesh_type == "sidecar" ? {
     kind     = "endpoint"
@@ -375,23 +398,9 @@ module "notebooks" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  gateway_metadata = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
-  } : null
-
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
+  gateway_metadata    = local.ui_gateway_metadata
+  service_mesh        = local.service_mesh
+  istio_ingress_route = local.ui_istio_ingress_route
 
   jupyter_controller = {
     channel  = local.notebooks_channel
@@ -432,23 +441,9 @@ module "tensorboard" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  gateway_metadata = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
-  } : null
-
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
+  gateway_metadata    = local.ui_gateway_metadata
+  service_mesh        = local.service_mesh
+  istio_ingress_route = local.ui_istio_ingress_route
 
   tensorboard_controller = {
     channel  = local.tensorboard_channel
@@ -519,17 +514,8 @@ module "mlflow" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
-
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
+  service_mesh        = local.service_mesh
+  istio_ingress_route = local.ui_istio_ingress_route
 
   mlflow_server = {
     channel  = local.mlflow_channel
@@ -552,17 +538,8 @@ module "kserve" {
     endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
   } : null
 
-  gateway_metadata = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
-  } : null
-
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
+  gateway_metadata = local.m2m_gateway_metadata
+  service_mesh     = local.service_mesh
 
   kserve_controller = {
     channel  = local.kserve_channel
@@ -614,11 +591,7 @@ module "training" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
+  service_mesh = local.service_mesh
 
   training_operator = {
     channel  = local.training_operator_channel
@@ -701,17 +674,8 @@ module "feast" {
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
   } : null
 
-  istio_ingress_route = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
-  } : null
-
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
+  istio_ingress_route = local.ui_istio_ingress_route
+  service_mesh        = local.service_mesh
 
   feast_integrator = {
     channel  = local.feast_channel
@@ -856,11 +820,11 @@ module "observability" {
   kubeflow_volumes_logging                  = module.core.requires.kubeflow_volumes_logging
   pvcviewer_operator_logging                = module.core.requires.pvcviewer_operator_logging
 
-  # Auth
-  dex_auth_grafana_dashboard = module.auth.provides.dex_auth_grafana_dashboard
-  dex_auth_metrics_endpoint  = module.auth.provides.dex_auth_metrics_endpoint
-  dex_auth_logging           = module.auth.requires.dex_auth_logging
-  oidc_gatekeeper_logging    = module.auth.requires.oidc_gatekeeper_logging
+  # Auth (sidecar only; the ambient path uses the IAM stack)
+  dex_auth_grafana_dashboard = var.service_mesh_type == "sidecar" ? module.auth[0].provides.dex_auth_grafana_dashboard : null
+  dex_auth_metrics_endpoint  = var.service_mesh_type == "sidecar" ? module.auth[0].provides.dex_auth_metrics_endpoint : null
+  dex_auth_logging           = var.service_mesh_type == "sidecar" ? module.auth[0].requires.dex_auth_logging : null
+  oidc_gatekeeper_logging    = var.service_mesh_type == "sidecar" ? module.auth[0].requires.oidc_gatekeeper_logging : null
 
   # KFP
   argo_controller_grafana_dashboard = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null

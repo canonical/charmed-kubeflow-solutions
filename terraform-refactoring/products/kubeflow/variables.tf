@@ -364,23 +364,6 @@ variable "istio_ingressgateway_config" {
 
 # Ambient Component Applications
 
-variable "istio_k8s_revision" {
-  description = "Revision of the istio-k8s application"
-  type        = number
-  default     = null
-}
-
-variable "istio_k8s_config" {
-  description = "Configuration for istio-k8s application"
-  type        = map(string)
-  default     = {}
-}
-
-variable "istio_k8s_platform" {
-  description = "Platform configuration for istio-k8s"
-  type        = string
-  default     = ""
-}
 
 variable "istio_ingress_k8s_revision" {
   description = "Revision of the istio-ingress-k8s application"
@@ -402,6 +385,82 @@ variable "istio_beacon_k8s_revision" {
 
 variable "istio_beacon_k8s_config" {
   description = "Configuration for istio-beacon-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_ui_config" {
+  description = "Extra configuration for the UI istio-ingress-k8s gateway (merged over istio_ingress_k8s_config)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_m2m_config" {
+  description = "Extra configuration for the M2M istio-ingress-k8s gateway (merged over istio_ingress_k8s_config)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_config_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of istio-k8s:istio-ingress-config from the
+    istio-system model. Both ambient gateways consume this offer. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+# IAM Auth Applications (ambient only)
+
+variable "oauth_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of hydra:oauth from the iam model. Consumed by
+    oauth2-proxy and request-authentication-configurator. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "oauth2_proxy_revision" {
+  description = "Revision of the oauth2-proxy-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "oauth2_proxy_config" {
+  description = "Configuration for the oauth2-proxy-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "request_authentication_configurator_revision" {
+  description = "Revision of the request-authentication-configurator application"
+  type        = number
+  default     = null
+}
+
+variable "request_authentication_configurator_config" {
+  description = "Configuration for the request-authentication-configurator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "enable_github_profiles_automator" {
+  description = "Whether to deploy the github-profiles-automator charm (ambient only)"
+  type        = bool
+  default     = false
+}
+
+variable "github_profiles_automator_revision" {
+  description = "Revision of the github-profiles-automator application"
+  type        = number
+  default     = null
+}
+
+variable "github_profiles_automator_config" {
+  description = "Configuration for the github-profiles-automator application"
   type        = map(string)
   default     = {}
 }
