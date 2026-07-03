@@ -168,6 +168,12 @@ variable "mlmd_size" {
   default     = "10G"
 }
 
+variable "model_name" {
+  description = "Name of the juju model/kubernetes namespace used for the kubeflow deployment"
+  type        = string
+  default     = "kubeflow"
+}
+
 variable "no_proxy" {
   description = "Value of the no_proxy environment variable"
   type        = string
@@ -183,7 +189,7 @@ variable "oidc_gatekeeper_ca_bundle" {
 variable "public_url" {
   description = "Public URL of Kubeflow for auth/OIDC"
   type        = string
-  default     = "http://dex-auth.kubeflow.svc:5556"
+  default     = null
 }
 
 variable "admission_webhook_revision" {
