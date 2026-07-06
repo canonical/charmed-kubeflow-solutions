@@ -7,13 +7,13 @@ locals {
   oidc_gatekeeper_channel = var.release == "1.11" ? "ckf-1.10/${var.risk}" : "latest/${var.risk}"
 
   # Core Component
-  admission_webhook_channel       = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
-  kubeflow_dashboard_channel      = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
-  kubeflow_profiles_channel       = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  admission_webhook_channel       = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
+  kubeflow_dashboard_channel      = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
+  kubeflow_profiles_channel       = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
   kubeflow_roles_channel          = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
-  kubeflow_volumes_channel        = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  kubeflow_volumes_channel        = var.release == "1.11" ? "1.11/${var.risk}" : "latest/${var.risk}"
   metacontroller_operator_channel = var.release == "1.11" ? "4.11/${var.risk}" : "latest/${var.risk}"
-  pvcviewer_operator_channel      = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  pvcviewer_operator_channel      = var.release == "1.11" ? "1.11/${var.risk}" : "latest/${var.risk}"
 
   # KFP Component
   kfp_channel             = var.release == "1.11" ? "2.15/${var.risk}" : "latest/${var.risk}"
