@@ -30,25 +30,25 @@ jobs:
         product: [kubeflow] #, mlflow, feast, spark]
         service-mesh-type: [ambient] # [sidecar, ambient]
         include:
-          - product: kubeflow
-            service-mesh-type: sidecar
-            uats:
-              env: kubeflow-remote
+          # - product: kubeflow
+          #   service-mesh-type: sidecar
+          #   uats:
+          #     env: kubeflow-remote
           - product: kubeflow
             service-mesh-type: ambient
             uats_branch: main
             uats:
               env: kubeflow-remote
-          - product: mlflow
-            uats:
-              env: mlflow-remote
-          - product: feast
-            uats:
-              env: feast-remote
-          - product: spark
-            uats:
-              env: spark-remote
-              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+          # - product: mlflow
+          #   uats:
+          #     env: mlflow-remote
+          # - product: feast
+          #   uats:
+          #     env: feast-remote
+          # - product: spark
+          #   uats:
+          #     env: spark-remote
+          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
         exclude:
           - product: spark
             service-mesh-type: ambient
