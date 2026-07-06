@@ -22,7 +22,8 @@ on:
 jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
-    runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
+    runs-on: ubuntu-24.04
+    # ["self-hosted-linux-amd64-noble-xlarge"]
 
     strategy:
       fail-fast: false
