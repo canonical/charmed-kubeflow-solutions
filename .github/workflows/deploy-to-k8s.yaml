@@ -36,7 +36,6 @@ jobs:
           #     env: kubeflow-remote
           - product: kubeflow
             service-mesh-type: ambient
-            uats_branch: main
             uats:
               env: kubeflow-remote
           # - product: mlflow
