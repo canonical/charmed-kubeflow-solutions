@@ -31,10 +31,10 @@ locals {
   katib_channel = var.release == "1.11" ? "0.19/${var.risk}" : "latest/${var.risk}"
 
   # Notebooks Component
-  notebooks_channel = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  notebooks_channel = var.release == "1.11" ? "1.11/${var.risk}" : "latest/${var.risk}"
 
   # Tensorboard Component
-  tensorboard_channel = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  tensorboard_channel = var.release == "1.11" ? "1.11/${var.risk}" : "latest/${var.risk}"
 
   # Resource Dispatcher Charm
   resource_dispatcher_channel = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
