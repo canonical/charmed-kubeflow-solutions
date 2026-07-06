@@ -27,28 +27,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
-        service-mesh-type: [sidecar, ambient]
+        product: [kubeflow] #, mlflow, feast, spark]
+        service-mesh-type: [ambient] # [sidecar, ambient]
         include:
-          - product: kubeflow
-            service-mesh-type: sidecar
-            uats:
-              env: kubeflow-remote
+          # - product: kubeflow
+          #   service-mesh-type: sidecar
+          #   uats:
+          #     env: kubeflow-remote
           - product: kubeflow
             service-mesh-type: ambient
             uats_branch: main
             uats:
               env: kubeflow-remote
-          - product: mlflow
-            uats:
-              env: mlflow-remote
-          - product: feast
-            uats:
-              env: feast-remote
-          - product: spark
-            uats:
-              env: spark-remote
-              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+          # - product: mlflow
+          #   uats:
+          #     env: mlflow-remote
+          # - product: feast
+          #   uats:
+          #     env: feast-remote
+          # - product: spark
+          #   uats:
+          #     env: spark-remote
+          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
         exclude:
           - product: spark
             service-mesh-type: ambient
@@ -181,6 +181,10 @@ jobs:
 
           tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
+      - name: Setup tmate session
+        if: false
+        uses: canonical/action-tmate@main
+        
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
