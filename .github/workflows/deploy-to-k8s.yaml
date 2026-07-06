@@ -22,14 +22,13 @@ on:
 jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
-    runs-on: ubuntu-24.04
-    # ["self-hosted-linux-amd64-noble-xlarge"]
+    runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
 
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
-        service-mesh-type: [sidecar, ambient]
+        product: [kubeflow] #, mlflow, feast, spark]
+        service-mesh-type: [ambient] # [sidecar, ambient]
         include:
           - product: kubeflow
             service-mesh-type: sidecar
@@ -182,6 +181,9 @@ jobs:
 
           tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
+        
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
