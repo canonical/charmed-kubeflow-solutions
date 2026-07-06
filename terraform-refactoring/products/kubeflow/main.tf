@@ -780,7 +780,6 @@ resource "juju_access_secret" "s3_secret_access" {
 
 module "spark" {
   count = var.enable_spark ? 1 : 0
-
   source = "git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
