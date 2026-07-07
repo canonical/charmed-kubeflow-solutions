@@ -120,7 +120,12 @@ module "github_profiles_automator" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   channel    = local.github_profiles_automator_channel
   revision   = var.github_profiles_automator_revision
-  config     = var.github_profiles_automator_config
+  config = merge({
+    # Istio ingress gateway service-account principals (SPIFFE identities) that
+    # are allowed to reach the profiles, one per ambient gateway.
+    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient[0].components.istio_ingress_k8s_ui.name}-istio"
+    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient[0].components.istio_ingress_k8s_m2m.name}-istio"
+  }, var.github_profiles_automator_config)
 }
 
 module "auth" {

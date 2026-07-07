@@ -2,6 +2,10 @@
 # See LICENSE file for licensing details.
 
 locals {
+  # Name of the kubeflow model (falls back to "kubeflow" when deploying into an
+  # existing model referenced only by UUID).
+  kubeflow_model_name = var.create_model ? juju_model.kubeflow[0].name : "kubeflow"
+
   # Auth Component
   dex_auth_channel        = var.release == "1.11" ? "2.41/${var.risk}" : "latest/${var.risk}"
   oidc_gatekeeper_channel = var.release == "1.11" ? "ckf-1.10/${var.risk}" : "latest/${var.risk}"
