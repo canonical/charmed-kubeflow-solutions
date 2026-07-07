@@ -78,7 +78,6 @@ module "kubeflow" {
   enable_kserve      = var.enable_kserve
   enable_feast       = var.enable_feast
 
-  enable_github_profiles_automator = var.enable_github_profiles_automator
   github_profiles_automator_config = var.github_profiles_automator_config
 
   enable_observability = var.enable_observability

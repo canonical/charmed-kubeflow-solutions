@@ -447,12 +447,6 @@ variable "request_authentication_configurator_config" {
   default     = {}
 }
 
-variable "enable_github_profiles_automator" {
-  description = "Whether to deploy the github-profiles-automator charm (ambient only)"
-  type        = bool
-  default     = false
-}
-
 variable "github_profiles_automator_revision" {
   description = "Revision of the github-profiles-automator application"
   type        = number

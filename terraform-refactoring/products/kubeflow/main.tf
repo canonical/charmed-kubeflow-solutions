@@ -56,7 +56,11 @@ module "ambient" {
     config   = var.istio_beacon_k8s_config
   }
 
-  istio_ingress_config = var.istio_ingress_config_offer_url != null ? {
+  # The offer URL is only known after apply (it comes from a juju_offer in the
+  # istio-system model), so this object is gated on the known service_mesh_type
+  # rather than on the URL value — otherwise the gateways' integration count
+  # would depend on an unknown value.
+  istio_ingress_config = var.service_mesh_type == "ambient" ? {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
   } : null
@@ -79,7 +83,9 @@ module "oauth2_proxy" {
     set_authorization_header = true
   }, var.oauth2_proxy_config)
 
-  oauth = var.oauth_offer_url != null ? {
+  # Gated on the known service_mesh_type (not the offer URL, which is only known
+  # after apply) so oauth2-proxy's oauth integration count is plan-determinable.
+  oauth = var.service_mesh_type == "ambient" ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
@@ -97,14 +103,16 @@ module "request_authentication_configurator" {
     "user-id-header-name" = "kubeflow-userid"
   }, var.request_authentication_configurator_config)
 
-  oauth = var.oauth_offer_url != null ? {
+  # Gated on the known service_mesh_type (not the offer URL, which is only known
+  # after apply) so the oauth integration count is plan-determinable.
+  oauth = var.service_mesh_type == "ambient" ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
 }
 
 module "github_profiles_automator" {
-  count  = (var.service_mesh_type == "ambient" && var.enable_github_profiles_automator) ? 1 : 0
+  count  = var.service_mesh_type == "ambient" ? 1 : 0
   source = "../../charms/github-profiles-automator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid

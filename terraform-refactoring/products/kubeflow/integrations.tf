@@ -58,7 +58,7 @@ resource "juju_integration" "request_auth_m2m" {
 
 # github-profiles-automator joins the in-model service mesh (ambient).
 resource "juju_integration" "github_profiles_automator_service_mesh" {
-  count      = (var.service_mesh_type == "ambient" && var.enable_github_profiles_automator) ? 1 : 0
+  count      = var.service_mesh_type == "ambient" ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
