@@ -67,7 +67,7 @@ variable "create_iam_model" {
 variable "iam_model_name" {
   description = "Name of the iam model to create."
   type        = string
-  default     = "iam-test"
+  default     = "iam"
   nullable    = false
 }
 
