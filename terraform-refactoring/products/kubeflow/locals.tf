@@ -43,7 +43,7 @@ locals {
   mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/${var.risk}"
 
   # KServe Component
-  kserve_channel  = var.release == "1.11" ? "0.15/${var.risk}" : "latest/${var.risk}"
+  kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
   knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
   deploy_minio    = var.enable_kfp || var.enable_mlflow
