@@ -28,8 +28,12 @@ locals {
   istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
 
   # Istio Component (ambient gateways + beacon)
-  istio_ingress_k8s_channel = var.release == "1.11" ? "2/${var.risk}" : "2/${var.risk}"
-  istio_beacon_k8s_channel  = var.release == "1.11" ? "2/${var.risk}" : "2/${var.risk}"
+  # NOTE: the ambient IAM architecture needs the istio-ingress-route,
+  # gateway-metadata and istio-request-auth endpoints, which are currently only
+  # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
+  # them). Move these back to a stable track once those endpoints graduate.
+  istio_ingress_k8s_channel = "dev/edge"
+  istio_beacon_k8s_channel  = "dev/edge"
 
   # IAM Auth Charms (ambient)
   oauth2_proxy_channel                        = "latest/edge"

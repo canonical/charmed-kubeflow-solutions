@@ -81,7 +81,7 @@ module "oauth2_proxy" {
   config = merge({
     # Forward the verified identity to upstream apps as an Authorization header.
     set_authorization_header = true
-    dev = true
+    dev                      = true
     enable_jwt_bearer_tokens = true
   }, var.oauth2_proxy_config)
 
