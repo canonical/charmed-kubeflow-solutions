@@ -67,7 +67,7 @@ variable "create_iam_model" {
 variable "iam_model_name" {
   description = "Name of the iam model to create."
   type        = string
-  default     = "iam"
+  default     = "iam-test"
   nullable    = false
 }
 
@@ -119,7 +119,7 @@ variable "release" {
 variable "risk" {
   description = "Charm channel risk level to deploy (stable, candidate, beta, edge)."
   type        = string
-  default     = "stable"
+  default     = "edge"
 }
 
 variable "enable_kfp" {
@@ -172,12 +172,6 @@ variable "enable_kserve" {
 
 variable "enable_feast" {
   description = "Deploy Feast."
-  type        = bool
-  default     = false
-}
-
-variable "enable_github_profiles_automator" {
-  description = "Deploy the github-profiles-automator charm."
   type        = bool
   default     = false
 }
