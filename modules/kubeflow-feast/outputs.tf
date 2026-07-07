@@ -28,3 +28,7 @@ output "ingress_provider" {
 output "dashboard_links_provider" {
   value = module.kubeflow.dashboard_links_provider
 }
+
+output "kserve_controller" {
+  value = module.kubeflow.kserve_controller
+}

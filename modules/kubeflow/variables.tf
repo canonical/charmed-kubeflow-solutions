@@ -174,7 +174,7 @@ variable "mlmd_size" {
 }
 
 variable "model_name" {
-  description = "Name of the juju model/kubernetes namespace used for the kubeflow deployment"
+  description = "Name of the Juju model/Kubernetes namespace used for the Kubeflow deployment"
   type        = string
   default     = "kubeflow"
 }
@@ -192,7 +192,7 @@ variable "no_proxy" {
 }
 
 variable "public_url" {
-  description = "Public URL of Kubeflow for auth/OIDC. The value defaults to the dex-auth URL of the deployment namespace"
+  description = "Public URL of Kubeflow for auth/OIDC. The default 'null' value results in a dex-auth URL that references the deployment namespace within it's FQDN"
   type        = string
   default     = null
 }
