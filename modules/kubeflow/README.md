@@ -38,10 +38,11 @@ The solution module offers the following configurable inputs:
 | `minio_size`| string | MinIO database storage size | False |
 | `minio_storage_service_endpoint`| string | MinIO storage service endpoint, required if minio_mode is 'gateway' | False |
 | `mlmd_size`| string | MLMD database storage size | False |
+| `model_name`| string | Name of the Juju model/Kubernetes namespace used for the Kubeflow deployment | False |
 | `no_proxy`| string | Value of the no_proxy environment variable | False |
 | `oidc_gatekeeper_ca_bundle`| string | Custom CA to be trusted by OIDC gatekeeper | False |
 | `opentelemetry_collector_k8s_size`| string | OpenTelemetry collector storage size | False |
-| `public_url`| string | Public URL of Kubeflow for auth/OIDC | False |
+| `public_url`| string | Public URL of Kubeflow for auth/OIDC. The default 'null' value results in a dex-auth URL that references the deployment namespace within it's FQDN | False |
 | `risk`| string | Value for the risk to be used | False |
 ### Outputs
 Upon applied, the solution module exports the following outputs:
@@ -64,7 +65,23 @@ If `kubeflow` model is created outside of this solution module (ie in a higher-l
 ```
 terraform apply -var create_model=false
 ```
-By default, it is set to `true` in order to enable the Charmed Kubeflow's standalone deployment. Note also that this takes into account that Kubeflow can be deployed only to a namespace called `kubeflow`.
+By default, it is set to `true` in order to enable the Charmed Kubeflow's standalone deployment.
+
+### Change the default model
+To deploy this solution module in a model other than the default `kubeflow` one, pass the targeted model name to the `model_name` variable.
+```
+terraform apply -var model_name="custom_model_name"
+```
+
+### Set public URL
+If not explicitly set, var.public_url defaults to `null`, resulting in a local.public_url that includes the model name based on the below expression in `main.tf`.
+```
+ public_url = var.public_url != null ? var.public_url : "http://dex-auth.${local.model}.svc:5556"
+ ```
+This will guarantee requests to dex are properly routed to the dex pods running in the correct Kubernetes namespace. The dex-auth url can also be explicitly set by passing the url to the `public_url` variable. This will take precedence over the url value derived from the `http://dex-auth.${local.model}.svc:5556` expression.
+```
+terraform apply -var public_url="https://custom-auth.url.com:5556"
+```
 
 ### COS configuration
 
@@ -88,4 +105,3 @@ If there is already an instance of the opentelemetry-collector-k8s charm in the 
 terraform apply -var cos_configuration=true -var existing_opentelemetry_collector_name="dummy-opentelemetry-collector"
 ```
 > :warning: Setting this input without `cos_configuration` will not have any effect.
-
