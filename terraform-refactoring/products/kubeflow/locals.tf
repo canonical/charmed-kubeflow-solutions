@@ -28,13 +28,13 @@ locals {
   istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
 
   # Istio Component (ambient gateways + beacon)
-  istio_ingress_k8s_channel = var.release == "1.11" ? "2/${var.risk}" : "latest/${var.risk}"
-  istio_beacon_k8s_channel  = var.release == "1.11" ? "2/${var.risk}" : "latest/${var.risk}"
+  istio_ingress_k8s_channel = var.release == "1.11" ? "2/${var.risk}" : "2/${var.risk}"
+  istio_beacon_k8s_channel  = var.release == "1.11" ? "2/${var.risk}" : "2/${var.risk}"
 
   # IAM Auth Charms (ambient)
-  oauth2_proxy_channel                        = "latest/${var.risk}"
-  request_authentication_configurator_channel = "latest/${var.risk}"
-  github_profiles_automator_channel           = "latest/${var.risk}"
+  oauth2_proxy_channel                        = "latest/edge"
+  request_authentication_configurator_channel = "latest/edge"
+  github_profiles_automator_channel           = "latest/edge"
 
   # Katib Component
   katib_channel = var.release == "1.11" ? "0.19/${var.risk}" : "latest/${var.risk}"

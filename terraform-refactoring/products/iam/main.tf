@@ -33,7 +33,7 @@ resource "juju_application" "traefik" {
     name     = "traefik-k8s"
     channel  = var.traefik_channel
     revision = var.traefik_revision
-    base     = "ubuntu@24.04"
+    base     = "ubuntu@26.04"
   }
 
   config = var.traefik_config
@@ -49,7 +49,7 @@ resource "juju_application" "self_signed_certificates" {
     name     = "self-signed-certificates"
     channel  = var.self_signed_certificates_channel
     revision = var.self_signed_certificates_revision
-    base     = "ubuntu@24.04"
+    base     = "ubuntu@22.04"
   }
 
   config = var.self_signed_certificates_config
