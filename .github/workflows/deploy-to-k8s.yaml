@@ -38,6 +38,7 @@ jobs:
             service-mesh-type: ambient
             uats:
               env: kubeflow-remote
+	      extra-args: --include-ambient-tests
           # - product: mlflow
           #   uats:
           #     env: mlflow-remote
