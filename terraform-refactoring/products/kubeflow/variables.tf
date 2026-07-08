@@ -416,7 +416,7 @@ variable "istio_ingress_config_offer_url" {
 variable "self_signed_certificates_channel" {
   description = "Channel for the self-signed-certificates charm serving the ambient gateways."
   type        = string
-  default     = "latest/stable"
+  default     = "1/stable"
   nullable    = false
 }
 

@@ -76,7 +76,7 @@ variable "traefik_config" {
 variable "self_signed_certificates_channel" {
   description = "Channel for the self-signed-certificates dependency."
   type        = string
-  default     = "latest/stable"
+  default     = "1/stable"
   nullable    = false
 }
 
