@@ -38,7 +38,7 @@ jobs:
             service-mesh-type: ambient
             uats:
               env: kubeflow-remote
-	      extra-args: --include-ambient-tests
+              extra-args: --include-ambient-tests
           # - product: mlflow
           #   uats:
           #     env: mlflow-remote
@@ -182,7 +182,7 @@ jobs:
           tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Setup tmate session
-        # if: false
+        if: false
         uses: canonical/action-tmate@main
         
       - name: Run UATs
