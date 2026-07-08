@@ -6,9 +6,19 @@ output "model_uuid" {
   value       = local.model_uuid
 }
 
+output "iam_core_model_uuid" {
+  description = "UUID of the iam-core model."
+  value       = local.iam_core_model_uuid
+}
+
 output "model_name" {
   description = "Name of the iam model."
   value       = var.create_model ? juju_model.iam[0].name : null
+}
+
+output "iam_core_model_name" {
+  description = "Name of the iam-core model."
+  value       = var.create_model ? juju_model.iam_core[0].name : null
 }
 
 output "oauth_offer_url" {

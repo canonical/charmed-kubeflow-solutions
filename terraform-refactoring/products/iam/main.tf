@@ -6,8 +6,16 @@ resource "juju_model" "iam" {
   name  = var.model_name
 }
 
+# IAM Core (postgresql-k8s / traefik-k8s / self-signed-certificates) live in
+# a separate model and are wired into the iam model via cross-model offers.
+resource "juju_model" "iam_core" {
+  count = var.create_model ? 1 : 0
+  name  = var.iam_core_model_name
+}
+
 locals {
-  model_uuid = var.create_model ? juju_model.iam[0].uuid : var.model_uuid
+  model_uuid          = var.create_model ? juju_model.iam[0].uuid : var.model_uuid
+  iam_core_model_uuid = var.create_model ? juju_model.iam_core[0].uuid : var.iam_core_model_uuid
 
   # App names of the bundle-deployed apps, derived exactly as the vendored
   # iam-bundle-integration module derives them (var.<app>.name with these
@@ -17,12 +25,12 @@ locals {
   login_ui_app_name = try(var.login_ui.name, "login-ui")
 }
 
-# --- Dependencies deployed in the iam model ---------------------------------
+# --- IAM Core deployed in the iam-core model --------------------
 
 module "postgresql_k8s" {
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
-  model_uuid = local.model_uuid
+  model_uuid = local.iam_core_model_uuid
   app_name   = "postgresql-k8s"
   channel    = var.postgresql_k8s_channel
   revision   = var.postgresql_k8s_revision
@@ -34,7 +42,7 @@ module "postgresql_k8s" {
 
 resource "juju_application" "traefik" {
   name       = "traefik"
-  model_uuid = local.model_uuid
+  model_uuid = local.iam_core_model_uuid
 
   charm {
     name     = "traefik-k8s"
@@ -50,7 +58,7 @@ resource "juju_application" "traefik" {
 
 resource "juju_application" "self_signed_certificates" {
   name       = "self-signed-certificates"
-  model_uuid = local.model_uuid
+  model_uuid = local.iam_core_model_uuid
 
   charm {
     name     = "self-signed-certificates"
@@ -64,9 +72,9 @@ resource "juju_application" "self_signed_certificates" {
   units  = 1
 }
 
-# traefik TLS termination via self-signed-certificates
+# traefik TLS termination via self-signed-certificates (iam-core model)
 resource "juju_integration" "traefik_certificates" {
-  model_uuid = local.model_uuid
+  model_uuid = local.iam_core_model_uuid
 
   application {
     name     = juju_application.traefik.name
@@ -79,23 +87,30 @@ resource "juju_integration" "traefik_certificates" {
   }
 }
 
-# --- Same-model offers consumed by the iam-bundle module --------------------
-# The iam-bundle-integration module consumes its dependencies via offer URLs
-# (it reads the model through data.juju_model.this). We therefore expose the
-# in-model dependencies as offers and feed their URLs back into the module.
+# --- Cross-model offers from the iam-core model ---------------------
+# The iam-bundle (iam model) consumes postgresql/traefik-route via offer URLs,
+# and the Identity Platform apps trust the self-signed CA via the send-ca-cert
+# offer.
 
 resource "juju_offer" "postgresql" {
   name             = "postgresql"
   application_name = module.postgresql_k8s.app_name
   endpoints        = ["database"]
-  model_uuid       = local.model_uuid
+  model_uuid       = local.iam_core_model_uuid
 }
 
 resource "juju_offer" "traefik_route" {
   name             = "traefik-route"
   application_name = juju_application.traefik.name
   endpoints        = ["traefik-route"]
-  model_uuid       = local.model_uuid
+  model_uuid       = local.iam_core_model_uuid
+}
+
+resource "juju_offer" "send_ca_cert" {
+  name             = "send-ca-cert"
+  application_name = juju_application.self_signed_certificates.name
+  endpoints        = ["send-ca-cert"]
+  model_uuid       = local.iam_core_model_uuid
 }
 
 # --- Identity Platform bundle (hydra / kratos / login-ui) -------------------
@@ -122,23 +137,20 @@ module "iam_bundle" {
   login_ui = var.login_ui
 }
 
-# --- CA-cert trust ----------------------------------------------------------
-# Kratos and the Login UI must trust the self-signed CA that terminates TLS on
-# traefik, so they receive it via self-signed-certificates:send-ca-cert. These
-# are in-model relations (same iam model), using the app names exposed by the
-# bundle module.
+# --- CA-cert trust (cross-model: iam-core -> iam) -------------------
+# Kratos and the Login UI trust the self-signed CA (which terminates TLS on
+# traefik) by consuming the send-ca-cert offer from the iam-core model.
 resource "juju_integration" "kratos_receive_ca_cert" {
   depends_on = [module.iam_bundle]
   model_uuid = local.model_uuid
 
   application {
-    name     = juju_application.self_signed_certificates.name
-    endpoint = "send-ca-cert"
+    name     = local.kratos_app_name
+    endpoint = "receive-ca-cert"
   }
 
   application {
-    name     = local.kratos_app_name
-    endpoint = "receive-ca-cert"
+    offer_url = juju_offer.send_ca_cert.url
   }
 }
 
@@ -147,12 +159,11 @@ resource "juju_integration" "login_ui_receive_ca_cert" {
   model_uuid = local.model_uuid
 
   application {
-    name     = juju_application.self_signed_certificates.name
-    endpoint = "send-ca-cert"
+    name     = local.login_ui_app_name
+    endpoint = "receive-ca-cert"
   }
 
   application {
-    name     = local.login_ui_app_name
-    endpoint = "receive-ca-cert"
+    offer_url = juju_offer.send_ca_cert.url
   }
 }

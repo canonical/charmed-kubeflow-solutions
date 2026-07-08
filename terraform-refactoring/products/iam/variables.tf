@@ -20,7 +20,20 @@ variable "model_uuid" {
   default     = null
 }
 
-# --- Dependencies deployed in the iam model ---------------------------------
+variable "iam_core_model_name" {
+  description = "Name of the iam-core model (postgresql-k8s / traefik-k8s / self-signed-certificates) to create when create_model is true."
+  type        = string
+  default     = "iam-core"
+  nullable    = false
+}
+
+variable "iam_core_model_uuid" {
+  description = "UUID of an existing iam-core model when create_model is false."
+  type        = string
+  default     = null
+}
+
+# --- Requirement dependencies (deployed in the iam-core model) -------
 
 variable "postgresql_k8s_channel" {
   description = "Channel for the postgresql-k8s dependency."
