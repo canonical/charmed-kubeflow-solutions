@@ -91,6 +91,14 @@ module "oauth2_proxy" {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
+
+  # Trust the self-signed CA fronting the Identity Platform via the send-ca-cert
+  # offer from the iam-core model. Gated on the known service_mesh_type so the
+  # integration count is plan-determinable.
+  ca_cert = var.service_mesh_type == "ambient" ? {
+    kind = "offer"
+    url  = var.send_ca_cert_offer_url
+  } : null
 }
 
 module "request_authentication_configurator" {

@@ -444,6 +444,17 @@ variable "oauth_offer_url" {
   default     = null
 }
 
+variable "send_ca_cert_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of self-signed-certificates:send-ca-cert from the
+    iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the
+    self-signed CA fronting the Identity Platform. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "oauth2_proxy_revision" {
   description = "Revision of the oauth2-proxy-k8s application"
   type        = number

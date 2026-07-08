@@ -84,6 +84,7 @@ module "kubeflow" {
   # Cross-model wiring
   istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url
   oauth_offer_url                = module.iam.oauth_offer_url
+  send_ca_cert_offer_url         = module.iam.send_ca_cert_offer_url
 
   # Per-gateway configuration (e.g. external_hostname)
   istio_ingress_k8s_ui_config  = var.istio_ingress_k8s_ui_config

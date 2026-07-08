@@ -34,13 +34,15 @@ No modules.
 | ---- | ---- |
 | [juju_application.oauth2_proxy](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.oauth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.receive_ca_cert](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Name to give the deployed application. | `string` | `"oauth2-proxy"` | no |
-| <a name="input_base"></a> [base](#input\_base) | The operating system on which to deploy. | `string` | `"ubuntu@24.04"` | no |
+| <a name="input_base"></a> [base](#input\_base) | The operating system on which to deploy. | `string` | `"ubuntu@22.04"` | no |
+| <a name="input_ca_cert"></a> [ca\_cert](#input\_ca\_cert) | CA certificate provider for oauth2-proxy, consumed on<br/>oauth2-proxy:receive-ca-cert (interface certificate\_transfer). Supports a<br/>same-model endpoint (kind = "endpoint") or a cross-model offer<br/>(kind = "offer"). Used to trust the self-signed CA from the iam-core model<br/>(send-ca-cert offer). | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_channel"></a> [channel](#input\_channel) | Channel of the charm. | `string` | `"latest/stable"` | no |
 | <a name="input_config"></a> [config](#input\_config) | Map for configuration options. | `map(string)` | `{}` | no |
 | <a name="input_constraints"></a> [constraints](#input\_constraints) | String listing constraints for this application. | `string` | `null` | no |

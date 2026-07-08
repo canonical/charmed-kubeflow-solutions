@@ -92,3 +92,33 @@ variable "oauth" {
     error_message = "oauth.url is required when kind is \"offer\"."
   }
 }
+
+variable "ca_cert" {
+  description = <<-EOT
+    CA certificate provider for oauth2-proxy, consumed on
+    oauth2-proxy:receive-ca-cert (interface certificate_transfer). Supports a
+    same-model endpoint (kind = "endpoint") or a cross-model offer
+    (kind = "offer"). Used to trust the self-signed CA from the iam-core model
+    (send-ca-cert offer).
+  EOT
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  default = null
+
+  validation {
+    condition     = var.ca_cert == null || contains(["endpoint", "offer"], var.ca_cert.kind)
+    error_message = "ca_cert.kind must be one of: endpoint, offer."
+  }
+  validation {
+    condition     = var.ca_cert == null || var.ca_cert.kind != "endpoint" || (var.ca_cert.name != null && var.ca_cert.name != "")
+    error_message = "ca_cert.name is required when kind is \"endpoint\"."
+  }
+  validation {
+    condition     = var.ca_cert == null || var.ca_cert.kind != "offer" || (var.ca_cert.url != null && var.ca_cert.url != "")
+    error_message = "ca_cert.url is required when kind is \"offer\"."
+  }
+}
