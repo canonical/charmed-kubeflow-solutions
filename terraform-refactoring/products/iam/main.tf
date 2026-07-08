@@ -126,15 +126,15 @@ module "iam_bundle" {
   enable_kratos_external_idp_integrator = var.enable_kratos_external_idp_integrator
   kratos_external_idp_integrator        = var.kratos_external_idp_integrator
 
-  hydra = var.hydra
-  kratos = merge(var.kratos, {
+  hydra = merge({ channel = "latest/stable" }, var.hydra, var.hydra_revision != null ? { revision = var.hydra_revision } : {})
+  kratos = merge({ channel = "latest/stable" }, var.kratos, {
     # Product-level default Kratos config (overridable via var.kratos.config).
     config = merge({
       dev         = "true"
       enforce_mfa = "false"
     }, try(var.kratos.config, {}))
-  })
-  login_ui = var.login_ui
+  }, var.kratos_revision != null ? { revision = var.kratos_revision } : {})
+  login_ui = merge({ channel = "latest/stable" }, var.login_ui, var.login_ui_revision != null ? { revision = var.login_ui_revision } : {})
 }
 
 # --- CA-cert trust (cross-model: iam-core -> iam) -------------------

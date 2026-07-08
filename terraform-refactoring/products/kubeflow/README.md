@@ -45,7 +45,10 @@
 | Name | Type |
 | ---- | ---- |
 | [juju_access_secret.s3_secret_access](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
+| [juju_application.self_signed_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.github_profiles_automator_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.istio_ingress_m2m_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.istio_ingress_ui_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_m2m_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -53,6 +56,7 @@
 | [juju_integration.minio_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.mlflow_server_m2m_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.oauth2_proxy_ui_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.oauth2_proxy_ui_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.request_auth_m2m](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.request_auth_ui](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -73,7 +77,6 @@
 | <a name="input_dex_static_password"></a> [dex\_static\_password](#input\_dex\_static\_password) | dex-auth static password | `string` | `""` | no |
 | <a name="input_dex_static_username"></a> [dex\_static\_username](#input\_dex\_static\_username) | dex-auth static username value | `string` | `""` | no |
 | <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Whether to deploy the Feast component (feast-integrator and feast-ui) | `bool` | `false` | no |
-| <a name="input_enable_github_profiles_automator"></a> [enable\_github\_profiles\_automator](#input\_enable\_github\_profiles\_automator) | Whether to deploy the github-profiles-automator charm (ambient only) | `bool` | `false` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Whether to deploy the KServe component | `bool` | `true` | no |
@@ -188,6 +191,10 @@
 | <a name="input_s3_endpoint"></a> [s3\_endpoint](#input\_s3\_endpoint) | S3 endpoint for object storage integration | `string` | `""` | no |
 | <a name="input_s3_revision"></a> [s3\_revision](#input\_s3\_revision) | Revision of the s3-integrator application | `number` | `null` | no |
 | <a name="input_s3_secret_key"></a> [s3\_secret\_key](#input\_s3\_secret\_key) | S3 secret key for object storage integration | `string` | `""` | no |
+| <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates charm serving the ambient gateways. | `string` | `"latest/stable"` | no |
+| <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Configuration for the self-signed-certificates application. | `map(string)` | `{}` | no |
+| <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision of the self-signed-certificates application. | `number` | `null` | no |
+| <a name="input_send_ca_cert_offer_url"></a> [send\_ca\_cert\_offer\_url](#input\_send\_ca\_cert\_offer\_url) | Cross-model offer URL of self-signed-certificates:send-ca-cert from the<br/>iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the<br/>self-signed CA fronting the Identity Platform. Required when<br/>service\_mesh\_type is 'ambient'. | `string` | `null` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
 | <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |
 | <a name="input_spark_history_server_revision"></a> [spark\_history\_server\_revision](#input\_spark\_history\_server\_revision) | Revision of the spark-history-server application | `number` | `null` | no |

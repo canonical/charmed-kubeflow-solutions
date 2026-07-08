@@ -27,6 +27,6 @@ output "oauth_offer_url" {
 }
 
 output "send_ca_cert_offer_url" {
-  description = "self-signed-certificates send-ca-cert offer URL (iam-core model), consumed cross-model (e.g. by istio-k8s:jwks-ca-cert)."
+  description = "self-signed-certificates send-ca-cert offer URL (iam-core model), consumed cross-model (e.g. by istio-k8s:jwks-ca-cert and oauth2-proxy:receive-ca-cert)."
   value       = juju_offer.send_ca_cert.url
 }

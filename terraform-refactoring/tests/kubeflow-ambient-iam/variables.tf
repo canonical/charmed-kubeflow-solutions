@@ -106,6 +106,24 @@ variable "kratos_external_idp_integrator" {
   default     = {}
 }
 
+variable "hydra_revision" {
+  description = "Revision for the Hydra application."
+  type        = number
+  default     = null
+}
+
+variable "kratos_revision" {
+  description = "Revision for the Kratos application."
+  type        = number
+  default     = null
+}
+
+variable "login_ui_revision" {
+  description = "Revision for the Identity Platform Login UI application."
+  type        = number
+  default     = null
+}
+
 variable "traefik_config" {
   description = "Configuration for the iam Traefik ingress (e.g. external_hostname)."
   type        = map(string)

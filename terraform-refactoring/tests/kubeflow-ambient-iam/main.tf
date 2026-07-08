@@ -64,6 +64,10 @@ module "iam" {
   enable_kratos_external_idp_integrator = var.enable_kratos_external_idp_integrator
   kratos_external_idp_integrator        = var.kratos_external_idp_integrator
 
+  hydra_revision    = var.hydra_revision
+  kratos_revision   = var.kratos_revision
+  login_ui_revision = var.login_ui_revision
+
   traefik_config = var.traefik_config
 }
 

@@ -119,14 +119,32 @@ variable "hydra" {
   default     = {}
 }
 
+variable "hydra_revision" {
+  description = "Revision for the Hydra application. Overrides the revision in var.hydra when set."
+  type        = number
+  default     = null
+}
+
 variable "kratos" {
   description = "Configuration for the Kratos application (passed through to the iam-bundle module)."
   type        = any
   default     = {}
 }
 
+variable "kratos_revision" {
+  description = "Revision for the Kratos application. Overrides the revision in var.kratos when set."
+  type        = number
+  default     = null
+}
+
 variable "login_ui" {
   description = "Configuration for the Identity Platform Login UI application (passed through to the iam-bundle module)."
   type        = any
   default     = {}
+}
+
+variable "login_ui_revision" {
+  description = "Revision for the Identity Platform Login UI application. Overrides the revision in var.login_ui when set."
+  type        = number
+  default     = null
 }
