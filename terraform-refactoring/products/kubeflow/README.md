@@ -16,7 +16,8 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_ambient"></a> [ambient](#module\_ambient) | ../../components/istio-ambient | n/a |
+| <a name="module_ambient_dex"></a> [ambient\_dex](#module\_ambient\_dex) | ../../components/istio-ambient-dex | n/a |
+| <a name="module_ambient_iam"></a> [ambient\_iam](#module\_ambient\_iam) | ../../components/istio-ambient | n/a |
 | <a name="module_auth"></a> [auth](#module\_auth) | ../../components/auth | n/a |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_external_integrations"></a> [external\_integrations](#module\_external\_integrations) | ../../components/data-kubeflow-integrator | n/a |
@@ -32,7 +33,7 @@
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
 | <a name="module_oauth2_proxy"></a> [oauth2\_proxy](#module\_oauth2\_proxy) | ../../charms/oauth2-proxy-k8s | n/a |
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
-| <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
+| <a name="module_postgresql"></a> [postgresql](#module\_postgresql) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_request_authentication_configurator"></a> [request\_authentication\_configurator](#module\_request\_authentication\_configurator) | ../../charms/request-authentication-configurator | n/a |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
 | <a name="module_s3"></a> [s3](#module\_s3) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
@@ -57,6 +58,7 @@
 | [juju_integration.mlflow_server_m2m_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.oauth2_proxy_ui_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.oauth2_proxy_ui_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.oidc_gatekeeper_istio_ingress_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.request_auth_m2m](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.request_auth_ui](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -107,6 +109,9 @@
 | <a name="input_istio_ingress_k8s_ui_config"></a> [istio\_ingress\_k8s\_ui\_config](#input\_istio\_ingress\_k8s\_ui\_config) | Extra configuration for the UI istio-ingress-k8s gateway (merged over istio\_ingress\_k8s\_config) | `map(string)` | `{}` | no |
 | <a name="input_istio_ingressgateway_config"></a> [istio\_ingressgateway\_config](#input\_istio\_ingressgateway\_config) | Configuration for istio-ingressgateway application | `map(string)` | <pre>{<br/>  "kind": "ingress"<br/>}</pre> | no |
 | <a name="input_istio_ingressgateway_revision"></a> [istio\_ingressgateway\_revision](#input\_istio\_ingressgateway\_revision) | Revision of the istio-ingressgateway application | `number` | `null` | no |
+| <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control-plane charm (ambient-dex only). | `map(string)` | `{}` | no |
+| <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only). | `string` | `""` | no |
+| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there). | `number` | `null` | no |
 | <a name="input_istio_pilot_config"></a> [istio\_pilot\_config](#input\_istio\_pilot\_config) | Configuration for istio-pilot application | `map(string)` | <pre>{<br/>  "default-gateway": "kubeflow-gateway"<br/>}</pre> | no |
 | <a name="input_istio_pilot_revision"></a> [istio\_pilot\_revision](#input\_istio\_pilot\_revision) | Revision of the istio-pilot application | `number` | `null` | no |
 | <a name="input_jupyter_controller_config"></a> [jupyter\_controller\_config](#input\_jupyter\_controller\_config) | Configuration for jupyter-controller application | `map(string)` | `{}` | no |
@@ -159,13 +164,16 @@
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | URL of the prometheus\_remote\_write interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_minio_config"></a> [minio\_config](#input\_minio\_config) | Configuration for minio application | `map(string)` | `{}` | no |
 | <a name="input_minio_revision"></a> [minio\_revision](#input\_minio\_revision) | Revision of the minio application | `number` | `null` | no |
+| <a name="input_minio_storage_size"></a> [minio\_storage\_size](#input\_minio\_storage\_size) | MinIO database storage size | `string` | `"10G"` | no |
 | <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | `{}` | no |
 | <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `null` | no |
 | <a name="input_mlmd_config"></a> [mlmd\_config](#input\_mlmd\_config) | Configuration for mlmd application | `map(string)` | `{}` | no |
 | <a name="input_mlmd_revision"></a> [mlmd\_revision](#input\_mlmd\_revision) | Revision of the mlmd application | `number` | `null` | no |
+| <a name="input_mlmd_storage_size"></a> [mlmd\_storage\_size](#input\_mlmd\_storage\_size) | MLMD database storage size | `string` | `"10G"` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing Juju model (required when create\_model is false) | `string` | `null` | no |
 | <a name="input_mysql_config"></a> [mysql\_config](#input\_mysql\_config) | Configuration for the mysql-db application | `map(string)` | `{}` | no |
 | <a name="input_mysql_revision"></a> [mysql\_revision](#input\_mysql\_revision) | Revision of the mysql-db application | `number` | `null` | no |
+| <a name="input_mysql_storage_size"></a> [mysql\_storage\_size](#input\_mysql\_storage\_size) | MySQL database storage size | `string` | `"10G"` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
 | <a name="input_oauth2_proxy_config"></a> [oauth2\_proxy\_config](#input\_oauth2\_proxy\_config) | Configuration for the oauth2-proxy-k8s application | `map(string)` | `{}` | no |
 | <a name="input_oauth2_proxy_revision"></a> [oauth2\_proxy\_revision](#input\_oauth2\_proxy\_revision) | Revision of the oauth2-proxy-k8s application | `number` | `null` | no |
@@ -174,9 +182,9 @@
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
 | <a name="input_opentelemetry_collector_k8s_config"></a> [opentelemetry\_collector\_k8s\_config](#input\_opentelemetry\_collector\_k8s\_config) | Configuration for the opentelemetry-collector-k8s application | `map(string)` | `{}` | no |
 | <a name="input_opentelemetry_collector_k8s_revision"></a> [opentelemetry\_collector\_k8s\_revision](#input\_opentelemetry\_collector\_k8s\_revision) | Revision of the opentelemetry-collector-k8s application | `number` | `null` | no |
-| <a name="input_postgresql_k8s_config"></a> [postgresql\_k8s\_config](#input\_postgresql\_k8s\_config) | Configuration for the postgresql-k8s application | `map(string)` | `{}` | no |
-| <a name="input_postgresql_k8s_revision"></a> [postgresql\_k8s\_revision](#input\_postgresql\_k8s\_revision) | Revision of the postgresql-k8s application | `number` | `null` | no |
-| <a name="input_profile"></a> [profile](#input\_profile) | Deployment profile used for sizing/defaults (testing or production). Note that this variable does not refer to Kubeflow profiles, but it is used to set sensible defaults for different kind of environments, similarly as done for other charms (e.g. Kafka, ZooKeeper, OpenSearch). | `string` | `"production"` | no |
+| <a name="input_postgresql_config"></a> [postgresql\_config](#input\_postgresql\_config) | Configuration for the postgresql application | `map(string)` | `{}` | no |
+| <a name="input_postgresql_revision"></a> [postgresql\_revision](#input\_postgresql\_revision) | Revision of the postgresql application | `number` | `null` | no |
+| <a name="input_postgresql_storage_size"></a> [postgresql\_storage\_size](#input\_postgresql\_storage\_size) | PostgreSQL database storage size | `string` | `"10G"` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
@@ -191,11 +199,11 @@
 | <a name="input_s3_endpoint"></a> [s3\_endpoint](#input\_s3\_endpoint) | S3 endpoint for object storage integration | `string` | `""` | no |
 | <a name="input_s3_revision"></a> [s3\_revision](#input\_s3\_revision) | Revision of the s3-integrator application | `number` | `null` | no |
 | <a name="input_s3_secret_key"></a> [s3\_secret\_key](#input\_s3\_secret\_key) | S3 secret key for object storage integration | `string` | `""` | no |
-| <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates charm serving the ambient gateways. | `string` | `"latest/stable"` | no |
+| <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates charm serving the ambient gateways. | `string` | `"1/stable"` | no |
 | <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Configuration for the self-signed-certificates application. | `map(string)` | `{}` | no |
 | <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision of the self-signed-certificates application. | `number` | `null` | no |
 | <a name="input_send_ca_cert_offer_url"></a> [send\_ca\_cert\_offer\_url](#input\_send\_ca\_cert\_offer\_url) | Cross-model offer URL of self-signed-certificates:send-ca-cert from the<br/>iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the<br/>self-signed CA fronting the Identity Platform. Required when<br/>service\_mesh\_type is 'ambient'. | `string` | `null` | no |
-| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
+| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Service mesh + auth mode: 'sidecar' (istio-pilot + Dex/OIDC), 'ambient-dex' (ambient mesh + Dex/OIDC), or 'ambient-iam' (ambient mesh + Identity Platform). | `string` | `"sidecar"` | no |
 | <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |
 | <a name="input_spark_history_server_revision"></a> [spark\_history\_server\_revision](#input\_spark\_history\_server\_revision) | Revision of the spark-history-server application | `number` | `null` | no |
 | <a name="input_spark_integration_hub_config"></a> [spark\_integration\_hub\_config](#input\_spark\_integration\_hub\_config) | Configuration for spark-integration-hub application | `map(string)` | `{}` | no |

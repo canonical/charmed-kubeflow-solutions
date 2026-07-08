@@ -102,7 +102,7 @@ module "kubeflow" {
   risk              = var.risk
   create_model      = var.create_model
   model_uuid        = var.model_uuid
-  service_mesh_type = "ambient"
+  service_mesh_type = "ambient-iam"
 
   # Cross-model wiring
   istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url

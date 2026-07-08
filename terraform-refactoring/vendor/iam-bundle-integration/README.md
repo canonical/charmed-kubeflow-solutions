@@ -81,12 +81,10 @@ Upstream root files vendored here: `applications.tf`, `cos.tf`,
 | [juju_integration.tracing_login_ui](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_offer.kratos_info_offer](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/offer) | resource |
 | [juju_model.this](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/model) | data source |
-| [juju_offer.database](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/offer) | data source |
 | [juju_offer.grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/offer) | data source |
 | [juju_offer.logging](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/offer) | data source |
 | [juju_offer.metrics](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/offer) | data source |
 | [juju_offer.tracing](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/offer) | data source |
-| [juju_offer.traefik_route](https://registry.terraform.io/providers/juju/juju/latest/docs/data-sources/offer) | data source |
 
 ## Inputs
 

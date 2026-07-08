@@ -30,14 +30,15 @@ module "istio" {
   }
 }
 
-# === Ambient service mesh (control plane lives in the istio-system model) ===
-# istio-k8s runs in the dedicated istio-system model. The istio-ambient
-# component deploys the two gateways (UI / M2M) and the beacon in this model;
-# the gateways consume istio-k8s:istio-ingress-config through a cross-model
-# offer.
+# === Ambient service mesh =================================================
+# Two ambient submodes (mutually exclusive):
+#  - ambient-iam: two gateways (UI/M2M) + beacon here; istio-k8s runs in the
+#    istio-system model (cross-model istio-ingress-config offer); IAM auth.
+#  - ambient-dex: single gateway + beacon + istio-k8s all in this model
+#    (component istio-ambient-dex); legacy Dex/OIDC auth.
 
-module "ambient" {
-  count  = var.service_mesh_type == "ambient" ? 1 : 0
+module "ambient_iam" {
+  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -60,10 +61,35 @@ module "ambient" {
   # istio-system model), so this object is gated on the known service_mesh_type
   # rather than on the URL value — otherwise the gateways' integration count
   # would depend on an unknown value.
-  istio_ingress_config = var.service_mesh_type == "ambient" ? {
+  istio_ingress_config = var.service_mesh_type == "ambient-iam" ? {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
   } : null
+}
+
+# ambient-dex: legacy single-gateway ambient mesh with istio-k8s deployed
+# in-model, fronted by the Dex/OIDC `auth` component.
+module "ambient_dex" {
+  count  = var.service_mesh_type == "ambient-dex" ? 1 : 0
+  source = "../../components/istio-ambient-dex"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  istio_k8s = {
+    channel  = local.istio_k8s_channel
+    revision = var.istio_k8s_revision
+    config   = merge(var.istio_k8s_config, var.istio_k8s_platform != "" ? { platform = var.istio_k8s_platform } : {})
+  }
+  istio_ingress_k8s = {
+    channel  = local.istio_ingress_k8s_channel
+    revision = var.istio_ingress_k8s_revision
+    config   = var.istio_ingress_k8s_config
+  }
+  istio_beacon_k8s = {
+    channel  = local.istio_beacon_k8s_channel
+    revision = var.istio_beacon_k8s_revision
+    config   = var.istio_beacon_k8s_config
+  }
 }
 
 # === IAM forward-auth + request-auth stack (ambient only) ===================
@@ -72,7 +98,7 @@ module "ambient" {
 # gateways. Both consume Hydra oauth from the iam model cross-model.
 
 module "oauth2_proxy" {
-  count  = var.service_mesh_type == "ambient" ? 1 : 0
+  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
   source = "../../charms/oauth2-proxy-k8s"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -87,7 +113,7 @@ module "oauth2_proxy" {
 
   # Gated on the known service_mesh_type (not the offer URL, which is only known
   # after apply) so oauth2-proxy's oauth integration count is plan-determinable.
-  oauth = var.service_mesh_type == "ambient" ? {
+  oauth = var.service_mesh_type == "ambient-iam" ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
@@ -102,7 +128,7 @@ module "oauth2_proxy" {
 }
 
 module "request_authentication_configurator" {
-  count  = var.service_mesh_type == "ambient" ? 1 : 0
+  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
   source = "../../charms/request-authentication-configurator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -115,14 +141,14 @@ module "request_authentication_configurator" {
 
   # Gated on the known service_mesh_type (not the offer URL, which is only known
   # after apply) so the oauth integration count is plan-determinable.
-  oauth = var.service_mesh_type == "ambient" ? {
+  oauth = var.service_mesh_type == "ambient-iam" ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
 }
 
 module "github_profiles_automator" {
-  count  = var.service_mesh_type == "ambient" ? 1 : 0
+  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
   source = "../../charms/github-profiles-automator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -131,15 +157,15 @@ module "github_profiles_automator" {
   config = merge({
     # Istio ingress gateway service-account principals (SPIFFE identities) that
     # are allowed to reach the profiles, one per ambient gateway.
-    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient[0].components.istio_ingress_k8s_ui.name}-istio"
-    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient[0].components.istio_ingress_k8s_m2m.name}-istio"
+    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient_iam[0].components.istio_ingress_k8s_ui.name}-istio"
+    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient_iam[0].components.istio_ingress_k8s_m2m.name}-istio"
   }, var.github_profiles_automator_config)
 }
 
 # TLS certificates for the ambient gateways. Provides the `certificates`
 # relation consumed by both istio-ingress-k8s gateways.
 resource "juju_application" "self_signed_certificates" {
-  count = var.service_mesh_type == "ambient" ? 1 : 0
+  count = var.service_mesh_type == "ambient-iam" ? 1 : 0
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   name       = "self-signed-certificates"
@@ -157,11 +183,11 @@ resource "juju_application" "self_signed_certificates" {
 }
 
 module "auth" {
-  # Legacy Dex/OIDC auth is used only on the (frozen) sidecar path. The ambient
-  # path uses the IAM stack (oauth2-proxy + request-authentication-configurator).
-  count = var.service_mesh_type == "sidecar" ? 1 : 0
+  # Legacy Dex/OIDC auth: used on the sidecar and ambient-dex paths. The
+  # ambient-iam path uses the IAM stack instead.
+  count = local.legacy_auth ? 1 : 0
 
-  depends_on = [module.istio]
+  depends_on = [module.istio, module.ambient_dex]
 
   source = "../../components/auth"
 
@@ -182,21 +208,26 @@ module "auth" {
     config   = var.oidc_gatekeeper_config
   }
 
-  ingress = {
+  # sidecar: front via istio-pilot ingress. ambient-dex: join the mesh + use the
+  # single gateway's unauthenticated route.
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  }
+  } : null
 
-  ingress_auth = {
+  ingress_auth = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress_auth.name
     endpoint = module.istio[0].provides.istio_pilot_ingress_auth.endpoint
-  }
+  } : null
+
+  service_mesh                        = local.ambient_dex ? local.service_mesh : null
+  istio_ingress_route_unauthenticated = local.istio_ingress_route_unauthenticated
 }
 
 module "core" {
-  depends_on = [module.istio, module.ambient, module.auth]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.auth]
 
   source = "../../components/core"
 
@@ -247,7 +278,7 @@ module "core" {
 
 module "minio" {
   count      = local.deploy_minio ? 1 : 0
-  depends_on = [module.istio, module.ambient]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../charms/minio"
 
@@ -278,7 +309,7 @@ module "mysql" {
 
 module "katib" {
   count      = var.enable_katib ? 1 : 0
-  depends_on = [module.core, module.mysql, module.istio, module.ambient]
+  depends_on = [module.core, module.mysql, module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../components/katib"
 
@@ -326,7 +357,7 @@ module "katib" {
 
 module "kfp" {
   count      = var.enable_kfp ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.mysql]
 
   source = "../../components/kfp"
 
@@ -430,7 +461,7 @@ module "kfp" {
 
 module "notebooks" {
   count      = var.enable_notebooks ? 1 : 0
-  depends_on = [module.core, module.istio, module.ambient]
+  depends_on = [module.core, module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../components/notebooks"
 
@@ -467,7 +498,7 @@ module "notebooks" {
 
 module "tensorboard" {
   count      = var.enable_tensorboard ? 1 : 0
-  depends_on = [module.core, module.istio, module.ambient]
+  depends_on = [module.core, module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../components/tensorboard"
 
@@ -510,7 +541,7 @@ module "tensorboard" {
 
 module "resource_dispatcher" {
   count      = (var.enable_mlflow || var.enable_feast || length(local.external_integrations) > 0) ? 1 : 0
-  depends_on = [module.istio, module.ambient]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../charms/resource-dispatcher"
 
@@ -522,7 +553,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql, module.resource_dispatcher]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.mysql, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
@@ -576,7 +607,7 @@ module "mlflow" {
 
 module "kserve" {
   count      = local.deploy_kserve ? 1 : 0
-  depends_on = [module.istio, module.ambient]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../components/kserve"
 
@@ -626,7 +657,7 @@ module "kserve" {
 
 module "training" {
   count      = (var.enable_training_v1 || var.enable_training_v2) ? 1 : 0
-  depends_on = [module.core, module.istio, module.ambient]
+  depends_on = [module.core, module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../components/training"
 
@@ -658,7 +689,7 @@ module "training" {
 
 module "postgresql" {
   count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
@@ -674,7 +705,7 @@ module "postgresql" {
 
 module "feast" {
   count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.resource_dispatcher, module.postgresql]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.resource_dispatcher, module.postgresql]
 
   source = "../../components/feast"
 
@@ -835,7 +866,7 @@ module "external_integrations" {
 module "observability" {
   count = var.enable_observability ? 1 : 0
   depends_on = [
-    module.auth, module.core, module.istio, module.ambient,
+    module.auth, module.core, module.istio, module.ambient_iam, module.ambient_dex,
     module.kfp, module.katib, module.kserve, module.notebooks,
     module.tensorboard, module.training, module.mlflow, module.minio,
   ]
@@ -868,10 +899,10 @@ module "observability" {
   pvcviewer_operator_logging                = module.core.requires.pvcviewer_operator_logging
 
   # Auth (sidecar only; the ambient path uses the IAM stack)
-  dex_auth_grafana_dashboard = var.service_mesh_type == "sidecar" ? module.auth[0].provides.dex_auth_grafana_dashboard : null
-  dex_auth_metrics_endpoint  = var.service_mesh_type == "sidecar" ? module.auth[0].provides.dex_auth_metrics_endpoint : null
-  dex_auth_logging           = var.service_mesh_type == "sidecar" ? module.auth[0].requires.dex_auth_logging : null
-  oidc_gatekeeper_logging    = var.service_mesh_type == "sidecar" ? module.auth[0].requires.oidc_gatekeeper_logging : null
+  dex_auth_grafana_dashboard = local.legacy_auth ? module.auth[0].provides.dex_auth_grafana_dashboard : null
+  dex_auth_metrics_endpoint  = local.legacy_auth ? module.auth[0].provides.dex_auth_metrics_endpoint : null
+  dex_auth_logging           = local.legacy_auth ? module.auth[0].requires.dex_auth_logging : null
+  oidc_gatekeeper_logging    = local.legacy_auth ? module.auth[0].requires.oidc_gatekeeper_logging : null
 
   # KFP
   argo_controller_grafana_dashboard = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null
@@ -935,10 +966,7 @@ module "observability" {
   minio_metrics_endpoint  = local.deploy_minio ? module.minio[0].provides.metrics_endpoint : null
 
   # Service mesh (ambient only)
-  service_mesh = var.service_mesh_type == "ambient" ? {
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  } : null
+  service_mesh = local.beacon
 
   # MLflow
   mlflow_server_grafana_dashboard = var.enable_mlflow ? module.mlflow[0].provides.mlflow_server_grafana_dashboard : null

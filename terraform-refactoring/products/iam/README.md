@@ -74,7 +74,7 @@ model.
 | <a name="input_postgresql_k8s_channel"></a> [postgresql\_k8s\_channel](#input\_postgresql\_k8s\_channel) | Channel for the postgresql-k8s dependency. | `string` | `"14/stable"` | no |
 | <a name="input_postgresql_k8s_config"></a> [postgresql\_k8s\_config](#input\_postgresql\_k8s\_config) | Extra config for the postgresql-k8s dependency. | `map(string)` | `{}` | no |
 | <a name="input_postgresql_k8s_revision"></a> [postgresql\_k8s\_revision](#input\_postgresql\_k8s\_revision) | Revision for the postgresql-k8s dependency. | `number` | `null` | no |
-| <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates dependency. | `string` | `"latest/stable"` | no |
+| <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates dependency. | `string` | `"1/stable"` | no |
 | <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Config for the self-signed-certificates dependency. | `map(string)` | `{}` | no |
 | <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision for the self-signed-certificates dependency. | `number` | `null` | no |
 | <a name="input_storage_size"></a> [storage\_size](#input\_storage\_size) | Storage size for the postgresql-k8s dependency. | `string` | `"10GB"` | no |

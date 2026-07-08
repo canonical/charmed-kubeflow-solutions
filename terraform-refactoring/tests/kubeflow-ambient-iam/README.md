@@ -84,6 +84,7 @@ The deployment always uses `service_mesh_type = "ambient"`. The legacy sidecar
 
 | Name | Type |
 | ---- | ---- |
+| [juju_integration.istio_k8s_jwks_ca_cert](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_model.istio_system](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
 | [juju_offer.istio_ingress_config](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/offer) | resource |
 
@@ -96,7 +97,6 @@ The deployment always uses `service_mesh_type = "ambient"`. The legacy sidecar
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create the kubeflow Juju model. | `bool` | `true` | no |
 | <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | Offer URL for COS Grafana dashboards. | `string` | `null` | no |
 | <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Deploy Feast. | `bool` | `false` | no |
-| <a name="input_enable_github_profiles_automator"></a> [enable\_github\_profiles\_automator](#input\_enable\_github\_profiles\_automator) | Deploy the github-profiles-automator charm. | `bool` | `false` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Deploy Katib. | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Deploy Kubeflow Pipelines. | `bool` | `true` | no |
 | <a name="input_enable_kratos_external_idp_integrator"></a> [enable\_kratos\_external\_idp\_integrator](#input\_enable\_kratos\_external\_idp\_integrator) | Deploy the Kratos External IdP Integrator (Google / Entra / etc.). | `bool` | `false` | no |
@@ -107,21 +107,31 @@ The deployment always uses `service_mesh_type = "ambient"`. The legacy sidecar
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Deploy Tensorboard. | `bool` | `true` | no |
 | <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Deploy the v1 Training Operator. | `bool` | `true` | no |
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Deploy the v2 Kubeflow Trainer. | `bool` | `false` | no |
+| <a name="input_external_auth_hostname"></a> [external\_auth\_hostname](#input\_external\_auth\_hostname) | External hostname for the iam Traefik ingress. | `string` | `null` | no |
+| <a name="input_external_m2m_hostname"></a> [external\_m2m\_hostname](#input\_external\_m2m\_hostname) | External hostname for the M2M ambient ingress gateway. | `string` | `null` | no |
+| <a name="input_external_ui_hostname"></a> [external\_ui\_hostname](#input\_external\_ui\_hostname) | External hostname for the UI ambient ingress gateway. | `string` | `null` | no |
 | <a name="input_github_profiles_automator_config"></a> [github\_profiles\_automator\_config](#input\_github\_profiles\_automator\_config) | Configuration for the github-profiles-automator charm (e.g. repository and PMR path). | `map(string)` | `{}` | no |
+| <a name="input_hydra_revision"></a> [hydra\_revision](#input\_hydra\_revision) | Revision for the Hydra application. | `number` | `null` | no |
 | <a name="input_iam_model_name"></a> [iam\_model\_name](#input\_iam\_model\_name) | Name of the iam model to create. | `string` | `"iam"` | no |
 | <a name="input_iam_model_uuid"></a> [iam\_model\_uuid](#input\_iam\_model\_uuid) | UUID of an existing model to deploy the Identity Platform into (required when create\_iam\_model is false). | `string` | `null` | no |
-| <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. | `string` | `"2/stable"` | no |
+| <a name="input_istio_ingress_k8s_m2m_config"></a> [istio\_ingress\_k8s\_m2m\_config](#input\_istio\_ingress\_k8s\_m2m\_config) | Configuration for the M2M ambient gateway (e.g. external\_hostname). | `map(string)` | `{}` | no |
+| <a name="input_istio_ingress_k8s_ui_config"></a> [istio\_ingress\_k8s\_ui\_config](#input\_istio\_ingress\_k8s\_ui\_config) | Configuration for the UI ambient gateway (e.g. external\_hostname). | `map(string)` | `{}` | no |
+| <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these). | `string` | `"dev/edge"` | no |
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control plane charm. | `map(string)` | `{}` | no |
-| <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s (merged into its config as 'platform' when non-empty). | `string` | `""` | no |
+| <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s (always merged into its config as 'platform', including an empty string). | `string` | `""` | no |
 | <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision for the istio-k8s control plane charm. | `number` | `null` | no |
 | <a name="input_istio_system_model_name"></a> [istio\_system\_model\_name](#input\_istio\_system\_model\_name) | Name of the istio-system model to create. | `string` | `"istio-system"` | no |
 | <a name="input_istio_system_model_uuid"></a> [istio\_system\_model\_uuid](#input\_istio\_system\_model\_uuid) | UUID of an existing model to deploy istio-k8s into (required when create\_istio\_system\_model is false). | `string` | `null` | no |
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
+| <a name="input_kratos_revision"></a> [kratos\_revision](#input\_kratos\_revision) | Revision for the Kratos application. | `number` | `null` | no |
+| <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for the kserve-controller application (e.g. domain-name). | `map(string)` | `{}` | no |
 | <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | Offer URL for COS Loki logging. | `string` | `null` | no |
+| <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing kubeflow model (required when create\_model is false). | `string` | `null` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
-| <a name="input_risk"></a> [risk](#input\_risk) | Charm channel risk level to deploy (stable, candidate, beta, edge). | `string` | `"stable"` | no |
+| <a name="input_risk"></a> [risk](#input\_risk) | Charm channel risk level to deploy (stable, candidate, beta, edge). | `string` | `"edge"` | no |
+| <a name="input_traefik_config"></a> [traefik\_config](#input\_traefik\_config) | Configuration for the iam Traefik ingress (e.g. external\_hostname). | `map(string)` | `{}` | no |
 
 ## Outputs
 

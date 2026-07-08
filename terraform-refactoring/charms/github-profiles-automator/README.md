@@ -38,7 +38,7 @@ No modules.
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Name to give the deployed application. | `string` | `"github-profiles-automator"` | no |
 | <a name="input_base"></a> [base](#input\_base) | The operating system on which to deploy. | `string` | `"ubuntu@24.04"` | no |
-| <a name="input_channel"></a> [channel](#input\_channel) | Channel of the charm. | `string` | `"latest/stable"` | no |
+| <a name="input_channel"></a> [channel](#input\_channel) | Channel of the charm. | `string` | `"latest/edge"` | no |
 | <a name="input_config"></a> [config](#input\_config) | Map for configuration options (e.g. `repository`, `pmr-path`,<br/>`sync-period`). See the charm's config.yaml for the full list. | `map(string)` | `{}` | no |
 | <a name="input_constraints"></a> [constraints](#input\_constraints) | String listing constraints for this application. | `string` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | Reference to an existing model uuid. | `string` | n/a | yes |

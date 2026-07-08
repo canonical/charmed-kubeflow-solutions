@@ -38,6 +38,7 @@ locals {
   # them). Move these back to a stable track once those endpoints graduate.
   istio_ingress_k8s_channel = "dev/edge"
   istio_beacon_k8s_channel  = "dev/edge"
+  istio_k8s_channel         = "dev/edge"
 
   # IAM Auth Charms (ambient)
   oauth2_proxy_channel                        = "latest/edge"
@@ -73,9 +74,9 @@ locals {
   training_operator_channel = var.release == "1.11" ? "1.9/${var.risk}" : "latest/${var.risk}"
   kubeflow_trainer_channel  = var.release == "1.11" ? "2.1/edge" : "latest/${var.risk}"
 
-  kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
+  kubeflow_profiles_service_mesh_config = local.ambient ? {
     "service-mesh-mode"             = "istio-ambient"
-    "istio-gateway-service-account" = "istio-ingress-k8s-ui-istio"
+    "istio-gateway-service-account" = local.ambient_iam ? "istio-ingress-k8s-ui-istio" : "istio-ingress-k8s-istio"
     } : {
     "service-mesh-mode"             = "istio-sidecar"
     "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
@@ -106,35 +107,73 @@ locals {
   )
 
   # ------------------------------------------------------------------
-  # Ambient gateway / service-mesh selectors (null when sidecar).
-  # istio-k8s runs in the istio-system model; the two gateways and the
-  # beacon are deployed by the istio-ambient component in this model.
+  # Service-mesh mode helpers + gateway/mesh selectors.
+  #   sidecar     : istio-pilot + istio-ingressgateway; Dex/OIDC auth.
+  #   ambient-dex : single gateway + beacon + istio-k8s in-model (component
+  #                 istio-ambient-dex); Dex/OIDC auth.
+  #   ambient-iam : two gateways (UI/M2M) + beacon (component istio-ambient);
+  #                 istio-k8s in istio-system; IAM auth stack.
+  # For ambient-dex the UI and M2M selectors both resolve to the single gateway.
   # ------------------------------------------------------------------
-  ambient = var.service_mesh_type == "ambient"
+  sidecar     = var.service_mesh_type == "sidecar"
+  ambient_iam = var.service_mesh_type == "ambient-iam"
+  ambient_dex = var.service_mesh_type == "ambient-dex"
+  ambient     = local.ambient_iam || local.ambient_dex
+  legacy_auth = local.sidecar || local.ambient_dex
 
-  ui_istio_ingress_route = local.ambient ? {
+  ui_istio_ingress_route = local.ambient_iam ? {
     kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+    } : local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
   } : null
 
-  ui_gateway_metadata = local.ambient ? {
+  ui_gateway_metadata = local.ambient_iam ? {
     kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
+    } : local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
   } : null
 
-  m2m_gateway_metadata = local.ambient ? {
+  m2m_gateway_metadata = local.ambient_iam ? {
     kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
-    endpoint = module.ambient[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+    } : local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
   } : null
 
-  service_mesh = local.ambient ? {
+  # Unauthenticated route on the single gateway, consumed by oidc-gatekeeper on
+  # the ambient-dex path.
+  istio_ingress_route_unauthenticated = local.ambient_dex ? {
     kind     = "endpoint"
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.endpoint
   } : null
+
+  # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
+  # component inputs that expect it.
+  beacon = local.ambient_iam ? {
+    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    } : local.ambient_dex ? {
+    name     = module.ambient_dex[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient_dex[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  service_mesh = local.beacon == null ? null : {
+    kind     = "endpoint"
+    name     = local.beacon.name
+    endpoint = local.beacon.endpoint
+  }
 
 }
 

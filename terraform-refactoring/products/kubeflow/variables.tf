@@ -330,13 +330,13 @@ variable "kfp_viz_config" {
 # Istio Component Applications
 
 variable "service_mesh_type" {
-  description = "Which service mesh component to deploy: 'istio' (sidecar) or 'ambient'"
+  description = "Service mesh + auth mode: 'sidecar' (istio-pilot + Dex/OIDC), 'ambient-dex' (ambient mesh + Dex/OIDC), or 'ambient-iam' (ambient mesh + Identity Platform)."
   type        = string
   default     = "sidecar"
 
   validation {
-    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
+    condition     = contains(["sidecar", "ambient-dex", "ambient-iam"], var.service_mesh_type)
+    error_message = "Valid values for service_mesh_type are (sidecar, ambient-dex, ambient-iam)."
   }
 }
 
@@ -366,6 +366,23 @@ variable "istio_ingressgateway_config" {
 
 # Ambient Component Applications
 
+variable "istio_k8s_revision" {
+  description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
+  type        = number
+  default     = null
+}
+
+variable "istio_k8s_config" {
+  description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_k8s_platform" {
+  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only)."
+  type        = string
+  default     = ""
+}
 
 variable "istio_ingress_k8s_revision" {
   description = "Revision of the istio-ingress-k8s application"
@@ -708,8 +725,8 @@ variable "kserve_controller_config" {
   default     = {}
 
   validation {
-    condition     = !(var.service_mesh_type == "ambient" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
-    error_message = "deployment-mode cannot be set to 'knative' when service_mesh_type is 'ambient'."
+    condition     = !(var.service_mesh_type != "sidecar" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
+    error_message = "deployment-mode cannot be set to 'knative' unless service_mesh_type is 'sidecar'."
   }
 }
 
