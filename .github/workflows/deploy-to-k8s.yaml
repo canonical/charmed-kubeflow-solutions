@@ -158,6 +158,8 @@ jobs:
       - name: Setup tmate session
         # if: false
         uses: canonical/action-tmate@main
+        with:
+          detached: true
         
       - name: Deploy solution
         run: |
