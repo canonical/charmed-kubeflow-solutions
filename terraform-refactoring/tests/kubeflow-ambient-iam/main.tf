@@ -23,7 +23,7 @@ module "istio_k8s" {
   model_uuid = local.istio_system_model_uuid
   channel    = var.istio_k8s_channel
   revision   = var.istio_k8s_revision
-  config     = merge(var.istio_k8s_config, var.istio_k8s_platform != "" ? { platform = var.istio_k8s_platform } : {})
+  config     = merge(var.istio_k8s_config, var.istio_k8s_platform)
 }
 
 resource "juju_offer" "istio_ingress_config" {
