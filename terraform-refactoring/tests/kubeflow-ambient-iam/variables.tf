@@ -54,6 +54,18 @@ variable "istio_k8s_platform" {
   default     = ""
 }
 
+variable "istio_ingress_k8s_ui_config" {
+  description = "Configuration for the UI ambient gateway (e.g. external_hostname)."
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_m2m_config" {
+  description = "Configuration for the M2M ambient gateway (e.g. external_hostname)."
+  type        = map(string)
+  default     = {}
+}
+
 # ---------------------------------------------------------------------------
 # iam (Canonical Identity Platform) settings
 # ---------------------------------------------------------------------------
@@ -91,6 +103,12 @@ variable "enable_kratos_external_idp_integrator" {
 variable "kratos_external_idp_integrator" {
   description = "Configuration for the Kratos External IdP Integrator (passed through to the iam product)."
   type        = any
+  default     = {}
+}
+
+variable "traefik_config" {
+  description = "Configuration for the iam Traefik ingress (e.g. external_hostname)."
+  type        = map(string)
   default     = {}
 }
 
@@ -174,6 +192,12 @@ variable "enable_feast" {
   description = "Deploy Feast."
   type        = bool
   default     = false
+}
+
+variable "kserve_controller_config" {
+  description = "Configuration for the kserve-controller application (e.g. domain-name)."
+  type        = map(string)
+  default     = {}
 }
 
 variable "github_profiles_automator_config" {

@@ -128,6 +128,26 @@ module "github_profiles_automator" {
   }, var.github_profiles_automator_config)
 }
 
+# TLS certificates for the ambient gateways. Provides the `certificates`
+# relation consumed by both istio-ingress-k8s gateways.
+resource "juju_application" "self_signed_certificates" {
+  count = var.service_mesh_type == "ambient" ? 1 : 0
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  name       = "self-signed-certificates"
+
+  charm {
+    name     = "self-signed-certificates"
+    channel  = var.self_signed_certificates_channel
+    revision = var.self_signed_certificates_revision
+    base     = "ubuntu@22.04"
+  }
+
+  config = var.self_signed_certificates_config
+  trust  = true
+  units  = 1
+}
+
 module "auth" {
   # Legacy Dex/OIDC auth is used only on the (frozen) sidecar path. The ambient
   # path uses the IAM stack (oauth2-proxy + request-authentication-configurator).

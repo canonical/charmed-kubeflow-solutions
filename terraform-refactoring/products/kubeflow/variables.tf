@@ -411,6 +411,27 @@ variable "istio_ingress_config_offer_url" {
   default     = null
 }
 
+# Self-signed certificates for the ambient gateways
+
+variable "self_signed_certificates_channel" {
+  description = "Channel for the self-signed-certificates charm serving the ambient gateways."
+  type        = string
+  default     = "latest/stable"
+  nullable    = false
+}
+
+variable "self_signed_certificates_revision" {
+  description = "Revision of the self-signed-certificates application."
+  type        = number
+  default     = null
+}
+
+variable "self_signed_certificates_config" {
+  description = "Configuration for the self-signed-certificates application."
+  type        = map(string)
+  default     = {}
+}
+
 # IAM Auth Applications (ambient only)
 
 variable "oauth_offer_url" {

@@ -72,6 +72,37 @@ resource "juju_integration" "github_profiles_automator_service_mesh" {
   }
 }
 
+# TLS certificates: self-signed-certificates -> both ambient gateways.
+resource "juju_integration" "istio_ingress_ui_certificates" {
+  count      = var.service_mesh_type == "ambient" ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = juju_application.self_signed_certificates[0].name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = module.ambient[0].requires.istio_ingress_k8s_ui_certificates.name
+    endpoint = module.ambient[0].requires.istio_ingress_k8s_ui_certificates.endpoint
+  }
+}
+
+resource "juju_integration" "istio_ingress_m2m_certificates" {
+  count      = var.service_mesh_type == "ambient" ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = juju_application.self_signed_certificates[0].name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = module.ambient[0].requires.istio_ingress_k8s_m2m_certificates.name
+    endpoint = module.ambient[0].requires.istio_ingress_k8s_m2m_certificates.endpoint
+  }
+}
+
 # Dual-gateway fronting (ambient): kfp-ui and mlflow-operator are also fronted by
 # the M2M gateway (token/JWT clients), in addition to the UI gateway wired by
 # their component modules. The istio-ingress-route requirer endpoint has no

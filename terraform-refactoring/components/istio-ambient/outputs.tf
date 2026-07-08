@@ -39,5 +39,8 @@ output "requires" {
   value = {
     istio_ingress_k8s_ui_forward_auth  = module.istio_ingress_k8s_ui.requires.forward_auth
     istio_ingress_k8s_m2m_forward_auth = module.istio_ingress_k8s_m2m.requires.forward_auth
+
+    istio_ingress_k8s_ui_certificates  = module.istio_ingress_k8s_ui.requires.certificates
+    istio_ingress_k8s_m2m_certificates = module.istio_ingress_k8s_m2m.requires.certificates
   }
 }

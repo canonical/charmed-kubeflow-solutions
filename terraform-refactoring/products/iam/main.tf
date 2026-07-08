@@ -8,6 +8,13 @@ resource "juju_model" "iam" {
 
 locals {
   model_uuid = var.create_model ? juju_model.iam[0].uuid : var.model_uuid
+
+  # App names of the bundle-deployed apps, derived exactly as the vendored
+  # iam-bundle-integration module derives them (var.<app>.name with these
+  # defaults). Kept here so the CA-cert relations can target them without
+  # modifying the vendored module.
+  kratos_app_name   = try(var.kratos.name, "kratos")
+  login_ui_app_name = try(var.login_ui.name, "login-ui")
 }
 
 # --- Dependencies deployed in the iam model ---------------------------------
@@ -104,7 +111,48 @@ module "iam_bundle" {
   enable_kratos_external_idp_integrator = var.enable_kratos_external_idp_integrator
   kratos_external_idp_integrator        = var.kratos_external_idp_integrator
 
-  hydra    = var.hydra
-  kratos   = var.kratos
+  hydra = var.hydra
+  kratos = merge(var.kratos, {
+    # Product-level default Kratos config (overridable via var.kratos.config).
+    config = merge({
+      dev         = "true"
+      enforce_mfa = "false"
+    }, try(var.kratos.config, {}))
+  })
   login_ui = var.login_ui
+}
+
+# --- CA-cert trust ----------------------------------------------------------
+# Kratos and the Login UI must trust the self-signed CA that terminates TLS on
+# traefik, so they receive it via self-signed-certificates:send-ca-cert. These
+# are in-model relations (same iam model), using the app names exposed by the
+# bundle module.
+resource "juju_integration" "kratos_receive_ca_cert" {
+  depends_on = [module.iam_bundle]
+  model_uuid = local.model_uuid
+
+  application {
+    name     = juju_application.self_signed_certificates.name
+    endpoint = "send-ca-cert"
+  }
+
+  application {
+    name     = local.kratos_app_name
+    endpoint = "receive-ca-cert"
+  }
+}
+
+resource "juju_integration" "login_ui_receive_ca_cert" {
+  depends_on = [module.iam_bundle]
+  model_uuid = local.model_uuid
+
+  application {
+    name     = juju_application.self_signed_certificates.name
+    endpoint = "send-ca-cert"
+  }
+
+  application {
+    name     = local.login_ui_app_name
+    endpoint = "receive-ca-cert"
+  }
 }

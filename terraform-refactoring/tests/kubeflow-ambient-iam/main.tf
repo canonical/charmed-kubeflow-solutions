@@ -48,6 +48,8 @@ module "iam" {
 
   enable_kratos_external_idp_integrator = var.enable_kratos_external_idp_integrator
   kratos_external_idp_integrator        = var.kratos_external_idp_integrator
+
+  traefik_config = var.traefik_config
 }
 
 # ===========================================================================
@@ -68,6 +70,10 @@ module "kubeflow" {
   istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url
   oauth_offer_url                = module.iam.oauth_offer_url
 
+  # Per-gateway configuration (e.g. external_hostname)
+  istio_ingress_k8s_ui_config  = var.istio_ingress_k8s_ui_config
+  istio_ingress_k8s_m2m_config = var.istio_ingress_k8s_m2m_config
+
   enable_kfp         = var.enable_kfp
   enable_katib       = var.enable_katib
   enable_notebooks   = var.enable_notebooks
@@ -77,6 +83,8 @@ module "kubeflow" {
   enable_mlflow      = var.enable_mlflow
   enable_kserve      = var.enable_kserve
   enable_feast       = var.enable_feast
+
+  kserve_controller_config = var.kserve_controller_config
 
   github_profiles_automator_config = var.github_profiles_automator_config
 
