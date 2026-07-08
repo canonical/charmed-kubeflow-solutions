@@ -49,7 +49,7 @@ variable "istio_k8s_config" {
 }
 
 variable "istio_k8s_platform" {
-  description = "Platform value for istio-k8s (merged into its config as 'platform' when non-empty)."
+  description = "Platform value for istio-k8s (always merged into its config as 'platform', including an empty string)."
   type        = string
   default     = ""
 }

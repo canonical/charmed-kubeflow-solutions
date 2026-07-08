@@ -24,6 +24,24 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
   }
 }
 
+# oauth2-proxy is reachable unauthenticated on the UI gateway (it is the
+# authenticator for the login flow): oauth2-proxy:ingress -> UI gateway's
+# ingress-unauthenticated.
+resource "juju_integration" "oauth2_proxy_ui_ingress" {
+  count      = var.service_mesh_type == "ambient" ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.oauth2_proxy[0].requires.ingress.name
+    endpoint = module.oauth2_proxy[0].requires.ingress.endpoint
+  }
+
+  application {
+    name     = module.ambient[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
+    endpoint = module.ambient[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
+  }
+}
+
 # request-authentication (ambient): request-authentication-configurator installs
 # Istio RequestAuthentication (JWT validation) on each gateway.
 resource "juju_integration" "request_auth_ui" {

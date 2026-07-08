@@ -14,6 +14,7 @@ output "provides" {
   description = "Map of endpoints provided by this component to other components (outbound relations)"
   value = {
     # UI gateway
+    istio_ingress_k8s_ui_ingress_unauthenticated             = module.istio_ingress_k8s_ui.provides.ingress_unauthenticated
     istio_ingress_k8s_ui_istio_ingress_route                 = module.istio_ingress_k8s_ui.provides.istio_ingress_route
     istio_ingress_k8s_ui_istio_ingress_route_unauthenticated = module.istio_ingress_k8s_ui.provides.istio_ingress_route_unauthenticated
     istio_ingress_k8s_ui_gateway_metadata                    = module.istio_ingress_k8s_ui.provides.gateway_metadata

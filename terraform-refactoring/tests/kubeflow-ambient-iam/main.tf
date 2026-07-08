@@ -23,7 +23,7 @@ module "istio_k8s" {
   model_uuid = local.istio_system_model_uuid
   channel    = var.istio_k8s_channel
   revision   = var.istio_k8s_revision
-  config     = merge(var.istio_k8s_config, var.istio_k8s_platform)
+  config     = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
 }
 
 resource "juju_offer" "istio_ingress_config" {
@@ -31,6 +31,21 @@ resource "juju_offer" "istio_ingress_config" {
   application_name = module.istio_k8s.requires.istio_ingress_config.name
   endpoints        = [module.istio_k8s.requires.istio_ingress_config.endpoint]
   model_uuid       = local.istio_system_model_uuid
+}
+
+# istio-k8s trusts the self-signed CA (used for the JWKS TLS endpoint in the iam
+# model) by consuming the iam-core send-ca-cert offer via jwks-ca-cert.
+resource "juju_integration" "istio_k8s_jwks_ca_cert" {
+  model_uuid = local.istio_system_model_uuid
+
+  application {
+    name     = module.istio_k8s.requires.jwks_ca_cert.name
+    endpoint = module.istio_k8s.requires.jwks_ca_cert.endpoint
+  }
+
+  application {
+    offer_url = module.iam.send_ca_cert_offer_url
+  }
 }
 
 # ===========================================================================

@@ -25,3 +25,8 @@ output "oauth_offer_url" {
   description = "Hydra OAuth offer URL, consumed cross-model by oauth2-proxy and request-authentication-configurator in the kubeflow model."
   value       = module.iam_bundle.oauth_offer_url
 }
+
+output "send_ca_cert_offer_url" {
+  description = "self-signed-certificates send-ca-cert offer URL (iam-core model), consumed cross-model (e.g. by istio-k8s:jwks-ca-cert)."
+  value       = juju_offer.send_ca_cert.url
+}
