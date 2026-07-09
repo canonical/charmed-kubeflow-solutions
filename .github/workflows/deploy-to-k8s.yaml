@@ -70,40 +70,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install pipx
+      - name: Install tox & poetry
         run: |
           sudo apt-get install -yqq pipx
           pipx ensurepath
           sudo pipx ensurepath
 
-      - name: Disk usage
-        shell: bash
-        run: |
-          sudo rm -rf \
-            /opt/google \
-            /opt/hostedtoolcache \
-            /opt/microsoft/powershell \
-            /opt/microsoft/msedge \
-            "$AGENT_TOOLSDIRECTORY" \
-            /usr/lib/firefox \
-            /usr/lib/mono \
-            /usr/local/julia* \
-            /usr/local/lib/android \
-            /usr/local/share/chromium \
-            /usr/local/share/powershell \
-            /usr/share/dotnet \
-            /usr/share/gradle* \
-            /usr/share/miniconda \
-            /usr/share/sbt \
-            /usr/share/swift \
-            /home/linuxbrew
-          pipx uninstall-all
-          printf '\nDisk usage\n'
-          df --human-readable
-
-      - name: Install tox & poetry
-        shell: bash
-        run: |
           pipx install tox
           pipx install poetry
 
@@ -140,6 +112,34 @@ jobs:
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
           kubectl -n kube-system rollout restart daemonset cilium
 
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
+        with:
+          detached: true
+
+      - name: Setup terraform
+        run: |
+          sudo snap install terraform  --channel latest/stable --classic
+          terraform --version
+
+      - name: Deploy solution
+        run: |
+          if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
+            git checkout '${{ env.CKF_BRANCH }}'
+          fi
+
+          RISK_ARG="--risk ${{ env.RISK }}"
+          PLATFORM_ARG=""
+          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
+            PLATFORM_ARG="--istio-k8s-platform"
+          fi
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
+            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
+          fi
+
+          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $TF_VARS_ARG $PLATFORM_ARG
+
       - name: Preload Images into Containerd Cache
         run: |
           echo "Starting image preload process..."
@@ -170,34 +170,6 @@ jobs:
               exit 1 # Fail the pipeline step if an image fails
             fi
           done < .github/images.txt
-
-      - name: Setup tmate session
-        uses: canonical/action-tmate@main
-        with:
-          detached: true
-
-      - name: Setup terraform
-        run: |
-          sudo snap install terraform  --channel latest/stable --classic
-          terraform --version
-
-      - name: Deploy solution
-        run: |
-          if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
-            git checkout '${{ env.CKF_BRANCH }}'
-          fi
-
-          RISK_ARG="--risk ${{ env.RISK }}"
-          PLATFORM_ARG=""
-          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
-            PLATFORM_ARG="--istio-k8s-platform"
-          fi
-          TF_VARS_ARG=""
-          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
-            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
-          fi
-
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $TF_VARS_ARG $PLATFORM_ARG
 
       - name: Run UATs
         run: |
