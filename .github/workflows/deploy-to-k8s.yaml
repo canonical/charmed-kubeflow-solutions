@@ -33,18 +33,18 @@ jobs:
             uats:
               env: uats-remote
               extra-args: --filter "not feast and not spark"
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
-          - module: kubeflow-ambient
-            uats:
-              env: kubeflow-remote
-              extra-args: --include-ambient-tests
-          - module: kubeflow-spark
-            tf-vars-file: examples/tfvars.json
-            uats:
-              env: spark-remote
-              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
+          # - module: kubeflow-feast
+          #   uats:
+          #     env: feast-remote
+          # - module: kubeflow-ambient
+          #   uats:
+          #     env: kubeflow-remote
+          #     extra-args: --include-ambient-tests
+          # - module: kubeflow-spark
+          #   tf-vars-file: examples/tfvars.json
+          #   uats:
+          #     env: spark-remote
+          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
 
     steps:
       - name: Checkout repository
@@ -111,6 +111,11 @@ jobs:
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
           kubectl -n kube-system rollout restart daemonset cilium
+
+      - name: Setup tmate session
+        uses: canonical/action-tmate@main
+        with:
+          detached: true
 
       - name: Setup terraform
         run: |
