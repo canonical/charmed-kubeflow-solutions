@@ -23,36 +23,36 @@ jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
     runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
+    timeout-minutes: 150
 
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow] #, mlflow, feast, spark]
-        service-mesh-type: [ambient] # [sidecar, ambient]
+        product: [kubeflow, mlflow, feast, spark]
+        service-mesh-type: [sidecar, ambient]
         include:
-          # - product: kubeflow
-          #   service-mesh-type: sidecar
-          #   uats:
-          #     env: kubeflow-remote
+          - product: kubeflow
+            service-mesh-type: sidecar
+            uats:
+              env: kubeflow-remote
           - product: kubeflow
             service-mesh-type: ambient
             uats:
               env: kubeflow-remote
               extra-args: --include-ambient-tests
-          # - product: mlflow
-          #   uats:
-          #     env: mlflow-remote
-          # - product: feast
-          #   uats:
-          #     env: feast-remote
-          # - product: spark
-          #   uats:
-          #     env: spark-remote
-          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+          - product: mlflow
+            uats:
+              env: mlflow-remote
+          - product: feast
+            uats:
+              env: feast-remote
+          - product: spark
+            uats:
+              env: spark-remote
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
         exclude:
           - product: spark
             service-mesh-type: ambient
-
 
     steps:
       - name: Checkout repository
@@ -135,64 +135,25 @@ jobs:
                 2: sudo microceph disk add loop,1G,3
                 3: sudo microceph enable rgw
                 4: sudo microceph.radosgw-admin user create --uid test --display-name test --access-key=foo --secret-key=bar
-
         run: |
           echo -e "$CLOUD_INIT_FILE" > microceph_rgw.yaml
           lxc init ubuntu:jammy ceph -c limits.cpu=4 -c limits.memory=2GB -d root,size=5GB
-          
+
           lxc config set ceph cloud-init.user-data - < microceph_rgw.yaml
           lxc start ceph
           while ! lxc exec ceph -- id -u ubuntu &>/dev/null; do sleep 0.5; done
           lxc exec ceph -- cloud-init status --wait
-          
+
           echo -e "S3_SERVER_URL=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/\nS3_ACCESS_KEY=foo\nS3_SECRET_KEY=bar" > .env
           echo -e "S3_BUCKET=spark-demo" >> .env
           lxc list
           cat .env
-
-      - name: Preload Images into Containerd Cache
-        run: |
-          echo "Starting image preload process..."
-          
-          while IFS= read -r image || [ -n "$image" ]; do
-            # Trim whitespace
-            image=$(echo "$image" | xargs)
-            
-            # Skip empty lines or commented lines starting with #
-            if [[ -z "$image" || "$image" =~ ^# ]]; then
-              continue
-            fi
-            
-            echo "--------------------------------------------------"
-            echo "🚀 Preloading: $image"
-            echo "--------------------------------------------------"
-            
-            # Execute pull via the snap path
-            sudo /snap/k8s/current/bin/ctr \
-              --address /run/containerd/containerd.sock \
-              --namespace k8s.io \
-              images pull "$image"
-              
-            if [ $? -eq 0 ]; then
-              echo "✅ Successfully pulled $image"
-            else
-              echo "::error::Failed to pull $image"
-              exit 1 # Fail the pipeline step if an image fails
-            fi
-          done < .github/images.txt
-
 
       - name: Setup terraform
         run: |
           sudo snap install terraform --revision=859 --classic
           terraform --version
 
-      - name: Setup tmate session
-        if: false
-        uses: canonical/action-tmate@main
-        with:
-          detached: true
-        
       - name: Deploy solution
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
@@ -218,13 +179,82 @@ jobs:
           fi
 
           tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
-  
-      - name: Run UATs
+
+      - name: Clone UATs repository
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Preload Images into Containerd Cache
+        run: |
+          echo "Starting image preload process..."
+
+          MAX_RETRIES=3
+          RETRY_DELAY=5
+
+          IMAGE_LIST=~/charmed-kubeflow-uats/assets/test.images.txt
+          if [ ! -f $IMAGE_LIST ]; then touch $IMAGE_LIST; fi
+
+          while IFS= read -r image || [ -n "$image" ]; do
+            # Trim whitespace
+            image=$(echo "$image" | xargs)
+            
+            # Skip empty lines or commented lines starting with #
+            if [[ -z "$image" || "$image" =~ ^# ]]; then
+              continue
+            fi
+            
+            echo "--------------------------------------------------"
+            echo "🚀 Preloading: $image"
+            echo "--------------------------------------------------"
+
+            attempt=1
+            success=false
+            
+            while [ $attempt -le $MAX_RETRIES ]; do
+              if [ $attempt -gt 1 ]; then
+                echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in $RETRY_DELAY seconds..."
+                sleep $RETRY_DELAY
+              fi
+
+              # Execute pull via the snap path
+              sudo /snap/k8s/current/bin/ctr \
+                --address /run/containerd/containerd.sock \
+                --namespace k8s.io \
+                images pull "$image" > /tmp/import.out 2>&1
+
+              if [ $? -eq 0 ]; then
+                sudo /snap/k8s/current/bin/ctr \
+                  --address /run/containerd/containerd.sock \
+                  --namespace k8s.io \
+                  image label "$image" io.cri-containerd.pinned=pinned
+
+                echo "✅ Successfully pulled $image on attempt $attempt"
+                success=true
+                break
+              else
+                echo "❌ Attempt $attempt failed for $image"
+                ((attempt++))
+              fi
+            done
+
+            if [ "$success" = false ]; then
+              echo "::error::Failed to pull $image after $MAX_RETRIES attempts."
+              echo "::error::Logs:"
+              cat /tmp/import.out
+              exit 1
+            fi
+          done < $IMAGE_LIST
+
+      - name: Run UATs
+        run: |
+          cd ~/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats.env }} -- ${{ matrix.uats.extra-args }} --bundle=""
+
+      - name: Setup tmate session
+        if: failure()
+        uses: canonical/action-tmate@main
 
       - name: Get juju status
         run: juju status -m kubeflow --relations
