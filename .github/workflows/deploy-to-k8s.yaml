@@ -187,8 +187,7 @@ jobs:
               echo "::error::Logs:"
               cat /tmp/import.out
               exit 1
-            fi
-	    
+            fi    
           done < .github/images.txt
 
       - name: Run UATs
