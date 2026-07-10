@@ -150,6 +150,38 @@ jobs:
           lxc list
           cat .env
 
+      - name: Preload Images into Containerd Cache
+        run: |
+          echo "Starting image preload process..."
+          
+          while IFS= read -r image || [ -n "$image" ]; do
+            # Trim whitespace
+            image=$(echo "$image" | xargs)
+            
+            # Skip empty lines or commented lines starting with #
+            if [[ -z "$image" || "$image" =~ ^# ]]; then
+              continue
+            fi
+            
+            echo "--------------------------------------------------"
+            echo "🚀 Preloading: $image"
+            echo "--------------------------------------------------"
+            
+            # Execute pull via the snap path
+            sudo /snap/k8s/current/bin/ctr \
+              --address /run/containerd/containerd.sock \
+              --namespace k8s.io \
+              images pull "$image"
+              
+            if [ $? -eq 0 ]; then
+              echo "✅ Successfully pulled $image"
+            else
+              echo "::error::Failed to pull $image"
+              exit 1 # Fail the pipeline step if an image fails
+            fi
+          done < .github/images.txt
+
+
       - name: Setup terraform
         run: |
           sudo snap install terraform --revision=859 --classic
@@ -186,7 +218,7 @@ jobs:
           fi
 
           tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
-
+  
       - name: Run UATs
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
