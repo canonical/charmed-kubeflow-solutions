@@ -149,7 +149,7 @@ jobs:
           RETRY_DELAY=5
 
           IMAGE_LIST=~/charmed-kubeflow-uats/assets/test.images.txt
-          if [ ! -f $IMAGE_LIST ]; then touch $IMAGE_LIST; done  
+          if [ ! -f $IMAGE_LIST ]; then touch $IMAGE_LIST; fi
 
           while IFS= read -r image || [ -n "$image" ]; do
             # Trim whitespace
