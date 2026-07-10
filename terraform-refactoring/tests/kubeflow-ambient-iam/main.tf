@@ -15,6 +15,25 @@ resource "juju_model" "istio_system" {
 
 locals {
   istio_system_model_uuid = var.create_istio_system_model ? juju_model.istio_system[0].uuid : var.istio_system_model_uuid
+
+  # Merge the top-level external hostname vars into the per-component config
+  # maps (only when set, so an unset hostname never injects an empty value).
+  istio_ingress_k8s_ui_config = merge(
+    var.istio_ingress_k8s_ui_config,
+    var.external_ui_hostname != null ? { external_hostname = var.external_ui_hostname } : {}
+  )
+  istio_ingress_k8s_m2m_config = merge(
+    var.istio_ingress_k8s_m2m_config,
+    var.external_m2m_hostname != null ? { external_hostname = var.external_m2m_hostname } : {}
+  )
+  kserve_controller_config = merge(
+    var.kserve_controller_config,
+    var.external_m2m_hostname != null ? { "domain-name" = var.external_m2m_hostname } : {}
+  )
+  traefik_config = merge(
+    var.traefik_config,
+    var.external_auth_hostname != null ? { external_hostname = var.external_auth_hostname } : {}
+  )
 }
 
 module "istio_k8s" {
@@ -68,7 +87,7 @@ module "iam" {
   kratos_revision   = var.kratos_revision
   login_ui_revision = var.login_ui_revision
 
-  traefik_config = var.traefik_config
+  traefik_config = local.traefik_config
 }
 
 # ===========================================================================
@@ -91,8 +110,8 @@ module "kubeflow" {
   send_ca_cert_offer_url         = module.iam.send_ca_cert_offer_url
 
   # Per-gateway configuration (e.g. external_hostname)
-  istio_ingress_k8s_ui_config  = var.istio_ingress_k8s_ui_config
-  istio_ingress_k8s_m2m_config = var.istio_ingress_k8s_m2m_config
+  istio_ingress_k8s_ui_config  = local.istio_ingress_k8s_ui_config
+  istio_ingress_k8s_m2m_config = local.istio_ingress_k8s_m2m_config
 
   enable_kfp         = var.enable_kfp
   enable_katib       = var.enable_katib
@@ -104,7 +123,7 @@ module "kubeflow" {
   enable_kserve      = var.enable_kserve
   enable_feast       = var.enable_feast
 
-  kserve_controller_config = var.kserve_controller_config
+  kserve_controller_config = local.kserve_controller_config
 
   github_profiles_automator_config = var.github_profiles_automator_config
 

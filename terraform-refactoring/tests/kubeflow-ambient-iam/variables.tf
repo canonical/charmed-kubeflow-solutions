@@ -67,6 +67,28 @@ variable "istio_ingress_k8s_m2m_config" {
 }
 
 # ---------------------------------------------------------------------------
+# External hostnames
+# ---------------------------------------------------------------------------
+
+variable "external_ui_hostname" {
+  description = "External hostname for the UI ambient ingress gateway."
+  type        = string
+  default     = null
+}
+
+variable "external_m2m_hostname" {
+  description = "External hostname for the M2M ambient ingress gateway."
+  type        = string
+  default     = null
+}
+
+variable "external_auth_hostname" {
+  description = "External hostname for the iam Traefik ingress."
+  type        = string
+  default     = null
+}
+
+# ---------------------------------------------------------------------------
 # iam (Canonical Identity Platform) settings
 # ---------------------------------------------------------------------------
 
