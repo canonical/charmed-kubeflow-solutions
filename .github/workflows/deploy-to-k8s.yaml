@@ -112,11 +112,6 @@ jobs:
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
           kubectl -n kube-system rollout restart daemonset cilium
 
-      - name: Setup tmate session
-        uses: canonical/action-tmate@main
-        with:
-          detached: true
-
       - name: Setup terraform
         run: |
           sudo snap install terraform  --channel latest/stable --classic
@@ -199,6 +194,10 @@ jobs:
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
           tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
+
+      - name: Setup tmate session
+        if: failure()
+        uses: canonical/action-tmate@main
 
       # On failure, capture debugging resources
       - name: Select model
