@@ -24,6 +24,7 @@ jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
     runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
+    timeout-minutes: 150
 
     strategy:
       fail-fast: false
@@ -33,18 +34,18 @@ jobs:
             uats:
               env: uats-remote
               extra-args: --filter "not feast and not spark"
-          # - module: kubeflow-feast
-          #   uats:
-          #     env: feast-remote
-          # - module: kubeflow-ambient
-          #   uats:
-          #     env: kubeflow-remote
-          #     extra-args: --include-ambient-tests
-          # - module: kubeflow-spark
-          #   tf-vars-file: examples/tfvars.json
-          #   uats:
-          #     env: spark-remote
-          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
+          - module: kubeflow-feast
+            uats:
+              env: feast-remote
+          - module: kubeflow-ambient
+            uats:
+              env: kubeflow-remote
+              extra-args: --include-ambient-tests
+          - module: kubeflow-spark
+            tf-vars-file: examples/tfvars.json
+            uats:
+              env: spark-remote
+              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
 
     steps:
       - name: Checkout repository
