@@ -118,7 +118,7 @@ def setup_s3_integrator_kfp() -> list[str]:
     """Terraform module customization for Spark deployment."""
     args = [
         "-var",
-        f"s3_bucket_kfp={os.environ['S3_BUCKET_PRIMARY']}",
+        f"s3_bucket_kfp={os.environ['S3_BUCKET_KFP_PRIMARY']}",
         "-var",
         f"s3_secret_kfp={os.environ['S3_SECRET_KEY_PRIMARY']}",
         "-var",
