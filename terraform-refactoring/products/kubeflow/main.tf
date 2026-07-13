@@ -32,7 +32,7 @@ module "istio" {
 
 module "ambient" {
   count  = var.service_mesh_type == "ambient" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient?ref=feat/terraform-refactor"
+  source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -243,6 +243,51 @@ module "katib" {
     revision = var.katib_ui_revision
     config   = var.katib_ui_config
   }
+}
+
+## KFP
+
+resource "juju_secret" "s3_secret_kfp" {
+  depends_on = [juju_model.kubeflow]
+  count      = var.enable_kfp ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  name       = "s3_secret_kfp"
+  value = {
+    secret-key = var.s3_secret_key_kfp
+    access-key = var.s3_access_key_kfp
+  }
+  info = "This is the access key and secret key for the S3 storage"
+}
+
+module "s3_kfp" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_kfp]
+  count      = var.enable_spark ? 1 : 0
+  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  channel = "2/stable"
+  config = merge(
+    {
+      bucket      = var.s3_bucket_kfp,
+      endpoint    = var.s3_endpoint_kfp,
+      path        = "test",
+      credentials = "secret:${juju_secret.s3_secret_kfp[0].secret_id}"
+    }, var.s3_config_kfp
+  )
+  constraints = "arch=amd64"
+  revision    = var.s3_revision_kfp
+}
+
+resource "juju_access_secret" "s3_secret_access_kfp" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_kfp, module.s3_kfp]
+  count      = var.enable_kfp ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  applications = [
+    module.s3_kfp[0].application.name
+  ]
+  secret_id = juju_secret.s3_secret_kfp[0].secret_id
 }
 
 module "kfp" {
@@ -464,7 +509,6 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  count      = (var.enable_mlflow || var.enable_feast || length(local.external_integrations) > 0) ? 1 : 0
   depends_on = [module.istio, module.ambient]
 
   source = "../../charms/resource-dispatcher"
@@ -730,20 +774,20 @@ module "feast" {
 # Spark solutions
 # ===============
 
-resource "juju_secret" "s3_secret" {
+resource "juju_secret" "s3_secret_spark" {
   depends_on = [juju_model.kubeflow]
   count      = var.enable_spark ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  name       = "s3_secret"
+  name       = "s3_secret_spark"
   value = {
-    secret-key = var.s3_secret_key
-    access-key = var.s3_access_key
+    secret-key = var.s3_secret_key_spark
+    access-key = var.s3_access_key_spark
   }
   info = "This is the access key and secret key for the S3 storage"
 }
 
-module "s3" {
-  depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
+module "s3_spark" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_spark]
   count      = var.enable_spark ? 1 : 0
   source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
 
@@ -752,25 +796,25 @@ module "s3" {
   channel = "2/stable"
   config = merge(
     {
-      bucket      = var.s3_bucket,
-      endpoint    = var.s3_endpoint,
+      bucket      = var.s3_bucket_spark,
+      endpoint    = var.s3_endpoint_spark,
       path        = "spark-events",
-      credentials = "secret:${juju_secret.s3_secret[0].secret_id}"
-    }, var.s3_config
+      credentials = "secret:${juju_secret.s3_secret_spark[0].secret_id}"
+    }, var.s3_config_spark
   )
   constraints = "arch=amd64"
-  revision    = var.s3_revision
+  revision    = var.s3_revision_spark
 }
 
-resource "juju_access_secret" "s3_secret_access" {
-  depends_on = [juju_model.kubeflow, juju_secret.s3_secret, module.s3]
+resource "juju_access_secret" "s3_secret_access_spark" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_spark, module.s3_spark]
   count      = var.enable_spark ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   applications = [
-    module.s3[0].application.name
+    module.s3_spark[0].application.name
   ]
-  secret_id = juju_secret.s3_secret[0].secret_id
+  secret_id = juju_secret.s3_secret_spark[0].secret_id
 }
 
 module "spark" {

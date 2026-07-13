@@ -16,11 +16,11 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_ambient"></a> [ambient](#module\_ambient) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-ambient | feat/terraform-refactor |
+| <a name="module_ambient"></a> [ambient](#module\_ambient) | ../../components/istio-ambient | n/a |
 | <a name="module_auth"></a> [auth](#module\_auth) | ../../components/auth | n/a |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
+| <a name="module_external_integrations"></a> [external\_integrations](#module\_external\_integrations) | ../../components/data-kubeflow-integrator | n/a |
 | <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
-| <a name="module_integrations"></a> [integrations](#module\_integrations) | ../../components/data-kubeflow-integrator | n/a |
 | <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
 | <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
@@ -32,8 +32,9 @@
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql_k8s"></a> [postgresql\_k8s](#module\_postgresql\_k8s) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
-| <a name="module_s3"></a> [s3](#module\_s3) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | wip-split-components |
-| <a name="module_spark"></a> [spark](#module\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core | wip-split-components |
+| <a name="module_s3_kfp"></a> [s3\_kfp](#module\_s3\_kfp) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
+| <a name="module_s3_spark"></a> [s3\_spark](#module\_s3\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
+| <a name="module_spark"></a> [spark](#module\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
 | <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
 
@@ -41,7 +42,8 @@
 
 | Name | Type |
 | ---- | ---- |
-| [juju_access_secret.s3_secret_access](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
+| [juju_access_secret.s3_secret_access_kfp](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
+| [juju_access_secret.s3_secret_access_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_integration.kserve_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_service_accounts](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -49,7 +51,8 @@
 | [juju_integration.oidc_gatekeeper_istio_ingress_k8s_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_model.kubeflow](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
-| [juju_secret.s3_secret](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
+| [juju_secret.s3_secret_kfp](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
+| [juju_secret.s3_secret_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
 
 ## Inputs
 
@@ -61,8 +64,9 @@
 | <a name="input_argo_controller_revision"></a> [argo\_controller\_revision](#input\_argo\_controller\_revision) | Revision of the argo-controller application | `number` | `null` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
 | <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | URL of the grafana\_dashboard interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
-| <a name="input_dex_auth_config"></a> [dex\_auth\_config](#input\_dex\_auth\_config) | Configuration for dex-auth application | `map(string)` | `{}` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
+| <a name="input_dex_static_password"></a> [dex\_static\_password](#input\_dex\_static\_password) | dex-auth static password | `string` | `""` | no |
+| <a name="input_dex_static_username"></a> [dex\_static\_username](#input\_dex\_static\_username) | dex-auth static username value | `string` | `""` | no |
 | <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Whether to deploy the Feast component (feast-integrator and feast-ui) | `bool` | `false` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
@@ -76,11 +80,13 @@
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Whether to deploy the kubeflow-trainer application (v2 training operator) | `bool` | `false` | no |
 | <a name="input_envoy_config"></a> [envoy\_config](#input\_envoy\_config) | Configuration for envoy application | `map(string)` | `{}` | no |
 | <a name="input_envoy_revision"></a> [envoy\_revision](#input\_envoy\_revision) | Revision of the envoy application | `number` | `null` | no |
+| <a name="input_external_integrations"></a> [external\_integrations](#input\_external\_integrations) | External integrations | <pre>map(object({<br/>    profile = string<br/>    mysql = optional(object({<br/>      kind             = string<br/>      name             = optional(string, null)<br/>      endpoint         = optional(string, null)<br/>      url              = optional(string, null)<br/>      database_name    = optional(string, null)<br/>      extra_user_roles = optional(string, null)<br/>    }), null)<br/>    postgresql = optional(object({<br/>      kind             = string<br/>      name             = optional(string, null)<br/>      endpoint         = optional(string, null)<br/>      url              = optional(string, null)<br/>      database_name    = optional(string, null)<br/>      extra_user_roles = optional(string, null)<br/>    }), null)<br/>    spark = optional(object({<br/>      kind            = string<br/>      name            = optional(string, null)<br/>      endpoint        = optional(string, null)<br/>      url             = optional(string, null)<br/>      service_account = optional(string, null)<br/>    }), null)<br/>  }))</pre> | `{}` | no |
 | <a name="input_feast_integrator_config"></a> [feast\_integrator\_config](#input\_feast\_integrator\_config) | Configuration for feast-integrator application | `map(string)` | `{}` | no |
 | <a name="input_feast_integrator_revision"></a> [feast\_integrator\_revision](#input\_feast\_integrator\_revision) | Revision of the feast-integrator application | `number` | `null` | no |
 | <a name="input_feast_ui_config"></a> [feast\_ui\_config](#input\_feast\_ui\_config) | Configuration for feast-ui application | `map(string)` | `{}` | no |
 | <a name="input_feast_ui_revision"></a> [feast\_ui\_revision](#input\_feast\_ui\_revision) | Revision of the feast-ui application | `number` | `null` | no |
-| <a name="input_integrations"></a> [integrations](#input\_integrations) | External integrations | `map(object({...}))` | `{}` | no |
+| <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
+| <a name="input_https_proxy"></a> [https\_proxy](#input\_https\_proxy) | Value of the https\_proxy environment variable | `string` | `""` | no |
 | <a name="input_istio_beacon_k8s_config"></a> [istio\_beacon\_k8s\_config](#input\_istio\_beacon\_k8s\_config) | Configuration for istio-beacon-k8s application | `map(string)` | `{}` | no |
 | <a name="input_istio_beacon_k8s_revision"></a> [istio\_beacon\_k8s\_revision](#input\_istio\_beacon\_k8s\_revision) | Revision of the istio-beacon-k8s application | `number` | `null` | no |
 | <a name="input_istio_ingress_k8s_config"></a> [istio\_ingress\_k8s\_config](#input\_istio\_ingress\_k8s\_config) | Configuration for istio-ingress-k8s application | `map(string)` | `{}` | no |
@@ -149,22 +155,32 @@
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing Juju model (required when create\_model is false) | `string` | `null` | no |
 | <a name="input_mysql_config"></a> [mysql\_config](#input\_mysql\_config) | Configuration for the mysql-db application | `map(string)` | `{}` | no |
 | <a name="input_mysql_revision"></a> [mysql\_revision](#input\_mysql\_revision) | Revision of the mysql-db application | `number` | `null` | no |
+| <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
 | <a name="input_opentelemetry_collector_k8s_config"></a> [opentelemetry\_collector\_k8s\_config](#input\_opentelemetry\_collector\_k8s\_config) | Configuration for the opentelemetry-collector-k8s application | `map(string)` | `{}` | no |
 | <a name="input_opentelemetry_collector_k8s_revision"></a> [opentelemetry\_collector\_k8s\_revision](#input\_opentelemetry\_collector\_k8s\_revision) | Revision of the opentelemetry-collector-k8s application | `number` | `null` | no |
 | <a name="input_postgresql_k8s_config"></a> [postgresql\_k8s\_config](#input\_postgresql\_k8s\_config) | Configuration for the postgresql-k8s application | `map(string)` | `{}` | no |
 | <a name="input_postgresql_k8s_revision"></a> [postgresql\_k8s\_revision](#input\_postgresql\_k8s\_revision) | Revision of the postgresql-k8s application | `number` | `null` | no |
+| <a name="input_profile"></a> [profile](#input\_profile) | Deployment profile used for sizing/defaults (testing or production). Note that this variable does not refer to Kubeflow profiles, but it is used to set sensible defaults for different kind of environments, similarly as done for other charms (e.g. Kafka, ZooKeeper, OpenSearch). | `string` | `"production"` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
 | <a name="input_resource_dispatcher_revision"></a> [resource\_dispatcher\_revision](#input\_resource\_dispatcher\_revision) | Revision of the resource-dispatcher application | `number` | `null` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
-| <a name="input_s3_access_key"></a> [s3\_access\_key](#input\_s3\_access\_key) | S3 access key for object storage integration | `string` | `""` | no |
-| <a name="input_s3_config"></a> [s3\_config](#input\_s3\_config) | Configuration for s3-integrator application | `map(string)` | `{}` | no |
-| <a name="input_s3_revision"></a> [s3\_revision](#input\_s3\_revision) | Revision of the s3-integrator application | `number` | `null` | no |
-| <a name="input_s3_secret_key"></a> [s3\_secret\_key](#input\_s3\_secret\_key) | S3 secret key for object storage integration | `string` | `""` | no |
+| <a name="input_s3_access_key_kfp"></a> [s3\_access\_key\_kfp](#input\_s3\_access\_key\_kfp) | S3 access key for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_access_key_spark"></a> [s3\_access\_key\_spark](#input\_s3\_access\_key\_spark) | S3 access key for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_bucket_kfp"></a> [s3\_bucket\_kfp](#input\_s3\_bucket\_kfp) | S3 bucket for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_bucket_spark"></a> [s3\_bucket\_spark](#input\_s3\_bucket\_spark) | S3 bucket for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_config_kfp"></a> [s3\_config\_kfp](#input\_s3\_config\_kfp) | Configuration for s3-integrator application for KFP | `map(string)` | `{}` | no |
+| <a name="input_s3_config_spark"></a> [s3\_config\_spark](#input\_s3\_config\_spark) | Configuration for s3-integrator application | `map(string)` | `{}` | no |
+| <a name="input_s3_endpoint_kfp"></a> [s3\_endpoint\_kfp](#input\_s3\_endpoint\_kfp) | S3 endpoint for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_endpoint_spark"></a> [s3\_endpoint\_spark](#input\_s3\_endpoint\_spark) | S3 endpoint for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_revision_kfp"></a> [s3\_revision\_kfp](#input\_s3\_revision\_kfp) | Revision of the s3-integrator application for KFP | `number` | `null` | no |
+| <a name="input_s3_revision_spark"></a> [s3\_revision\_spark](#input\_s3\_revision\_spark) | Revision of the s3-integrator application | `number` | `null` | no |
+| <a name="input_s3_secret_key_kfp"></a> [s3\_secret\_key\_kfp](#input\_s3\_secret\_key\_kfp) | S3 secret key for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_secret_key_spark"></a> [s3\_secret\_key\_spark](#input\_s3\_secret\_key\_spark) | S3 secret key for Spark object storage integration | `string` | `""` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
 | <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |
 | <a name="input_spark_history_server_revision"></a> [spark\_history\_server\_revision](#input\_spark\_history\_server\_revision) | Revision of the spark-history-server application | `number` | `null` | no |

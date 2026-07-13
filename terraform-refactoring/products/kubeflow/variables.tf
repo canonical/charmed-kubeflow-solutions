@@ -325,6 +325,46 @@ variable "kfp_viz_config" {
   default     = {}
 }
 
+# S3 Integrator KFP variables
+
+variable "s3_secret_key_kfp" {
+  description = "S3 secret key for KFP object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_access_key_kfp" {
+  description = "S3 access key for KFP object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_endpoint_kfp" {
+  description = "S3 endpoint for KFP object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket_kfp" {
+  description = "S3 bucket for KFP object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_config_kfp" {
+  description = "Configuration for s3-integrator application for KFP"
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_revision_kfp" {
+  description = "Revision of the s3-integrator application for KFP"
+  type        = number
+  default     = null
+}
+
 # Istio Component Applications
 
 variable "service_mesh_type" {
@@ -786,41 +826,41 @@ variable "enable_spark" {
   default     = false
 }
 
-# S3 Integrator variables
+# S3 Integrator Spark variables
 
-variable "s3_secret_key" {
-  description = "S3 secret key for object storage integration"
+variable "s3_secret_key_spark" {
+  description = "S3 secret key for Spark object storage integration"
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "s3_access_key" {
-  description = "S3 access key for object storage integration"
+variable "s3_access_key_spark" {
+  description = "S3 access key for Spark object storage integration"
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "s3_endpoint" {
-  description = "S3 endpoint for object storage integration"
+variable "s3_endpoint_spark" {
+  description = "S3 endpoint for Spark object storage integration"
   type        = string
   default     = ""
 }
 
-variable "s3_bucket" {
-  description = "S3 bucket for object storage integration"
+variable "s3_bucket_spark" {
+  description = "S3 bucket for Spark object storage integration"
   type        = string
   default     = ""
 }
 
-variable "s3_config" {
+variable "s3_config_spark" {
   description = "Configuration for s3-integrator application"
   type        = map(string)
   default     = {}
 }
 
-variable "s3_revision" {
+variable "s3_revision_spark" {
   description = "Revision of the s3-integrator application"
   type        = number
   default     = null
