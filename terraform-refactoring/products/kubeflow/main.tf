@@ -275,7 +275,6 @@ module "s3_kfp" {
     {
       bucket      = var.s3_bucket_kfp,
       endpoint    = var.s3_endpoint_kfp,
-      path        = "test",
       credentials = "secret:${juju_secret.s3_secret_kfp[0].secret_id}"
     }, var.s3_config_kfp
   )

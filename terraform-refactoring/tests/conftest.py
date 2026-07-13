@@ -114,8 +114,30 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def setup_s3_integrator_kfp() -> list[str]:
+    """Terraform module customization for Spark deployment."""
+    args = [
+        "-var",
+        f"s3_bucket_kfp={os.environ['S3_BUCKET_PRIMARY']}",
+        "-var",
+        f"s3_secret_kfp={os.environ['S3_SECRET_KEY_PRIMARY']}",
+        "-var",
+        f"s3_access_kfp={os.environ['S3_ACCESS_KEY_PRIMARY']}",
+        "-var",
+        f"s3_endpoint_kfp={os.environ['S3_SERVER_URL_PRIMARY']}",
+    ]
+    print(f"Args for s3 KFP integration: {args}")
+    return args
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
-    risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark
+    risk,
+    service_mesh_type,
+    enable_mlflow,
+    enable_feast,
+    enable_spark,
+    setup_s3_integrator_kfp,
 ) -> list[str]:
     """Overall Terraform module customization."""
     return (
@@ -124,6 +146,7 @@ def tf_vars(
         + enable_spark
         + service_mesh_type
         + risk
+        + setup_s3_integrator_kfp
         + [
             "-var",
             "create_model=false",
