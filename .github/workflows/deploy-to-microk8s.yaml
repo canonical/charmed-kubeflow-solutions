@@ -207,8 +207,9 @@ jobs:
               fi
 
               # Execute pull via the snap path
-              sudo microk8s ctr image pull "$image" \
-                --namespace k8s.io  > /tmp/import.out 2>&1
+              sudo microk8s ctr \
+                --namespace k8s.io \
+                image pull "$image" > /tmp/import.out 2>&1
 
               if [ $? -eq 0 ]; then
                 sudo microk8s ctr \
