@@ -155,19 +155,19 @@ jobs:
           while IFS= read -r image || [ -n "$image" ]; do
             # Trim whitespace
             image=$(echo "$image" | xargs)
-            
+
             # Skip empty lines or commented lines starting with #
             if [[ -z "$image" || "$image" =~ ^# ]]; then
               continue
             fi
-            
+
             echo "--------------------------------------------------"
             echo "🚀 Preloading: $image"
             echo "--------------------------------------------------"
 
             attempt=1
             success=false
-            
+
             while [ $attempt -le $MAX_RETRIES ]; do
               if [ $attempt -gt 1 ]; then
                 echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in $RETRY_DELAY seconds..."
