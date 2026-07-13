@@ -120,9 +120,9 @@ def setup_s3_integrator_kfp() -> list[str]:
         "-var",
         f"s3_bucket_kfp={os.environ['S3_BUCKET_KFP_PRIMARY']}",
         "-var",
-        f"s3_secret_kfp={os.environ['S3_SECRET_KEY_PRIMARY']}",
+        f"s3_secret_key_kfp={os.environ['S3_SECRET_KEY_PRIMARY']}",
         "-var",
-        f"s3_access_kfp={os.environ['S3_ACCESS_KEY_PRIMARY']}",
+        f"s3_access_key_kfp={os.environ['S3_ACCESS_KEY_PRIMARY']}",
         "-var",
         f"s3_endpoint_kfp={os.environ['S3_SERVER_URL_PRIMARY']}",
     ]

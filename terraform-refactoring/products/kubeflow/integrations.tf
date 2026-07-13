@@ -63,8 +63,8 @@ resource "juju_integration" "resource_dispatcher_service_mesh" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.resource_dispatcher[0].requires.service_mesh.name
-    endpoint = module.resource_dispatcher[0].requires.service_mesh.endpoint
+    name     = module.resource_dispatcher.requires.service_mesh.name
+    endpoint = module.resource_dispatcher.requires.service_mesh.endpoint
   }
 
   application {
@@ -85,8 +85,8 @@ resource "juju_integration" "kserve_controller_secrets" {
   }
 
   application {
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 }
 
@@ -102,8 +102,8 @@ resource "juju_integration" "kserve_controller_service_accounts" {
   }
 
   application {
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 }
 

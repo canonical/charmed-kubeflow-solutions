@@ -553,14 +553,14 @@ module "mlflow" {
 
   secrets = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   pod_defaults = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
   ingress = var.service_mesh_type == "sidecar" ? {
@@ -727,14 +727,14 @@ module "feast" {
 
   secrets = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   pod_defaults = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
   dashboard_links = {
@@ -842,8 +842,8 @@ module "spark" {
 
   # Integrations
 
-  object_storage           = merge({ kind = "endpoint" }, module.s3[0].provides.s3_credentials)
-  object_storage_interface = module.s3[0].provides.s3_credentials.endpoint
+  object_storage           = merge({ kind = "endpoint" }, module.s3_spark[0].provides.s3_credentials)
+  object_storage_interface = module.s3_spark[0].provides.s3_credentials.endpoint
 }
 
 module "external_integrations" {
@@ -865,7 +865,7 @@ module "external_integrations" {
   postgresql = each.value.postgresql
   spark      = each.value.spark
 
-  resource_dispatcher_endpoints = module.resource_dispatcher[0].provides
+  resource_dispatcher_endpoints = module.resource_dispatcher.provides
 }
 
 module "observability" {
