@@ -33,6 +33,8 @@ resource "juju_application" "mlmd" {
   constraints = var.mlmd.constraints
   config      = var.mlmd.config
   resources   = var.mlmd.resources
+
+  storage_directives = var.mlmd.storage_directives
 }
 
 # Argo Controller application
