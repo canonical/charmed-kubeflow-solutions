@@ -14,7 +14,7 @@ resource "juju_model" "kubeflow" {
 
 module "istio" {
   count  = var.service_mesh_type == "sidecar" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform/components/istio-sidecar?ref=feat/terraform-refactor"
+  source = "../../components/istio-sidecar"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -32,7 +32,7 @@ module "istio" {
 
 module "ambient" {
   count  = var.service_mesh_type == "ambient" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform/components/istio-ambient?ref=feat/terraform-refactor"
+  source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
