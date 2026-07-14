@@ -8,6 +8,7 @@ MODEL_NAME = "kubeflow"
 
 load_dotenv()
 
+
 @pytest.fixture(scope="module")
 def juju():
     juju_instance = jubilant.Juju()
@@ -82,6 +83,7 @@ def enable_mlflow(request) -> list[str]:
         return ["-var", "enable_mlflow=true"]
     return []
 
+
 @pytest.fixture(scope="module")
 def enable_feast(request) -> list[str]:
     """Terraform module customization for Feast deployment."""
@@ -89,23 +91,32 @@ def enable_feast(request) -> list[str]:
         return ["-var", "enable_feast=true"]
     return []
 
+
 @pytest.fixture(scope="module")
 def enable_spark(request) -> list[str]:
     """Terraform module customization for Spark deployment."""
-    if request.config.getoption("--enable-spark"):        
+    if request.config.getoption("--enable-spark"):
         extra_args = [
-            "-var", "enable_spark=true", 
-            "-var", f"s3_bucket={os.environ['S3_BUCKET']}",
-            "-var", f"s3_secret_key={os.environ['S3_SECRET_KEY']}",
-            "-var", f"s3_access_key={os.environ['S3_ACCESS_KEY']}",
-            "-var", f"s3_endpoint={os.environ['S3_SERVER_URL']}",
+            "-var",
+            "enable_spark=true",
+            "-var",
+            f"s3_bucket={os.environ['S3_BUCKET']}",
+            "-var",
+            f"s3_secret_key={os.environ['S3_SECRET_KEY']}",
+            "-var",
+            f"s3_access_key={os.environ['S3_ACCESS_KEY']}",
+            "-var",
+            f"s3_endpoint={os.environ['S3_SERVER_URL']}",
         ]
         print(f"Extra args for Spark deployment: {extra_args}")
         return extra_args
     return []
 
+
 @pytest.fixture(scope="module")
-def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark) -> list[str]:
+def tf_vars(
+    risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark
+) -> list[str]:
     """Overall Terraform module customization."""
     return (
         enable_mlflow
@@ -114,7 +125,15 @@ def tf_vars(risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark) 
         + service_mesh_type
         + risk
         + [
-            "-var", "create_model=false",
-            "-var", "profile=testing"
+            "-var",
+            "create_model=false",
+            "-var",
+            "mysql_storage_size=1G",
+            "-var",
+            "minio_storage_size=10G",
+            "-var",
+            "mlmd_storage_size=10G",
+            "-var",
+            "postgresql_storage_size=1G",
         ]
     )
