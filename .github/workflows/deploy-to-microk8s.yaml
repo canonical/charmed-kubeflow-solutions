@@ -148,6 +148,7 @@ jobs:
           terraform --version
 
       - name: Deploy solution
+        timeout-minutes: 45
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
@@ -234,9 +235,14 @@ jobs:
           done < $IMAGE_LIST
 
       - name: Run UATs
+        timeout-minutes: 45
         run: |
           cd ~/charmed-kubeflow-uats
           tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
+
+      - name: Setup tmate session
+        if: failure()
+        uses: canonical/action-tmate@main
 
       # On failure, capture debugging resources
       - name: Select model

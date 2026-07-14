@@ -119,6 +119,7 @@ jobs:
           terraform --version
 
       - name: Deploy solution
+        timeout-minutes: 45
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
@@ -137,6 +138,7 @@ jobs:
           tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $TF_VARS_ARG $PLATFORM_ARG
 
       - name: Clone UATs repository
+        timeout-minutes: 45
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
