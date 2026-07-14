@@ -270,7 +270,8 @@ module "s3_kfp" {
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  channel = "2/stable"
+  app_name = "s3-integrator-kfp"
+  channel  = "2/stable"
   config = merge(
     {
       bucket      = var.s3_bucket_kfp,
@@ -797,7 +798,8 @@ module "s3_spark" {
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  channel = "2/stable"
+  app_name = "s3-integrator-spark"
+  channel  = "2/stable"
   config = merge(
     {
       bucket      = var.s3_bucket_spark,
