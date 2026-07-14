@@ -6,7 +6,7 @@
 variable "release" {
   type        = string
   description = "Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks."
-  default     = "1.11"
+  default     = "latest"
 
   validation {
     condition     = contains(["1.11", "latest"], var.release)
