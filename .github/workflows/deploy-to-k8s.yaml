@@ -28,14 +28,14 @@ jobs:
       fail-fast: false
       matrix:
         product: [kubeflow, mlflow, feast, spark]
-        service-mesh-type: [sidecar, ambient]
+        service-mesh-type: [sidecar, ambient-dex]
         include:
           - product: kubeflow
             service-mesh-type: sidecar
             uats:
               env: kubeflow-remote
           - product: kubeflow
-            service-mesh-type: ambient
+            service-mesh-type: ambient-dex
             uats_branch: main
             uats:
               env: kubeflow-remote
@@ -51,7 +51,7 @@ jobs:
               extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
         exclude:
           - product: spark
-            service-mesh-type: ambient
+            service-mesh-type: ambient-dex
 
 
     steps:
@@ -167,7 +167,7 @@ jobs:
           
           EXTRA_COMPONENTS_ARG=""
 
-          if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
+          if [[ "${{ matrix.service-mesh-type }}" == ambient* ]]; then
             PLATFORM_ARG="--istio-k8s-platform"
           fi
 

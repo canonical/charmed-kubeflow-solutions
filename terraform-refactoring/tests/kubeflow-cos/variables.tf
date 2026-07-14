@@ -78,13 +78,13 @@ variable "model_uuid" {
 }
 
 variable "service_mesh_type" {
-  description = "Which service mesh component to deploy: 'sidecar' (Istio sidecar) or 'ambient' (Istio ambient)"
+  description = "Which service mesh component to deploy: 'sidecar' (Istio sidecar), 'ambient-dex' (Istio ambient + DEX), 'ambient-iam' (Istio ambient + IAM)"
   type        = string
   default     = "sidecar"
 
   validation {
-    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
+    condition     = contains(["sidecar", "ambient-dex", "ambient-iam"], var.service_mesh_type)
+    error_message = "Valid values for service_mesh_type are (sidecar, ambient-dex, ambient-iam)."
   }
 }
 
