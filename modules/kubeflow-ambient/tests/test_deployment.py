@@ -4,6 +4,7 @@ import aiohttp
 import jubilant
 import lightkube
 import pytest
+from itertools import batched
 from lightkube.resources.core_v1 import Service
 
 
@@ -39,7 +40,8 @@ class TestCharm:
         # `blocked` until it's related to one of the COS charms
         apps.remove("opentelemetry-collector-k8s-kubeflow")
 
-        juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=3600)
+        for batched_apps in batched(apps, 5):
+            juju.wait(lambda status: jubilant.all_active(status, *batched_apps), timeout=3600)
 
         # Verify deployment by checking the public URL
         url = get_public_url(lightkube_client, "kubeflow")
