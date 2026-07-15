@@ -88,6 +88,60 @@ variable "dashboard_links" {
   }
 }
 
+variable "config_maps" {
+  description = "Config maps provider for kfp-profile-controller from resource-dispatcher:config-maps (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.config_maps == null || contains(["endpoint", "offer"], var.config_maps.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.config_maps == null || var.config_maps.kind != "endpoint" || (var.config_maps.name != null && var.config_maps.name != "" && var.config_maps.endpoint != null && var.config_maps.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.config_maps == null || var.config_maps.kind != "offer" || (var.config_maps.url != null && var.config_maps.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
+variable "secrets" {
+  description = "Secrets provider for kfp-profile-controller from resource-dispatcher:secrets (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.secrets == null || contains(["endpoint", "offer"], var.secrets.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.secrets == null || var.secrets.kind != "endpoint" || (var.secrets.name != null && var.secrets.name != "" && var.secrets.endpoint != null && var.secrets.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.secrets == null || var.secrets.kind != "offer" || (var.secrets.url != null && var.secrets.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
 variable "service_mesh" {
   description = "Service mesh provider for KFP applications from istio-beacon-k8s:service-mesh (supports same-model endpoint or cross-model offer)"
   type = object({

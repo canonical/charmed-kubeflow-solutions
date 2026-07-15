@@ -71,6 +71,40 @@ resource "juju_integration" "kfp_profile_controller_object_storage" {
   }
 }
 
+# KFP Profile Controller config-maps integration (resource-dispatcher:config-maps -> kfp-profile-controller)
+resource "juju_integration" "kfp_profile_controller_config_maps" {
+  count      = var.config_maps != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_profile_controller.name
+    endpoint = "config-maps"
+  }
+
+  application {
+    name      = var.config_maps.kind == "endpoint" ? var.config_maps.name : null
+    endpoint  = var.config_maps.kind == "endpoint" ? var.config_maps.endpoint : null
+    offer_url = var.config_maps.kind == "offer" ? var.config_maps.url : null
+  }
+}
+
+# KFP Profile Controller secrets integration (resource-dispatcher:secrets -> kfp-profile-controller)
+resource "juju_integration" "kfp_profile_controller_secrets" {
+  count      = var.secrets != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_profile_controller.name
+    endpoint = "secrets"
+  }
+
+  application {
+    name      = var.secrets.kind == "endpoint" ? var.secrets.name : null
+    endpoint  = var.secrets.kind == "endpoint" ? var.secrets.endpoint : null
+    offer_url = var.secrets.kind == "offer" ? var.secrets.url : null
+  }
+}
+
 resource "juju_integration" "kfp_ui_object_storage" {
   count      = var.object_storage != null ? 1 : 0
   model_uuid = var.model_uuid

@@ -296,7 +296,7 @@ resource "juju_access_secret" "s3_secret_access_kfp" {
 
 module "kfp" {
   count      = var.enable_kfp ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql]
+  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql, module.resource_dispatcher]
 
   source = "../../components/kfp"
 
@@ -312,6 +312,18 @@ module "kfp" {
     kind     = "endpoint"
     name     = module.minio[0].provides.object_storage.name
     endpoint = module.minio[0].provides.object_storage.endpoint
+  }
+
+  config_maps = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher.provides.config_maps.name
+    endpoint = module.resource_dispatcher.provides.config_maps.endpoint
+  }
+
+  secrets = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   dashboard_links = {
