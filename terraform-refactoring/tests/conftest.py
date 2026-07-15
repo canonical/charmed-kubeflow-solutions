@@ -118,13 +118,13 @@ def setup_s3_integrator_kfp() -> list[str]:
     """Terraform module customization for Spark deployment."""
     args = [
         "-var",
-        f"s3_bucket_kfp={os.environ['S3_BUCKET_KFP_PRIMARY']}",
+        f"s3_bucket_kfp={os.environ['S3_BUCKET_KFP_GLOBAL']}",
         "-var",
-        f"s3_secret_key_kfp={os.environ['S3_SECRET_KEY_PRIMARY']}",
+        f"s3_secret_key_kfp={os.environ['S3_SECRET_KEY_GLOBAL']}",
         "-var",
-        f"s3_access_key_kfp={os.environ['S3_ACCESS_KEY_PRIMARY']}",
+        f"s3_access_key_kfp={os.environ['S3_ACCESS_KEY_GLOBAL']}",
         "-var",
-        f"s3_endpoint_kfp={os.environ['S3_SERVER_URL_PRIMARY']}",
+        f"s3_endpoint_kfp={os.environ['S3_SERVER_URL_GLOBAL']}",
     ]
     print(f"Args for s3 KFP integration: {args}")
     return args
