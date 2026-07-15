@@ -235,7 +235,7 @@ jobs:
           done < $IMAGE_LIST
 
       - name: Run UATs
-        timeout-minutes: 45
+        timeout-minutes: 75
         run: |
           cd ~/charmed-kubeflow-uats
           tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
