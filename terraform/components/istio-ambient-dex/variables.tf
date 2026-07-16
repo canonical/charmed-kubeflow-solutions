@@ -27,10 +27,8 @@ variable "istio_ingress_k8s" {
     channel     = optional(string, "2/stable")
     revision    = optional(number)
     units       = optional(number, 1)
-    trust       = optional(bool, true)
     constraints = optional(string)
     config      = optional(map(string), {})
-    resources   = optional(map(string), {})
   })
   default = {}
 }
@@ -41,10 +39,8 @@ variable "istio_beacon_k8s" {
     channel     = optional(string, "2/stable")
     revision    = optional(number)
     units       = optional(number, 1)
-    trust       = optional(bool, true)
     constraints = optional(string)
     config      = optional(map(string), {})
-    resources   = optional(map(string), {})
   })
   default = {}
 }
