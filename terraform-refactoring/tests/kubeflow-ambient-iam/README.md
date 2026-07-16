@@ -77,7 +77,7 @@ The deployment always uses `service_mesh_type = "ambient"`. The legacy sidecar
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../products/iam | n/a |
-| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | ../../charms/istio-k8s | n/a |
+| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | df6c85dea5decdd014fd187404163ef2d73263da |
 | <a name="module_kubeflow"></a> [kubeflow](#module\_kubeflow) | ../../products/kubeflow | n/a |
 
 ## Resources

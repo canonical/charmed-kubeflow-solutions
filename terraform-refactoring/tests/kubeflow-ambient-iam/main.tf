@@ -37,9 +37,10 @@ locals {
 }
 
 module "istio_k8s" {
-  source = "../../charms/istio-k8s"
+  source = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=df6c85dea5decdd014fd187404163ef2d73263da"
 
   model_uuid = local.istio_system_model_uuid
+  app_name   = "istio-k8s"
   channel    = var.istio_k8s_channel
   revision   = var.istio_k8s_revision
   config     = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
@@ -47,8 +48,8 @@ module "istio_k8s" {
 
 resource "juju_offer" "istio_ingress_config" {
   name             = "istio-ingress-config"
-  application_name = module.istio_k8s.requires.istio_ingress_config.name
-  endpoints        = [module.istio_k8s.requires.istio_ingress_config.endpoint]
+  application_name = module.istio_k8s.app_name
+  endpoints        = [module.istio_k8s.requires.istio_ingress_config]
   model_uuid       = local.istio_system_model_uuid
 }
 
@@ -58,8 +59,10 @@ resource "juju_integration" "istio_k8s_jwks_ca_cert" {
   model_uuid = local.istio_system_model_uuid
 
   application {
-    name     = module.istio_k8s.requires.jwks_ca_cert.name
-    endpoint = module.istio_k8s.requires.jwks_ca_cert.endpoint
+    # The upstream istio-k8s module does not surface jwks-ca-cert in its
+    # requires output, so the endpoint is referenced literally.
+    name     = module.istio_k8s.app_name
+    endpoint = "jwks-ca-cert"
   }
 
   application {
