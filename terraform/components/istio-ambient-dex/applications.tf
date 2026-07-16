@@ -1,21 +1,20 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# Istio K8s application
-resource "juju_application" "istio_k8s" {
-  charm {
-    name     = "istio-k8s"
-    channel  = var.istio_k8s.channel
-    revision = var.istio_k8s.revision
-  }
+# Istio K8s control plane, deployed via the upstream istio-k8s Terraform module
+# (track/2 branch, pinned by commit). The upstream module hardcodes trust = true
+# and does not accept base/resources, so var.istio_k8s.trust and .resources are
+# intentionally not passed.
+module "istio_k8s" {
+  source = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=e3c216c0fe5a9a42ab8d1b6e16725a97b72bf2a7"
 
   model_uuid  = var.model_uuid
-  name        = "istio-k8s"
+  app_name    = "istio-k8s"
+  channel     = var.istio_k8s.channel
+  revision    = var.istio_k8s.revision
   units       = var.istio_k8s.units
-  trust       = var.istio_k8s.trust
   constraints = var.istio_k8s.constraints
   config      = var.istio_k8s.config
-  resources   = var.istio_k8s.resources
 }
 
 # Istio Ingress K8s gateway, deployed via the upstream istio-ingress-k8s

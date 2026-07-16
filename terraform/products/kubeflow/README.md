@@ -187,7 +187,7 @@
 | <a name="input_postgresql_storage_size"></a> [postgresql\_storage\_size](#input\_postgresql\_storage\_size) | PostgreSQL database storage size | `string` | `"10G"` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
-| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
+| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"1.11"` | no |
 | <a name="input_request_authentication_configurator_config"></a> [request\_authentication\_configurator\_config](#input\_request\_authentication\_configurator\_config) | Configuration for the request-authentication-configurator application | `map(string)` | `{}` | no |
 | <a name="input_request_authentication_configurator_revision"></a> [request\_authentication\_configurator\_revision](#input\_request\_authentication\_configurator\_revision) | Revision of the request-authentication-configurator application | `number` | `null` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |

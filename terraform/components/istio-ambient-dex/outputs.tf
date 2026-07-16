@@ -4,7 +4,7 @@
 output "components" {
   description = "Map of the deployed Istio Ambient applications"
   value = {
-    istio_k8s         = juju_application.istio_k8s
+    istio_k8s         = { name = module.istio_k8s.app_name }
     istio_ingress_k8s = { name = module.istio_ingress_k8s.app_name }
     istio_beacon_k8s  = { name = module.istio_beacon_k8s.app_name }
   }

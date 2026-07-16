@@ -6,7 +6,7 @@ if ! command -v terraform-docs &> /dev/null; then
   exit 1
 fi
 
-TERRAFORM_DIR=$(pwd)/../terraform-refactoring
+TERRAFORM_DIR=$(pwd)/../terraform
 
 echo "Starting terraform-docs update from ${TERRAFORM_DIR}"
 

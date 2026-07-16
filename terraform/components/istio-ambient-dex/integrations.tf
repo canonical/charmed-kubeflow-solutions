@@ -5,7 +5,7 @@ resource "juju_integration" "istio_k8s_istio_ingress_k8s_ingress_config" {
   model_uuid = var.model_uuid
 
   application {
-    name     = juju_application.istio_k8s.name
+    name     = module.istio_k8s.app_name
     endpoint = "istio-ingress-config"
   }
 
