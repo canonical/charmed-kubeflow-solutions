@@ -14,7 +14,7 @@ resource "juju_model" "kubeflow" {
 
 module "istio" {
   count  = var.service_mesh_type == "sidecar" ? 1 : 0
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar?ref=feat/terraform-refactor"
+  source = "../../components/istio-sidecar"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 

@@ -17,7 +17,7 @@ Prometheus metrics).
 
 ```hcl
 module "kubeflow_cos" {
-  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/products/kubeflow-cos?ref=main"
+  source = "git::https://github.com/canonical/charmed-kubeflow-solutions//terraform/products/kubeflow-cos?ref=main"
 
   risk       = "stable"
   cos_channel = "2/stable"

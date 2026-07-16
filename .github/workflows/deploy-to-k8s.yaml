@@ -182,7 +182,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform-refactoring/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Clone UATs repository
         run: |
