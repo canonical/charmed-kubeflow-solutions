@@ -64,10 +64,16 @@ locals {
     "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
   }
 
+  istio_pilot_config = merge(
+    var.istio_pilot_config,
+    var.istio_cni_bin_dir != "" ? { "cni-bin-dir" = var.istio_cni_bin_dir } : {},
+    var.istio_cni_conf_dir != "" ? { "cni-conf-dir" = var.istio_cni_conf_dir } : {}
+  )
+
   kubeflow_profiles = {
     channel  = local.kubeflow_profiles_channel
     revision = var.kubeflow_profiles_revision
-    config   = merge(local.kubeflow_profiles_service_mesh_config, var.kubeflow_profiles_config)
+    config   = merge(local.kubeflow_profiles_service_mesh_config, var.kubeflow_profiles_config, { "security-policy" = var.kubeflow_profiles_security_policy })
   }
 
   external_integrations = merge(

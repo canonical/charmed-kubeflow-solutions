@@ -21,7 +21,7 @@ module "istio" {
   istio_pilot = {
     channel  = local.istio_sidecar_channel
     revision = var.istio_pilot_revision
-    config   = var.istio_pilot_config
+    config   = local.istio_pilot_config
   }
   istio_ingressgateway = {
     channel  = local.istio_sidecar_channel
