@@ -163,7 +163,7 @@ module "kserve_controller" {
   source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
-    deployment-mode = "rawdeployment",
+    deployment-mode = "standard",
     http-proxy      = var.http_proxy,
     https-proxy     = var.https_proxy,
     no-proxy        = var.no_proxy,
@@ -203,7 +203,7 @@ module "kubeflow_roles" {
 
 module "kubeflow_trainer" {
   count      = var.kubeflow_trainer_v2 ? 1 : 0
-  source     = "git::https://github.com/canonical/training-operator//terraform?ref=main-v2"
+  source     = "git::https://github.com/canonical/kubeflow-trainer-operator//terraform?ref=main"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_trainer_revision
   channel    = local.channel_latest_edge

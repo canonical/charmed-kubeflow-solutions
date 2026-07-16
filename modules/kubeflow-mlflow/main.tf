@@ -73,6 +73,10 @@ module "kubeflow" {
   opentelemetry_collector_k8s_revision  = var.opentelemetry_collector_k8s_revision
 }
 
+locals {
+  track = "latest"
+}
+
 module "mlflow" {
   source = "git::https://github.com/canonical/charmed-mlflow-solutions//modules/mlflow?ref=track/2.22"
   # kubeflow module creates the model
@@ -97,8 +101,8 @@ module "mlflow" {
 }
 
 module "resource_dispatcher" {
-  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=track/2.0"
+  source     = "git::https://github.com/canonical/resource-dispatcher//terraform?ref=main"
   model_name = module.kubeflow.model
   revision   = var.resource_dispatcher_revision
-  channel    = "2.0/${var.risk}"
+  channel    = "${local.track}/${var.risk}"
 }

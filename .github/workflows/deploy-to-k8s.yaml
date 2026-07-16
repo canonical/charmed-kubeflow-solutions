@@ -19,6 +19,7 @@ on:
   schedule:
     - cron: "17 02 * * 1"
 
+
 jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
@@ -160,6 +161,10 @@ jobs:
 
           if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
             PLATFORM_ARG="--istio-k8s-platform"
+          fi
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
+            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
           fi
 
           if [[ "${{ matrix.product }}" == "mlflow" ]]; then
