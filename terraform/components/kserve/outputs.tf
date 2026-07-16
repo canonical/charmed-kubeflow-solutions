@@ -53,6 +53,10 @@ output "requires" {
         name     = juju_application.kserve_controller.name
         endpoint = "ingress-gateway"
       }
+      kserve_controller_s3_credentials = {
+        name     = juju_application.kserve_controller.name
+        endpoint = "s3-credentials"
+      }
       kserve_controller_object_storage = {
         name     = juju_application.kserve_controller.name
         endpoint = "object-storage"

@@ -114,19 +114,19 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def setup_s3_integrator_kfp() -> list[str]:
-    """Terraform module customization for Spark deployment."""
+def setup_s3_integrator_global() -> list[str]:
+    """Terraform module customization for the shared S3 integrator."""
     args = [
         "-var",
-        f"s3_bucket_kfp={os.environ['S3_BUCKET_KFP_GLOBAL']}",
+        f"s3_bucket_global={os.environ['S3_BUCKET_KFP_GLOBAL']}",
         "-var",
-        f"s3_secret_key_kfp={os.environ['S3_SECRET_KEY_GLOBAL']}",
+        f"s3_secret_key_global={os.environ['S3_SECRET_KEY_GLOBAL']}",
         "-var",
-        f"s3_access_key_kfp={os.environ['S3_ACCESS_KEY_GLOBAL']}",
+        f"s3_access_key_global={os.environ['S3_ACCESS_KEY_GLOBAL']}",
         "-var",
-        f"s3_endpoint_kfp={os.environ['S3_SERVER_URL_GLOBAL']}",
+        f"s3_endpoint_global={os.environ['S3_SERVER_URL_GLOBAL']}",
     ]
-    print(f"Args for s3 KFP integration: {args}")
+    print(f"Args for shared S3 integration: {args}")
     return args
 
 
@@ -137,7 +137,7 @@ def tf_vars(
     enable_mlflow,
     enable_feast,
     enable_spark,
-    setup_s3_integrator_kfp,
+    setup_s3_integrator_global,
 ) -> list[str]:
     """Overall Terraform module customization."""
     return (
@@ -146,14 +146,14 @@ def tf_vars(
         + enable_spark
         + service_mesh_type
         + risk
-        + setup_s3_integrator_kfp
+        + setup_s3_integrator_global
         + [
             "-var",
             "create_model=false",
             "-var",
-            "mysql_storage_size=1G",
+            "object_storage_mode=S3",
             "-var",
-            "minio_storage_size=10G",
+            "mysql_storage_size=1G",
             "-var",
             "mlmd_storage_size=10G",
             "-var",

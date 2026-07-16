@@ -21,7 +21,7 @@
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_external_integrations"></a> [external\_integrations](#module\_external\_integrations) | ../../components/data-kubeflow-integrator | n/a |
 | <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
-| <a name="module_istio"></a> [istio](#module\_istio) | git::https://github.com/canonical/charmed-kubeflow-solutions//terraform-refactoring/components/istio-sidecar | feat/terraform-refactor |
+| <a name="module_istio"></a> [istio](#module\_istio) | ../../components/istio-sidecar | n/a |
 | <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |
@@ -32,7 +32,7 @@
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql"></a> [postgresql](#module\_postgresql) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
-| <a name="module_s3_kfp"></a> [s3\_kfp](#module\_s3\_kfp) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
+| <a name="module_s3_global"></a> [s3\_global](#module\_s3\_global) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_s3_spark"></a> [s3\_spark](#module\_s3\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_spark"></a> [spark](#module\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
@@ -42,16 +42,17 @@
 
 | Name | Type |
 | ---- | ---- |
-| [juju_access_secret.s3_secret_access_kfp](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
+| [juju_access_secret.s3_secret_access_global](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_access_secret.s3_secret_access_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_integration.kserve_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kserve_controller_s3_credentials](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_service_accounts](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.minio_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.oidc_gatekeeper_istio_ingress_k8s_forward_auth](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_model.kubeflow](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
-| [juju_secret.s3_secret_kfp](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
+| [juju_secret.s3_secret_global](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
 | [juju_secret.s3_secret_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
 
 ## Inputs
@@ -159,6 +160,7 @@
 | <a name="input_mysql_revision"></a> [mysql\_revision](#input\_mysql\_revision) | Revision of the mysql-db application | `number` | `null` | no |
 | <a name="input_mysql_storage_size"></a> [mysql\_storage\_size](#input\_mysql\_storage\_size) | MySQL database storage size | `string` | `"10G"` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
+| <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
 | <a name="input_opentelemetry_collector_k8s_config"></a> [opentelemetry\_collector\_k8s\_config](#input\_opentelemetry\_collector\_k8s\_config) | Configuration for the opentelemetry-collector-k8s application | `map(string)` | `{}` | no |
@@ -168,21 +170,21 @@
 | <a name="input_postgresql_storage_size"></a> [postgresql\_storage\_size](#input\_postgresql\_storage\_size) | PostgreSQL database storage size | `string` | `"10G"` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
-| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
+| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"1.11"` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
 | <a name="input_resource_dispatcher_revision"></a> [resource\_dispatcher\_revision](#input\_resource\_dispatcher\_revision) | Revision of the resource-dispatcher application | `number` | `null` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
-| <a name="input_s3_access_key_kfp"></a> [s3\_access\_key\_kfp](#input\_s3\_access\_key\_kfp) | S3 access key for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_access_key_global"></a> [s3\_access\_key\_global](#input\_s3\_access\_key\_global) | S3 access key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_access_key_spark"></a> [s3\_access\_key\_spark](#input\_s3\_access\_key\_spark) | S3 access key for Spark object storage integration | `string` | `""` | no |
-| <a name="input_s3_bucket_kfp"></a> [s3\_bucket\_kfp](#input\_s3\_bucket\_kfp) | S3 bucket for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_bucket_global"></a> [s3\_bucket\_global](#input\_s3\_bucket\_global) | S3 bucket for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_bucket_spark"></a> [s3\_bucket\_spark](#input\_s3\_bucket\_spark) | S3 bucket for Spark object storage integration | `string` | `""` | no |
-| <a name="input_s3_config_kfp"></a> [s3\_config\_kfp](#input\_s3\_config\_kfp) | Configuration for s3-integrator application for KFP | `map(string)` | `{}` | no |
+| <a name="input_s3_config_global"></a> [s3\_config\_global](#input\_s3\_config\_global) | Configuration for the shared s3-integrator application | `map(string)` | `{}` | no |
 | <a name="input_s3_config_spark"></a> [s3\_config\_spark](#input\_s3\_config\_spark) | Configuration for s3-integrator application | `map(string)` | `{}` | no |
-| <a name="input_s3_endpoint_kfp"></a> [s3\_endpoint\_kfp](#input\_s3\_endpoint\_kfp) | S3 endpoint for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_endpoint_spark"></a> [s3\_endpoint\_spark](#input\_s3\_endpoint\_spark) | S3 endpoint for Spark object storage integration | `string` | `""` | no |
-| <a name="input_s3_revision_kfp"></a> [s3\_revision\_kfp](#input\_s3\_revision\_kfp) | Revision of the s3-integrator application for KFP | `number` | `null` | no |
+| <a name="input_s3_revision_global"></a> [s3\_revision\_global](#input\_s3\_revision\_global) | Revision of the shared s3-integrator application | `number` | `null` | no |
 | <a name="input_s3_revision_spark"></a> [s3\_revision\_spark](#input\_s3\_revision\_spark) | Revision of the s3-integrator application | `number` | `null` | no |
-| <a name="input_s3_secret_key_kfp"></a> [s3\_secret\_key\_kfp](#input\_s3\_secret\_key\_kfp) | S3 secret key for KFP object storage integration | `string` | `""` | no |
+| <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_spark"></a> [s3\_secret\_key\_spark](#input\_s3\_secret\_key\_spark) | S3 secret key for Spark object storage integration | `string` | `""` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
 | <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |

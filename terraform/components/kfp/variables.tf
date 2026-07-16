@@ -34,6 +34,33 @@ variable "mysql_database" {
   }
 }
 
+variable "s3_credentials" {
+  description = "S3 credentials provider for KFP applications from s3-integrator:s3-credentials (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.s3_credentials == null || contains(["endpoint", "offer"], var.s3_credentials.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.s3_credentials == null || var.s3_credentials.kind != "endpoint" || (var.s3_credentials.name != null && var.s3_credentials.name != "" && var.s3_credentials.endpoint != null && var.s3_credentials.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.s3_credentials == null || var.s3_credentials.kind != "offer" || (var.s3_credentials.url != null && var.s3_credentials.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
 variable "object_storage" {
   description = "Object storage provider for KFP applications from minio:object-storage (supports same-model endpoint or cross-model offer)"
   type = object({
@@ -51,7 +78,7 @@ variable "object_storage" {
   }
 
   validation {
-    condition     = var.object_storage == null || var.object_storage.kind != "endpoint" || (var.object_storage.kind != null && var.object_storage.kind != "" && var.object_storage.name != null && var.object_storage.name != "")
+    condition     = var.object_storage == null || var.object_storage.kind != "endpoint" || (var.object_storage.name != null && var.object_storage.name != "" && var.object_storage.endpoint != null && var.object_storage.endpoint != "")
     error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
   }
 

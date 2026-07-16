@@ -1,6 +1,24 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+# Argo Controller S3 credentials integration (s3-integrator:s3-credentials -> argo-controller)
+
+resource "juju_integration" "argo_controller_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.argo_controller.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
+  }
+}
+
 # Argo Controller object storage integration (minio:object-storage -> argo-controller)
 
 resource "juju_integration" "argo_controller_object_storage" {
@@ -34,6 +52,40 @@ resource "juju_integration" "kfp_api_mysql_database" {
     name      = var.mysql_database.kind == "endpoint" ? var.mysql_database.name : null
     endpoint  = var.mysql_database.kind == "endpoint" ? var.mysql_database.endpoint : null
     offer_url = var.mysql_database.kind == "offer" ? var.mysql_database.url : null
+  }
+}
+
+# S3 credentials integrations (s3-integrator:s3-credentials -> KFP apps)
+
+resource "juju_integration" "kfp_api_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_api.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
+  }
+}
+
+resource "juju_integration" "kfp_profile_controller_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_profile_controller.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
   }
 }
 
@@ -102,6 +154,22 @@ resource "juju_integration" "kfp_profile_controller_secrets" {
     name      = var.secrets.kind == "endpoint" ? var.secrets.name : null
     endpoint  = var.secrets.kind == "endpoint" ? var.secrets.endpoint : null
     offer_url = var.secrets.kind == "offer" ? var.secrets.url : null
+  }
+}
+
+resource "juju_integration" "kfp_ui_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_ui.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
   }
 }
 

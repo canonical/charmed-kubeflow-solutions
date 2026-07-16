@@ -138,24 +138,6 @@ variable "kubeflow_volumes_config" {
   default     = {}
 }
 
-variable "minio_revision" {
-  description = "Revision of the minio application"
-  type        = number
-  default     = null
-}
-
-variable "minio_config" {
-  description = "Configuration for minio application"
-  type        = map(string)
-  default     = {}
-}
-
-variable "minio_storage_size" {
-  description = "MinIO database storage size"
-  type        = string
-  default     = "10G"
-}
-
 variable "metacontroller_operator_revision" {
   description = "Revision of the metacontroller-operator application"
   type        = number
@@ -327,44 +309,75 @@ variable "kfp_viz_config" {
   default     = {}
 }
 
-# S3 Integrator KFP variables
+# S3 Integrator (shared/global) variables
 
-variable "s3_secret_key_kfp" {
-  description = "S3 secret key for KFP object storage integration"
+variable "s3_secret_key_global" {
+  description = "S3 secret key for the shared object storage integration"
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "s3_access_key_kfp" {
-  description = "S3 access key for KFP object storage integration"
+variable "s3_access_key_global" {
+  description = "S3 access key for the shared object storage integration"
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "s3_endpoint_kfp" {
-  description = "S3 endpoint for KFP object storage integration"
+variable "s3_endpoint_global" {
+  description = "S3 endpoint for the shared object storage integration"
   type        = string
   default     = ""
 }
 
-variable "s3_bucket_kfp" {
-  description = "S3 bucket for KFP object storage integration"
+variable "s3_bucket_global" {
+  description = "S3 bucket for the shared object storage integration"
   type        = string
   default     = ""
 }
 
-variable "s3_config_kfp" {
-  description = "Configuration for s3-integrator application for KFP"
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application"
   type        = map(string)
   default     = {}
 }
 
-variable "s3_revision_kfp" {
-  description = "Revision of the s3-integrator application for KFP"
+variable "s3_revision_global" {
+  description = "Revision of the shared s3-integrator application"
   type        = number
   default     = null
+}
+
+# Object storage backend selection
+
+variable "object_storage_mode" {
+  description = "Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation)"
+  type        = string
+  default     = "S3"
+
+  validation {
+    condition     = contains(["minio", "S3"], var.object_storage_mode)
+    error_message = "Valid values for object_storage_mode are ('minio', 'S3')."
+  }
+}
+
+variable "minio_revision" {
+  description = "Revision of the minio application"
+  type        = number
+  default     = null
+}
+
+variable "minio_config" {
+  description = "Configuration for minio application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "minio_storage_size" {
+  description = "MinIO database storage size"
+  type        = string
+  default     = "10G"
 }
 
 # Istio Component Applications

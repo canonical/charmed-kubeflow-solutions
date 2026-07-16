@@ -249,54 +249,54 @@ module "katib" {
   }
 }
 
-## KFP
+## Object storage (shared S3 integrator)
 
-resource "juju_secret" "s3_secret_kfp" {
+resource "juju_secret" "s3_secret_global" {
   depends_on = [juju_model.kubeflow]
-  count      = var.enable_kfp ? 1 : 0
+  count      = local.deploy_s3_integrator ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  name       = "s3_secret_kfp"
+  name       = "s3_secret_global"
   value = {
-    secret-key = var.s3_secret_key_kfp
-    access-key = var.s3_access_key_kfp
+    secret-key = var.s3_secret_key_global
+    access-key = var.s3_access_key_global
   }
   info = "This is the access key and secret key for the S3 storage"
 }
 
-module "s3_kfp" {
-  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_kfp]
-  count      = var.enable_spark ? 1 : 0
+module "s3_global" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global]
+  count      = local.deploy_s3_integrator ? 1 : 0
   source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  app_name = "s3-integrator-kfp"
+  app_name = "s3-integrator-global"
   channel  = "2/stable"
   config = merge(
     {
-      bucket      = var.s3_bucket_kfp,
-      endpoint    = var.s3_endpoint_kfp,
-      credentials = "secret:${juju_secret.s3_secret_kfp[0].secret_id}"
-    }, var.s3_config_kfp
+      bucket      = var.s3_bucket_global,
+      endpoint    = var.s3_endpoint_global,
+      credentials = "secret:${juju_secret.s3_secret_global[0].secret_id}"
+    }, var.s3_config_global
   )
   constraints = "arch=amd64"
-  revision    = var.s3_revision_kfp
+  revision    = var.s3_revision_global
 }
 
-resource "juju_access_secret" "s3_secret_access_kfp" {
-  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_kfp, module.s3_kfp]
-  count      = var.enable_kfp ? 1 : 0
+resource "juju_access_secret" "s3_secret_access_global" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global, module.s3_global]
+  count      = local.deploy_s3_integrator ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   applications = [
-    module.s3_kfp[0].application.name
+    module.s3_global[0].application.name
   ]
-  secret_id = juju_secret.s3_secret_kfp[0].secret_id
+  secret_id = juju_secret.s3_secret_global[0].secret_id
 }
 
 module "kfp" {
   count      = var.enable_kfp ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql, module.resource_dispatcher]
+  depends_on = [module.istio, module.ambient, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
   source = "../../components/kfp"
 
@@ -308,11 +308,17 @@ module "kfp" {
     endpoint = module.mysql[0].provides.database
   }
 
-  object_storage = {
+  object_storage = local.deploy_minio ? {
     kind     = "endpoint"
     name     = module.minio[0].provides.object_storage.name
     endpoint = module.minio[0].provides.object_storage.endpoint
-  }
+  } : null
+
+  s3_credentials = local.deploy_s3_integrator ? {
+    kind     = "endpoint"
+    name     = module.s3_global[0].provides.s3_credentials.name
+    endpoint = module.s3_global[0].provides.s3_credentials.endpoint
+  } : null
 
   config_maps = {
     kind     = "endpoint"
@@ -540,7 +546,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient, module.core, module.minio, module.mysql, module.resource_dispatcher]
+  depends_on = [module.istio, module.ambient, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
@@ -558,11 +564,17 @@ module "mlflow" {
     endpoint = module.mysql[0].provides.database
   }
 
-  object_storage = {
+  object_storage = local.deploy_minio ? {
     kind     = "endpoint"
     name     = module.minio[0].provides.object_storage.name
     endpoint = module.minio[0].provides.object_storage.endpoint
-  }
+  } : null
+
+  s3_credentials = local.deploy_s3_integrator ? {
+    kind     = "endpoint"
+    name     = module.s3_global[0].provides.s3_credentials.name
+    endpoint = module.s3_global[0].provides.s3_credentials.endpoint
+  } : null
 
   secrets = {
     kind     = "endpoint"

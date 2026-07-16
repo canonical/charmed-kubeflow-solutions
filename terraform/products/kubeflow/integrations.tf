@@ -41,9 +41,10 @@ resource "juju_integration" "minio_service_mesh" {
 }
 
 # kserve-controller object-storage integration (minio:object-storage -> kserve-controller)
-# Only deployed when MLflow is enabled, since kserve uses minio to read MLflow model artifacts
+# Only deployed with the 'minio' object storage mode and when MLflow is enabled,
+# since kserve uses this storage to read MLflow model artifacts
 resource "juju_integration" "kserve_controller_object_storage" {
-  count      = (var.enable_mlflow && var.enable_kserve) ? 1 : 0
+  count      = (local.deploy_minio && var.enable_mlflow && var.enable_kserve) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -54,6 +55,23 @@ resource "juju_integration" "kserve_controller_object_storage" {
   application {
     name     = module.minio[0].provides.object_storage.name
     endpoint = module.minio[0].provides.object_storage.endpoint
+  }
+}
+
+# kserve-controller s3-credentials integration (s3-integrator-global:s3-credentials -> kserve-controller)
+# Only deployed with the 's3' object storage mode and when MLflow is enabled, since kserve uses this storage to read MLflow model artifacts
+resource "juju_integration" "kserve_controller_s3_credentials" {
+  count      = (local.deploy_s3_integrator && var.enable_mlflow && var.enable_kserve) ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.kserve[0].requires.kserve_controller_s3_credentials.name
+    endpoint = module.kserve[0].requires.kserve_controller_s3_credentials.endpoint
+  }
+
+  application {
+    name     = module.s3_global[0].provides.s3_credentials.name
+    endpoint = module.s3_global[0].provides.s3_credentials.endpoint
   }
 }
 
