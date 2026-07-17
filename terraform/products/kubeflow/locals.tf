@@ -16,7 +16,7 @@ locals {
   pvcviewer_operator_channel      = var.release == "1.11" ? "1.11/${var.risk}" : "latest/${var.risk}"
 
   # KFP Component
-  kfp_channel             = var.release == "1.11" ? "2.15/${var.risk}" : "latest/${var.risk}"
+  kfp_channel             = var.release == "1.11" ? "2.16/${var.risk}" : "latest/${var.risk}"
   argo_controller_channel = var.release == "1.11" ? "3.7/${var.risk}" : "latest/${var.risk}"
   mlmd_channel            = var.release == "1.11" ? "ckf-1.10/${var.risk}" : "latest/${var.risk}"
   envoy_channel           = var.release == "1.11" ? "2.4/${var.risk}" : "latest/${var.risk}"
