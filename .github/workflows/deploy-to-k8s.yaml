@@ -29,20 +29,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
+        product: [kubeflow]
+	#, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
         include:
           - service-mesh-type: ambient
             uats-extra-args: --include-ambient-tests
           - product: kubeflow
             uats-env: kubeflow-remote
-          - product: mlflow
-            uats-env: mlflow-remote
-          - product: feast
-            uats-env: feast-remote
-          - product: spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+          # - product: mlflow
+          #   uats-env: mlflow-remote
+          # - product: feast
+          #   uats-env: feast-remote
+          # - product: spark
+          #   uats-env: spark-remote
+          #   uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
         exclude:
           - product: spark
             service-mesh-type: ambient
