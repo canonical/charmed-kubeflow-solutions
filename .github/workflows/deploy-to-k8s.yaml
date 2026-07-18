@@ -29,8 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow]
-	#, mlflow, feast, spark]
+        product: [kubeflow] #, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
         include:
           - service-mesh-type: ambient
