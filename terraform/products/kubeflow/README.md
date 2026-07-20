@@ -186,6 +186,7 @@
 | <a name="input_s3_revision_spark"></a> [s3\_revision\_spark](#input\_s3\_revision\_spark) | Revision of the s3-integrator application | `number` | `null` | no |
 | <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_spark"></a> [s3\_secret\_key\_spark](#input\_s3\_secret\_key\_spark) | S3 secret key for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_tls_ca_chain_global"></a> [s3\_tls\_ca\_chain\_global](#input\_s3\_tls\_ca\_chain\_global) | PEM-encoded CA chain used for HTTPS validation against the S3 endpoint. When set, it is base64-encoded and passed to the s3-integrator 'tls-ca-chain' config option. Leave empty to omit. | `string` | `""` | no |
 | <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
 | <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |
 | <a name="input_spark_history_server_revision"></a> [spark\_history\_server\_revision](#input\_spark\_history\_server\_revision) | Revision of the spark-history-server application | `number` | `null` | no |

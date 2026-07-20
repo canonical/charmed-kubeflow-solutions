@@ -277,7 +277,9 @@ module "s3_global" {
       bucket      = var.s3_bucket_global,
       endpoint    = var.s3_endpoint_global,
       credentials = "secret:${juju_secret.s3_secret_global[0].secret_id}"
-    }, var.s3_config_global
+    },
+    var.s3_tls_ca_chain_global != "" ? { "tls-ca-chain" = base64encode(var.s3_tls_ca_chain_global) } : {},
+    var.s3_config_global
   )
   constraints = "arch=amd64"
   revision    = var.s3_revision_global

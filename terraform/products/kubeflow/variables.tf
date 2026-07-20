@@ -343,6 +343,12 @@ variable "s3_config_global" {
   default     = {}
 }
 
+variable "s3_tls_ca_chain_global" {
+  description = "PEM-encoded CA chain used for HTTPS validation against the S3 endpoint. When set, it is base64-encoded and passed to the s3-integrator 'tls-ca-chain' config option. Leave empty to omit."
+  type        = string
+  default     = ""
+}
+
 variable "s3_revision_global" {
   description = "Revision of the shared s3-integrator application"
   type        = number
