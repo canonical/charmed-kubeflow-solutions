@@ -39,8 +39,8 @@ flowchart LR
   apps -. service mesh .- beacon
 ```
 
-The deployment always uses `service_mesh_type = "ambient"`. The legacy sidecar
-+ Dex/OIDC path is not used here.
+The deployment always uses `service_mesh_type = "ambient"` and `auth_type = "iam"`.
+The legacy sidecar + Dex/OIDC path is not used here.
 
 ## Cross-model wiring
 

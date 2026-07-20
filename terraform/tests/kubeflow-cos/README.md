@@ -44,6 +44,7 @@ terraform apply
 | `create_model` | Create a Juju model named `kubeflow` | `true` |
 | `model_uuid` | UUID of an existing Juju model for Kubeflow (when `create_model = false`) | `null` |
 | `service_mesh_type` | Service mesh mode: `"sidecar"` or `"ambient"` | `"sidecar"` |
+| `auth_type` | Authentication stack: `"dex"` (legacy) or `"iam"` (Identity Platform) | `"dex"` |
 | `istio_k8s_platform` | Platform setting for istio-k8s (ambient mode only) | `""` |
 | `mysql` | mysql-k8s configuration object | `{}` |
 | `postgresql_k8s` | postgresql-k8s configuration object (Feast) | `{}` |
@@ -93,6 +94,7 @@ terraform apply
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_auth_type"></a> [auth\_type](#input\_auth\_type) | Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service\_mesh\_type = 'ambient'. | `string` | `"dex"` | no |
 | <a name="input_cos_channel"></a> [cos\_channel](#input\_cos\_channel) | Channel to deploy COS Lite applications from | `string` | `"2/stable"` | no |
 | <a name="input_cos_model_name"></a> [cos\_model\_name](#input\_cos\_model\_name) | Name of the Juju model to create for COS | `string` | `"cos"` | no |
 | <a name="input_cos_model_uuid"></a> [cos\_model\_uuid](#input\_cos\_model\_uuid) | UUID of an existing Juju model to deploy COS into (required when create\_cos\_model is false) | `string` | `null` | no |
@@ -111,5 +113,5 @@ terraform apply
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing Juju model for Kubeflow (required when create\_model is false) | `string` | `null` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
-| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'sidecar' (Istio sidecar), 'ambient-dex' (Istio ambient + DEX), 'ambient-iam' (Istio ambient + IAM) | `string` | `"sidecar"` | no |
+| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Service mesh to deploy: 'sidecar' (Istio sidecar) or 'ambient' (Istio ambient mesh) | `string` | `"sidecar"` | no |
 <!-- END_TF_DOCS -->

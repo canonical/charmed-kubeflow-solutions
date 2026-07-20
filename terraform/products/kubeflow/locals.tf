@@ -107,19 +107,22 @@ locals {
   )
 
   # ------------------------------------------------------------------
-  # Service-mesh mode helpers + gateway/mesh selectors.
-  #   sidecar     : istio-pilot + istio-ingressgateway; Dex/OIDC auth.
-  #   ambient-dex : single gateway + beacon + istio-k8s in-model (component
-  #                 istio-ambient-dex); Dex/OIDC auth.
-  #   ambient-iam : two gateways (UI/M2M) + beacon (component istio-ambient);
-  #                 istio-k8s in istio-system; IAM auth stack.
-  # For ambient-dex the UI and M2M selectors both resolve to the single gateway.
+  # Service-mesh + auth mode helpers and gateway/mesh selectors, derived from
+  # the two inputs var.service_mesh_type ('sidecar' | 'ambient') and
+  # var.auth_type ('dex' | 'iam'). Supported combinations:
+  #   sidecar + dex : istio-pilot + istio-ingressgateway; Dex/OIDC auth.
+  #   ambient + dex : single gateway + beacon + istio-k8s in-model (component
+  #                   istio-ambient-dex); Dex/OIDC auth.
+  #   ambient + iam : two gateways (UI/M2M) + beacon (component istio-ambient);
+  #                   istio-k8s in istio-system; IAM auth stack.
+  # (sidecar + iam is rejected by variable validation.)
+  # For ambient_dex the UI and M2M selectors both resolve to the single gateway.
   # ------------------------------------------------------------------
   sidecar     = var.service_mesh_type == "sidecar"
-  ambient_iam = var.service_mesh_type == "ambient-iam"
-  ambient_dex = var.service_mesh_type == "ambient-dex"
-  ambient     = local.ambient_iam || local.ambient_dex
-  legacy_auth = local.sidecar || local.ambient_dex
+  ambient     = var.service_mesh_type == "ambient"
+  ambient_iam = local.ambient && var.auth_type == "iam"
+  ambient_dex = local.ambient && var.auth_type == "dex"
+  legacy_auth = var.auth_type == "dex"
 
   ui_istio_ingress_route = local.ambient_iam ? {
     kind     = "endpoint"

@@ -30,9 +30,17 @@ def pytest_addoption(parser):
         "--service-mesh-type",
         nargs="?",
         default="sidecar",
-        choices=["sidecar", "ambient-dex", "ambient-iam"],
+        choices=["sidecar", "ambient"],
         type=str,
-        help="Service mesh type (sidecar, ambient-dex, ambient-iam)",
+        help="Service mesh type (sidecar, ambient)",
+    )
+    parser.addoption(
+        "--auth-type",
+        nargs="?",
+        default="dex",
+        choices=["dex", "iam"],
+        type=str,
+        help="Authentication stack (dex, iam)",
     )
     parser.addoption(
         "--risk",
@@ -61,12 +69,16 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="module")
 def service_mesh_type(request) -> list[str]:
-    """Terraform module customization for the db sizes."""
-    istio_mode = request.config.getoption("--service-mesh-type")
-    return [
-        "-var",
-        f"service_mesh_type={istio_mode}",
-    ]
+    """Terraform module customization for the service mesh type."""
+    mesh = request.config.getoption("--service-mesh-type")
+    return ["-var", f"service_mesh_type={mesh}"]
+
+
+@pytest.fixture(scope="module")
+def auth_type(request) -> list[str]:
+    """Terraform module customization for the authentication stack."""
+    auth = request.config.getoption("--auth-type")
+    return ["-var", f"auth_type={auth}"]
 
 
 @pytest.fixture(scope="module")
@@ -115,7 +127,7 @@ def enable_spark(request) -> list[str]:
 
 @pytest.fixture(scope="module")
 def tf_vars(
-    risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark
+    risk, service_mesh_type, auth_type, enable_mlflow, enable_feast, enable_spark
 ) -> list[str]:
     """Overall Terraform module customization."""
     return (
@@ -123,6 +135,7 @@ def tf_vars(
         + enable_feast
         + enable_spark
         + service_mesh_type
+        + auth_type
         + risk
         + [
             "-var",

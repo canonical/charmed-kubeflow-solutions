@@ -13,7 +13,7 @@ resource "juju_model" "kubeflow" {
 }
 
 module "istio" {
-  count  = var.service_mesh_type == "sidecar" ? 1 : 0
+  count  = local.sidecar ? 1 : 0
   source = "../../components/istio-sidecar"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -38,7 +38,7 @@ module "istio" {
 #    (component istio-ambient-dex); legacy Dex/OIDC auth.
 
 module "ambient_iam" {
-  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
+  count  = local.ambient_iam ? 1 : 0
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -61,7 +61,7 @@ module "ambient_iam" {
   # istio-system model), so this object is gated on the known service_mesh_type
   # rather than on the URL value — otherwise the gateways' integration count
   # would depend on an unknown value.
-  istio_ingress_config = var.service_mesh_type == "ambient-iam" ? {
+  istio_ingress_config = local.ambient_iam ? {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
   } : null
@@ -70,7 +70,7 @@ module "ambient_iam" {
 # ambient-dex: legacy single-gateway ambient mesh with istio-k8s deployed
 # in-model, fronted by the Dex/OIDC `auth` component.
 module "ambient_dex" {
-  count  = var.service_mesh_type == "ambient-dex" ? 1 : 0
+  count  = local.ambient_dex ? 1 : 0
   source = "../../components/istio-ambient-dex"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -98,7 +98,7 @@ module "ambient_dex" {
 # gateways. Both consume Hydra oauth from the iam model cross-model.
 
 module "oauth2_proxy" {
-  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
+  count  = local.ambient_iam ? 1 : 0
   source = "../../charms/oauth2-proxy-k8s"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -111,24 +111,24 @@ module "oauth2_proxy" {
     enable_jwt_bearer_tokens = true
   }, var.oauth2_proxy_config)
 
-  # Gated on the known service_mesh_type (not the offer URL, which is only known
+  # Gated on the known mode (not the offer URL, which is only known
   # after apply) so oauth2-proxy's oauth integration count is plan-determinable.
-  oauth = var.service_mesh_type == "ambient-iam" ? {
+  oauth = local.ambient_iam ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
 
   # Trust the self-signed CA fronting the Identity Platform via the send-ca-cert
-  # offer from the iam-core model. Gated on the known service_mesh_type so the
+  # offer from the iam-core model. Gated on the known mode so the
   # integration count is plan-determinable.
-  ca_cert = var.service_mesh_type == "ambient" ? {
+  ca_cert = local.ambient_iam ? {
     kind = "offer"
     url  = var.send_ca_cert_offer_url
   } : null
 }
 
 module "request_authentication_configurator" {
-  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
+  count  = local.ambient_iam ? 1 : 0
   source = "../../charms/request-authentication-configurator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -139,16 +139,16 @@ module "request_authentication_configurator" {
     "user-id-header-name" = "kubeflow-userid"
   }, var.request_authentication_configurator_config)
 
-  # Gated on the known service_mesh_type (not the offer URL, which is only known
+  # Gated on the known mode (not the offer URL, which is only known
   # after apply) so the oauth integration count is plan-determinable.
-  oauth = var.service_mesh_type == "ambient-iam" ? {
+  oauth = local.ambient_iam ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
 }
 
 module "github_profiles_automator" {
-  count  = var.service_mesh_type == "ambient-iam" ? 1 : 0
+  count  = local.ambient_iam ? 1 : 0
   source = "../../charms/github-profiles-automator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -165,7 +165,7 @@ module "github_profiles_automator" {
 # TLS certificates for the ambient gateways. Provides the `certificates`
 # relation consumed by both istio-ingress-k8s gateways.
 resource "juju_application" "self_signed_certificates" {
-  count = var.service_mesh_type == "ambient-iam" ? 1 : 0
+  count = local.ambient_iam ? 1 : 0
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   name       = "self-signed-certificates"
@@ -265,7 +265,7 @@ module "core" {
     config   = var.pvcviewer_operator_config
   }
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -327,7 +327,7 @@ module "katib" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -384,7 +384,7 @@ module "kfp" {
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -473,7 +473,7 @@ module "notebooks" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -510,13 +510,13 @@ module "tensorboard" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  gateway_info = var.service_mesh_type == "sidecar" ? {
+  gateway_info = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_gateway_info.name
     endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
   } : null
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -589,7 +589,7 @@ module "mlflow" {
     endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
   }
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -613,7 +613,7 @@ module "kserve" {
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  gateway_info = var.service_mesh_type == "sidecar" ? {
+  gateway_info = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_gateway_info.name
     endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
@@ -626,7 +626,7 @@ module "kserve" {
     channel  = local.kserve_channel
     revision = var.kserve_controller_revision
     config = merge({
-      "deployment-mode" = var.service_mesh_type == "sidecar" ? "knative" : "standard",
+      "deployment-mode" = local.sidecar ? "knative" : "standard",
       "http-proxy"      = var.http_proxy,
       "https-proxy"     = var.https_proxy,
       "no-proxy"        = var.no_proxy,
@@ -747,7 +747,7 @@ module "feast" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  ingress = var.service_mesh_type == "sidecar" ? {
+  ingress = local.sidecar ? {
     kind     = "endpoint"
     name     = module.istio[0].provides.istio_pilot_ingress.name
     endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
@@ -957,9 +957,9 @@ module "observability" {
   tensorboards_web_app_logging            = var.enable_tensorboard ? module.tensorboard[0].requires.tensorboards_web_app_logging : null
 
   # Istio Sidecar
-  istio_ingressgateway_metrics_endpoint = var.service_mesh_type == "sidecar" ? module.istio[0].provides.istio_ingressgateway_metrics_endpoint : null
-  istio_pilot_grafana_dashboard         = var.service_mesh_type == "sidecar" ? module.istio[0].provides.istio_pilot_grafana_dashboard : null
-  istio_pilot_metrics_endpoint          = var.service_mesh_type == "sidecar" ? module.istio[0].provides.istio_pilot_metrics_endpoint : null
+  istio_ingressgateway_metrics_endpoint = local.sidecar ? module.istio[0].provides.istio_ingressgateway_metrics_endpoint : null
+  istio_pilot_grafana_dashboard         = local.sidecar ? module.istio[0].provides.istio_pilot_grafana_dashboard : null
+  istio_pilot_metrics_endpoint          = local.sidecar ? module.istio[0].provides.istio_pilot_metrics_endpoint : null
 
   # Minio
   minio_grafana_dashboard = local.deploy_minio ? module.minio[0].provides.grafana_dashboard : null

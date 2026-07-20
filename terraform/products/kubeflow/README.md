@@ -73,6 +73,7 @@
 | <a name="input_admission_webhook_revision"></a> [admission\_webhook\_revision](#input\_admission\_webhook\_revision) | Revision of the admission-webhook application | `number` | `null` | no |
 | <a name="input_argo_controller_config"></a> [argo\_controller\_config](#input\_argo\_controller\_config) | Configuration for argo-controller application | `map(string)` | `{}` | no |
 | <a name="input_argo_controller_revision"></a> [argo\_controller\_revision](#input\_argo\_controller\_revision) | Revision of the argo-controller application | `number` | `null` | no |
+| <a name="input_auth_type"></a> [auth\_type](#input\_auth\_type) | Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service\_mesh\_type = 'ambient'. | `string` | `"dex"` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
 | <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | URL of the grafana\_dashboard interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
@@ -203,7 +204,7 @@
 | <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Configuration for the self-signed-certificates application. | `map(string)` | `{}` | no |
 | <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision of the self-signed-certificates application. | `number` | `null` | no |
 | <a name="input_send_ca_cert_offer_url"></a> [send\_ca\_cert\_offer\_url](#input\_send\_ca\_cert\_offer\_url) | Cross-model offer URL of self-signed-certificates:send-ca-cert from the<br/>iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the<br/>self-signed CA fronting the Identity Platform. Required when<br/>service\_mesh\_type is 'ambient'. | `string` | `null` | no |
-| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Service mesh + auth mode: 'sidecar' (istio-pilot + Dex/OIDC), 'ambient-dex' (ambient mesh + Dex/OIDC), or 'ambient-iam' (ambient mesh + Identity Platform). | `string` | `"sidecar"` | no |
+| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh). | `string` | `"ambient"` | no |
 | <a name="input_spark_history_server_image"></a> [spark\_history\_server\_image](#input\_spark\_history\_server\_image) | Container image resource for spark-history-server | `string` | `null` | no |
 | <a name="input_spark_history_server_revision"></a> [spark\_history\_server\_revision](#input\_spark\_history\_server\_revision) | Revision of the spark-history-server application | `number` | `null` | no |
 | <a name="input_spark_integration_hub_config"></a> [spark\_integration\_hub\_config](#input\_spark\_integration\_hub\_config) | Configuration for spark-integration-hub application | `map(string)` | `{}` | no |

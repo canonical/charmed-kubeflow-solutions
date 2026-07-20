@@ -330,13 +330,29 @@ variable "kfp_viz_config" {
 # Istio Component Applications
 
 variable "service_mesh_type" {
-  description = "Service mesh + auth mode: 'sidecar' (istio-pilot + Dex/OIDC), 'ambient-dex' (ambient mesh + Dex/OIDC), or 'ambient-iam' (ambient mesh + Identity Platform)."
+  description = "Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh)."
   type        = string
-  default     = "sidecar"
+  default     = "ambient"
 
   validation {
-    condition     = contains(["sidecar", "ambient-dex", "ambient-iam"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (sidecar, ambient-dex, ambient-iam)."
+    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
+    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
+  }
+}
+
+variable "auth_type" {
+  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
+  type        = string
+  default     = "dex"
+
+  validation {
+    condition     = contains(["dex", "iam"], var.auth_type)
+    error_message = "Valid values for auth_type are (dex, iam)."
+  }
+
+  validation {
+    condition     = !(var.auth_type == "iam" && var.service_mesh_type != "ambient")
+    error_message = "auth_type = 'iam' requires service_mesh_type = 'ambient'."
   }
 }
 
