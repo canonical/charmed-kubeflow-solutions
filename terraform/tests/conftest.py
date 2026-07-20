@@ -22,7 +22,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--istio-k8s-platform",
         nargs="?",
-        default="microk8s",
+        default="",
         type=str,
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
@@ -101,6 +101,13 @@ def pss(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def istio_k8s_platform(request) -> list[str]:
+    """Terraform module customization for the istio-k8s platform."""
+    platform = request.config.getoption("--istio-k8s-platform") or ""
+    return ["-var", f"istio_k8s_platform={platform}"]
+
+
+@pytest.fixture(scope="module")
 def service_mesh_type(request) -> list[str]:
     """Terraform module customization for the db sizes."""
     istio_mode = request.config.getoption("--service-mesh-type")
@@ -156,7 +163,7 @@ def enable_spark(request) -> list[str]:
 
 @pytest.fixture(scope="module")
 def tf_vars(
-    risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark, pss
+    risk, service_mesh_type, istio_k8s_platform, enable_mlflow, enable_feast, enable_spark, pss
 ) -> list[str]:
     """Overall Terraform module customization."""
     return (
@@ -164,6 +171,7 @@ def tf_vars(
         + enable_feast
         + enable_spark
         + service_mesh_type
+        + istio_k8s_platform
         + risk
         + pss
         + [

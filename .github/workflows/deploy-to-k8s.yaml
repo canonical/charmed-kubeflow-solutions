@@ -154,14 +154,10 @@ jobs:
           fi
 
           RISK_ARG="--risk ${{ env.RISK }}"
-          PLATFORM_ARG=""
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           
           EXTRA_COMPONENTS_ARG=""
 
-          if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
-            PLATFORM_ARG="--istio-k8s-platform"
-          fi
           TF_VARS_ARG=""
           if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
             TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
@@ -175,7 +171,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Clone UATs repository
         run: |

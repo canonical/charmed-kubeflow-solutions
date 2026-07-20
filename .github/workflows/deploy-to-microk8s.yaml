@@ -42,6 +42,7 @@ jobs:
           - policy: baseline
             istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
+        service-mesh-type: [sidecar, ambient]
           
     steps:
       - name: Checkout repository
@@ -148,6 +149,10 @@ jobs:
 
           EXTRA_COMPONENTS_ARG=""
 
+          if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
+            PLATFORM_ARG="--istio-k8s-platform microk8s"
+          fi
+
           if [[ "${{ matrix.product.name }}" == "mlflow" ]]; then
             EXTRA_COMPONENTS_ARG="--enable-mlflow"
           elif [[ "${{ matrix.product.name }}" == "feast" ]]; then
@@ -156,7 +161,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG --pss ${{ matrix.pod-security-standards.policy }}
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG --pss ${{ matrix.pod-security-standards.policy }}
 
       - name: Clone UATs repository
         run: |
