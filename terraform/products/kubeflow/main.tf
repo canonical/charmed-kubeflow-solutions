@@ -271,7 +271,7 @@ module "s3_global" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   app_name = "s3-integrator-global"
-  channel  = "2/stable"
+  channel  = local.s3_integrator_channel
   config = merge(
     {
       bucket      = var.s3_bucket_global,
