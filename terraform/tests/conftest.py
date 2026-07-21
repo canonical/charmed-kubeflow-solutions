@@ -22,7 +22,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--istio-k8s-platform",
         nargs="?",
-        default="microk8s",
+        default="",
         type=str,
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
@@ -57,6 +57,54 @@ def pytest_addoption(parser):
         action="store_true",
         help="Enable to deploy also Spark",
     )
+    parser.addoption(
+        "--istio-cni-bin-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of binaries for Istio CNI",
+    )
+    parser.addoption(
+        "--istio-cni-conf-dir",
+        nargs="?",
+        const="",
+        default="",
+        type=str,
+        help="Directory of configurations for Istio CNI",
+    )
+    parser.addoption(
+        "--pss",
+        nargs="?",
+        choices=["privileged", "baseline"],
+        const="privileged",
+        default="privileged",
+        type=str,
+        help="Pod security standards enforced in Profiles' namespaces",
+    )
+
+
+@pytest.fixture(scope="module")
+def pss(request) -> list[str]:
+    """Pod security standards enforced in Profiles' namespaces."""
+    pss = request.config.getoption("--pss")
+    istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
+    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
+    return [
+        "-var",
+        f"istio_cni_bin_dir={istio_cni_bin_dir}",
+        "-var",
+        f"istio_cni_conf_dir={istio_cni_conf_dir}",
+        "-var",
+        f"kubeflow_profiles_security_policy={pss}",
+    ]
+
+
+@pytest.fixture(scope="module")
+def istio_k8s_platform(request) -> list[str]:
+    """Terraform module customization for the istio-k8s platform."""
+    platform = request.config.getoption("--istio-k8s-platform") or ""
+    return ["-var", f"istio_k8s_platform={platform}"]
 
 
 @pytest.fixture(scope="module")
@@ -115,7 +163,7 @@ def enable_spark(request) -> list[str]:
 
 @pytest.fixture(scope="module")
 def tf_vars(
-    risk, service_mesh_type, enable_mlflow, enable_feast, enable_spark
+    risk, service_mesh_type, istio_k8s_platform, enable_mlflow, enable_feast, enable_spark, pss
 ) -> list[str]:
     """Overall Terraform module customization."""
     return (
@@ -123,7 +171,9 @@ def tf_vars(
         + enable_feast
         + enable_spark
         + service_mesh_type
+        + istio_k8s_platform
         + risk
+        + pss
         + [
             "-var",
             "create_model=false",
