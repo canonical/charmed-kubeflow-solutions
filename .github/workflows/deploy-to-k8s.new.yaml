@@ -1,4 +1,4 @@
-name: Validation on Canonical K8s
+name: Validation on Canonical K8s (New)
 on:
   workflow_dispatch:
     inputs:
