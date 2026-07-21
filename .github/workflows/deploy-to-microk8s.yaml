@@ -15,6 +15,9 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
+      juju_agent_version:
+        description: 'Juju agent version to use when bootstrapping. Leave empty to use the default.'
+        required: false
 
   pull_request:
   schedule:
@@ -27,7 +30,9 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
+        service-mesh-type: [sidecar, ambient]
         product: 
           - name: kubeflow
             uats-env: kubeflow-remote
@@ -42,7 +47,6 @@ jobs:
           - policy: baseline
             istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
-        service-mesh-type: [sidecar, ambient]
           
     steps:
       - name: Checkout repository
@@ -121,12 +125,12 @@ jobs:
 
           sudo microk8s config | juju add-k8s local-k8s --client
 
-          # AGENT_VERSION_ARG=""
-          # if [[ -n "${{ matrix.bundle.juju-agent-version }}" ]]; then
-          #   AGENT_VERSION_ARG="--agent-version=${{ matrix.bundle.juju-agent-version }}"
-          # fi
+          AGENT_VERSION_ARG=""
+          if [[ -n "${{ inputs.juju_agent_version }}" ]]; then
+            AGENT_VERSION_ARG="--agent-version=${{ inputs.juju_agent_version }}"
+          fi
       
-          juju bootstrap local-k8s microk8s # $AGENT_VERSION_ARG
+          juju bootstrap local-k8s microk8s $AGENT_VERSION_ARG
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
