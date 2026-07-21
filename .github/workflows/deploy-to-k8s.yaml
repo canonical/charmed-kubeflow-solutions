@@ -175,19 +175,19 @@ jobs:
 
       - name: Clone UATs repository
         run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
 
       - name: Preload Images into Containerd Cache
         uses: ./.github/actions/preload-images
         with:
-          image-list: ${{ env.HOME }}/charmed-kubeflow-uats/assets/test.images.txt
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
           ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
 
       - name: Run UATs
         run: |
-          cd ~/charmed-kubeflow-uats	  
+          cd ${{ github.workspace }}/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
       - name: Setup tmate session

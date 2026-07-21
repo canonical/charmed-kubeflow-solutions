@@ -31,7 +31,8 @@ runs:
 
         MAX_RETRIES=${{ inputs.max-retries }}
         RETRY_DELAY=${{ inputs.retry-delay }}
-        CTR_CMD="${{ inputs.ctr-command }}"
+        # Split into an array so each word is passed as a separate argument
+        read -ra CTR_CMD <<< "${{ inputs.ctr-command }}"
 
         IMAGE_LIST="${{ inputs.image-list }}"
         LOG_DIR=/tmp/image-preload-logs
@@ -65,9 +66,9 @@ runs:
               sleep "$delay"
             fi
 
-            if $CTR_CMD image pull "$image" >"$log_file" 2>&1; then
+            if "${CTR_CMD[@]}" image pull "$image" >"$log_file" 2>&1; then
 
-              if $CTR_CMD image label "$image" io.cri-containerd.pinned=pinned >>"$log_file" 2>&1; then
+              if "${CTR_CMD[@]}" image label "$image" io.cri-containerd.pinned=pinned >>"$log_file" 2>&1; then
                 echo "✅ Successfully pulled $image on attempt $attempt"
                 success=true
                 break
