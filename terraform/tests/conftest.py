@@ -210,5 +210,7 @@ def tf_vars(
             "mlmd_storage_size=10G",
             "-var",
             "postgresql_storage_size=1G",
+            "-var",
+            "release=latest",
         ]
     )
