@@ -16,7 +16,7 @@ locals {
   pvcviewer_operator_channel      = var.release == "1.11" ? "1.11/${var.risk}" : "latest/${var.risk}"
 
   # KFP Component
-  kfp_channel             = var.release == "1.11" ? "2.15/${var.risk}" : "latest/${var.risk}"
+  kfp_channel             = var.release == "1.11" ? "2.16/${var.risk}" : "latest/${var.risk}"
   argo_controller_channel = var.release == "1.11" ? "3.7/${var.risk}" : "latest/${var.risk}"
   mlmd_channel            = var.release == "1.11" ? "ckf-1.10/${var.risk}" : "latest/${var.risk}"
   envoy_channel           = var.release == "1.11" ? "2.4/${var.risk}" : "latest/${var.risk}"
@@ -69,10 +69,16 @@ locals {
     "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
   }
 
+  istio_pilot_config = merge(
+    var.istio_pilot_config,
+    var.istio_cni_bin_dir != "" ? { "cni-bin-dir" = var.istio_cni_bin_dir } : {},
+    var.istio_cni_conf_dir != "" ? { "cni-conf-dir" = var.istio_cni_conf_dir } : {}
+  )
+
   kubeflow_profiles = {
     channel  = local.kubeflow_profiles_channel
     revision = var.kubeflow_profiles_revision
-    config   = merge(local.kubeflow_profiles_service_mesh_config, var.kubeflow_profiles_config)
+    config   = merge(local.kubeflow_profiles_service_mesh_config, var.kubeflow_profiles_config, { "security-policy" = var.kubeflow_profiles_security_policy })
   }
 
   external_integrations = merge(

@@ -16,7 +16,7 @@ on:
         required: false
         default: 'stable'
 
-  # pull_request:
+  pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
@@ -28,19 +28,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bundle:
-          - module: kubeflow-mlflow
-            uats:
-              env: uats-remote
-              extra-args: --filter "not feast and not spark"
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
-          - module: kubeflow-ambient
-            uats_branch: main
-            uats:
-              env: kubeflow-remote
-              extra-args:
+        product: 
+          - name: kubeflow
+            uats-env: kubeflow-remote
+          - name: mlflow
+            uats-env: mlflow-remote
+          - name: feast
+            uats-env: feast-remote
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
@@ -48,7 +42,8 @@ jobs:
           - policy: baseline
             istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
-
+        service-mesh-type: [sidecar, ambient]
+          
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -67,12 +62,12 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ matrix.bundle.uats_branch || inputs.uats_branch || env.UATS_BRANCH }}
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - id: setup-python
         name: Setup Python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v6.3.0
         with:
           python-version: "3.12"
           architecture: x64
@@ -125,7 +120,13 @@ jobs:
           mkdir -p ~/.local/share/juju
 
           sudo microk8s config | juju add-k8s local-k8s --client
-          juju bootstrap local-k8s microk8s
+
+          # AGENT_VERSION_ARG=""
+          # if [[ -n "${{ matrix.bundle.juju-agent-version }}" ]]; then
+          #   AGENT_VERSION_ARG="--agent-version=${{ matrix.bundle.juju-agent-version }}"
+          # fi
+      
+          juju bootstrap local-k8s microk8s # $AGENT_VERSION_ARG
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
@@ -137,6 +138,7 @@ jobs:
           terraform --version
 
       - name: Deploy solution
+        timeout-minutes: 45
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
@@ -144,21 +146,93 @@ jobs:
 
           CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
           RISK_ARG="--risk ${{ env.RISK }}"
-          PLATFORM_ARG=""
-          if [[ "${{ matrix.bundle.module }}" == "kubeflow-ambient" ]]; then
-            CNI_ARGS=""
-            RISK_ARG=""
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
+
+          EXTRA_COMPONENTS_ARG="--pss ${{ matrix.pod-security-standards.policy }}"
+
+          if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
             PLATFORM_ARG="--istio-k8s-platform microk8s"
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s $RISK_ARG $CNI_ARGS $PLATFORM_ARG --pss ${{ matrix.pod-security-standards.policy }}
+          if [[ "${{ matrix.product.name }}" == "mlflow" ]]; then
+            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-mlflow"
+          elif [[ "${{ matrix.product.name }}" == "feast" ]]; then
+            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-feast"
+          elif [[ "${{ matrix.product.name }}" == "spark" ]]; then
+            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-spark"
+          fi
 
-      - name: Run UATs
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
+
+      - name: Clone UATs repository
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
+
+      - name: Preload Images into Containerd Cache
+        run: |
+          echo "Starting image preload process..."
+
+          MAX_RETRIES=3
+          RETRY_DELAY=5
+
+          IMAGE_LIST=~/charmed-kubeflow-uats/assets/test.images.txt
+          if [ ! -f $IMAGE_LIST ]; then touch $IMAGE_LIST; fi
+
+          while IFS= read -r image || [ -n "$image" ]; do
+            # Trim whitespace
+            image=$(echo "$image" | xargs)
+
+            # Skip empty lines or commented lines starting with #
+            if [[ -z "$image" || "$image" =~ ^# ]]; then
+              continue
+            fi
+
+            echo "--------------------------------------------------"
+            echo "🚀 Preloading: $image"
+            echo "--------------------------------------------------"
+
+            attempt=1
+            success=false
+
+            while [ $attempt -le $MAX_RETRIES ]; do
+              if [ $attempt -gt 1 ]; then
+                echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in $RETRY_DELAY seconds..."
+                sleep $RETRY_DELAY
+              fi
+
+              # Execute pull via the snap path
+              sudo microk8s ctr \
+                --namespace k8s.io \
+                image pull "$image" > /tmp/import.out 2>&1
+
+              if [ $? -eq 0 ]; then
+                sudo microk8s ctr \
+                  --namespace k8s.io \
+                  image label "$image" io.cri-containerd.pinned=pinned
+
+                echo "✅ Successfully pulled $image on attempt $attempt"
+                success=true
+                break
+              else
+                echo "❌ Attempt $attempt failed for $image"
+                ((attempt++))
+              fi
+            done
+
+            if [ "$success" = false ]; then
+              echo "::error::Failed to pull $image after $MAX_RETRIES attempts."
+              echo "::error::Logs:"
+              cat /tmp/import.out
+              exit 1
+            fi
+          done < $IMAGE_LIST
+
+      - name: Run UATs
+        run: |
+          cd ~/charmed-kubeflow-uats	  
+          tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} 
 
       # On failure, capture debugging resources
       - name: Select model
