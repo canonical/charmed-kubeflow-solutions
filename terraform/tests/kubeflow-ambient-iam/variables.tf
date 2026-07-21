@@ -73,19 +73,34 @@ variable "istio_ingress_k8s_m2m_config" {
 variable "external_ui_hostname" {
   description = "External hostname for the UI ambient ingress gateway."
   type        = string
-  default     = null
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.external_ui_hostname)) > 0
+    error_message = "external_ui_hostname must not be empty."
+  }
 }
 
 variable "external_m2m_hostname" {
   description = "External hostname for the M2M ambient ingress gateway."
   type        = string
-  default     = null
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.external_m2m_hostname)) > 0
+    error_message = "external_m2m_hostname must not be empty."
+  }
 }
 
 variable "external_auth_hostname" {
   description = "External hostname for the iam Traefik ingress."
   type        = string
-  default     = null
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.external_auth_hostname)) > 0
+    error_message = "external_auth_hostname must not be empty."
+  }
 }
 
 # ---------------------------------------------------------------------------
