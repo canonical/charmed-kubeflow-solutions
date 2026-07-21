@@ -57,10 +57,10 @@ runs:
           attempt=1
           success=false
 
-          while [ $attempt -le $MAX_RETRIES ]; do
+          while [ "$attempt" -le "$MAX_RETRIES" ]; do
             log_file="$LOG_DIR/${safe_name}.attempt-${attempt}.log"
 
-            if [ $attempt -gt 1 ]; then
+            if [ "$attempt" -gt 1 ]; then
               delay=$(( RETRY_DELAY * (attempt - 1) ))
               echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in ${delay}s..."
               sleep "$delay"
