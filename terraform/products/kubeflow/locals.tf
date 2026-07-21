@@ -50,7 +50,7 @@ locals {
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3')
-  object_storage_consumers = var.enable_kfp || var.enable_mlflow
+  object_storage_consumers = var.enable_kfp || var.enable_mlflow || var.enable_kserve
   deploy_minio             = var.object_storage_mode == "minio" && local.object_storage_consumers
   deploy_s3_integrator     = var.object_storage_mode == "S3" && local.object_storage_consumers
 

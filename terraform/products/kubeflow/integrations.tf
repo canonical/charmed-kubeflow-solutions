@@ -61,7 +61,7 @@ resource "juju_integration" "kserve_controller_object_storage" {
 # kserve-controller s3-credentials integration (s3-integrator-global:s3-credentials -> kserve-controller)
 # Only deployed with the 's3' object storage mode and when MLflow is enabled, since kserve uses this storage to read MLflow model artifacts
 resource "juju_integration" "kserve_controller_s3_credentials" {
-  count      = (local.deploy_s3_integrator && var.enable_mlflow && var.enable_kserve) ? 1 : 0
+  count      = (local.deploy_s3_integrator && var.enable_kserve) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
