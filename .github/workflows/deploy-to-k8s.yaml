@@ -157,7 +157,6 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
-
           EXTRA_COMPONENTS_ARG=""
 
           TF_VARS_ARG=""
