@@ -132,6 +132,48 @@ jobs:
           # environment-variable changes:
           microk8s config > ~/.kube/config
 
+      - name: Setup object storage
+        id: object-storage
+        shell: bash
+        env:
+          CLOUD_INIT_FILE: |
+            #cloud-config
+            package_upgrade: true
+            snap:
+              commands:
+                0: snap install microceph
+                1: sudo microceph cluster bootstrap
+                2: sudo microceph disk add loop,1G,3
+                3: sudo microceph enable rgw
+                4: sudo microceph.radosgw-admin user create --uid test-spark --display-name test-spark --access-key=foo --secret-key=bar
+                5: sudo microceph.radosgw-admin user create --uid test-global --display-name test-global --access-key=baz --secret-key=qux
+                6: sudo microceph.radosgw-admin user create --uid test-override --display-name test-override --access-key=grault --secret-key=corge
+
+        run: |
+          echo -e "$CLOUD_INIT_FILE" > microceph_rgw.yaml
+          lxd init --auto
+          lxc init ubuntu:jammy ceph -c limits.cpu=4 -c limits.memory=2GB -d root,size=5GB
+
+          lxc config set ceph cloud-init.user-data - < microceph_rgw.yaml
+          lxc start ceph
+          while ! lxc exec ceph -- id -u ubuntu &>/dev/null; do sleep 0.5; done
+          lxc exec ceph -- cloud-init status --wait
+
+          echo -e "S3_SERVER_URL_SPARK=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/" >> .env
+          echo -e "S3_SERVER_URL_GLOBAL=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/" >> .env
+          echo -e "S3_SERVER_URL_OVERRIDE=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/" >> .env
+          echo -e "S3_BUCKET_SPARK=spark-demo" >> .env
+          echo -e "S3_ACCESS_KEY_SPARK=foo" >> .env
+          echo -e "S3_SECRET_KEY_SPARK=bar" >> .env
+          echo -e "S3_ACCESS_KEY_GLOBAL=baz" >> .env
+          echo -e "S3_SECRET_KEY_GLOBAL=qux" >> .env
+          echo -e "S3_ACCESS_KEY_OVERRIDE=grault" >> .env
+          echo -e "S3_SECRET_KEY_OVERRIDE=corge" >> .env
+          echo -e "S3_BUCKET_KFP_GLOBAL=kfp-uats-global" >> .env
+          echo -e "S3_BUCKET_KFP_OVERRIDE=kfp-uats-override" >> .env
+          lxc list
+          cat .env
+
       - name: Setup terraform
         run: |
           sudo snap install terraform --channel latest/stable --classic
