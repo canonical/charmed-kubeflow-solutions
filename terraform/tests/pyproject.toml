@@ -26,7 +26,7 @@ ruff = "^0.9.4"
 optional = true
 
 [tool.poetry.group.integration.dependencies]
-aiohttp = "^3.13.5"
+aiohttp = "^3.14.1"
 jubilant = "^1.8.0"
 lightkube = "^0.19.1"
 pytest = "^9.0.3"
