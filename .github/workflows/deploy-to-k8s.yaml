@@ -155,7 +155,8 @@ jobs:
           sudo snap install terraform --channel latest/stable --classic
           terraform --version
 
-      - name: Deploy solution
+      - name: Deploy
+        timeout-minutes: 45
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
