@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  workflow_call:
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        run: |
+          sudo snap install terraform --revision=859 --classic
+
+      - name: Setup TFLint
+        run: |
+          sudo snap install tflint
+
+      - name: Install tox
+        run: |
+          sudo apt-get install -yqq pipx
+          pipx ensurepath
+          sudo pipx ensurepath
+          pipx install tox
+
+      - name: Run tests
+        run: |
+          cd scripts
+          tox
