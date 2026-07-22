@@ -27,6 +27,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         bundle:
           - module: kubeflow-mlflow

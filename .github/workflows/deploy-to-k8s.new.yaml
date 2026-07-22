@@ -28,6 +28,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         product: [kubeflow, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
