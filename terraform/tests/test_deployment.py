@@ -1,11 +1,13 @@
 import logging
 import subprocess
+import time
 
 import aiohttp
 import jubilant
 import lightkube
 import pytest
-from lightkube.resources.core_v1 import Service
+from lightkube.core.exceptions import ApiError
+from lightkube.resources.core_v1 import ConfigMap, Service
 
 
 logging.getLogger("jubilant.wait").setLevel("WARNING")
@@ -61,6 +63,9 @@ class TestCharm:
         # The ambient-iam solution spans multiple models; wait for the provider
         # models to settle before asserting on the kubeflow model.
         if auth_type == "iam":
+            # The IAM charms only reconcile to active once the external
+            # hostnames resolve to their gateway/ingress LoadBalancer IPs.
+            configure_dns(lightkube_client)
             for model_name in ("istio-system", "iam-core", "iam"):
                 model_juju = jubilant.Juju(model=model_name)
                 model_apps = list(model_juju.status().apps.keys())
@@ -121,3 +126,108 @@ async def fetch_response(url, headers=None):
             result_status = response.status
             result_text = await response.text()
     return result_status, str(result_text)
+
+
+def _wait_for_lb_ip(
+    lightkube_client: lightkube.Client,
+    namespace: str,
+    labels: dict[str, str],
+    timeout: int = 900,
+) -> str:
+    """Poll until a LoadBalancer Service matching labels has an ingress address."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            services = [
+                svc
+                for svc in lightkube_client.list(
+                    Service, namespace=namespace, labels=labels
+                )
+                if svc.spec and svc.spec.type == "LoadBalancer"
+            ]
+        except ApiError:
+            services = []
+
+        for svc in services:
+            lb = svc.status.loadBalancer if svc.status else None
+            ingress = lb.ingress if lb else None
+            if ingress:
+                address = ingress[0].ip or ingress[0].hostname
+                if address:
+                    return address
+        time.sleep(5)
+
+    raise TimeoutError(
+        f"No LoadBalancer IP assigned for a service matching {labels} in "
+        f"namespace {namespace!r} within {timeout}s"
+    )
+
+
+def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
+    """Resolve the ambient-iam hostnames to their LoadBalancer IPs.
+
+    Both the in-cluster DNS (CoreDNS) and the runner host (/etc/hosts) are
+    updated so the IAM charms and cross-model callbacks can resolve the
+    external hostnames and reconcile to active.
+    """
+    host_to_ip = {
+        "ui.kubeflow.com": _wait_for_lb_ip(
+            lightkube_client,
+            "kubeflow",
+            {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-ui"},
+        ),
+        "api.kubeflow.com": _wait_for_lb_ip(
+            lightkube_client,
+            "kubeflow",
+            {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-m2m"},
+        ),
+        "auth.kubeflow.com": _wait_for_lb_ip(
+            lightkube_client,
+            "iam-core",
+            {"kubernetes-resource-handler-scope": "traefik-loadbalancer"},
+        ),
+    }
+
+    # Inject a hosts block into the existing Corefile (right after the server
+    # block opening brace), preserving the cluster's default DNS config.
+    hosts_block = (
+        "    hosts {\n"
+        + "".join(f"        {ip} {host}\n" for host, ip in host_to_ip.items())
+        + "        fallthrough\n"
+        "    }\n"
+    )
+    configmap = lightkube_client.get(
+        ConfigMap, "ck-dns-coredns", namespace="kube-system"
+    )
+    corefile = configmap.data["Corefile"]
+    insert_at = corefile.find("{\n") + len("{\n")
+    patched_corefile = corefile[:insert_at] + hosts_block + corefile[insert_at:]
+
+    lightkube_client.patch(
+        ConfigMap,
+        "ck-dns-coredns",
+        namespace="kube-system",
+        obj={"data": {"Corefile": patched_corefile}},
+    )
+    # CoreDNS does not always pick up the patched Corefile promptly, so force a
+    # rollout to apply the new host entries immediately.
+    subprocess.run(
+        [
+            "kubectl",
+            "-n",
+            "kube-system",
+            "rollout",
+            "restart",
+            "deployment/coredns",
+        ],
+        check=True,
+    )
+
+    host_entries = "".join(f"{ip} {host}\n" for host, ip in host_to_ip.items())
+    subprocess.run(
+        ["sudo", "tee", "-a", "/etc/hosts"],
+        input=host_entries.encode(),
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    return host_to_ip
