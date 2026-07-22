@@ -24,6 +24,7 @@ class TestCharm:
         juju: jubilant.Juju,
         tf_vars,
         solution_module_path,
+        request,
     ):
         """Initialize and apply the selected Terraform solution root module."""
         subprocess.run(
@@ -31,15 +32,19 @@ class TestCharm:
             check=True,
             cwd=solution_module_path,
         )
+        apply_cmd = [
+            "terraform",
+            "apply",
+            "-auto-approve",
+            "-var",
+            f"model_uuid={juju.show_model().model_uuid}",
+        ]
+        # The iam solution spans multiple models with cross-model offers; apply
+        # serially to work around juju/terraform-provider-juju#1308.
+        if request.config.getoption("--auth-type") == "iam":
+            apply_cmd.append("-parallelism=1")
         subprocess.run(
-            [
-                "terraform",
-                "apply",
-                "-auto-approve",
-                "-var",
-                f"model_uuid={juju.show_model().model_uuid}",
-            ]
-            + tf_vars,
+            apply_cmd + tf_vars,
             check=True,
             cwd=solution_module_path,
         )
