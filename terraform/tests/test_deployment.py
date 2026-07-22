@@ -1,10 +1,11 @@
 import logging
 import subprocess
 
-import aiohttp
 import jubilant
 import lightkube
 import pytest
+import requests
+import tenacity
 from itertools import batched
 from lightkube.resources.core_v1 import Service
 
@@ -20,7 +21,7 @@ def lightkube_client() -> lightkube.Client:
 
 class TestCharm:
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(
+    def test_apply_terraform_solution(
         self,
         juju: jubilant.Juju,
         tf_vars,
@@ -45,7 +46,7 @@ class TestCharm:
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
-    async def test_assert_deployment(
+    def test_assert_deployment(
         self, juju: jubilant.Juju, lightkube_client, request
     ):
         """
@@ -67,13 +68,18 @@ class TestCharm:
         if request.config.getoption("--service-mesh-type") == "ambient":
             istio_service = "istio-ingress-k8s-istio"
         url = get_public_url(lightkube_client, "kubeflow", istio_service)
-        result_status, result_text = await fetch_response(url)
+        result_status, result_text = fetch_response(url)
         assert result_status == 200
         assert "Log in to Your Account" in result_text
         assert "Email Address" in result_text
         assert "Password" in result_text
 
 
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=2, min=1, max=10),
+    stop=tenacity.stop_after_attempt(30),
+    reraise=True,
+)
 def get_public_url(
     lightkube_client: lightkube.Client, bundle_name: str, service_name: str
 ):
@@ -89,12 +95,12 @@ def get_public_url(
     return public_url
 
 
-async def fetch_response(url, headers=None):
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=2, min=1, max=10),
+    stop=tenacity.stop_after_attempt(30),
+    reraise=True,
+)
+def fetch_response(url, headers=None):
     """Fetch provided URL and return (status, text)."""
-    result_status = 0
-    result_text = ""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=url, headers=headers) as response:
-            result_status = response.status
-            result_text = await response.text()
-    return result_status, str(result_text)
+    response = requests.get(url, headers=headers)
+    return response.status_code, response.text
