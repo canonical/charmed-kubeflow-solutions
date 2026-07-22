@@ -174,10 +174,46 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def solution_module_path(request) -> str:
+    """Path to the Terraform root module to apply for the selected auth stack."""
+    if request.config.getoption("--auth-type") == "iam":
+        return "./../tests/kubeflow-ambient-iam"
+    return "./../products/kubeflow"
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
-    risk, service_mesh_type, auth_type, istio_k8s_platform, enable_mlflow, enable_feast, enable_spark, pss
+    request,
+    risk,
+    service_mesh_type,
+    auth_type,
+    istio_k8s_platform,
+    enable_mlflow,
+    enable_feast,
+    enable_spark,
+    pss,
 ) -> list[str]:
     """Overall Terraform module customization."""
+    if request.config.getoption("--auth-type") == "iam":
+        # The kubeflow-ambient-iam root always deploys ambient + iam and lets
+        # Terraform create the istio-system, iam and iam-core models. Only the
+        # kubeflow model is pre-created by the test and referenced via model_uuid.
+        return (
+            enable_mlflow
+            + enable_feast
+            + istio_k8s_platform
+            + risk
+            + [
+                "-var",
+                "create_model=false",
+                "-var",
+                "external_ui_hostname=ui.kubeflow.com",
+                "-var",
+                "external_m2m_hostname=api.kubeflow.com",
+                "-var",
+                "external_auth_hostname=auth.kubeflow.com",
+            ]
+        )
     return (
         enable_mlflow
         + enable_feast

@@ -29,24 +29,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
-        service-mesh-type: [sidecar, ambient]
-        auth-type: [dex]
+        # TODO(kf-8863): temporarily reduced to only the kubeflow-ambient-iam job
+        # to test this solution in CI. Restore the full matrix below before merge.
+        product: [kubeflow]
+        service-mesh-type: [ambient]
+        auth-type: [iam]
         include:
-          - service-mesh-type: ambient
-            uats-extra-args: --include-ambient-tests
           - product: kubeflow
-            uats-env: kubeflow-remote
-          - product: mlflow
-            uats-env: mlflow-remote
-          - product: feast
-            uats-env: feast-remote
-          - product: spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
-        exclude:
-          - product: spark
             service-mesh-type: ambient
+            auth-type: iam
+            uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests
+        # --- Full matrix (restore before merge) ---------------------------------
+        # product: [kubeflow, mlflow, feast, spark]
+        # service-mesh-type: [sidecar, ambient]
+        # auth-type: [dex]
+        # include:
+        #   - service-mesh-type: ambient
+        #     uats-extra-args: --include-ambient-tests
+        #   - product: kubeflow
+        #     uats-env: kubeflow-remote
+        #   - product: mlflow
+        #     uats-env: mlflow-remote
+        #   - product: feast
+        #     uats-env: feast-remote
+        #   - product: spark
+        #     uats-env: spark-remote
+        #     uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+        #   # Standalone kubeflow-ambient-iam solution (ambient mesh + Canonical
+        #   # Identity Platform). Deployment-only for now; UATs are gated off below.
+        #   - product: kubeflow
+        #     service-mesh-type: ambient
+        #     auth-type: iam
+        #     uats-env: kubeflow-remote
+        #     uats-extra-args: --include-ambient-tests
+        # exclude:
+        #   - product: spark
+        #     service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
@@ -175,12 +194,14 @@ jobs:
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Clone UATs repository
+        if: matrix.auth-type != 'iam'
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
 
       - name: Preload Images into Containerd Cache
+        if: matrix.auth-type != 'iam'
         run: |
           echo "Starting image preload process..."
 
@@ -242,6 +263,7 @@ jobs:
           done < $IMAGE_LIST
 
       - name: Run UATs
+        if: matrix.auth-type != 'iam'
         run: |
           cd ~/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""

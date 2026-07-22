@@ -16,7 +16,8 @@ on:
         required: false
         default: 'stable'
 
-  pull_request:
+  # TODO(kf-8863): temporarily disabled so only deploy-to-k8s.yaml runs on this test PR. Restore before merge.
+  # pull_request:
   schedule:
     - cron: "17 02 * * 1"
 

@@ -23,12 +23,13 @@ class TestCharm:
         self,
         juju: jubilant.Juju,
         tf_vars,
+        solution_module_path,
     ):
-        """Initialize and apply the kubeflow-cos Terraform solution module."""
+        """Initialize and apply the selected Terraform solution root module."""
         subprocess.run(
             ["terraform", "init"],
             check=True,
-            cwd="./../products/kubeflow",
+            cwd=solution_module_path,
         )
         subprocess.run(
             [
@@ -40,7 +41,7 @@ class TestCharm:
             ]
             + tf_vars,
             check=True,
-            cwd="./../products/kubeflow",
+            cwd=solution_module_path,
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
@@ -50,10 +51,34 @@ class TestCharm:
         """
         Wait for the applications to become active and idle and verify its public URL access.
         """
+        auth_type = request.config.getoption("--auth-type")
+
+        # The ambient-iam solution spans multiple models; wait for the provider
+        # models to settle before asserting on the kubeflow model.
+        if auth_type == "iam":
+            for model_name in ("istio-system", "iam-core", "iam"):
+                model_juju = jubilant.Juju(model=model_name)
+                model_apps = list(model_juju.status().apps.keys())
+                model_juju.wait(
+                    lambda status, apps=model_apps: jubilant.all_active(status, *apps),
+                    timeout=3600,
+                )
 
         apps = list(juju.status().apps.keys())
 
         juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=3600)
+
+        if auth_type == "iam":
+            # UI traffic is served by the dedicated UI ambient gateway and is
+            # matched on the configured external hostname.
+            url = get_public_url(
+                lightkube_client, "kubeflow", "istio-ingress-k8s-ui-istio"
+            )
+            result_status, _ = await fetch_response(
+                url, headers={"Host": "ui.kubeflow.com"}
+            )
+            assert result_status == 200
+            return
 
         # Verify deployment by checking the public URL
         istio_service = "istio-ingressgateway-workload"
