@@ -1,5 +1,5 @@
-CKF_BRANCH: "test/KF-8853/feat/upgrade-mlflow-to-3.14"
+CKF_BRANCH: "track/1.11"
 K8S_VERSION: "1.32"
 JUJU_VERSION: "3.6"
-UATS_BRANCH: "KF-8742/feat/update-tests-for-mlflow-3"
+UATS_BRANCH: "track/1.11"
 RISK: "stable"
