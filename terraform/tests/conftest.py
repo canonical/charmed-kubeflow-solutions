@@ -212,6 +212,13 @@ def tf_vars(
                 "external_m2m_hostname=api.kubeflow.com",
                 "-var",
                 "external_auth_hostname=auth.kubeflow.com",
+                "-var",
+                (
+                    "github_profiles_automator_config={"
+                    'repository="https://github.com/canonical/github-profiles-automator.git",'
+                    '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
+                    '"git-revision"="main"}'
+                ),
             ]
         )
     return (
