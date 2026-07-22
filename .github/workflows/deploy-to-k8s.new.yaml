@@ -245,10 +245,6 @@ jobs:
           cd ~/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
-      - name: Setup tmate session
-        if: failure()
-        uses: canonical/action-tmate@main
-
       - name: Get juju status
         run: juju status -m kubeflow --relations
         if: always()

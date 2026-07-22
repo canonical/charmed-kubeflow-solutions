@@ -210,10 +210,6 @@ jobs:
           cd ~/charmed-kubeflow-uats	  
           tox -e ${{ matrix.bundle.uats.env }} -- ${{ matrix.bundle.uats.extra-args }}
 
-      - name: Setup tmate session
-        if: failure()
-        uses: canonical/action-tmate@main
-
       # On failure, capture debugging resources
       - name: Select model
         run: juju switch kubeflow
