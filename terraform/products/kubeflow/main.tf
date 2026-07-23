@@ -885,7 +885,7 @@ module "external_integrations" {
   profile = each.value.profile
 
   data_kubeflow_integrator = {
-    channel  = "1/edge",
+    channel  = "latest/edge",
     app_name = each.key
   }
 

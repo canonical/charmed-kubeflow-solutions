@@ -35,7 +35,8 @@ jobs:
           - service-mesh-type: ambient
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow
-            uats-env: kubeflow-remote --include-multi-tenancy-tests
+            uats-env: kubeflow-remote
+            uats-extra-args: --include-multi-tenancy-tests
           - product: mlflow
             uats-env: mlflow-remote
           - product: feast
