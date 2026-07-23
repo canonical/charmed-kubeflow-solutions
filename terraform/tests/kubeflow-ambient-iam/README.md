@@ -107,9 +107,9 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Deploy Tensorboard. | `bool` | `true` | no |
 | <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Deploy the v1 Training Operator. | `bool` | `true` | no |
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Deploy the v2 Kubeflow Trainer. | `bool` | `false` | no |
-| <a name="input_external_auth_hostname"></a> [external\_auth\_hostname](#input\_external\_auth\_hostname) | External hostname for the iam Traefik ingress. | `string` | `null` | no |
-| <a name="input_external_m2m_hostname"></a> [external\_m2m\_hostname](#input\_external\_m2m\_hostname) | External hostname for the M2M ambient ingress gateway. | `string` | `null` | no |
-| <a name="input_external_ui_hostname"></a> [external\_ui\_hostname](#input\_external\_ui\_hostname) | External hostname for the UI ambient ingress gateway. | `string` | `null` | no |
+| <a name="input_external_auth_hostname"></a> [external\_auth\_hostname](#input\_external\_auth\_hostname) | External hostname for the iam Traefik ingress. | `string` | n/a | yes |
+| <a name="input_external_m2m_hostname"></a> [external\_m2m\_hostname](#input\_external\_m2m\_hostname) | External hostname for the M2M ambient ingress gateway. | `string` | n/a | yes |
+| <a name="input_external_ui_hostname"></a> [external\_ui\_hostname](#input\_external\_ui\_hostname) | External hostname for the UI ambient ingress gateway. | `string` | n/a | yes |
 | <a name="input_github_profiles_automator_config"></a> [github\_profiles\_automator\_config](#input\_github\_profiles\_automator\_config) | Configuration for the github-profiles-automator charm (e.g. repository and PMR path). | `map(string)` | `{}` | no |
 | <a name="input_hydra_revision"></a> [hydra\_revision](#input\_hydra\_revision) | Revision for the Hydra application. | `number` | `null` | no |
 | <a name="input_iam_model_name"></a> [iam\_model\_name](#input\_iam\_model\_name) | Name of the iam model to create. | `string` | `"iam"` | no |
