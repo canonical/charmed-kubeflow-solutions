@@ -12,6 +12,8 @@ from lightkube.resources.core_v1 import ConfigMap, Service
 
 logging.getLogger("jubilant.wait").setLevel("WARNING")
 
+logger = logging.getLogger(__name__)
+
 # Kept in one place so the workaround below can be reverted or retargeted easily.
 OAUTH2_PROXY_APP = "oauth2-proxy"
 
@@ -90,13 +92,11 @@ class TestCharm:
         # END workaround: oauth2-proxy-k8s#278
 
         if auth_type == "iam":
-            # UI traffic is served by the dedicated UI ambient gateway and is
-            # matched on the configured external hostname.
-            url = get_public_url(
-                lightkube_client, "kubeflow", "istio-ingress-k8s-ui-istio"
-            )
+            # UI traffic is served over TLS by the dedicated UI ambient gateway.
+            # The hostname resolves via the DNS configured above; the gateway
+            # certificate is self-signed, so TLS verification is disabled.
             result_status, _ = await fetch_response(
-                url, headers={"Host": "ui.kubeflow.com"}
+                "https://ui.kubeflow.com", ssl=False
             )
             assert result_status == 200
             return
@@ -128,12 +128,12 @@ def get_public_url(
     return public_url
 
 
-async def fetch_response(url, headers=None):
+async def fetch_response(url, headers=None, ssl=None):
     """Fetch provided URL and return (status, text)."""
     result_status = 0
     result_text = ""
     async with aiohttp.ClientSession() as session:
-        async with session.get(url=url, headers=headers) as response:
+        async with session.get(url=url, headers=headers, ssl=ssl) as response:
             result_status = response.status
             result_text = await response.text()
     return result_status, str(result_text)
@@ -165,6 +165,11 @@ def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
     juju.wait(_oauth2_proxy_active_or_stuck, timeout=1800)
 
     if not jubilant.all_active(juju.status(), OAUTH2_PROXY_APP):
+        logger.info(
+            "%s is stuck in maintenance; restarting its statefulset "
+            "(oauth2-proxy-k8s#278)",
+            OAUTH2_PROXY_APP,
+        )
         subprocess.run(
             [
                 "kubectl",
