@@ -39,7 +39,7 @@ jobs:
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
-            uats-extra-args: --include-ambient-tests
+            uats-extra-args: --include-ambient-tests --include-m2m-tests
         # --- Full matrix (restore before merge) ---------------------------------
         # product: [kubeflow, mlflow, feast, spark]
         # service-mesh-type: [sidecar, ambient]
@@ -57,12 +57,13 @@ jobs:
         #     uats-env: spark-remote
         #     uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
         #   # Standalone kubeflow-ambient-iam solution (ambient mesh + Canonical
-        #   # Identity Platform). Deployment-only for now; UATs are gated off below.
+        #   # Identity Platform). Runs the regular ambient UATs plus the M2M
+        #   # Identity UATs.
         #   - product: kubeflow
         #     service-mesh-type: ambient
         #     auth-type: iam
         #     uats-env: kubeflow-remote
-        #     uats-extra-args: --include-ambient-tests
+        #     uats-extra-args: --include-ambient-tests --include-m2m-tests
         # exclude:
         #   - product: spark
         #     service-mesh-type: ambient
@@ -194,14 +195,12 @@ jobs:
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Clone UATs repository
-        if: matrix.auth-type != 'iam'
         run: |
           git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
           cd ~/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
 
       - name: Preload Images into Containerd Cache
-        if: matrix.auth-type != 'iam'
         run: |
           echo "Starting image preload process..."
 
@@ -263,7 +262,6 @@ jobs:
           done < $IMAGE_LIST
 
       - name: Run UATs
-        if: matrix.auth-type != 'iam'
         run: |
           cd ~/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
