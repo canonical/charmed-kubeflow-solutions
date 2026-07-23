@@ -78,7 +78,7 @@ module "ambient_dex" {
   istio_k8s = {
     channel  = local.istio_k8s_channel
     revision = var.istio_k8s_revision
-    config   = merge(var.istio_k8s_config, var.istio_k8s_platform != "" ? { platform = var.istio_k8s_platform } : {})
+    config   = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
   }
   istio_ingress_k8s = {
     channel  = local.istio_ingress_k8s_channel

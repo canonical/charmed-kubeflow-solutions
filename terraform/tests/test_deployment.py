@@ -1,11 +1,13 @@
 import logging
 import subprocess
 import time
+from itertools import batched
 
-import aiohttp
 import jubilant
 import lightkube
 import pytest
+import requests
+import tenacity
 from lightkube.core.exceptions import ApiError
 from lightkube.resources.core_v1 import ConfigMap, Service
 
@@ -26,7 +28,7 @@ def lightkube_client() -> lightkube.Client:
 
 class TestCharm:
     @pytest.mark.dependency()
-    async def test_apply_terraform_solution(
+    def test_apply_terraform_solution(
         self,
         juju: jubilant.Juju,
         tf_vars,
@@ -57,7 +59,7 @@ class TestCharm:
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
-    async def test_assert_deployment(
+    def test_assert_deployment(
         self, juju: jubilant.Juju, lightkube_client, request
     ):
         """
@@ -74,10 +76,13 @@ class TestCharm:
             for model_name in ("istio-system", "iam-core", "iam"):
                 model_juju = jubilant.Juju(model=model_name)
                 model_apps = list(model_juju.status().apps.keys())
-                model_juju.wait(
-                    lambda status, apps=model_apps: jubilant.all_active(status, *apps),
-                    timeout=3600,
-                )
+                for batched_apps in batched(model_apps, 5):
+                    model_juju.wait(
+                        lambda status, apps=batched_apps: jubilant.all_active(
+                            status, *apps
+                        ),
+                        timeout=3600,
+                    )
 
         apps = list(juju.status().apps.keys())
 
@@ -86,17 +91,21 @@ class TestCharm:
         if auth_type == "iam":
             _wait_kubeflow_active(juju, apps)
         else:
-            juju.wait(
-                lambda status: jubilant.all_active(status, *apps), timeout=3600
-            )
+            for batched_apps in batched(apps, 5):
+                juju.wait(
+                    lambda status, apps=batched_apps: jubilant.all_active(
+                        status, *apps
+                    ),
+                    timeout=3600,
+                )
         # END workaround: oauth2-proxy-k8s#278
 
         if auth_type == "iam":
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
             # certificate is self-signed, so TLS verification is disabled.
-            result_status, _ = await fetch_response(
-                "https://ui.kubeflow.com", ssl=False
+            result_status, _ = fetch_response(
+                "https://ui.kubeflow.com", verify=False
             )
             assert result_status == 200
             return
@@ -106,13 +115,18 @@ class TestCharm:
         if request.config.getoption("--service-mesh-type") == "ambient":
             istio_service = "istio-ingress-k8s-istio"
         url = get_public_url(lightkube_client, "kubeflow", istio_service)
-        result_status, result_text = await fetch_response(url)
+        result_status, result_text = fetch_response(url)
         assert result_status == 200
         assert "Log in to Your Account" in result_text
         assert "Email Address" in result_text
         assert "Password" in result_text
 
 
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=2, min=1, max=10),
+    stop=tenacity.stop_after_attempt(30),
+    reraise=True,
+)
 def get_public_url(
     lightkube_client: lightkube.Client, bundle_name: str, service_name: str
 ):
@@ -128,15 +142,15 @@ def get_public_url(
     return public_url
 
 
-async def fetch_response(url, headers=None, ssl=None):
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=2, min=1, max=10),
+    stop=tenacity.stop_after_attempt(30),
+    reraise=True,
+)
+def fetch_response(url, headers=None, verify=True):
     """Fetch provided URL and return (status, text)."""
-    result_status = 0
-    result_text = ""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=url, headers=headers, ssl=ssl) as response:
-            result_status = response.status
-            result_text = await response.text()
-    return result_status, str(result_text)
+    response = requests.get(url, headers=headers, verify=verify)
+    return response.status_code, response.text
 
 
 # BEGIN workaround: oauth2-proxy-k8s#278 (remove this whole helper once fixed).
@@ -182,7 +196,11 @@ def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
             check=False,
         )
 
-    juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=1800)
+    for batched_apps in batched(apps, 5):
+        juju.wait(
+            lambda status, apps=batched_apps: jubilant.all_active(status, *apps),
+            timeout=1800,
+        )
 # END workaround: oauth2-proxy-k8s#278
 
 
