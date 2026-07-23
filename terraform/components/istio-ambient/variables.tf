@@ -9,7 +9,7 @@ variable "model_uuid" {
 
 variable "istio_ingress_config" {
   description = <<-EOT
-    Control-plane ingress-config provider consumed by both gateways, from
+    Control-plane ingress-config provider consumed by the UI gateway, from
     istio-k8s:istio-ingress-config (interface istio_ingress_config). Supports a
     same-model endpoint (kind = "endpoint") or a cross-model offer
     (kind = "offer"). When istio-k8s runs in the istio-system model this is the

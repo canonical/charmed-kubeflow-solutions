@@ -439,7 +439,7 @@ variable "istio_ingress_k8s_m2m_config" {
 variable "istio_ingress_config_offer_url" {
   description = <<-EOT
     Cross-model offer URL of istio-k8s:istio-ingress-config from the
-    istio-system model. Both ambient gateways consume this offer. Required when
+    istio-system model. The UI ambient gateway consumes this offer. Required when
     service_mesh_type is 'ambient'.
   EOT
   type        = string

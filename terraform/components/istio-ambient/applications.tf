@@ -2,10 +2,11 @@
 # See LICENSE file for licensing details.
 
 # Two Istio ingress gateways: one fronting browser/UI traffic and one fronting
-# machine-to-machine (token/JWT) traffic. Each consumes the istio-k8s
-# istio-ingress-config offer (typically cross-model from the istio-system model);
-# that integration is wired in integrations.tf since the upstream module only
-# deploys the application.
+# machine-to-machine (token/JWT) traffic. Only the UI gateway consumes the
+# istio-k8s istio-ingress-config offer (typically cross-model from the
+# istio-system model), for its forward-auth ext-authz config; that integration
+# is wired in integrations.tf since the upstream module only deploys the
+# application. The M2M gateway is JWT-only and is intentionally not wired to it.
 #
 # The upstream module hardcodes trust = true and does not accept base/resources,
 # so those inputs from var.istio_ingress_k8s are intentionally not passed.
