@@ -1,5 +1,5 @@
 CKF_BRANCH: "main"
 K8S_VERSION: "1.32"
 JUJU_VERSION: "3.6"
-UATS_BRANCH: "main"
+UATS_BRANCH: "feat/KF-8788-multi-tenancy-kfp"
 RISK: "edge"
