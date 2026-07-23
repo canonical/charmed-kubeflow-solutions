@@ -3,6 +3,7 @@ import subprocess
 
 import jubilant
 import lightkube
+from itertools import batched
 import pytest
 import requests
 import tenacity
@@ -54,7 +55,8 @@ class TestCharm:
 
         apps = list(juju.status().apps.keys())
 
-        juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=3600)
+        for batched_apps in batched(apps, 5):
+            juju.wait(lambda status: jubilant.all_active(status, *batched_apps), timeout=3600)
 
         # Verify deployment by checking the public URL
         istio_service = "istio-ingressgateway-workload"
