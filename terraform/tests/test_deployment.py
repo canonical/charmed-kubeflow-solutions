@@ -12,6 +12,9 @@ from lightkube.resources.core_v1 import ConfigMap, Service
 
 logging.getLogger("jubilant.wait").setLevel("WARNING")
 
+# Kept in one place so the workaround below can be reverted or retargeted easily.
+OAUTH2_PROXY_APP = "oauth2-proxy"
+
 
 @pytest.fixture()
 def lightkube_client() -> lightkube.Client:
@@ -76,7 +79,15 @@ class TestCharm:
 
         apps = list(juju.status().apps.keys())
 
-        juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=3600)
+        # BEGIN workaround: oauth2-proxy-k8s#278 (remove once fixed upstream).
+        # To revert, drop this branch and always run the plain juju.wait below.
+        if auth_type == "iam":
+            _wait_kubeflow_active(juju, apps)
+        else:
+            juju.wait(
+                lambda status: jubilant.all_active(status, *apps), timeout=3600
+            )
+        # END workaround: oauth2-proxy-k8s#278
 
         if auth_type == "iam":
             # UI traffic is served by the dedicated UI ambient gateway and is
@@ -126,6 +137,48 @@ async def fetch_response(url, headers=None):
             result_status = response.status
             result_text = await response.text()
     return result_status, str(result_text)
+
+
+# BEGIN workaround: oauth2-proxy-k8s#278 (remove this whole helper once fixed).
+def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
+    """Wait for the kubeflow model to go active (oauth2-proxy-k8s#278 workaround).
+
+    oauth2-proxy-k8s can stay in maintenance ("Status check: DOWN") after its
+    Pebble check recovers; restarting the pod moves it to active. Wait until
+    oauth2-proxy is either active or in that known-stuck state, restart it when
+    stuck, then wait for the whole model to settle.
+    """
+
+    def _oauth2_proxy_active_or_stuck(status: jubilant.Status) -> bool:
+        app = status.apps.get(OAUTH2_PROXY_APP)
+        if app is None or not app.units:
+            return False
+        return all(
+            unit.workload_status.current == "active"
+            or (
+                unit.workload_status.current == "maintenance"
+                and "Status check: DOWN" in (unit.workload_status.message or "")
+            )
+            for unit in app.units.values()
+        )
+
+    juju.wait(_oauth2_proxy_active_or_stuck, timeout=1800)
+
+    if not jubilant.all_active(juju.status(), OAUTH2_PROXY_APP):
+        subprocess.run(
+            [
+                "kubectl",
+                "-n",
+                "kubeflow",
+                "rollout",
+                "restart",
+                f"statefulset/{OAUTH2_PROXY_APP}",
+            ],
+            check=False,
+        )
+
+    juju.wait(lambda status: jubilant.all_active(status, *apps), timeout=1800)
+# END workaround: oauth2-proxy-k8s#278
 
 
 def _wait_for_lb_ip(
