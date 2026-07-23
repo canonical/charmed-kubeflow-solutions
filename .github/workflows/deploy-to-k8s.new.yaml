@@ -189,7 +189,7 @@ jobs:
       - name: Run UATs
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }}
 
       - name: Get juju status
         run: juju status -m kubeflow --relations

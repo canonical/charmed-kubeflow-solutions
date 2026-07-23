@@ -180,7 +180,7 @@ jobs:
       - name: Run UATs
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats	  
-          tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} 
+          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
