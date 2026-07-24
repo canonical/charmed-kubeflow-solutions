@@ -15,7 +15,7 @@ providers:
         l2-mode: true
         cidrs: 10.64.140.43/29 # NOTE: at least three IPs are required for kubeflow-ambient-iam solution
     bootstrap-constraints:
-      root-disk: 10G
+      root-disk: 4G
 
   lxd:
     enable: true

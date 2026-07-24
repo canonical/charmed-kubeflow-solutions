@@ -131,6 +131,12 @@ jobs:
             yq -i e '.juju.agent-version = "${{ inputs.juju_agent_version }}"' concierge.yaml
           fi
 
+          # The kubeflow-ambient-iam solution spans four models and needs a
+          # larger controller root-disk than the other jobs.
+          if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
+            yq -i e '.providers.k8s.bootstrap-constraints.root-disk = "10G"' concierge.yaml
+          fi
+
           sudo concierge prepare --trace
           cd ..
 
