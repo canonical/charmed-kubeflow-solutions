@@ -154,33 +154,29 @@ def fetch_response(url, headers=None, verify=True):
 
 
 # BEGIN workaround: oauth2-proxy-k8s#278 (remove this whole helper once fixed).
+# https://github.com/canonical/oauth2-proxy-k8s-operator/issues/278
 def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
     """Wait for the kubeflow model to go active (oauth2-proxy-k8s#278 workaround).
 
-    oauth2-proxy-k8s can stay in maintenance ("Status check: DOWN") after its
-    Pebble check recovers; restarting the pod moves it to active. Wait until
-    oauth2-proxy is either active or in that known-stuck state, restart it when
-    stuck, then wait for the whole model to settle.
+    oauth2-proxy-k8s can settle (agent idle) into a non-active state (e.g.
+    maintenance "Status check: DOWN" or blocked) and never recover on its own;
+    restarting the pod moves it to active. Wait until oauth2-proxy is idle, roll
+    it out if it did not settle active, then wait for the whole model to settle.
     """
 
-    def _oauth2_proxy_active_or_stuck(status: jubilant.Status) -> bool:
+    def _oauth2_proxy_idle(status: jubilant.Status) -> bool:
         app = status.apps.get(OAUTH2_PROXY_APP)
         if app is None or not app.units:
             return False
         return all(
-            unit.workload_status.current == "active"
-            or (
-                unit.workload_status.current == "maintenance"
-                and "Status check: DOWN" in (unit.workload_status.message or "")
-            )
-            for unit in app.units.values()
+            unit.juju_status.current == "idle" for unit in app.units.values()
         )
 
-    juju.wait(_oauth2_proxy_active_or_stuck, timeout=1800)
+    juju.wait(_oauth2_proxy_idle, timeout=1800)
 
     if not jubilant.all_active(juju.status(), OAUTH2_PROXY_APP):
         logger.info(
-            "%s is stuck in maintenance; restarting its statefulset "
+            "%s settled idle but not active; restarting its statefulset "
             "(oauth2-proxy-k8s#278)",
             OAUTH2_PROXY_APP,
         )
