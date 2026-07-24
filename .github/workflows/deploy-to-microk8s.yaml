@@ -204,6 +204,10 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
 
+      - name: Setup tmate session
+        if: failure()
+        uses: canonical/action-tmate@main
+
       # On failure, capture debugging resources
       - name: Select model
         run: juju switch kubeflow
