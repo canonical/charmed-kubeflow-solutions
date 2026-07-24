@@ -15,6 +15,9 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'edge'
+      juju_agent_version:
+        description: 'Juju agent version to use when bootstrapping. Leave empty to use the default.'
+        required: false
   pull_request:
   schedule:
     - cron: "17 02 * * 1"
@@ -28,6 +31,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         product: [kubeflow, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
@@ -103,6 +107,10 @@ jobs:
           # Set the K8s version
           yq -i e '.providers.k8s.channel = "${{ env.K8S_VERSION }}-classic/stable"' concierge.yaml
 
+          if [[ -n "${{ inputs.juju_agent_version }}" ]]; then
+            yq -i e '.juju.agent-version = "${{ inputs.juju_agent_version }}"' concierge.yaml
+          fi
+
           sudo concierge prepare --trace
           cd ..
 
@@ -157,10 +165,11 @@ jobs:
 
       - name: Setup terraform
         run: |
-          sudo snap install terraform --revision=859 --classic
+          sudo snap install terraform --channel latest/stable --classic
           terraform --version
 
-      - name: Deploy solution
+      - name: Deploy
+        timeout-minutes: 45
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
@@ -188,74 +197,19 @@ jobs:
 
       - name: Clone UATs repository
         run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
 
       - name: Preload Images into Containerd Cache
-        run: |
-          echo "Starting image preload process..."
-
-          MAX_RETRIES=3
-          RETRY_DELAY=5
-
-          IMAGE_LIST=~/charmed-kubeflow-uats/assets/test.images.txt
-          if [ ! -f $IMAGE_LIST ]; then touch $IMAGE_LIST; fi
-
-          while IFS= read -r image || [ -n "$image" ]; do
-            # Trim whitespace
-            image=$(echo "$image" | xargs)
-            
-            # Skip empty lines or commented lines starting with #
-            if [[ -z "$image" || "$image" =~ ^# ]]; then
-              continue
-            fi
-            
-            echo "--------------------------------------------------"
-            echo "🚀 Preloading: $image"
-            echo "--------------------------------------------------"
-
-            attempt=1
-            success=false
-            
-            while [ $attempt -le $MAX_RETRIES ]; do
-              if [ $attempt -gt 1 ]; then
-                echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in $RETRY_DELAY seconds..."
-                sleep $RETRY_DELAY
-              fi
-
-              # Execute pull via the snap path
-              sudo /snap/k8s/current/bin/ctr \
-                --address /run/containerd/containerd.sock \
-                --namespace k8s.io \
-                images pull "$image" > /tmp/import.out 2>&1
-
-              if [ $? -eq 0 ]; then
-                sudo /snap/k8s/current/bin/ctr \
-                  --address /run/containerd/containerd.sock \
-                  --namespace k8s.io \
-                  image label "$image" io.cri-containerd.pinned=pinned
-
-                echo "✅ Successfully pulled $image on attempt $attempt"
-                success=true
-                break
-              else
-                echo "❌ Attempt $attempt failed for $image"
-                ((attempt++))
-              fi
-            done
-
-            if [ "$success" = false ]; then
-              echo "::error::Failed to pull $image after $MAX_RETRIES attempts."
-              echo "::error::Logs:"
-              cat /tmp/import.out
-              exit 1
-            fi
-          done < $IMAGE_LIST
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
 
       - name: Run UATs
         run: |
-          cd ~/charmed-kubeflow-uats	  
+          cd ${{ github.workspace }}/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
       - name: Setup tmate session
