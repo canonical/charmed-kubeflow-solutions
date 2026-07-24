@@ -129,5 +129,8 @@ def tf_vars_file(request) -> list[str]:
 def tf_vars(risk, pss, db_sizes, tf_vars_file) -> list[str]:
     """Overall Terraform module customization."""
     return risk + pss + db_sizes + [
-        "-var", "cos_configuration=true",
+        "-var",
+        "create_model=false",
+        "-var",
+        "cos_configuration=true",
     ] + tf_vars_file

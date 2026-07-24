@@ -9,6 +9,9 @@ from itertools import batched
 from lightkube.resources.core_v1 import Service
 
 
+logging.getLogger("jubilant.wait").setLevel("WARNING")
+
+
 @pytest.fixture()
 def lightkube_client() -> lightkube.Client:
     client = lightkube.Client(field_manager="kubeflow")
