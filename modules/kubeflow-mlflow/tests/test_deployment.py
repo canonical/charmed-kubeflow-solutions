@@ -1,5 +1,6 @@
 import subprocess
 
+import logging
 import jubilant
 import lightkube
 import pytest
