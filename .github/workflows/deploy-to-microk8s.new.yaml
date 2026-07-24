@@ -44,6 +44,9 @@ jobs:
             istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
         service-mesh-type: [sidecar, ambient]
+        include:
+            - service-mesh-type: ambient
+              uats-extra-args: --include-ambient-tests
           
     steps:
       - name: Checkout repository
