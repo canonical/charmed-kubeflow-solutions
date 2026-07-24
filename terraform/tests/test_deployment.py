@@ -239,6 +239,18 @@ def _wait_for_lb_ip(
     )
 
 
+def _coredns_configmap(lightkube_client: lightkube.Client) -> ConfigMap:
+    """Find the CoreDNS ConfigMap (the one holding the Corefile).
+
+    Distro-agnostic: Canonical K8s names it ck-dns-coredns and MicroK8s names it
+    coredns, but both keep the config under a Corefile data key.
+    """
+    for configmap in lightkube_client.list(ConfigMap, namespace="kube-system"):
+        if configmap.data and "Corefile" in configmap.data:
+            return configmap
+    raise RuntimeError("CoreDNS ConfigMap not found in kube-system")
+
+
 def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
     """Resolve the ambient-iam hostnames to their LoadBalancer IPs.
 
@@ -272,16 +284,14 @@ def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
         + "        fallthrough\n"
         "    }\n"
     )
-    configmap = lightkube_client.get(
-        ConfigMap, "ck-dns-coredns", namespace="kube-system"
-    )
+    configmap = _coredns_configmap(lightkube_client)
     corefile = configmap.data["Corefile"]
     insert_at = corefile.find("{\n") + len("{\n")
     patched_corefile = corefile[:insert_at] + hosts_block + corefile[insert_at:]
 
     lightkube_client.patch(
         ConfigMap,
-        "ck-dns-coredns",
+        configmap.metadata.name,
         namespace="kube-system",
         obj={"data": {"Corefile": patched_corefile}},
     )
