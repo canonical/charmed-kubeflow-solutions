@@ -6,7 +6,7 @@
 # and does not accept base/resources, so var.istio_k8s.trust and .resources are
 # intentionally not passed.
 module "istio_k8s" {
-  source = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=e3c216c0fe5a9a42ab8d1b6e16725a97b72bf2a7"
+  source = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=7b1162ba3a9b2af6896545f51e64dd21cc44ee39"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-k8s"
@@ -22,7 +22,7 @@ module "istio_k8s" {
 # module hardcodes trust = true and does not accept base/resources, so
 # var.istio_ingress_k8s.trust and .resources are intentionally not passed.
 module "istio_ingress_k8s" {
-  source = "git::https://github.com/canonical/istio-ingress-k8s-operator//terraform?ref=a9ef9646aea149a00a6a7620acaf483249714d04"
+  source = "git::https://github.com/canonical/istio-ingress-k8s-operator//terraform?ref=f3c7cd585a5a2a8e36bc750274c48bd5f431051f"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s"
@@ -37,7 +37,7 @@ module "istio_ingress_k8s" {
 # (ref pinned to match components/istio-ambient). trust is hardcoded upstream
 # and base/resources are unsupported, so those fields are not passed.
 module "istio_beacon_k8s" {
-  source = "git::https://github.com/canonical/istio-beacon-k8s-operator//terraform?ref=51b204dd50392809692263f6e973d81dd9fe200a"
+  source = "git::https://github.com/canonical/istio-beacon-k8s-operator//terraform?ref=87fbeb0b5ad41b80dc006827293976c3db2bc911"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-beacon-k8s"

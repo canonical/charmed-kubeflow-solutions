@@ -15,6 +15,9 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
+      juju_agent_version:
+        description: 'Juju agent version to use when bootstrapping. Leave empty to use the default.'
+        required: false
 
   pull_request:
   schedule:
@@ -28,9 +31,11 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         # TODO(kf-8863): temporarily reduced to only the kubeflow-ambient-iam job
         # to test this solution in CI. Restore the full matrix below before merge.
+        service-mesh-type: [ambient]
         product:
           - name: kubeflow
             uats-env: kubeflow-remote
@@ -38,10 +43,10 @@ jobs:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
             istio-cni-conf-dir: ""  # meaning Istio CNI disabled
-        service-mesh-type: [ambient]
         auth-type: [iam]
         uats-extra-args: ["--include-ambient-tests --include-m2m-tests"]
         # --- Full matrix (restore before merge) ---------------------------------
+        # service-mesh-type: [sidecar, ambient]
         # product:
         #   - name: kubeflow
         #     uats-env: kubeflow-remote
@@ -56,8 +61,7 @@ jobs:
         #   - policy: baseline
         #     istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
         #     istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
-        # service-mesh-type: [sidecar, ambient]
-          
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -135,12 +139,12 @@ jobs:
 
           sudo microk8s config | juju add-k8s local-k8s --client
 
-          # AGENT_VERSION_ARG=""
-          # if [[ -n "${{ matrix.bundle.juju-agent-version }}" ]]; then
-          #   AGENT_VERSION_ARG="--agent-version=${{ matrix.bundle.juju-agent-version }}"
-          # fi
+          AGENT_VERSION_ARG=""
+          if [[ -n "${{ inputs.juju_agent_version }}" ]]; then
+            AGENT_VERSION_ARG="--agent-version=${{ inputs.juju_agent_version }}"
+          fi
       
-          juju bootstrap local-k8s microk8s # $AGENT_VERSION_ARG
+          juju bootstrap local-k8s microk8s $AGENT_VERSION_ARG
 
           # for Python's K8s client to find K8s configurations without code or
           # environment-variable changes:
@@ -185,73 +189,20 @@ jobs:
 
       - name: Clone UATs repository
         run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
           git checkout ${{ env.UATS_BRANCH }}
 
       - name: Preload Images into Containerd Cache
-        run: |
-          echo "Starting image preload process..."
-
-          MAX_RETRIES=3
-          RETRY_DELAY=5
-
-          IMAGE_LIST=~/charmed-kubeflow-uats/assets/test.images.txt
-          if [ ! -f $IMAGE_LIST ]; then touch $IMAGE_LIST; fi
-
-          while IFS= read -r image || [ -n "$image" ]; do
-            # Trim whitespace
-            image=$(echo "$image" | xargs)
-
-            # Skip empty lines or commented lines starting with #
-            if [[ -z "$image" || "$image" =~ ^# ]]; then
-              continue
-            fi
-
-            echo "--------------------------------------------------"
-            echo "🚀 Preloading: $image"
-            echo "--------------------------------------------------"
-
-            attempt=1
-            success=false
-
-            while [ $attempt -le $MAX_RETRIES ]; do
-              if [ $attempt -gt 1 ]; then
-                echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in $RETRY_DELAY seconds..."
-                sleep $RETRY_DELAY
-              fi
-
-              # Execute pull via the snap path
-              sudo microk8s ctr \
-                --namespace k8s.io \
-                image pull "$image" > /tmp/import.out 2>&1
-
-              if [ $? -eq 0 ]; then
-                sudo microk8s ctr \
-                  --namespace k8s.io \
-                  image label "$image" io.cri-containerd.pinned=pinned
-
-                echo "✅ Successfully pulled $image on attempt $attempt"
-                success=true
-                break
-              else
-                echo "❌ Attempt $attempt failed for $image"
-                ((attempt++))
-              fi
-            done
-
-            if [ "$success" = false ]; then
-              echo "::error::Failed to pull $image after $MAX_RETRIES attempts."
-              echo "::error::Logs:"
-              cat /tmp/import.out
-              exit 1
-            fi
-          done < $IMAGE_LIST
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo microk8s ctr --namespace k8s.io
 
       - name: Run UATs
         run: |
-          cd ~/charmed-kubeflow-uats	  
-          tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} 
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
 
       # On failure, capture debugging resources
       - name: Select model
