@@ -16,34 +16,47 @@ on:
         required: false
         default: 'stable'
 
-  # TODO(kf-8863): temporarily disabled so only deploy-to-k8s.yaml runs on this test PR. Restore before merge.
-  # pull_request:
+  pull_request:
   schedule:
     - cron: "17 02 * * 1"
 
 jobs:
   deploy-solution:
     name: Deploy to Microk8s
-    runs-on: ["self-hosted-linux-amd64-jammy-xlarge"]
+    runs-on: ${{ matrix.auth-type == 'iam' && 'self-hosted-linux-amd64-jammy-2xlarge-extra' || 'self-hosted-linux-amd64-jammy-xlarge' }}
+    timeout-minutes: 150
 
     strategy:
       fail-fast: false
       matrix:
-        product: 
+        # TODO(kf-8863): temporarily reduced to only the kubeflow-ambient-iam job
+        # to test this solution in CI. Restore the full matrix below before merge.
+        product:
           - name: kubeflow
             uats-env: kubeflow-remote
-          - name: mlflow
-            uats-env: mlflow-remote
-          - name: feast
-            uats-env: feast-remote
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
             istio-cni-conf-dir: ""  # meaning Istio CNI disabled
-          - policy: baseline
-            istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
-            istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
-        service-mesh-type: [sidecar, ambient]
+        service-mesh-type: [ambient]
+        auth-type: [iam]
+        uats-extra-args: ["--include-ambient-tests --include-m2m-tests"]
+        # --- Full matrix (restore before merge) ---------------------------------
+        # product:
+        #   - name: kubeflow
+        #     uats-env: kubeflow-remote
+        #   - name: mlflow
+        #     uats-env: mlflow-remote
+        #   - name: feast
+        #     uats-env: feast-remote
+        # pod-security-standards:
+        #   - policy: privileged
+        #     istio-cni-bin-dir: ""  # meaning Istio CNI disabled
+        #     istio-cni-conf-dir: ""  # meaning Istio CNI disabled
+        #   - policy: baseline
+        #     istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
+        #     istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
+        # service-mesh-type: [sidecar, ambient]
           
     steps:
       - name: Checkout repository
@@ -139,7 +152,7 @@ jobs:
           terraform --version
 
       - name: Deploy solution
-        timeout-minutes: 45
+        timeout-minutes: ${{ matrix.auth-type == 'iam' && 120 || 45 }}
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
@@ -148,6 +161,11 @@ jobs:
           CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
           RISK_ARG="--risk ${{ env.RISK }}"
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
+
+          AUTH_TYPE_ARG=""
+          if [[ -n "${{ matrix.auth-type }}" ]]; then
+            AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
+          fi
 
           EXTRA_COMPONENTS_ARG="--pss ${{ matrix.pod-security-standards.policy }}"
 
@@ -163,7 +181,7 @@ jobs:
             EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Clone UATs repository
         run: |
@@ -247,6 +265,22 @@ jobs:
       - name: Get juju debug logs
         run: juju debug-log --replay --no-tail
         if: failure() || cancelled()
+
+      - name: Get juju status for istio and iam models
+        if: (failure() || cancelled()) && matrix.auth-type == 'iam'
+        run: |
+          for model in istio-system iam iam-core; do
+            echo "=== juju status -m $model ==="
+            juju status -m "$model" --relations || true
+          done
+
+      - name: Get juju debug logs for istio and iam models
+        if: (failure() || cancelled()) && matrix.auth-type == 'iam'
+        run: |
+          for model in istio-system iam iam-core; do
+            echo "=== juju debug-log -m $model ==="
+            juju debug-log --replay --no-tail -m "$model" || true
+          done
 
       - name: Get all kubernetes resources
         run: kubectl get all -A
