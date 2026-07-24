@@ -184,7 +184,7 @@ jobs:
           terraform --version
 
       - name: Deploy solution
-        timeout-minutes: 90
+        timeout-minutes: 45
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
