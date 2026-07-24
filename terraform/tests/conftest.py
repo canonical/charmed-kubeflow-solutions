@@ -217,7 +217,10 @@ def tf_vars(
                     "github_profiles_automator_config={"
                     'repository="https://github.com/canonical/github-profiles-automator.git",'
                     '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
-                    '"git-revision"="main"}'
+                    '"git-revision"="main",'
+                    # Slow the reconcile so it does not remove the m2m UATs'
+                    # directly-created authorization mid-run.
+                    '"sync-period"="86400"}'
                 ),
             ]
         )
