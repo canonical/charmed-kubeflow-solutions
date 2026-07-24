@@ -26,7 +26,7 @@ on:
 jobs:
   deploy-solution:
     name: Deploy to Microk8s
-    runs-on: ${{ matrix.auth-type == 'iam' && 'self-hosted-linux-amd64-jammy-2xlarge-extra' || 'self-hosted-linux-amd64-jammy-xlarge' }}
+    runs-on: ${{ matrix.auth-type == 'iam' && 'self-hosted-linux-amd64-noble-2xlarge-extra' || 'self-hosted-linux-amd64-jammy-xlarge' }}
     timeout-minutes: 150
 
     strategy:
