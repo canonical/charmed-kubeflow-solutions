@@ -70,19 +70,17 @@ class TestCharm:
         # The ambient-iam solution spans multiple models; wait for the provider
         # models to settle before asserting on the kubeflow model.
         if auth_type == "iam":
-            # The IAM charms only reconcile to active once the external
-            # hostnames resolve to their gateway/ingress LoadBalancer IPs.
+            # iam-core (traefik / postgresql / self-signed) does not depend on
+            # the external DNS, so wait for it first: this guarantees traefik's
+            # LoadBalancer IP exists before we resolve the hostnames below.
+            _wait_model_active("iam-core")
+
+            # The IAM charms and cross-model callbacks only reconcile to active
+            # once the external hostnames resolve to their LoadBalancer IPs.
             configure_dns(lightkube_client)
-            for model_name in ("istio-system", "iam-core", "iam"):
-                model_juju = jubilant.Juju(model=model_name)
-                model_apps = list(model_juju.status().apps.keys())
-                for batched_apps in batched(model_apps, 5):
-                    model_juju.wait(
-                        lambda status, apps=batched_apps: jubilant.all_active(
-                            status, *apps
-                        ),
-                        timeout=3600,
-                    )
+
+            for model_name in ("istio-system", "iam"):
+                _wait_model_active(model_name)
 
         apps = list(juju.status().apps.keys())
 
@@ -198,6 +196,17 @@ def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
             timeout=1800,
         )
 # END workaround: oauth2-proxy-k8s#278
+
+
+def _wait_model_active(model_name: str) -> None:
+    """Wait for every application in the given model to be active."""
+    model_juju = jubilant.Juju(model=model_name)
+    model_apps = list(model_juju.status().apps.keys())
+    for batched_apps in batched(model_apps, 5):
+        model_juju.wait(
+            lambda status, apps=batched_apps: jubilant.all_active(status, *apps),
+            timeout=3600,
+        )
 
 
 def _wait_for_lb_ip(
