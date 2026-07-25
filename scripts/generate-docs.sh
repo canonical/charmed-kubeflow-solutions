@@ -6,7 +6,7 @@ if ! command -v terraform-docs &> /dev/null; then
   exit 1
 fi
 
-TERRAFORM_DIR=$(pwd)/../terraform-refactoring
+TERRAFORM_DIR=$(pwd)/../terraform
 
 echo "Starting terraform-docs update from ${TERRAFORM_DIR}"
 
@@ -19,6 +19,7 @@ find "${TERRAFORM_DIR}" -maxdepth 2 -mindepth 2 -type d | while read -r MODULE_D
       terraform-docs markdown table . \
           --output-mode inject \
           --output-file README.md \
+          --hide-empty=true \
           --lockfile=false
     else
       echo "Skipping ${MODULE_DIR}"

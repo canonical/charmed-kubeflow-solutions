@@ -2,6 +2,10 @@
 # See LICENSE file for licensing details.
 
 locals {
+  # Name of the kubeflow model (falls back to "kubeflow" when deploying into an
+  # existing model referenced only by UUID).
+  kubeflow_model_name = var.create_model ? juju_model.kubeflow[0].name : "kubeflow"
+
   # Auth Component
   dex_auth_channel        = var.release == "1.11" ? "2.41/${var.risk}" : "latest/${var.risk}"
   oidc_gatekeeper_channel = var.release == "1.11" ? "ckf-1.10/${var.risk}" : "latest/${var.risk}"
@@ -26,6 +30,21 @@ locals {
 
   # Istio Component (sidecar)
   istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
+
+  # Istio Component (ambient gateways + beacon)
+  # NOTE: the ambient IAM architecture needs the istio-ingress-route,
+  # gateway-metadata and istio-request-auth endpoints, which are currently only
+  # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
+  # them). Move these back to a stable track once those endpoints graduate.
+  istio_channel             = local.ambient_iam ? "dev/edge" : "2/stable"
+  istio_ingress_k8s_channel = local.istio_channel
+  istio_beacon_k8s_channel  = local.istio_channel
+  istio_k8s_channel         = local.istio_channel
+
+  # IAM Auth Charms (ambient)
+  oauth2_proxy_channel                        = "latest/edge"
+  request_authentication_configurator_channel = var.release == "1.11" ? "1.0/edge" : "latest/edge"
+  github_profiles_automator_channel           = var.release == "1.11" ? "1.0/edge" : "latest/edge"
 
   # Katib Component
   katib_channel = var.release == "1.11" ? "0.19/${var.risk}" : "latest/${var.risk}"
@@ -56,9 +75,9 @@ locals {
   training_operator_channel = var.release == "1.11" ? "1.9/${var.risk}" : "latest/${var.risk}"
   kubeflow_trainer_channel  = var.release == "1.11" ? "2.1/edge" : "latest/${var.risk}"
 
-  kubeflow_profiles_service_mesh_config = var.service_mesh_type == "ambient" ? {
+  kubeflow_profiles_service_mesh_config = local.ambient ? {
     "service-mesh-mode"             = "istio-ambient"
-    "istio-gateway-service-account" = "istio-ingress-k8s-istio"
+    "istio-gateway-service-account" = local.ambient_iam ? "istio-ingress-k8s-ui-istio" : "istio-ingress-k8s-istio"
     } : {
     "service-mesh-mode"             = "istio-sidecar"
     "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
@@ -93,6 +112,78 @@ locals {
       }
     } : {}
   )
+
+  # ------------------------------------------------------------------
+  # Service-mesh + auth mode helpers and gateway/mesh selectors, derived from
+  # the two inputs var.service_mesh_type ('sidecar' | 'ambient') and
+  # var.auth_type ('dex' | 'iam'). Supported combinations:
+  #   sidecar + dex : istio-pilot + istio-ingressgateway; Dex/OIDC auth.
+  #   ambient + dex : single gateway + beacon + istio-k8s in-model (component
+  #                   istio-ambient-dex); Dex/OIDC auth.
+  #   ambient + iam : two gateways (UI/M2M) + beacon (component istio-ambient);
+  #                   istio-k8s in istio-system; IAM auth stack.
+  # (sidecar + iam is rejected by variable validation.)
+  # For ambient_dex the UI and M2M selectors both resolve to the single gateway.
+  # ------------------------------------------------------------------
+  sidecar     = var.service_mesh_type == "sidecar"
+  ambient     = var.service_mesh_type == "ambient"
+  ambient_iam = local.ambient && var.auth_type == "iam"
+  ambient_dex = local.ambient && var.auth_type == "dex"
+  legacy_auth = var.auth_type == "dex"
+
+  ui_istio_ingress_route = local.ambient_iam ? {
+    kind     = "endpoint"
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+    } : local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+  } : null
+
+  ui_gateway_metadata = local.ambient_iam ? {
+    kind     = "endpoint"
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
+    } : local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+  } : null
+
+  m2m_gateway_metadata = local.ambient_iam ? {
+    kind     = "endpoint"
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+    } : local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+  } : null
+
+  # Unauthenticated route on the single gateway, consumed by oidc-gatekeeper on
+  # the ambient-dex path.
+  istio_ingress_route_unauthenticated = local.ambient_dex ? {
+    kind     = "endpoint"
+    name     = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.name
+    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.endpoint
+  } : null
+
+  # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
+  # component inputs that expect it.
+  beacon = local.ambient_iam ? {
+    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    } : local.ambient_dex ? {
+    name     = module.ambient_dex[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient_dex[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  } : null
+
+  service_mesh = local.beacon == null ? null : {
+    kind     = "endpoint"
+    name     = local.beacon.name
+    endpoint = local.beacon.endpoint
+  }
 
 }
 

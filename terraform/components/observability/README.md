@@ -195,10 +195,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
-## Modules
-
-No modules.
-
 ## Resources
 
 | Name | Type |
@@ -239,7 +235,6 @@ No modules.
 | [juju_integration.knative_eventing_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.knative_operator_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.knative_operator_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.knative_operator_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.knative_serving_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |

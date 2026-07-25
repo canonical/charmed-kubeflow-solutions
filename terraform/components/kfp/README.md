@@ -12,10 +12,6 @@
 | ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
-## Modules
-
-No modules.
-
 ## Resources
 
 | Name | Type |
@@ -73,7 +69,7 @@ No modules.
 | <a name="input_kfp_ui"></a> [kfp\_ui](#input\_kfp\_ui) | Configuration for kfp-ui application | <pre>object({<br/>    app_name    = optional(string, "kfp-ui")<br/>    channel     = optional(string, "2.15/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_kfp_viewer"></a> [kfp\_viewer](#input\_kfp\_viewer) | Configuration for kfp-viewer application | <pre>object({<br/>    app_name    = optional(string, "kfp-viewer")<br/>    channel     = optional(string, "2.15/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_kfp_viz"></a> [kfp\_viz](#input\_kfp\_viz) | Configuration for kfp-viz application | <pre>object({<br/>    app_name    = optional(string, "kfp-viz")<br/>    channel     = optional(string, "2.15/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
-| <a name="input_mlmd"></a> [mlmd](#input\_mlmd) | Configuration for mlmd application | <pre>object({<br/>    app_name    = optional(string, "mlmd")<br/>    channel     = optional(string, "ckf-1.10/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_mlmd"></a> [mlmd](#input\_mlmd) | Configuration for mlmd application | <pre>object({<br/>    app_name    = optional(string, "mlmd")<br/>    channel     = optional(string, "ckf-1.10/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>    storage_directives = optional(map(string), {<br/>      mlmd-data = "10G"<br/>    })<br/>  })</pre> | `{}` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where KFP is deployed | `string` | n/a | yes |
 | <a name="input_mysql_database"></a> [mysql\_database](#input\_mysql\_database) | MySQL database provider for kfp-api from mysql-k8s:database (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_object_storage"></a> [object\_storage](#input\_object\_storage) | Object storage provider for KFP applications from minio:object-storage (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |

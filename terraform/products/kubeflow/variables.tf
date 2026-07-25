@@ -330,13 +330,29 @@ variable "kfp_viz_config" {
 # Istio Component Applications
 
 variable "service_mesh_type" {
-  description = "Which service mesh component to deploy: 'istio' (sidecar) or 'ambient'"
+  description = "Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh)."
   type        = string
-  default     = "sidecar"
+  default     = "ambient"
 
   validation {
     condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
     error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
+  }
+}
+
+variable "auth_type" {
+  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
+  type        = string
+  default     = "dex"
+
+  validation {
+    condition     = contains(["dex", "iam"], var.auth_type)
+    error_message = "Valid values for auth_type are (dex, iam)."
+  }
+
+  validation {
+    condition     = !(var.auth_type == "iam" && var.service_mesh_type != "ambient")
+    error_message = "auth_type = 'iam' requires service_mesh_type = 'ambient'."
   }
 }
 
@@ -367,19 +383,19 @@ variable "istio_ingressgateway_config" {
 # Ambient Component Applications
 
 variable "istio_k8s_revision" {
-  description = "Revision of the istio-k8s application"
+  description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
   type        = number
   default     = null
 }
 
 variable "istio_k8s_config" {
-  description = "Configuration for istio-k8s application"
+  description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
   type        = map(string)
   default     = {}
 }
 
 variable "istio_k8s_platform" {
-  description = "Platform configuration for istio-k8s"
+  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only)."
   type        = string
   default     = ""
 }
@@ -404,6 +420,108 @@ variable "istio_beacon_k8s_revision" {
 
 variable "istio_beacon_k8s_config" {
   description = "Configuration for istio-beacon-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_ui_config" {
+  description = "Extra configuration for the UI istio-ingress-k8s gateway (merged over istio_ingress_k8s_config)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_m2m_config" {
+  description = "Extra configuration for the M2M istio-ingress-k8s gateway (merged over istio_ingress_k8s_config)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_config_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of istio-k8s:istio-ingress-config from the
+    istio-system model. Both ambient gateways consume this offer. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+# Self-signed certificates for the ambient gateways
+
+variable "self_signed_certificates_channel" {
+  description = "Channel for the self-signed-certificates charm serving the ambient gateways."
+  type        = string
+  default     = "1/stable"
+  nullable    = false
+}
+
+variable "self_signed_certificates_revision" {
+  description = "Revision of the self-signed-certificates application."
+  type        = number
+  default     = null
+}
+
+variable "self_signed_certificates_config" {
+  description = "Configuration for the self-signed-certificates application."
+  type        = map(string)
+  default     = {}
+}
+
+# IAM Auth Applications (ambient only)
+
+variable "oauth_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of hydra:oauth from the iam model. Consumed by
+    oauth2-proxy and request-authentication-configurator. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "send_ca_cert_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of self-signed-certificates:send-ca-cert from the
+    iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the
+    self-signed CA fronting the Identity Platform. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "oauth2_proxy_revision" {
+  description = "Revision of the oauth2-proxy-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "oauth2_proxy_config" {
+  description = "Configuration for the oauth2-proxy-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "request_authentication_configurator_revision" {
+  description = "Revision of the request-authentication-configurator application"
+  type        = number
+  default     = null
+}
+
+variable "request_authentication_configurator_config" {
+  description = "Configuration for the request-authentication-configurator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "github_profiles_automator_revision" {
+  description = "Revision of the github-profiles-automator application"
+  type        = number
+  default     = null
+}
+
+variable "github_profiles_automator_config" {
+  description = "Configuration for the github-profiles-automator application"
   type        = map(string)
   default     = {}
 }
@@ -623,8 +741,8 @@ variable "kserve_controller_config" {
   default     = {}
 
   validation {
-    condition     = !(var.service_mesh_type == "ambient" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
-    error_message = "deployment-mode cannot be set to 'knative' when service_mesh_type is 'ambient'."
+    condition     = !(var.service_mesh_type != "sidecar" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
+    error_message = "deployment-mode cannot be set to 'knative' unless service_mesh_type is 'sidecar'."
   }
 }
 
