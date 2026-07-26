@@ -187,6 +187,12 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
+      - name: Print used images
+        timeout-minutes: 75
+        run: |
+          sudo microk8s ctr --namespace k8s.io images list > images.txt
+          cat images.txt
+
       - name: Setup tmate session
         if: failure()
         uses: canonical/action-tmate@main
