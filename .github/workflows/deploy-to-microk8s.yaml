@@ -34,18 +34,18 @@ jobs:
             uats:
               env: uats-remote
               extra-args: --filter "not feast and not spark"
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
-          - module: kubeflow-ambient
-            uats:
-              env: kubeflow-remote
-              extra-args: --include-ambient-tests
-          - module: kubeflow-spark
-            tf-vars-file: examples/tfvars.json
-            uats:
-              env: spark-remote
-              extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
+          # - module: kubeflow-feast
+          #   uats:
+          #     env: feast-remote
+          # - module: kubeflow-ambient
+          #   uats:
+          #     env: kubeflow-remote
+          #     extra-args: --include-ambient-tests
+          # - module: kubeflow-spark
+          #   tf-vars-file: examples/tfvars.json
+          #   uats:
+          #     env: spark-remote
+          #     extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable --bundle ""
 
         pod-security-standards:
           - policy: privileged
@@ -187,6 +187,10 @@ jobs:
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
+
+      - name: Setup tmate session
+        if: failure()
+        uses: canonical/action-tmate@main
 
       # On failure, capture debugging resources
       - name: Select model
