@@ -188,7 +188,7 @@ jobs:
           tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
 
       - name: Print used images
-        timeout-minutes: 75
+        if: always()
         run: |
           sudo microk8s ctr --namespace k8s.io images list > images.txt
           cat images.txt
