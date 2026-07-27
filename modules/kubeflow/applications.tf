@@ -213,7 +213,7 @@ module "knative_serving" {
 }
 
 module "kserve_controller" {
-  source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/0.15"
+  source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/0.17"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     deployment-mode = "serverless",
@@ -222,7 +222,7 @@ module "kserve_controller" {
     no-proxy        = var.no_proxy,
   }
   revision = var.kserve_controller_revision
-  channel  = "0.15/${var.risk}"
+  channel  = "0.17/${var.risk}"
 }
 
 module "kubeflow_dashboard" {

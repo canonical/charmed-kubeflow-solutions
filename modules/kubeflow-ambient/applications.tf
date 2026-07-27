@@ -169,7 +169,7 @@ module "kserve_controller" {
     no-proxy        = var.no_proxy,
   }
   revision = var.kserve_controller_revision
-  channel  = "0.15/${var.risk}"
+  channel  = "0.17/${var.risk}"
 }
 
 module "kubeflow_dashboard" {

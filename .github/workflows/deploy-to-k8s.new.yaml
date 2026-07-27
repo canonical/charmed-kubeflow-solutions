@@ -1,0 +1,213 @@
+name: Validation on Canonical K8s (New)
+on:
+  workflow_dispatch:
+    inputs:
+      k8s_version:
+        description: 'Kubernetes version to be used for the K8s cluster.'
+        required: false
+      uats_branch:
+        description: 'Branch to run the UATs from e.g. main or track/1.10. By default, this is defined by the dependencies.yaml file.'
+        required: false
+      ckf_branch:
+        description: 'Branch on the Charmed Kubeflow repository to be tested'
+        required: false
+      risk:
+        description: 'The risk level to be tested'
+        required: false
+        default: 'edge'
+  pull_request:
+  schedule:
+    - cron: "17 02 * * 1"
+
+
+jobs:
+  deploy-solution:
+    name: Deploy to Canonical K8s
+    runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
+    timeout-minutes: 150
+
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        product: [kubeflow, mlflow, feast, spark]
+        service-mesh-type: [sidecar, ambient]
+        include:
+          - service-mesh-type: ambient
+            uats-extra-args: --include-ambient-tests
+          - product: kubeflow
+            uats-env: kubeflow-remote
+          - product: mlflow
+            uats-env: mlflow-remote
+          - product: feast
+            uats-env: feast-remote
+          - product: spark
+            uats-env: spark-remote
+            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+        exclude:
+          - product: spark
+            service-mesh-type: ambient
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set envvars from dependencies.yaml
+        run: |
+          yq eval 'to_entries | .[] | "\(.key)=\(.value)"' ".github/dependencies.yaml" | while IFS= read -r line; do
+            echo "$line" >> "$GITHUB_ENV"
+          done
+
+      - name: Update ENV variables from inputs if available
+        run: |
+          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
+          CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
+          echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
+          RISK=${{ inputs.risk || env.RISK }}
+          echo "RISK=${RISK}" >> $GITHUB_ENV
+          UATS_BRANCH=${{ matrix.uats-branch || inputs.uats_branch || env.UATS_BRANCH }}
+          echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install tox & poetry
+        run: |
+          sudo apt-get install -yqq pipx
+          pipx ensurepath
+          sudo pipx ensurepath
+
+          pipx install tox
+          pipx install poetry
+
+      - name: Setup environment
+        run: |
+          # Avoiding dockerhub rate limits (see https://canonical-self-hosted-github-runner-docs.readthedocs-hosted.com/en/latest/usage/faq/how-to-avoid-dockerhub-rate-limits/ for more informations)
+          if [ -n "$DOCKERHUB_MIRROR" ]; then
+          MIRROR_CONFIG=/etc/containerd/hosts.d/docker.io
+
+          sudo mkdir -p ${MIRROR_CONFIG}
+          sudo chown $USER ${MIRROR_CONFIG}
+          cat << EOF > ${MIRROR_CONFIG}/hosts.toml
+          [host."$DOCKERHUB_MIRROR"]
+          capabilities = ["pull", "resolve"]
+          EOF
+          fi
+
+          sudo apt-get remove -y docker.io containerd
+          sudo rm -rf /run/containerd
+          sudo snap install concierge --classic
+          cd .github
+
+          # Set the K8s version
+          yq -i e '.providers.k8s.channel = "${{ env.K8S_VERSION }}-classic/stable"' concierge.yaml
+
+          sudo concierge prepare --trace
+          cd ..
+
+      - name: Configure Cilium for Istio
+        if: matrix.service-mesh-type == 'ambient'
+        run: |
+          # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
+          kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
+          kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
+          kubectl -n kube-system rollout restart daemonset cilium
+
+      - name: Setup spark object storage
+        id: spark-object-storage
+        if: matrix.product == 'spark'
+        shell: bash
+        env:
+          CLOUD_INIT_FILE: |
+            #cloud-config
+            package_upgrade: true
+            snap:
+              commands:
+                0: snap install microceph
+                1: sudo microceph cluster bootstrap
+                2: sudo microceph disk add loop,1G,3
+                3: sudo microceph enable rgw
+                4: sudo microceph.radosgw-admin user create --uid test --display-name test --access-key=foo --secret-key=bar
+        run: |
+          echo -e "$CLOUD_INIT_FILE" > microceph_rgw.yaml
+          lxc init ubuntu:jammy ceph -c limits.cpu=4 -c limits.memory=2GB -d root,size=5GB
+
+          lxc config set ceph cloud-init.user-data - < microceph_rgw.yaml
+          lxc start ceph
+          while ! lxc exec ceph -- id -u ubuntu &>/dev/null; do sleep 0.5; done
+          lxc exec ceph -- cloud-init status --wait
+
+          echo -e "S3_SERVER_URL=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/\nS3_ACCESS_KEY=foo\nS3_SECRET_KEY=bar" > .env
+          echo -e "S3_BUCKET=spark-demo" >> .env
+          lxc list
+          cat .env
+
+      - name: Setup terraform
+        run: |
+          sudo snap install terraform --revision=859 --classic
+          terraform --version
+
+      - name: Deploy solution
+        run: |
+          if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
+            git checkout '${{ env.CKF_BRANCH }}'
+          fi
+
+          RISK_ARG="--risk ${{ env.RISK }}"
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
+          
+          EXTRA_COMPONENTS_ARG=""
+
+          TF_VARS_ARG=""
+          if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
+            TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
+          fi
+
+          if [[ "${{ matrix.product }}" == "mlflow" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-mlflow"
+          elif [[ "${{ matrix.product }}" == "feast" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-feast"
+          elif [[ "${{ matrix.product }}" == "spark" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-spark"
+          fi
+
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
+
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Preload Images into Containerd Cache
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
+
+      - name: Run UATs
+        run: |
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }}
+
+      - name: Get juju status
+        run: juju status -m kubeflow --relations
+        if: always()
+
+      # On failure, capture debugging resources
+      - name: Get juju debug logs
+        run: juju debug-log --replay --no-tail -m kubeflow
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = Pending
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = Failed
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+        if: failure() || cancelled()
+
+      - name: Get logs from pods with status = CrashLoopBackOff
+        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+        if: failure() || cancelled()
