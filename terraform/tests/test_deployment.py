@@ -106,11 +106,8 @@ class TestCharm:
             result_status, result_text = fetch_response(
                 f"https://{UI_HOSTNAME}", verify=False
             )
-            # Logged so we can pick a stable string to assert on the IAM
-            # (Identity Platform Login UI) page in a follow-up.
-            logger.info("IAM UI response status: %s", result_status)
-            logger.info("IAM UI response body:\n%s", result_text)
             assert result_status == 200
+            assert '"page":"/login"' in result_text
             return
 
         # Verify deployment by checking the public URL
