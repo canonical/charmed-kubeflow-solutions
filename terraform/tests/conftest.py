@@ -1,6 +1,7 @@
 import jubilant
 import pytest
 
+from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
 from dotenv import load_dotenv
 import os
 
@@ -207,11 +208,11 @@ def tf_vars(
                 "-var",
                 "create_model=false",
                 "-var",
-                "external_ui_hostname=ui.kubeflow.com",
+                f"external_ui_hostname={UI_HOSTNAME}",
                 "-var",
-                "external_m2m_hostname=api.kubeflow.com",
+                f"external_m2m_hostname={M2M_HOSTNAME}",
                 "-var",
-                "external_auth_hostname=auth.kubeflow.com",
+                f"external_auth_hostname={AUTH_HOSTNAME}",
                 "-var",
                 (
                     "github_profiles_automator_config={"

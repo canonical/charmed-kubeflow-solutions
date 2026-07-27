@@ -8,6 +8,7 @@ import lightkube
 import pytest
 import requests
 import tenacity
+from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
 from lightkube.core.exceptions import ApiError
 from lightkube.resources.core_v1 import ConfigMap, Service
 
@@ -103,7 +104,7 @@ class TestCharm:
             # The hostname resolves via the DNS configured above; the gateway
             # certificate is self-signed, so TLS verification is disabled.
             result_status, _ = fetch_response(
-                "https://ui.kubeflow.com", verify=False
+                f"https://{UI_HOSTNAME}", verify=False
             )
             assert result_status == 200
             return
@@ -264,17 +265,17 @@ def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
     external hostnames and reconcile to active.
     """
     host_to_ip = {
-        "ui.kubeflow.com": _wait_for_lb_ip(
+        UI_HOSTNAME: _wait_for_lb_ip(
             lightkube_client,
             "kubeflow",
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-ui"},
         ),
-        "api.kubeflow.com": _wait_for_lb_ip(
+        M2M_HOSTNAME: _wait_for_lb_ip(
             lightkube_client,
             "kubeflow",
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-m2m"},
         ),
-        "auth.kubeflow.com": _wait_for_lb_ip(
+        AUTH_HOSTNAME: _wait_for_lb_ip(
             lightkube_client,
             "iam-core",
             {"kubernetes-resource-handler-scope": "traefik-loadbalancer"},
