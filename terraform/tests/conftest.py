@@ -226,8 +226,8 @@ def tf_vars(
                     "github_profiles_automator_config={"
                     'repository="https://github.com/canonical/github-profiles-automator.git",'
                     '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
-                    # Pin to a commit for reproducibility.
-                    '"git-revision"="c5f7889",'
+                    # Pin to a revision tag for reproducibility.
+                    '"git-revision"="rev295",'
                     # Slow the reconcile so it does not remove the m2m UATs'
                     # directly-created authorization mid-run.
                     '"sync-period"="86400"}'
