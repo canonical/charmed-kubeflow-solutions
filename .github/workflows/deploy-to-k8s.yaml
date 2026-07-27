@@ -33,10 +33,6 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow]
-        service-mesh-type: [ambient]
-        auth-type: [iam]
-        include:
         product: [kubeflow, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
