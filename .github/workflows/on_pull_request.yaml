@@ -5,9 +5,7 @@ name: On Pull Request
 # * create backport labels if it is against main, only when the PR is opened/reopened
 
 on:
-  # TODO(kf-8863): temporarily switched from pull_request to workflow_dispatch so only
-  # deploy-to-k8s.yaml runs on this test PR. Restore `pull_request:` before merge.
-  workflow_dispatch:
+  pull_request:
 
 jobs:
 
