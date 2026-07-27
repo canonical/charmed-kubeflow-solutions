@@ -103,9 +103,13 @@ class TestCharm:
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
             # certificate is self-signed, so TLS verification is disabled.
-            result_status, _ = fetch_response(
+            result_status, result_text = fetch_response(
                 f"https://{UI_HOSTNAME}", verify=False
             )
+            # Logged so we can pick a stable string to assert on the IAM
+            # (Identity Platform Login UI) page in a follow-up.
+            logger.info("IAM UI response status: %s", result_status)
+            logger.info("IAM UI response body:\n%s", result_text)
             assert result_status == 200
             return
 
