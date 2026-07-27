@@ -199,6 +199,14 @@ def tf_vars(
         # The kubeflow-ambient-iam root always deploys ambient + iam and lets
         # Terraform create the istio-system, iam and iam-core models. Only the
         # kubeflow model is pre-created by the test and referenced via model_uuid.
+
+        # Validate that the service mesh type is ambient, as required by the IAM auth stack.
+        service_mesh = request.config.getoption("--service-mesh-type")
+        if service_mesh != "ambient":
+            raise ValueError(
+                "--auth-type=iam requires --service-mesh-type=ambient; "
+                f"got {service_mesh!r}"
+            )
         return (
             enable_mlflow
             + enable_feast
