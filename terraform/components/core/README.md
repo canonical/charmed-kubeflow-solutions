@@ -12,10 +12,6 @@
 | ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
-## Modules
-
-No modules.
-
 ## Resources
 
 | Name | Type |

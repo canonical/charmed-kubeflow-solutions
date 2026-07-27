@@ -32,7 +32,15 @@ def pytest_addoption(parser):
         default="sidecar",
         choices=["sidecar", "ambient"],
         type=str,
-        help="Service mesh type (sidecar or ambient)",
+        help="Service mesh type (sidecar, ambient)",
+    )
+    parser.addoption(
+        "--auth-type",
+        nargs="?",
+        default="dex",
+        choices=["dex", "iam"],
+        type=str,
+        help="Authentication stack (dex, iam)",
     )
     parser.addoption(
         "--risk",
@@ -109,12 +117,16 @@ def istio_k8s_platform(request) -> list[str]:
 
 @pytest.fixture(scope="module")
 def service_mesh_type(request) -> list[str]:
-    """Terraform module customization for the db sizes."""
-    istio_mode = request.config.getoption("--service-mesh-type")
-    return [
-        "-var",
-        f"service_mesh_type={istio_mode}",
-    ]
+    """Terraform module customization for the service mesh type."""
+    mesh = request.config.getoption("--service-mesh-type")
+    return ["-var", f"service_mesh_type={mesh}"]
+
+
+@pytest.fixture(scope="module")
+def auth_type(request) -> list[str]:
+    """Terraform module customization for the authentication stack."""
+    auth = request.config.getoption("--auth-type")
+    return ["-var", f"auth_type={auth}"]
 
 
 @pytest.fixture(scope="module")
@@ -182,6 +194,7 @@ def setup_s3_integrator_global() -> list[str]:
 def tf_vars(
     risk,
     service_mesh_type,
+    auth_type,
     istio_k8s_platform,
     enable_mlflow,
     enable_feast,
@@ -195,6 +208,7 @@ def tf_vars(
         + enable_feast
         + enable_spark
         + service_mesh_type
+        + auth_type
         + istio_k8s_platform
         + risk
         + pss

@@ -78,13 +78,24 @@ variable "model_uuid" {
 }
 
 variable "service_mesh_type" {
-  description = "Which service mesh component to deploy: 'sidecar' (Istio sidecar) or 'ambient' (Istio ambient)"
+  description = "Service mesh to deploy: 'sidecar' (Istio sidecar) or 'ambient' (Istio ambient mesh)"
   type        = string
   default     = "sidecar"
 
   validation {
     condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
     error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
+  }
+}
+
+variable "auth_type" {
+  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
+  type        = string
+  default     = "dex"
+
+  validation {
+    condition     = contains(["dex", "iam"], var.auth_type)
+    error_message = "Valid values for auth_type are (dex, iam)."
   }
 }
 

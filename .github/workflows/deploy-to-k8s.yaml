@@ -35,6 +35,7 @@ jobs:
       matrix:
         product: [kubeflow, mlflow, feast, spark]
         service-mesh-type: [sidecar, ambient]
+        auth-type: [dex]
         include:
           - service-mesh-type: ambient
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
@@ -177,7 +178,7 @@ jobs:
 
           RISK_ARG="--risk ${{ env.RISK }}"
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
-          
+          AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
           EXTRA_COMPONENTS_ARG=""
 
           TF_VARS_ARG=""
@@ -193,7 +194,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
       - name: Clone UATs repository
         run: |

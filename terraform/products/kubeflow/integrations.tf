@@ -6,27 +6,175 @@
 # See main.tf for the wiring of service_mesh, istio_ingress_route, and
 # istio_ingress_route_unauthenticated into module "core".
 
-# forward-auth: oidc-gatekeeper (core) -> istio-ingress-k8s (ambient)
-# This cannot be passed through module variables without creating a cycle,
-# since module.core already references module.ambient outputs.
-resource "juju_integration" "oidc_gatekeeper_istio_ingress_k8s_forward_auth" {
-  count      = var.service_mesh_type == "ambient" ? 1 : 0
+# forward-auth (ambient-dex): oidc-gatekeeper (auth) -> the single ambient
+# gateway. On the ambient-iam path this is replaced by the IAM stack below.
+resource "juju_integration" "oidc_gatekeeper_istio_ingress_forward_auth" {
+  count      = local.ambient_dex ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.auth.provides.oidc_gatekeeper_forward_auth.name
-    endpoint = module.auth.provides.oidc_gatekeeper_forward_auth.endpoint
+    name     = module.auth[0].provides.oidc_gatekeeper_forward_auth.name
+    endpoint = module.auth[0].provides.oidc_gatekeeper_forward_auth.endpoint
   }
 
   application {
-    name     = module.ambient[0].requires.istio_ingress_k8s_forward_auth.name
-    endpoint = module.ambient[0].requires.istio_ingress_k8s_forward_auth.endpoint
+    name     = module.ambient_dex[0].requires.istio_ingress_k8s_forward_auth.name
+    endpoint = module.ambient_dex[0].requires.istio_ingress_k8s_forward_auth.endpoint
   }
 }
 
-# minio service-mesh integration (ambient only)
+# forward-auth (ambient-iam): oauth2-proxy -> UI gateway (istio-ingress-k8s-ui).
+# Browser sessions on the UI gateway are authenticated by oauth2-proxy, which
+# federates to Hydra (iam model) through the oauth cross-model offer.
+resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.oauth2_proxy[0].provides.forward_auth.name
+    endpoint = module.oauth2_proxy[0].provides.forward_auth.endpoint
+  }
+
+  application {
+    name     = module.ambient_iam[0].requires.istio_ingress_k8s_ui_forward_auth.name
+    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_ui_forward_auth.endpoint
+  }
+}
+
+# oauth2-proxy is reachable unauthenticated on the UI gateway (it is the
+# authenticator for the login flow): oauth2-proxy:ingress -> UI gateway's
+# ingress-unauthenticated.
+resource "juju_integration" "oauth2_proxy_ui_ingress" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.oauth2_proxy[0].requires.ingress.name
+    endpoint = module.oauth2_proxy[0].requires.ingress.endpoint
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
+  }
+}
+
+# request-authentication (ambient-iam): request-authentication-configurator
+# installs Istio RequestAuthentication (JWT validation) on each gateway.
+resource "juju_integration" "request_auth_ui" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.request_authentication_configurator[0].requires.request_auth_ui.name
+    endpoint = module.request_authentication_configurator[0].requires.request_auth_ui.endpoint
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
+  }
+}
+
+resource "juju_integration" "request_auth_m2m" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.request_authentication_configurator[0].requires.request_auth_m2m.name
+    endpoint = module.request_authentication_configurator[0].requires.request_auth_m2m.endpoint
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
+  }
+}
+
+# github-profiles-automator joins the in-model service mesh (ambient-iam).
+resource "juju_integration" "github_profiles_automator_service_mesh" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.github_profiles_automator[0].requires.service_mesh.name
+    endpoint = module.github_profiles_automator[0].requires.service_mesh.endpoint
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  }
+}
+
+# TLS certificates (ambient-iam): self-signed-certificates -> both gateways.
+resource "juju_integration" "istio_ingress_ui_certificates" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = juju_application.self_signed_certificates[0].name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = module.ambient_iam[0].requires.istio_ingress_k8s_ui_certificates.name
+    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_ui_certificates.endpoint
+  }
+}
+
+resource "juju_integration" "istio_ingress_m2m_certificates" {
+  count      = local.ambient_iam ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = juju_application.self_signed_certificates[0].name
+    endpoint = "certificates"
+  }
+
+  application {
+    name     = module.ambient_iam[0].requires.istio_ingress_k8s_m2m_certificates.name
+    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_m2m_certificates.endpoint
+  }
+}
+
+# Dual-gateway fronting (ambient): kfp-ui and mlflow-operator are also fronted by
+# the M2M gateway (token/JWT clients), in addition to the UI gateway wired by
+# their component modules. The istio-ingress-route requirer endpoint has no
+# limit, so a second relation to the M2M gateway is permitted.
+resource "juju_integration" "kfp_ui_m2m_istio_ingress_route" {
+  count      = (local.ambient_iam && var.enable_kfp) ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.kfp[0].components.kfp_ui.name
+    endpoint = "istio-ingress-route"
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+  }
+}
+
+resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
+  count      = (local.ambient_iam && var.enable_mlflow) ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.mlflow[0].components.mlflow_server.name
+    endpoint = "istio-ingress-route"
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+  }
+}
+
+# minio service-mesh integration (any ambient mode)
 resource "juju_integration" "minio_service_mesh" {
-  count      = (local.deploy_minio && var.service_mesh_type == "ambient") ? 1 : 0
+  count      = (local.deploy_minio && local.ambient) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -35,8 +183,8 @@ resource "juju_integration" "minio_service_mesh" {
   }
 
   application {
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    name     = local.beacon.name
+    endpoint = local.beacon.endpoint
   }
 }
 
@@ -76,8 +224,9 @@ resource "juju_integration" "kserve_controller_s3_credentials" {
 }
 
 # resource-dispatcher service-mesh integration (ambient only)
+# resource-dispatcher service-mesh integration (any ambient mode)
 resource "juju_integration" "resource_dispatcher_service_mesh" {
-  count      = var.service_mesh_type == "ambient" ? 1 : 0
+  count      = ((var.enable_mlflow || var.enable_feast) && local.ambient) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -86,8 +235,8 @@ resource "juju_integration" "resource_dispatcher_service_mesh" {
   }
 
   application {
-    name     = module.ambient[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    name     = local.beacon.name
+    endpoint = local.beacon.endpoint
   }
 }
 
