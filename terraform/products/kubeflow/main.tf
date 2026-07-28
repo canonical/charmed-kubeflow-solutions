@@ -378,7 +378,7 @@ module "s3_global" {
 
   app_name = "s3-integrator-global"
   channel  = local.s3_integrator_channel
-  base = "ubuntu@24.04"
+  base     = "ubuntu@24.04"
   config = merge(
     {
       bucket      = var.s3_bucket_global,
@@ -865,7 +865,7 @@ module "s3_spark" {
 
   app_name = "s3-integrator-spark"
   channel  = local.s3_integrator_channel
-  base = "ubuntu@24.04"
+  base     = "ubuntu@24.04"
   config = merge(
     {
       bucket      = var.s3_bucket_spark,
