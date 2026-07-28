@@ -863,7 +863,7 @@ module "s3_spark" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   app_name = "s3-integrator-spark"
-  channel  = "2/stable"
+  channel  = local.s3_integrator_channel
   config = merge(
     {
       bucket      = var.s3_bucket_spark,

@@ -27,7 +27,7 @@ locals {
 
   # Standalone Charms
   minio_channel         = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
-  s3_integrator_channel = "2/${var.risk}"
+  s3_integrator_channel = "2/edge/pr-188"
 
   # Istio Component (sidecar)
   istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
