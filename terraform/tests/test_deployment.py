@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 # Kept in one place so the workaround below can be reverted or retargeted easily.
 OAUTH2_PROXY_APP = "oauth2-proxy"
 
+# The cross-model oauth offer (in the iam model) that oauth2-proxy integrates
+# with; toggled by the hydra-operator#591 workaround.
+OAUTH_OFFER = "oauth-offer:oauth"
+
 
 @pytest.fixture()
 def lightkube_client() -> lightkube.Client:
@@ -100,6 +104,12 @@ class TestCharm:
         # END workaround: oauth2-proxy-k8s#278
 
         if auth_type == "iam":
+            # Hydra does not patch an already-registered client's redirect_uri
+            # when it changes (http:// -> https://), which breaks the OIDC flow;
+            # re-register the client before probing the UI (hydra-operator#591).
+            # Remove when https://github.com/canonical/hydra-operator/issues/591 is resolved.
+            _refresh_hydra_oauth_client(juju, apps)
+
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
             # certificate is self-signed, so TLS verification is disabled.
@@ -198,6 +208,63 @@ def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
             timeout=1800,
         )
 # END workaround: oauth2-proxy-k8s#278
+
+
+# BEGIN workaround: hydra-operator#591 (remove this whole helper once fixed).
+# https://github.com/canonical/hydra-operator/issues/591
+def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
+    """Re-register oauth2-proxy's Hydra client if its redirect_uri is stale.
+
+    Hydra does not patch an already-registered OAuth client when the requirer's
+    redirect_uri changes (http:// -> https://), so the OIDC login flow fails
+    with a redirect_uri mismatch. Detect the stale http:// entry and toggle the
+    oauth relation, which forces Hydra to drop and recreate the client with the
+    correct https redirect_uri.
+    """
+    result = subprocess.run(
+        ["juju", "run", "-m", "iam", "hydra/0", "list-oauth-clients"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    if f"http://{UI_HOSTNAME}" not in result.stdout:
+        return
+
+    logger.info(
+        "Hydra has a stale http:// redirect_uri for %s; toggling the oauth "
+        "relation to force re-registration (hydra-operator#591)",
+        UI_HOSTNAME,
+    )
+    oauth2_proxy_oauth = f"{OAUTH2_PROXY_APP}:oauth"
+    # Remove then re-add the relation so Hydra drops and recreates the client.
+    subprocess.run(
+        ["juju", "remove-relation", "-m", "kubeflow", OAUTH_OFFER, oauth2_proxy_oauth],
+        check=True,
+    )
+    # remove-relation returns before the relation is fully gone; juju rejects a
+    # re-integrate while it is still "dying", so retry until removal completes.
+    _integrate_oauth_relation(oauth2_proxy_oauth)
+    _wait_model_active("iam")
+    for batched_apps in batched(apps, 5):
+        juju.wait(
+            lambda status, apps=batched_apps: jubilant.all_active(status, *apps),
+            timeout=1800,
+        )
+
+
+@tenacity.retry(
+    retry=tenacity.retry_if_exception_type(subprocess.CalledProcessError),
+    wait=tenacity.wait_fixed(10),
+    stop=tenacity.stop_after_delay(300),
+    reraise=True,
+)
+def _integrate_oauth_relation(oauth2_proxy_oauth: str) -> None:
+    """Re-integrate the oauth relation, retrying while the old one is removing."""
+    subprocess.run(
+        ["juju", "integrate", "-m", "kubeflow", OAUTH_OFFER, oauth2_proxy_oauth],
+        check=True,
+    )
+# END workaround: hydra-operator#591
 
 
 def _wait_model_active(model_name: str) -> None:
