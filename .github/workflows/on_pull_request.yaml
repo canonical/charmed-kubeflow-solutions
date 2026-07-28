@@ -4,8 +4,9 @@ name: On Pull Request
 # * run checks
 # * create backport labels if it is against main, only when the PR is opened/reopened
 
+# donotmerge-test-iam-ci: disabled so only the Canonical K8s iam job runs.
 on:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
 

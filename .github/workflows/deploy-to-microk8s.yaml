@@ -19,7 +19,7 @@ on:
         description: 'Juju agent version to use when bootstrapping. Leave empty to use the default.'
         required: false
 
-  pull_request:
+  # donotmerge-test-iam-ci: disabled so only the Canonical K8s iam job runs.
   schedule:
     - cron: "17 02 * * 1"
 
