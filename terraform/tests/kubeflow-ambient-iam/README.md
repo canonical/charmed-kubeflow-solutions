@@ -30,7 +30,6 @@ flowchart LR
   end
 
   ingUI == istio_ingress_config offer ==> istiok8s
-  ingM2M == istio_ingress_config offer ==> istiok8s
   o2p == oauth offer ==> hydra
   rac == oauth offer ==> hydra
   o2p -- forward-auth --> ingUI
@@ -45,7 +44,8 @@ The legacy sidecar + Dex/OIDC path is not used here.
 ## Cross-model wiring
 
 - `istio-k8s:istio-ingress-config` is offered from `istio-system` and consumed by
-  both gateways in `kubeflow` (`istio_ingress_config_offer_url`).
+  the UI gateway in `kubeflow` (`istio_ingress_config_offer_url`). The M2M gateway
+  is JWT-only and is intentionally not wired to it.
 - `hydra:oauth` is offered from `iam` and consumed by `oauth2-proxy` and
   `request-authentication-configurator` in `kubeflow` (`oauth_offer_url`).
 

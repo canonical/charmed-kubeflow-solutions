@@ -1,6 +1,7 @@
 import jubilant
 import pytest
 
+from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
 from dotenv import load_dotenv
 import os
 
@@ -174,10 +175,65 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def solution_module_path(request) -> str:
+    """Path to the Terraform root module to apply for the selected auth stack."""
+    if request.config.getoption("--auth-type") == "iam":
+        return "./../tests/kubeflow-ambient-iam"
+    return "./../products/kubeflow"
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
-    risk, service_mesh_type, auth_type, istio_k8s_platform, enable_mlflow, enable_feast, enable_spark, pss
+    request,
+    risk,
+    service_mesh_type,
+    auth_type,
+    istio_k8s_platform,
+    enable_mlflow,
+    enable_feast,
+    enable_spark,
+    pss,
 ) -> list[str]:
     """Overall Terraform module customization."""
+    if request.config.getoption("--auth-type") == "iam":
+        # The kubeflow-ambient-iam root always deploys ambient + iam and lets
+        # Terraform create the istio-system, iam and iam-core models. Only the
+        # kubeflow model is pre-created by the test and referenced via model_uuid.
+
+        # Validate that the service mesh type is ambient, as required by the IAM auth stack.
+        service_mesh = request.config.getoption("--service-mesh-type")
+        if service_mesh != "ambient":
+            raise ValueError(
+                "--auth-type=iam requires --service-mesh-type=ambient; "
+                f"got {service_mesh!r}"
+            )
+        return (
+            enable_mlflow
+            + enable_feast
+            + istio_k8s_platform
+            + risk
+            + [
+                "-var",
+                "create_model=false",
+                "-var",
+                f"external_ui_hostname={UI_HOSTNAME}",
+                "-var",
+                f"external_m2m_hostname={M2M_HOSTNAME}",
+                "-var",
+                f"external_auth_hostname={AUTH_HOSTNAME}",
+                "-var",
+                (
+                    "github_profiles_automator_config={"
+                    'repository="https://github.com/canonical/github-profiles-automator.git",'
+                    '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
+                    # Pin to a revision tag for reproducibility.
+                    '"git-revision"="rev295",'
+                    # Slow the reconcile so it does not remove the m2m UATs'
+                    # directly-created authorization mid-run.
+                    '"sync-period"="86400"}'
+                ),
+            ]
+        )
     return (
         enable_mlflow
         + enable_feast
