@@ -60,7 +60,7 @@ jobs:
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-m2m-tests
             # The UI (Identity login) UAT suite lives on this branch until it is
-            # merged to main; pin the iam entry to it so `tox -e ui-remote` exists.
+            # merged to main; pin the iam entry to it so the suite is available.
             uats-branch: kf-8826-feat-add-ui-identity-tests
         # TODO(identity-uats): restore this exclude with the base matrix above.
         # exclude:
@@ -228,7 +228,9 @@ jobs:
         if: matrix.auth-type == 'iam'
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ui-remote -- --bundle=""
+          poetry install --no-root
+          poetry run playwright install --with-deps chromium
+          tox -e uats-remote -- --include-ui-tests -k ui
 
       - name: Setup tmate session
         if: failure()
