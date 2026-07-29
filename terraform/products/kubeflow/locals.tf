@@ -94,6 +94,21 @@ locals {
     var.istio_cni_conf_dir != "" ? { "cni-conf-dir" = var.istio_cni_conf_dir } : {}
   )
 
+  argo_controller_config = merge(
+    var.argo_controller_config,
+    { "bucket" = var.s3_bucket_global }
+  )
+
+  kfp_api_config = merge(
+    var.kfp_api_config,
+    { "object-store-bucket-name" = var.s3_bucket_global }
+  )
+
+  kfp_profile_controller_config = merge(
+    var.kfp_profile_controller_config,
+    { "default-pipeline-root" = "minio://${var.s3_bucket_global}/v2/artifacts" }
+  )
+
   kubeflow_profiles = {
     channel  = local.kubeflow_profiles_channel
     revision = var.kubeflow_profiles_revision

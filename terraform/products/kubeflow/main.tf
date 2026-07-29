@@ -459,7 +459,7 @@ module "kfp" {
   argo_controller = {
     channel  = local.argo_controller_channel
     revision = var.argo_controller_revision
-    config   = var.argo_controller_config
+    config   = local.argo_controller_config
   }
   envoy = {
     channel  = local.envoy_channel
@@ -479,7 +479,7 @@ module "kfp" {
   kfp_api = {
     channel  = local.kfp_channel
     revision = var.kfp_api_revision
-    config   = var.kfp_api_config
+    config   = local.kfp_api_config
   }
 
   kfp_metadata_writer = {
@@ -497,7 +497,7 @@ module "kfp" {
   kfp_profile_controller = {
     channel  = local.kfp_channel
     revision = var.kfp_profile_controller_revision
-    config   = var.kfp_profile_controller_config
+    config   = local.kfp_profile_controller_config
   }
 
   kfp_schedwf = {
