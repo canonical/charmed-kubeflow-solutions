@@ -26,7 +26,7 @@ on:
 jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
-    runs-on: ["self-hosted-linux-amd64-noble-xlarge"]
+    runs-on: ${{ matrix.auth-type == 'iam' && 'self-hosted-linux-amd64-noble-2xlarge-extra' || 'self-hosted-linux-amd64-noble-xlarge' }}
     timeout-minutes: 150
 
     strategy:
@@ -49,6 +49,11 @@ jobs:
           - product: spark
             uats-env: spark-remote
             uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+          - product: kubeflow
+            service-mesh-type: ambient
+            auth-type: iam
+            uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests --include-m2m-tests
         exclude:
           - product: spark
             service-mesh-type: ambient
@@ -112,6 +117,12 @@ jobs:
             yq -i e '.juju.agent-version = "${{ inputs.juju_agent_version }}"' concierge.yaml
           fi
 
+          # The kubeflow-ambient-iam solution spans four models and needs a
+          # larger controller root-disk than the other jobs.
+          if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
+            yq -i e '.providers.k8s.bootstrap-constraints.root-disk = "10G"' concierge.yaml
+          fi
+
           sudo concierge prepare --trace
           cd ..
 
@@ -170,7 +181,7 @@ jobs:
           terraform --version
 
       - name: Deploy
-        timeout-minutes: 45
+        timeout-minutes: ${{ matrix.auth-type == 'iam' && 60 || 45 }}
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
@@ -221,10 +232,26 @@ jobs:
         run: juju status -m kubeflow --relations
         if: always()
 
+      - name: Get juju status for istio and iam models
+        if: always() && matrix.auth-type == 'iam'
+        run: |
+          for model in istio-system iam iam-core; do
+            echo "=== juju status -m $model ==="
+            juju status -m "$model" --relations || true
+          done
+
       # On failure, capture debugging resources
       - name: Get juju debug logs
         run: juju debug-log --replay --no-tail -m kubeflow
         if: failure() || cancelled()
+
+      - name: Get juju debug logs for istio and iam models
+        if: (failure() || cancelled()) && matrix.auth-type == 'iam'
+        run: |
+          for model in istio-system iam iam-core; do
+            echo "=== juju debug-log -m $model ==="
+            juju debug-log --replay --no-tail -m "$model" || true
+          done
 
       - name: Get logs from pods with status = Pending
         run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
