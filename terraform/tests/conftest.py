@@ -193,6 +193,7 @@ def setup_s3_integrator_global() -> list[str]:
 
 @pytest.fixture(scope="module")
 def tf_vars(
+    request,
     risk,
     service_mesh_type,
     auth_type,
