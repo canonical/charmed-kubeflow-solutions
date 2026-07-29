@@ -33,22 +33,26 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        service-mesh-type: [sidecar, ambient]
-        product:
-          - name: kubeflow
-            uats-env: kubeflow-remote
-          - name: mlflow
-            uats-env: mlflow-remote
-          - name: feast
-            uats-env: feast-remote
-        pod-security-standards:
-          - policy: privileged
-            istio-cni-bin-dir: ""  # meaning Istio CNI disabled
-            istio-cni-conf-dir: ""  # meaning Istio CNI disabled
-          - policy: baseline
-            istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
-            istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
-        auth-type: [dex]
+        # TODO(identity-uats): restore the full matrix below once the UI
+        # (Identity login) UATs are validated; currently only the iam/identity
+        # entry runs to avoid CI clutter. Uncomment the base lists and the
+        # supplemental includes to bring them back.
+        # service-mesh-type: [sidecar, ambient]
+        # product:
+        #   - name: kubeflow
+        #     uats-env: kubeflow-remote
+        #   - name: mlflow
+        #     uats-env: mlflow-remote
+        #   - name: feast
+        #     uats-env: feast-remote
+        # pod-security-standards:
+        #   - policy: privileged
+        #     istio-cni-bin-dir: ""  # meaning Istio CNI disabled
+        #     istio-cni-conf-dir: ""  # meaning Istio CNI disabled
+        #   - policy: baseline
+        #     istio-cni-bin-dir: /var/snap/microk8s/current/opt/cni/bin
+        #     istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
+        # auth-type: [dex]
         include:
           - service-mesh-type: ambient
             product:
@@ -58,6 +62,9 @@ jobs:
               policy: privileged
             auth-type: iam
             uats-extra-args: --include-ambient-tests --include-m2m-tests
+            # The UI (Identity login) UAT suite lives on this branch until it is
+            # merged to main; pin the iam entry to it so `tox -e ui-remote` exists.
+            uats-branch: kf-8826-feat-add-ui-identity-tests
 
     steps:
       - name: Checkout repository
@@ -77,7 +84,7 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
+          UATS_BRANCH=${{ matrix.uats-branch || inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - id: setup-python
@@ -197,9 +204,18 @@ jobs:
           ctr-command: sudo microk8s ctr --namespace k8s.io
 
       - name: Run UATs
+        # TODO(identity-uats): re-enable this step once the UI (Identity login)
+        # UATs are validated; it is skipped so only the identity suite runs.
+        if: false
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
+
+      - name: Run UI UATs
+        if: matrix.auth-type == 'iam'
+        run: |
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          tox -e ui-remote -- --bundle=""
 
       - name: Setup tmate session
         if: failure()

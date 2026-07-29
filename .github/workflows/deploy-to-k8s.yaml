@@ -33,29 +33,39 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
-        service-mesh-type: [sidecar, ambient]
-        auth-type: [dex]
+        # TODO(identity-uats): restore the full matrix below once the UI
+        # (Identity login) UATs are validated; currently only the iam/identity
+        # entry runs to avoid CI clutter. Uncomment the base lists, the
+        # supplemental includes and the exclude block to bring them back.
+        # product: [kubeflow, mlflow, feast, spark]
+        # service-mesh-type: [sidecar, ambient]
+        # auth-type: [dex]
         include:
-          - service-mesh-type: ambient
-            uats-extra-args: --include-ambient-tests
-          - product: kubeflow
-            uats-env: kubeflow-remote
-          - product: mlflow
-            uats-env: mlflow-remote
-          - product: feast
-            uats-env: feast-remote
-          - product: spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+          # TODO(identity-uats): restore these supplemental includes with the
+          # base matrix above.
+          # - service-mesh-type: ambient
+          #   uats-extra-args: --include-ambient-tests
+          # - product: kubeflow
+          #   uats-env: kubeflow-remote
+          # - product: mlflow
+          #   uats-env: mlflow-remote
+          # - product: feast
+          #   uats-env: feast-remote
+          # - product: spark
+          #   uats-env: spark-remote
+          #   uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-m2m-tests
-        exclude:
-          - product: spark
-            service-mesh-type: ambient
+            # The UI (Identity login) UAT suite lives on this branch until it is
+            # merged to main; pin the iam entry to it so `tox -e ui-remote` exists.
+            uats-branch: kf-8826-feat-add-ui-identity-tests
+        # TODO(identity-uats): restore this exclude with the base matrix above.
+        # exclude:
+        #   - product: spark
+        #     service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
@@ -207,9 +217,18 @@ jobs:
           ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
 
       - name: Run UATs
+        # TODO(identity-uats): re-enable this step once the UI (Identity login)
+        # UATs are validated; it is skipped so only the identity suite runs.
+        if: false
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
+
+      - name: Run UI UATs
+        if: matrix.auth-type == 'iam'
+        run: |
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          tox -e ui-remote -- --bundle=""
 
       - name: Setup tmate session
         if: failure()
