@@ -109,7 +109,7 @@ locals {
 
   kfp_profile_controller_config = merge(
     var.kfp_profile_controller_config,
-    { "default-pipeline-root" = "minio://${var.s3_bucket_global}/v2/artifacts" }
+    { "default_pipeline_root" = "minio://${var.s3_bucket_global}/v2/artifacts" }
   )
 
   kubeflow_profiles = {
