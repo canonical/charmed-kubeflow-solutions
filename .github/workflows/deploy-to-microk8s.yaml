@@ -212,6 +212,7 @@ jobs:
           tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
 
       - name: Run UI UATs
+        id: ui-uats
         if: matrix.auth-type == 'iam'
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
@@ -220,7 +221,7 @@ jobs:
           tox -e uats-remote -- --include-ui-tests -k ui
 
       - name: Upload Playwright artifacts
-        if: failure()
+        if: failure() && steps.ui-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts-${{ matrix.auth-type }}
