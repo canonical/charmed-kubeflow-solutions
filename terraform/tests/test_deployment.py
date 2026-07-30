@@ -110,16 +110,6 @@ class TestCharm:
             # Remove when https://github.com/canonical/hydra-operator/issues/591 is resolved.
             _refresh_hydra_oauth_client(juju, apps)
 
-            # Delayed IAM reconciliations after deploy (e.g. a CA-cert re-push
-            # from self-signed-certificates -> kratos receive-ca-cert) can
-            # restart kratos minutes after the model last reported active. If
-            # that restart overlaps with the UI UATs (next CI step), the login
-            # flow's /self-service/login/browser 500s while kratos is
-            # mid-restart and the UAT fails. Buffer for any delayed restart to
-            # begin, then re-wait for active so kratos is stable when the UATs run.
-            time.sleep(90)
-            _wait_model_active("iam")
-
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
             # certificate is self-signed, so TLS verification is disabled.
