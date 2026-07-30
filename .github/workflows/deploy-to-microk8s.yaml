@@ -219,6 +219,14 @@ jobs:
           poetry run playwright install --with-deps chromium
           tox -e uats-remote -- --include-ui-tests -k ui
 
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/playwright-artifacts/
+          if-no-files-found: ignore
+
       - name: Setup tmate session
         if: failure()
         uses: canonical/action-tmate@main
