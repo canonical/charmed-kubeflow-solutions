@@ -932,7 +932,10 @@ module "external_integrations" {
   postgresql = each.value.postgresql
   spark      = each.value.spark
 
-  resource_dispatcher_endpoints = module.resource_dispatcher.provides
+  # Exclude provide_cmr_mesh: the data-kubeflow-integrator charm has no provide-cmr-mesh endpoint.
+  resource_dispatcher_endpoints = {
+    for k, v in module.resource_dispatcher.provides : k => v if k != "provide_cmr_mesh"
+  }
 }
 
 module "observability" {
