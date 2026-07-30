@@ -224,7 +224,7 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
-      - name: Run UI UATs
+      - name: Run Identity UI UATs
         id: ui-uats
         if: matrix.auth-type == 'iam'
         run: |
