@@ -241,9 +241,11 @@ resource "juju_integration" "resource_dispatcher_service_mesh" {
 }
 
 # kserve-controller secrets integration (resource-dispatcher:secrets -> kserve-controller)
-# Only deployed when MLflow is enabled
+# Deployed when MLflow is enabled, or when KServe uses the S3 object storage
+# backend, so the kserve-controller-s3 credentials Secret is dispatched into the
+# user profile namespaces.
 resource "juju_integration" "kserve_controller_secrets" {
-  count      = var.enable_mlflow ? 1 : 0
+  count      = (var.enable_mlflow || (local.deploy_s3_integrator && var.enable_kserve)) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -258,9 +260,11 @@ resource "juju_integration" "kserve_controller_secrets" {
 }
 
 # kserve-controller service-accounts integration (resource-dispatcher:pod-defaults -> kserve-controller:service-accounts)
-# Only deployed when MLflow is enabled
+# Deployed when MLflow is enabled, or when KServe uses the S3 object storage
+# backend, so the kserve-controller-s3 ServiceAccount is dispatched into the
+# user profile namespaces.
 resource "juju_integration" "kserve_controller_service_accounts" {
-  count      = var.enable_mlflow ? 1 : 0
+  count      = (var.enable_mlflow || (local.deploy_s3_integrator && var.enable_kserve)) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
