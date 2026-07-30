@@ -372,12 +372,13 @@ resource "juju_secret" "s3_secret_global" {
 module "s3_global" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global]
   count      = local.deploy_s3_integrator ? 1 : 0
-  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
+  source     = "../../charms/s3-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  app_name = "s3-integrator-global"
-  channel  = local.s3_integrator_channel
+  app_name   = "s3-integrator-global"
+  offer_name = "s3-credentials-global"
+  channel    = local.s3_integrator_channel
   config = merge(
     {
       bucket      = var.s3_bucket_global,
@@ -858,13 +859,14 @@ resource "juju_secret" "s3_secret_spark" {
 module "s3_spark" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret_spark]
   count      = var.enable_spark ? 1 : 0
-  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
+  source     = "../../charms/s3-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  app_name = "s3-integrator-spark"
-  channel  = local.s3_integrator_channel
-  base     = "ubuntu@24.04"
+  app_name   = "s3-integrator-spark"
+  offer_name = "s3-credentials-spark"
+  channel    = local.s3_integrator_channel
+  base       = "ubuntu@24.04"
   config = merge(
     {
       bucket      = var.s3_bucket_spark,
