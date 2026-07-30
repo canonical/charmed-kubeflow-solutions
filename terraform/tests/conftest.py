@@ -175,6 +175,14 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def solution_module_path(request) -> str:
+    """Path to the Terraform root module to apply for the selected auth stack."""
+    if request.config.getoption("--auth-type") == "iam":
+        return "./../tests/kubeflow-ambient-iam"
+    return "./../products/kubeflow"
+
+
+@pytest.fixture(scope="module")
 def setup_s3_integrator_global() -> list[str]:
     """Terraform module customization for the shared S3 integrator."""
     args = [
