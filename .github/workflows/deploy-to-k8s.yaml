@@ -58,7 +58,7 @@ jobs:
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
-            uats-extra-args: --include-ambient-tests --include-m2m-tests
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests
             # The UI (Identity login) UAT suite lives on this branch until it is
             # merged to main; pin the iam entry to it so the suite is available.
             uats-branch: kf-8826-feat-add-ui-identity-tests
@@ -231,7 +231,7 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           poetry install --no-root
           poetry run playwright install --with-deps chromium
-          tox -e uats-remote -- --include-ui-tests -k ui
+          tox -e uats-remote -- --include-iam-ui-tests -k ui
 
       - name: Upload Playwright artifacts
         if: failure() && steps.ui-uats.outcome == 'failure'
