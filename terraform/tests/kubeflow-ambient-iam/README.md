@@ -129,8 +129,13 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing kubeflow model (required when create\_model is false). | `string` | `null` | no |
+| <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Charm channel risk level to deploy (stable, candidate, beta, edge). | `string` | `"edge"` | no |
+| <a name="input_s3_access_key_global"></a> [s3\_access\_key\_global](#input\_s3\_access\_key\_global) | S3 access key for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_bucket_global"></a> [s3\_bucket\_global](#input\_s3\_bucket\_global) | S3 bucket for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_traefik_config"></a> [traefik\_config](#input\_traefik\_config) | Configuration for the iam Traefik ingress (e.g. external\_hostname). | `map(string)` | `{}` | no |
 
 ## Outputs

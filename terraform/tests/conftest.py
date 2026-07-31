@@ -230,9 +230,12 @@ def tf_vars(
             + enable_feast
             + istio_k8s_platform
             + risk
+            + setup_s3_integrator_global
             + [
                 "-var",
                 "create_model=false",
+                "-var",
+                "object_storage_mode=S3",
                 "-var",
                 f"external_ui_hostname={UI_HOSTNAME}",
                 "-var",
