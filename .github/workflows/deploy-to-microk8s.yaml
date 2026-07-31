@@ -189,12 +189,26 @@ jobs:
           lxc list
           cat .env
 
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Preload Images into Containerd Cache
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo microk8s ctr --namespace k8s.io
+          pull-extra-args: --hosts-dir /var/snap/microk8s/current/args/certs.d
+
       - name: Setup terraform
         run: |
           sudo snap install terraform --channel latest/stable --classic
           terraform --version
 
       - name: Deploy solution
+        id: deploy
         timeout-minutes: ${{ matrix.auth-type == 'iam' && 60 || 45 }}
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
@@ -226,20 +240,8 @@ jobs:
 
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
 
-      - name: Clone UATs repository
-        run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
-          cd ${{ github.workspace }}/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-
-      - name: Preload Images into Containerd Cache
-        uses: ./.github/actions/preload-images
-        with:
-          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
-          ctr-command: sudo microk8s ctr --namespace k8s.io
-          pull-extra-args: --hosts-dir /var/snap/microk8s/current/args/certs.d
-
       - name: Run UATs
+        id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
@@ -262,7 +264,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Setup tmate session
-        if: failure()
+        if: failure() && (steps.deploy.outcome == 'failure' || steps.run-uats.outcome == 'failure')
         uses: canonical/action-tmate@main
 
       # On failure, capture debugging resources
