@@ -125,6 +125,18 @@ jobs:
           sudo concierge prepare --trace
           cd ..
 
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Preload Images into Containerd Cache
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
+
       - name: Configure Cilium for Istio
         if: matrix.service-mesh-type == 'ambient'
         run: |
@@ -168,6 +180,7 @@ jobs:
           terraform --version
 
       - name: Deploy
+        id: deploy
         timeout-minutes: ${{ matrix.auth-type == 'iam' && 60 || 45 }}
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
@@ -194,25 +207,14 @@ jobs:
 
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
-      - name: Clone UATs repository
-        run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
-          cd ${{ github.workspace }}/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-
-      - name: Preload Images into Containerd Cache
-        uses: ./.github/actions/preload-images
-        with:
-          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
-          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
-
       - name: Run UATs
+        id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats	  
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
       - name: Setup tmate session
-        if: failure()
+        if: failure() && (steps.deploy.outcome == 'failure' || steps.run-uats.outcome == 'failure')
         uses: canonical/action-tmate@main
 
       - name: Get juju status
