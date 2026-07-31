@@ -64,9 +64,7 @@ class TestCharm:
         )
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
-    def test_assert_deployment(
-        self, juju: jubilant.Juju, lightkube_client, request
-    ):
+    def test_assert_deployment(self, juju: jubilant.Juju, lightkube_client, request):
         """
         Wait for the applications to become active and idle and verify its public URL access.
         """
@@ -89,19 +87,11 @@ class TestCharm:
 
         apps = list(juju.status().apps.keys())
 
-        # BEGIN workaround: oauth2-proxy-k8s#278 (remove once fixed upstream).
-        # To revert, drop this branch and always run the plain juju.wait below.
-        if auth_type == "iam":
-            _wait_kubeflow_active(juju, apps)
-        else:
-            for batched_apps in batched(apps, 5):
-                juju.wait(
-                    lambda status, apps=batched_apps: jubilant.all_active(
-                        status, *apps
-                    ),
-                    timeout=3600,
-                )
-        # END workaround: oauth2-proxy-k8s#278
+        for batched_apps in batched(apps, 5):
+            juju.wait(
+                lambda status, apps=batched_apps: jubilant.all_active(status, *apps),
+                timeout=3600,
+            )
 
         if auth_type == "iam":
             # Hydra does not patch an already-registered client's redirect_uri
@@ -163,53 +153,6 @@ def fetch_response(url, headers=None, verify=True):
     return response.status_code, response.text
 
 
-# BEGIN workaround: oauth2-proxy-k8s#278 (remove this whole helper once fixed).
-# https://github.com/canonical/oauth2-proxy-k8s-operator/issues/278
-def _wait_kubeflow_active(juju: jubilant.Juju, apps: list[str]) -> None:
-    """Wait for the kubeflow model to go active (oauth2-proxy-k8s#278 workaround).
-
-    oauth2-proxy-k8s can settle (agent idle) into a non-active state (e.g.
-    maintenance "Status check: DOWN" or blocked) and never recover on its own;
-    restarting the pod moves it to active. Wait until oauth2-proxy is idle, roll
-    it out if it did not settle active, then wait for the whole model to settle.
-    """
-
-    def _oauth2_proxy_idle(status: jubilant.Status) -> bool:
-        app = status.apps.get(OAUTH2_PROXY_APP)
-        if app is None or not app.units:
-            return False
-        return all(
-            unit.juju_status.current == "idle" for unit in app.units.values()
-        )
-
-    juju.wait(_oauth2_proxy_idle, timeout=1800)
-
-    if not jubilant.all_active(juju.status(), OAUTH2_PROXY_APP):
-        logger.info(
-            "%s settled idle but not active; restarting its statefulset "
-            "(oauth2-proxy-k8s#278)",
-            OAUTH2_PROXY_APP,
-        )
-        subprocess.run(
-            [
-                "kubectl",
-                "-n",
-                "kubeflow",
-                "rollout",
-                "restart",
-                f"statefulset/{OAUTH2_PROXY_APP}",
-            ],
-            check=False,
-        )
-
-    for batched_apps in batched(apps, 5):
-        juju.wait(
-            lambda status, apps=batched_apps: jubilant.all_active(status, *apps),
-            timeout=1800,
-        )
-# END workaround: oauth2-proxy-k8s#278
-
-
 # BEGIN workaround: hydra-operator#591 (remove this whole helper once fixed).
 # https://github.com/canonical/hydra-operator/issues/591
 def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
@@ -264,6 +207,8 @@ def _integrate_oauth_relation(oauth2_proxy_oauth: str) -> None:
         ["juju", "integrate", "-m", "kubeflow", OAUTH_OFFER, oauth2_proxy_oauth],
         check=True,
     )
+
+
 # END workaround: hydra-operator#591
 
 
