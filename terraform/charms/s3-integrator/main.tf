@@ -18,6 +18,6 @@ resource "juju_application" "s3_integrator" {
 resource "juju_offer" "s3_credentials" {
   name             = var.offer_name
   model_uuid       = var.model_uuid
-  application_name = var.app_name
+  application_name = juju_application.s3_integrator.name
   endpoints        = ["s3-credentials"]
 }
