@@ -57,7 +57,7 @@ jobs:
             pod-security-standards:
               policy: privileged
             auth-type: iam
-            uats-extra-args: --include-ambient-tests --include-m2m-tests
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests
 
     steps:
       - name: Checkout repository
@@ -202,6 +202,23 @@ jobs:
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }}
+
+      - name: Run Identity UI UATs
+        id: ui-uats
+        if: matrix.auth-type == 'iam'
+        run: |
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          poetry install --no-root
+          poetry run playwright install --with-deps chromium
+          tox -e uats-remote -- --include-iam-ui-tests -k ui
+
+      - name: Upload Playwright artifacts
+        if: failure() && steps.ui-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/playwright-artifacts/
+          if-no-files-found: ignore
 
       - name: Setup tmate session
         if: failure() && (steps.deploy.outcome == 'failure' || steps.run-uats.outcome == 'failure')
