@@ -150,6 +150,7 @@ jobs:
         with:
           image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
           ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
+          pull-extra-args: --hosts-dir /etc/containerd/hosts.d
 
       - name: Run UATs
         run: |

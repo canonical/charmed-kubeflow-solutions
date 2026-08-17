@@ -181,6 +181,7 @@ jobs:
         with:
           image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
           ctr-command: sudo microk8s ctr --namespace k8s.io
+          pull-extra-args: --hosts-dir /var/snap/microk8s/current/args/certs.d
 
       - name: Run UATs
         timeout-minutes: 75
