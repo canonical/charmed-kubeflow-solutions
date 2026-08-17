@@ -52,7 +52,7 @@ jobs:
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
-            uats-extra-args: --include-ambient-tests --include-m2m-tests
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests
         exclude:
           - product: spark
             service-mesh-type: ambient
@@ -75,7 +75,7 @@ jobs:
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
           RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-          UATS_BRANCH=${{ matrix.uats-branch || inputs.uats_branch || env.UATS_BRANCH }}
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -208,8 +208,25 @@ jobs:
 
       - name: Run UATs
         run: |
-          cd ${{ github.workspace }}/charmed-kubeflow-uats	  
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
+
+      - name: Run Identity UI UATs
+        id: ui-uats
+        if: matrix.auth-type == 'iam'
+        run: |
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          poetry install --no-root
+          poetry run playwright install --with-deps chromium
+          tox -e uats-remote -- --include-iam-ui-tests -k ui
+
+      - name: Upload Playwright artifacts
+        if: failure() && steps.ui-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/playwright-artifacts/
+          if-no-files-found: ignore
 
       - name: Setup tmate session
         if: failure()
