@@ -1,6 +1,24 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+# Argo Controller S3 credentials integration (s3-integrator:s3-credentials -> argo-controller)
+
+resource "juju_integration" "argo_controller_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.argo_controller.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
+  }
+}
+
 # Argo Controller object storage integration (minio:object-storage -> argo-controller)
 
 resource "juju_integration" "argo_controller_object_storage" {
@@ -37,6 +55,40 @@ resource "juju_integration" "kfp_api_mysql_database" {
   }
 }
 
+# S3 credentials integrations (s3-integrator:s3-credentials -> KFP apps)
+
+resource "juju_integration" "kfp_api_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_api.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
+  }
+}
+
+resource "juju_integration" "kfp_profile_controller_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_profile_controller.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
+  }
+}
+
 # Object storage integrations (minio:object-storage -> KFP apps)
 
 resource "juju_integration" "kfp_api_object_storage" {
@@ -68,6 +120,56 @@ resource "juju_integration" "kfp_profile_controller_object_storage" {
     name      = var.object_storage.kind == "endpoint" ? var.object_storage.name : null
     endpoint  = var.object_storage.kind == "endpoint" ? var.object_storage.endpoint : null
     offer_url = var.object_storage.kind == "offer" ? var.object_storage.url : null
+  }
+}
+
+# KFP Profile Controller config-maps integration (resource-dispatcher:config-maps -> kfp-profile-controller)
+resource "juju_integration" "kfp_profile_controller_config_maps" {
+  count      = var.config_maps != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_profile_controller.name
+    endpoint = "config-maps"
+  }
+
+  application {
+    name      = var.config_maps.kind == "endpoint" ? var.config_maps.name : null
+    endpoint  = var.config_maps.kind == "endpoint" ? var.config_maps.endpoint : null
+    offer_url = var.config_maps.kind == "offer" ? var.config_maps.url : null
+  }
+}
+
+# KFP Profile Controller secrets integration (resource-dispatcher:secrets -> kfp-profile-controller)
+resource "juju_integration" "kfp_profile_controller_secrets" {
+  count      = var.secrets != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_profile_controller.name
+    endpoint = "secrets"
+  }
+
+  application {
+    name      = var.secrets.kind == "endpoint" ? var.secrets.name : null
+    endpoint  = var.secrets.kind == "endpoint" ? var.secrets.endpoint : null
+    offer_url = var.secrets.kind == "offer" ? var.secrets.url : null
+  }
+}
+
+resource "juju_integration" "kfp_ui_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.kfp_ui.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
   }
 }
 

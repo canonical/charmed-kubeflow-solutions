@@ -53,14 +53,14 @@ module "feast" {
 
   secrets = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   pod_defaults = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
   dashboard_links = {

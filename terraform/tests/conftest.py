@@ -161,13 +161,13 @@ def enable_spark(request) -> list[str]:
             "-var",
             "enable_spark=true",
             "-var",
-            f"s3_bucket={os.environ['S3_BUCKET']}",
+            f"s3_bucket_spark={os.environ['S3_BUCKET_SPARK']}",
             "-var",
-            f"s3_secret_key={os.environ['S3_SECRET_KEY']}",
+            f"s3_secret_key_spark={os.environ['S3_SECRET_KEY_SPARK']}",
             "-var",
-            f"s3_access_key={os.environ['S3_ACCESS_KEY']}",
+            f"s3_access_key_spark={os.environ['S3_ACCESS_KEY_SPARK']}",
             "-var",
-            f"s3_endpoint={os.environ['S3_SERVER_URL']}",
+            f"s3_endpoint_spark={os.environ['S3_SERVER_URL_SPARK']}",
         ]
         print(f"Extra args for Spark deployment: {extra_args}")
         return extra_args
@@ -183,6 +183,23 @@ def solution_module_path(request) -> str:
 
 
 @pytest.fixture(scope="module")
+def setup_s3_integrator_global() -> list[str]:
+    """Terraform module customization for the shared S3 integrator."""
+    args = [
+        "-var",
+        f"s3_bucket_global={os.environ['S3_BUCKET_KFP_GLOBAL']}",
+        "-var",
+        f"s3_secret_key_global={os.environ['S3_SECRET_KEY_GLOBAL']}",
+        "-var",
+        f"s3_access_key_global={os.environ['S3_ACCESS_KEY_GLOBAL']}",
+        "-var",
+        f"s3_endpoint_global={os.environ['S3_SERVER_URL_GLOBAL']}",
+    ]
+    print(f"Args for shared S3 integration: {args}")
+    return args
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
     request,
     risk,
@@ -193,6 +210,7 @@ def tf_vars(
     enable_feast,
     enable_spark,
     pss,
+    setup_s3_integrator_global,
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
@@ -212,9 +230,12 @@ def tf_vars(
             + enable_feast
             + istio_k8s_platform
             + risk
+            + setup_s3_integrator_global
             + [
                 "-var",
                 "create_model=false",
+                "-var",
+                "object_storage_mode=S3",
                 "-var",
                 f"external_ui_hostname={UI_HOSTNAME}",
                 "-var",
@@ -243,16 +264,19 @@ def tf_vars(
         + istio_k8s_platform
         + risk
         + pss
+        + setup_s3_integrator_global
         + [
             "-var",
             "create_model=false",
             "-var",
-            "mysql_storage_size=1G",
+            "object_storage_mode=S3",
             "-var",
-            "minio_storage_size=10G",
+            "mysql_storage_size=1G",
             "-var",
             "mlmd_storage_size=10G",
             "-var",
             "postgresql_storage_size=1G",
+            "-var",
+            "release=latest",
         ]
     )

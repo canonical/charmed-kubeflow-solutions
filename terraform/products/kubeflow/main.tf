@@ -355,9 +355,57 @@ module "katib" {
   }
 }
 
+## Object storage (shared S3 integrator)
+
+resource "juju_secret" "s3_secret_global" {
+  depends_on = [juju_model.kubeflow]
+  count      = local.deploy_s3_integrator ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  name       = "s3_secret_global"
+  value = {
+    secret-key = var.s3_secret_key_global
+    access-key = var.s3_access_key_global
+  }
+  info = "This is the access key and secret key for the S3 storage"
+}
+
+module "s3_global" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global]
+  count      = local.deploy_s3_integrator ? 1 : 0
+  source     = "../../charms/s3-integrator"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  app_name   = "s3-integrator-global"
+  offer_name = "s3-credentials-global"
+  channel    = local.s3_integrator_channel
+  config = merge(
+    {
+      bucket      = var.s3_bucket_global,
+      endpoint    = var.s3_endpoint_global,
+      credentials = "secret:${juju_secret.s3_secret_global[0].secret_id}"
+    },
+    var.s3_tls_ca_chain_global != "" ? { "tls-ca-chain" = base64encode(var.s3_tls_ca_chain_global) } : {},
+    var.s3_config_global
+  )
+  constraints = "arch=amd64"
+  revision    = var.s3_revision_global
+}
+
+resource "juju_access_secret" "s3_secret_access_global" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global, module.s3_global]
+  count      = local.deploy_s3_integrator ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  applications = [
+    module.s3_global[0].application.name
+  ]
+  secret_id = juju_secret.s3_secret_global[0].secret_id
+}
+
 module "kfp" {
   count      = var.enable_kfp ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.mysql]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
   source = "../../components/kfp"
 
@@ -369,10 +417,28 @@ module "kfp" {
     endpoint = module.mysql[0].provides.database
   }
 
-  object_storage = {
+  object_storage = local.deploy_minio ? {
     kind     = "endpoint"
     name     = module.minio[0].provides.object_storage.name
     endpoint = module.minio[0].provides.object_storage.endpoint
+  } : null
+
+  s3_credentials = local.deploy_s3_integrator ? {
+    kind     = "endpoint"
+    name     = module.s3_global[0].provides.s3_credentials.name
+    endpoint = module.s3_global[0].provides.s3_credentials.endpoint
+  } : null
+
+  config_maps = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher.provides.config_maps.name
+    endpoint = module.resource_dispatcher.provides.config_maps.endpoint
+  }
+
+  secrets = {
+    kind     = "endpoint"
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   dashboard_links = {
@@ -393,7 +459,7 @@ module "kfp" {
   argo_controller = {
     channel  = local.argo_controller_channel
     revision = var.argo_controller_revision
-    config   = var.argo_controller_config
+    config   = local.argo_controller_config
   }
   envoy = {
     channel  = local.envoy_channel
@@ -413,7 +479,7 @@ module "kfp" {
   kfp_api = {
     channel  = local.kfp_channel
     revision = var.kfp_api_revision
-    config   = var.kfp_api_config
+    config   = local.kfp_api_config
   }
 
   kfp_metadata_writer = {
@@ -431,7 +497,7 @@ module "kfp" {
   kfp_profile_controller = {
     channel  = local.kfp_channel
     revision = var.kfp_profile_controller_revision
-    config   = var.kfp_profile_controller_config
+    config   = local.kfp_profile_controller_config
   }
 
   kfp_schedwf = {
@@ -540,7 +606,6 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  count      = (var.enable_mlflow || var.enable_feast || length(local.external_integrations) > 0) ? 1 : 0
   depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "../../charms/resource-dispatcher"
@@ -553,7 +618,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.mysql, module.resource_dispatcher]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
@@ -571,22 +636,28 @@ module "mlflow" {
     endpoint = module.mysql[0].provides.database
   }
 
-  object_storage = {
+  object_storage = local.deploy_minio ? {
     kind     = "endpoint"
     name     = module.minio[0].provides.object_storage.name
     endpoint = module.minio[0].provides.object_storage.endpoint
-  }
+  } : null
+
+  s3_credentials = local.deploy_s3_integrator ? {
+    kind     = "endpoint"
+    name     = module.s3_global[0].provides.s3_credentials.name
+    endpoint = module.s3_global[0].provides.s3_credentials.endpoint
+  } : null
 
   secrets = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   pod_defaults = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
   ingress = local.sidecar ? {
@@ -731,14 +802,14 @@ module "feast" {
 
   secrets = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 
   pod_defaults = {
     kind     = "endpoint"
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
   dashboard_links = {
@@ -773,47 +844,50 @@ module "feast" {
 # Spark solutions
 # ===============
 
-resource "juju_secret" "s3_secret" {
+resource "juju_secret" "s3_secret_spark" {
   depends_on = [juju_model.kubeflow]
   count      = var.enable_spark ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  name       = "s3_secret"
+  name       = "s3_secret_spark"
   value = {
-    secret-key = var.s3_secret_key
-    access-key = var.s3_access_key
+    secret-key = var.s3_secret_key_spark
+    access-key = var.s3_access_key_spark
   }
   info = "This is the access key and secret key for the S3 storage"
 }
 
-module "s3" {
-  depends_on = [juju_model.kubeflow, juju_secret.s3_secret]
+module "s3_spark" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_spark]
   count      = var.enable_spark ? 1 : 0
-  source     = "git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator?ref=1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8"
+  source     = "../../charms/s3-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  channel = "2/stable"
+  app_name   = "s3-integrator-spark"
+  offer_name = "s3-credentials-spark"
+  channel    = local.s3_integrator_channel
+  base       = "ubuntu@24.04"
   config = merge(
     {
-      bucket      = var.s3_bucket,
-      endpoint    = var.s3_endpoint,
+      bucket      = var.s3_bucket_spark,
+      endpoint    = var.s3_endpoint_spark,
       path        = "spark-events",
-      credentials = "secret:${juju_secret.s3_secret[0].secret_id}"
-    }, var.s3_config
+      credentials = "secret:${juju_secret.s3_secret_spark[0].secret_id}"
+    }, var.s3_config_spark
   )
   constraints = "arch=amd64"
-  revision    = var.s3_revision
+  revision    = var.s3_revision_spark
 }
 
-resource "juju_access_secret" "s3_secret_access" {
-  depends_on = [juju_model.kubeflow, juju_secret.s3_secret, module.s3]
+resource "juju_access_secret" "s3_secret_access_spark" {
+  depends_on = [juju_model.kubeflow, juju_secret.s3_secret_spark, module.s3_spark]
   count      = var.enable_spark ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   applications = [
-    module.s3[0].application.name
+    module.s3_spark[0].application.name
   ]
-  secret_id = juju_secret.s3_secret[0].secret_id
+  secret_id = juju_secret.s3_secret_spark[0].secret_id
 }
 
 module "spark" {
@@ -837,8 +911,8 @@ module "spark" {
 
   # Integrations
 
-  object_storage           = merge({ kind = "endpoint" }, module.s3[0].provides.s3_credentials)
-  object_storage_interface = module.s3[0].provides.s3_credentials.endpoint
+  object_storage           = merge({ kind = "endpoint" }, module.s3_spark[0].provides.s3_credentials)
+  object_storage_interface = module.s3_spark[0].provides.s3_credentials.endpoint
 }
 
 module "external_integrations" {
@@ -852,7 +926,7 @@ module "external_integrations" {
   profile = each.value.profile
 
   data_kubeflow_integrator = {
-    channel  = "1/edge",
+    channel  = "latest/edge",
     app_name = each.key
   }
 
@@ -860,7 +934,10 @@ module "external_integrations" {
   postgresql = each.value.postgresql
   spark      = each.value.spark
 
-  resource_dispatcher_endpoints = module.resource_dispatcher[0].provides
+  # Exclude provide_cmr_mesh: the data-kubeflow-integrator charm has no provide-cmr-mesh endpoint.
+  resource_dispatcher_endpoints = {
+    for k, v in module.resource_dispatcher.provides : k => v if k != "provide_cmr_mesh"
+  }
 }
 
 module "observability" {
