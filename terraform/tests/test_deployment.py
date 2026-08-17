@@ -113,11 +113,18 @@ class TestCharm:
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
             # certificate is self-signed, so TLS verification is disabled.
-            result_status, result_text = fetch_response(
+            #
+            # This is a reachability smoke test only (status 200): it confirms the
+            # ingress chain (DNS -> UI gateway -> oauth2-proxy -> IdP login-ui)
+            # responds. The login page content itself is verified by the Identity
+            # UI UATs ("Run Identity UI UATs" workflow step), which drive a real
+            # headless browser and assert the rendered "Sign in" form — a
+            # requests.get substring check is brittle because the login-ui is a
+            # client-rendered Next.js SPA whose __NEXT_DATA__ shape is not stable.
+            result_status, _ = fetch_response(
                 f"https://{UI_HOSTNAME}", verify=False
             )
             assert result_status == 200
-            assert '"page":"/login"' in result_text
             return
 
         # Verify deployment by checking the public URL
