@@ -55,6 +55,10 @@ output "provides" {
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
+    kfp_api_s3_credentials = {
+      name     = juju_application.kfp_api.name
+      endpoint = "s3-credentials"
+    }
     kfp_api_object_storage = {
       name     = juju_application.kfp_api.name
       endpoint = "object-storage"
@@ -63,6 +67,10 @@ output "requires" {
       name     = juju_application.kfp_api.name
       endpoint = "relational-db"
     }
+    kfp_profile_controller_s3_credentials = {
+      name     = juju_application.kfp_profile_controller.name
+      endpoint = "s3-credentials"
+    }
     kfp_profile_controller_object_storage = {
       name     = juju_application.kfp_profile_controller.name
       endpoint = "object-storage"
@@ -70,6 +78,10 @@ output "requires" {
     kfp_ui_dashboard_links = {
       name     = juju_application.kfp_ui.name
       endpoint = "dashboard-links"
+    }
+    kfp_ui_s3_credentials = {
+      name     = juju_application.kfp_ui.name
+      endpoint = "s3-credentials"
     }
     kfp_ui_object_storage = {
       name     = juju_application.kfp_ui.name

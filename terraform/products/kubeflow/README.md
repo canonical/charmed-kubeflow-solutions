@@ -36,7 +36,8 @@
 | <a name="module_postgresql"></a> [postgresql](#module\_postgresql) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_request_authentication_configurator"></a> [request\_authentication\_configurator](#module\_request\_authentication\_configurator) | ../../charms/request-authentication-configurator | n/a |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
-| <a name="module_s3"></a> [s3](#module\_s3) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
+| <a name="module_s3_global"></a> [s3\_global](#module\_s3\_global) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
+| <a name="module_s3_spark"></a> [s3\_spark](#module\_s3\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_spark"></a> [spark](#module\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
 | <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
@@ -45,13 +46,15 @@
 
 | Name | Type |
 | ---- | ---- |
-| [juju_access_secret.s3_secret_access](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
+| [juju_access_secret.s3_secret_access_global](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
+| [juju_access_secret.s3_secret_access_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_application.self_signed_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.github_profiles_automator_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.istio_ingress_m2m_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.istio_ingress_ui_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_m2m_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kserve_controller_s3_credentials](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_service_accounts](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.minio_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -63,7 +66,8 @@
 | [juju_integration.request_auth_ui](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.resource_dispatcher_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_model.kubeflow](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
-| [juju_secret.s3_secret](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
+| [juju_secret.s3_secret_global](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
+| [juju_secret.s3_secret_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/secret) | resource |
 
 ## Inputs
 
@@ -97,6 +101,8 @@
 | <a name="input_feast_integrator_revision"></a> [feast\_integrator\_revision](#input\_feast\_integrator\_revision) | Revision of the feast-integrator application | `number` | `null` | no |
 | <a name="input_feast_ui_config"></a> [feast\_ui\_config](#input\_feast\_ui\_config) | Configuration for feast-ui application | `map(string)` | `{}` | no |
 | <a name="input_feast_ui_revision"></a> [feast\_ui\_revision](#input\_feast\_ui\_revision) | Revision of the feast-ui application | `number` | `null` | no |
+| <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
+| <a name="input_https_proxy"></a> [https\_proxy](#input\_https\_proxy) | Value of the https\_proxy environment variable | `string` | `""` | no |
 | <a name="input_github_profiles_automator_config"></a> [github\_profiles\_automator\_config](#input\_github\_profiles\_automator\_config) | Configuration for the github-profiles-automator application | `map(string)` | `{}` | no |
 | <a name="input_github_profiles_automator_revision"></a> [github\_profiles\_automator\_revision](#input\_github\_profiles\_automator\_revision) | Revision of the github-profiles-automator application | `number` | `null` | no |
 | <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
@@ -179,6 +185,7 @@
 | <a name="input_mysql_revision"></a> [mysql\_revision](#input\_mysql\_revision) | Revision of the mysql-db application | `number` | `null` | no |
 | <a name="input_mysql_storage_size"></a> [mysql\_storage\_size](#input\_mysql\_storage\_size) | MySQL database storage size | `string` | `"10G"` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
+| <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
 | <a name="input_oauth2_proxy_config"></a> [oauth2\_proxy\_config](#input\_oauth2\_proxy\_config) | Configuration for the oauth2-proxy-k8s application | `map(string)` | `{}` | no |
 | <a name="input_oauth2_proxy_revision"></a> [oauth2\_proxy\_revision](#input\_oauth2\_proxy\_revision) | Revision of the oauth2-proxy-k8s application | `number` | `null` | no |
 | <a name="input_oauth_offer_url"></a> [oauth\_offer\_url](#input\_oauth\_offer\_url) | Cross-model offer URL of hydra:oauth from the iam model. Consumed by<br/>oauth2-proxy and request-authentication-configurator. Required when<br/>service\_mesh\_type is 'ambient'. | `string` | `null` | no |
@@ -197,12 +204,20 @@
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
 | <a name="input_resource_dispatcher_revision"></a> [resource\_dispatcher\_revision](#input\_resource\_dispatcher\_revision) | Revision of the resource-dispatcher application | `number` | `null` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Value for the risk to be used | `string` | `"edge"` | no |
-| <a name="input_s3_access_key"></a> [s3\_access\_key](#input\_s3\_access\_key) | S3 access key for object storage integration | `string` | `""` | no |
-| <a name="input_s3_bucket"></a> [s3\_bucket](#input\_s3\_bucket) | S3 bucket for object storage integration | `string` | `""` | no |
-| <a name="input_s3_config"></a> [s3\_config](#input\_s3\_config) | Configuration for s3-integrator application | `map(string)` | `{}` | no |
-| <a name="input_s3_endpoint"></a> [s3\_endpoint](#input\_s3\_endpoint) | S3 endpoint for object storage integration | `string` | `""` | no |
-| <a name="input_s3_revision"></a> [s3\_revision](#input\_s3\_revision) | Revision of the s3-integrator application | `number` | `null` | no |
-| <a name="input_s3_secret_key"></a> [s3\_secret\_key](#input\_s3\_secret\_key) | S3 secret key for object storage integration | `string` | `""` | no |
+| <a name="input_s3_access_key_global"></a> [s3\_access\_key\_global](#input\_s3\_access\_key\_global) | S3 access key for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_access_key_spark"></a> [s3\_access\_key\_spark](#input\_s3\_access\_key\_spark) | S3 access key for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_bucket_global"></a> [s3\_bucket\_global](#input\_s3\_bucket\_global) | S3 bucket for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_bucket_spark"></a> [s3\_bucket\_spark](#input\_s3\_bucket\_spark) | S3 bucket for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_config_global"></a> [s3\_config\_global](#input\_s3\_config\_global) | Configuration for the shared s3-integrator application | `map(string)` | `{}` | no |
+| <a name="input_s3_config_spark"></a> [s3\_config\_spark](#input\_s3\_config\_spark) | Configuration for s3-integrator application | `map(string)` | `{}` | no |
+| <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_endpoint_spark"></a> [s3\_endpoint\_spark](#input\_s3\_endpoint\_spark) | S3 endpoint for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_revision_global"></a> [s3\_revision\_global](#input\_s3\_revision\_global) | Revision of the shared s3-integrator application | `number` | `null` | no |
+| <a name="input_s3_revision_spark"></a> [s3\_revision\_spark](#input\_s3\_revision\_spark) | Revision of the s3-integrator application | `number` | `null` | no |
+| <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_secret_key_spark"></a> [s3\_secret\_key\_spark](#input\_s3\_secret\_key\_spark) | S3 secret key for Spark object storage integration | `string` | `""` | no |
+| <a name="input_s3_tls_ca_chain_global"></a> [s3\_tls\_ca\_chain\_global](#input\_s3\_tls\_ca\_chain\_global) | PEM-encoded CA chain used for HTTPS validation against the S3 endpoint. When set, it is base64-encoded and passed to the s3-integrator 'tls-ca-chain' config option. Leave empty to omit. | `string` | `""` | no |
+| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
 | <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates charm serving the ambient gateways. | `string` | `"1/stable"` | no |
 | <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Configuration for the self-signed-certificates application. | `map(string)` | `{}` | no |
 | <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision of the self-signed-certificates application. | `number` | `null` | no |

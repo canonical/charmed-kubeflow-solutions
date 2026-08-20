@@ -33,6 +33,10 @@ output "requires" {
       name     = juju_application.mlflow_server.name
       endpoint = "relational-db"
     }
+    mlflow_server_s3_credentials = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "s3-credentials"
+    }
     mlflow_server_object_storage = {
       name     = juju_application.mlflow_server.name
       endpoint = "object-storage"

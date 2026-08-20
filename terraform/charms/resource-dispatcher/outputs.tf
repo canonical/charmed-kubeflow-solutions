@@ -18,12 +18,24 @@ output "requires" {
       name     = juju_application.resource_dispatcher.name
       endpoint = "service-mesh"
     }
+    require_cmr_mesh = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "require-cmr-mesh"
+    }
   }
 }
 
 output "provides" {
   description = "Map of provided endpoints."
   value = {
+    provide_cmr_mesh = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "provide-cmr-mesh"
+    }
+    config_maps = {
+      name     = juju_application.resource_dispatcher.name
+      endpoint = "config-maps"
+    }
     secrets = {
       name     = juju_application.resource_dispatcher.name
       endpoint = "secrets"

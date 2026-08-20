@@ -138,24 +138,6 @@ variable "kubeflow_volumes_config" {
   default     = {}
 }
 
-variable "minio_revision" {
-  description = "Revision of the minio application"
-  type        = number
-  default     = null
-}
-
-variable "minio_config" {
-  description = "Configuration for minio application"
-  type        = map(string)
-  default     = {}
-}
-
-variable "minio_storage_size" {
-  description = "MinIO database storage size"
-  type        = string
-  default     = "10G"
-}
-
 variable "metacontroller_operator_revision" {
   description = "Revision of the metacontroller-operator application"
   type        = number
@@ -325,6 +307,83 @@ variable "kfp_viz_config" {
   description = "Configuration for kfp-viz application"
   type        = map(string)
   default     = {}
+}
+
+# S3 Integrator (shared/global) variables
+
+variable "s3_secret_key_global" {
+  description = "S3 secret key for the shared object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_access_key_global" {
+  description = "S3 access key for the shared object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_endpoint_global" {
+  description = "S3 endpoint for the shared object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket_global" {
+  description = "S3 bucket for the shared object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_tls_ca_chain_global" {
+  description = "PEM-encoded CA chain used for HTTPS validation against the S3 endpoint. When set, it is base64-encoded and passed to the s3-integrator 'tls-ca-chain' config option. Leave empty to omit."
+  type        = string
+  default     = ""
+}
+
+variable "s3_revision_global" {
+  description = "Revision of the shared s3-integrator application"
+  type        = number
+  default     = null
+}
+
+# Object storage backend selection
+
+variable "object_storage_mode" {
+  description = "Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation)"
+  type        = string
+  default     = "S3"
+
+  validation {
+    condition     = contains(["minio", "S3"], var.object_storage_mode)
+    error_message = "Valid values for object_storage_mode are ('minio', 'S3')."
+  }
+}
+
+variable "minio_revision" {
+  description = "Revision of the minio application"
+  type        = number
+  default     = null
+}
+
+variable "minio_config" {
+  description = "Configuration for minio application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "minio_storage_size" {
+  description = "MinIO database storage size"
+  type        = string
+  default     = "10G"
 }
 
 # Istio Component Applications
@@ -918,41 +977,41 @@ variable "enable_spark" {
   default     = false
 }
 
-# S3 Integrator variables
+# S3 Integrator Spark variables
 
-variable "s3_secret_key" {
-  description = "S3 secret key for object storage integration"
+variable "s3_secret_key_spark" {
+  description = "S3 secret key for Spark object storage integration"
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "s3_access_key" {
-  description = "S3 access key for object storage integration"
+variable "s3_access_key_spark" {
+  description = "S3 access key for Spark object storage integration"
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "s3_endpoint" {
-  description = "S3 endpoint for object storage integration"
+variable "s3_endpoint_spark" {
+  description = "S3 endpoint for Spark object storage integration"
   type        = string
   default     = ""
 }
 
-variable "s3_bucket" {
-  description = "S3 bucket for object storage integration"
+variable "s3_bucket_spark" {
+  description = "S3 bucket for Spark object storage integration"
   type        = string
   default     = ""
 }
 
-variable "s3_config" {
+variable "s3_config_spark" {
   description = "Configuration for s3-integrator application"
   type        = map(string)
   default     = {}
 }
 
-variable "s3_revision" {
+variable "s3_revision_spark" {
   description = "Revision of the s3-integrator application"
   type        = number
   default     = null

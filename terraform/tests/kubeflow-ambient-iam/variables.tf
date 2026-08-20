@@ -288,3 +288,42 @@ variable "metrics_offer" {
   type        = string
   default     = null
 }
+
+# Object storage (shared/global S3 integrator) variables
+
+variable "object_storage_mode" {
+  description = "Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation)"
+  type        = string
+  default     = "S3"
+
+  validation {
+    condition     = contains(["minio", "S3"], var.object_storage_mode)
+    error_message = "Valid values for object_storage_mode are ('minio', 'S3')."
+  }
+}
+
+variable "s3_secret_key_global" {
+  description = "S3 secret key for the shared object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_access_key_global" {
+  description = "S3 access key for the shared object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_endpoint_global" {
+  description = "S3 endpoint for the shared object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket_global" {
+  description = "S3 bucket for the shared object storage integration"
+  type        = string
+  default     = ""
+}

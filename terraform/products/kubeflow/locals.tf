@@ -26,7 +26,8 @@ locals {
   envoy_channel           = var.release == "1.11" ? "2.4/${var.risk}" : "latest/${var.risk}"
 
   # Standalone Charms
-  minio_channel = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  minio_channel         = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
+  s3_integrator_channel = "2/edge"
 
   # Istio Component (sidecar)
   istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
@@ -68,8 +69,12 @@ locals {
   kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
   knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
-  deploy_minio    = var.enable_kfp || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
+
+  # Object storage backend selection ('minio' or 'S3')
+  object_storage_consumers = var.enable_kfp || var.enable_mlflow || var.enable_kserve
+  deploy_minio             = var.object_storage_mode == "minio" && local.object_storage_consumers
+  deploy_s3_integrator     = var.object_storage_mode == "S3" && local.object_storage_consumers
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"
@@ -90,6 +95,21 @@ locals {
     var.istio_pilot_config,
     var.istio_cni_bin_dir != "" ? { "cni-bin-dir" = var.istio_cni_bin_dir } : {},
     var.istio_cni_conf_dir != "" ? { "cni-conf-dir" = var.istio_cni_conf_dir } : {}
+  )
+
+  argo_controller_config = merge(
+    var.argo_controller_config,
+    { "bucket" = var.s3_bucket_global }
+  )
+
+  kfp_api_config = merge(
+    var.kfp_api_config,
+    { "object-store-bucket-name" = var.s3_bucket_global }
+  )
+
+  kfp_profile_controller_config = merge(
+    var.kfp_profile_controller_config,
+    { "default_pipeline_root" = "minio://${var.s3_bucket_global}/v2/artifacts" }
   )
 
   kubeflow_profiles = {

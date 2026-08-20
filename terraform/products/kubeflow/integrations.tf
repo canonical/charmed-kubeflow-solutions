@@ -189,9 +189,10 @@ resource "juju_integration" "minio_service_mesh" {
 }
 
 # kserve-controller object-storage integration (minio:object-storage -> kserve-controller)
-# Only deployed when MLflow is enabled, since kserve uses minio to read MLflow model artifacts
+# Only deployed with the 'minio' object storage mode and when MLflow is enabled,
+# since kserve uses this storage to read MLflow model artifacts
 resource "juju_integration" "kserve_controller_object_storage" {
-  count      = (var.enable_mlflow && var.enable_kserve) ? 1 : 0
+  count      = (local.deploy_minio && var.enable_mlflow && var.enable_kserve) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -205,14 +206,32 @@ resource "juju_integration" "kserve_controller_object_storage" {
   }
 }
 
+# kserve-controller s3-credentials integration (s3-integrator-global:s3-credentials -> kserve-controller)
+# Only deployed with the 's3' object storage mode and when MLflow is enabled, since kserve uses this storage to read MLflow model artifacts
+resource "juju_integration" "kserve_controller_s3_credentials" {
+  count      = (local.deploy_s3_integrator && var.enable_kserve) ? 1 : 0
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.kserve[0].requires.kserve_controller_s3_credentials.name
+    endpoint = module.kserve[0].requires.kserve_controller_s3_credentials.endpoint
+  }
+
+  application {
+    name     = module.s3_global[0].provides.s3_credentials.name
+    endpoint = module.s3_global[0].provides.s3_credentials.endpoint
+  }
+}
+
+# resource-dispatcher service-mesh integration (ambient only)
 # resource-dispatcher service-mesh integration (any ambient mode)
 resource "juju_integration" "resource_dispatcher_service_mesh" {
   count      = ((var.enable_mlflow || var.enable_feast) && local.ambient) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.resource_dispatcher[0].requires.service_mesh.name
-    endpoint = module.resource_dispatcher[0].requires.service_mesh.endpoint
+    name     = module.resource_dispatcher.requires.service_mesh.name
+    endpoint = module.resource_dispatcher.requires.service_mesh.endpoint
   }
 
   application {
@@ -222,9 +241,11 @@ resource "juju_integration" "resource_dispatcher_service_mesh" {
 }
 
 # kserve-controller secrets integration (resource-dispatcher:secrets -> kserve-controller)
-# Only deployed when MLflow is enabled
+# Deployed when MLflow is enabled, or when KServe uses the S3 object storage
+# backend, so the kserve-controller-s3 credentials Secret is dispatched into the
+# user profile namespaces.
 resource "juju_integration" "kserve_controller_secrets" {
-  count      = var.enable_mlflow ? 1 : 0
+  count      = (var.enable_mlflow || (local.deploy_s3_integrator && var.enable_kserve)) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -233,15 +254,17 @@ resource "juju_integration" "kserve_controller_secrets" {
   }
 
   application {
-    name     = module.resource_dispatcher[0].provides.secrets.name
-    endpoint = module.resource_dispatcher[0].provides.secrets.endpoint
+    name     = module.resource_dispatcher.provides.secrets.name
+    endpoint = module.resource_dispatcher.provides.secrets.endpoint
   }
 }
 
 # kserve-controller service-accounts integration (resource-dispatcher:pod-defaults -> kserve-controller:service-accounts)
-# Only deployed when MLflow is enabled
+# Deployed when MLflow is enabled, or when KServe uses the S3 object storage
+# backend, so the kserve-controller-s3 ServiceAccount is dispatched into the
+# user profile namespaces.
 resource "juju_integration" "kserve_controller_service_accounts" {
-  count      = var.enable_mlflow ? 1 : 0
+  count      = (var.enable_mlflow || (local.deploy_s3_integrator && var.enable_kserve)) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -250,8 +273,8 @@ resource "juju_integration" "kserve_controller_service_accounts" {
   }
 
   application {
-    name     = module.resource_dispatcher[0].provides.pod_defaults.name
-    endpoint = module.resource_dispatcher[0].provides.pod_defaults.endpoint
+    name     = module.resource_dispatcher.provides.pod_defaults.name
+    endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 }
 

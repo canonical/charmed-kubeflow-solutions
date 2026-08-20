@@ -129,6 +129,12 @@ module "kubeflow" {
 
   kserve_controller_config = local.kserve_controller_config
 
+  object_storage_mode  = var.object_storage_mode
+  s3_bucket_global     = var.s3_bucket_global
+  s3_access_key_global = var.s3_access_key_global
+  s3_secret_key_global = var.s3_secret_key_global
+  s3_endpoint_global   = var.s3_endpoint_global
+
   github_profiles_automator_config = var.github_profiles_automator_config
 
   enable_observability = var.enable_observability

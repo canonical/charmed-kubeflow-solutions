@@ -38,9 +38,10 @@ jobs:
         auth-type: [dex]
         include:
           - service-mesh-type: ambient
-            uats-extra-args: --include-ambient-tests
+            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow
             uats-env: kubeflow-remote
+            uats-extra-args: --include-multi-tenancy-tests
           - product: mlflow
             uats-env: mlflow-remote
           - product: feast
@@ -136,6 +137,7 @@ jobs:
         with:
           image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
           ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
+          pull-extra-args: --hosts-dir /etc/containerd/hosts.d
 
       - name: Configure Cilium for Istio
         if: matrix.service-mesh-type == 'ambient'
@@ -145,9 +147,8 @@ jobs:
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"cni-exclusive":"false"}}'
           kubectl -n kube-system rollout restart daemonset cilium
 
-      - name: Setup spark object storage
-        id: spark-object-storage
-        if: matrix.product == 'spark'
+      - name: Setup object storage
+        id: object-storage
         shell: bash
         env:
           CLOUD_INIT_FILE: |
@@ -159,7 +160,10 @@ jobs:
                 1: sudo microceph cluster bootstrap
                 2: sudo microceph disk add loop,1G,3
                 3: sudo microceph enable rgw
-                4: sudo microceph.radosgw-admin user create --uid test --display-name test --access-key=foo --secret-key=bar
+                4: sudo microceph.radosgw-admin user create --uid test-spark --display-name test-spark --access-key=foo --secret-key=bar
+                5: sudo microceph.radosgw-admin user create --uid test-global --display-name test-global --access-key=baz --secret-key=qux
+                6: sudo microceph.radosgw-admin user create --uid test-override --display-name test-override --access-key=grault --secret-key=corge
+
         run: |
           echo -e "$CLOUD_INIT_FILE" > microceph_rgw.yaml
           lxc init ubuntu:jammy ceph -c limits.cpu=4 -c limits.memory=2GB -d root,size=5GB
@@ -169,8 +173,18 @@ jobs:
           while ! lxc exec ceph -- id -u ubuntu &>/dev/null; do sleep 0.5; done
           lxc exec ceph -- cloud-init status --wait
 
-          echo -e "S3_SERVER_URL=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address'):80/\nS3_ACCESS_KEY=foo\nS3_SECRET_KEY=bar" > .env
-          echo -e "S3_BUCKET=spark-demo" >> .env
+          echo -e "S3_SERVER_URL_SPARK=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address')/" >> .env
+          echo -e "S3_SERVER_URL_GLOBAL=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address')/" >> .env
+          echo -e "S3_SERVER_URL_OVERRIDE=http://$(lxc list --format json | yq '.[] | select(.name == "ceph") .state.network.eth0.addresses.[] | select(.family == "inet") .address')/" >> .env
+          echo -e "S3_BUCKET_SPARK=spark-demo" >> .env
+          echo -e "S3_ACCESS_KEY_SPARK=foo" >> .env
+          echo -e "S3_SECRET_KEY_SPARK=bar" >> .env
+          echo -e "S3_ACCESS_KEY_GLOBAL=baz" >> .env
+          echo -e "S3_SECRET_KEY_GLOBAL=qux" >> .env
+          echo -e "S3_ACCESS_KEY_OVERRIDE=grault" >> .env
+          echo -e "S3_SECRET_KEY_OVERRIDE=corge" >> .env
+          echo -e "S3_BUCKET_KFP_GLOBAL=kfp-uats-global" >> .env
+          echo -e "S3_BUCKET_KFP_OVERRIDE=kfp-uats-override" >> .env
           lxc list
           cat .env
 

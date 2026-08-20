@@ -35,6 +35,23 @@ resource "juju_integration" "mlflow_server_mysql_database" {
   }
 }
 
+# MLflow Server s3-credentials integration (s3-integrator:s3-credentials -> mlflow-server)
+resource "juju_integration" "mlflow_server_s3_credentials" {
+  count      = var.s3_credentials != null ? 1 : 0
+  model_uuid = var.model_uuid
+
+  application {
+    name     = juju_application.mlflow_server.name
+    endpoint = "s3-credentials"
+  }
+
+  application {
+    name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
+    endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
+    offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
+  }
+}
+
 # MLflow Server object-storage integration (minio:object-storage -> mlflow-server)
 resource "juju_integration" "mlflow_server_object_storage" {
   count      = var.object_storage != null ? 1 : 0

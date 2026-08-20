@@ -28,6 +28,7 @@
 | [juju_application.kfp_viz](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_application.mlmd](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.argo_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.argo_controller_s3_credentials](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_mlmd_grpc](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -39,16 +40,21 @@
 | [juju_integration.kfp_api_kfp_viz](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_api_mysql_database](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_api_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kfp_api_s3_credentials](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_api_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_metadata_writer_grpc](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_persistence_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kfp_profile_controller_config_maps](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_profile_controller_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kfp_profile_controller_s3_credentials](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kfp_profile_controller_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_profile_controller_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_schedwf_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_dashboard_links](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_object_storage](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_integration.kfp_ui_s3_credentials](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_ui_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_viz_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
@@ -57,6 +63,7 @@
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_argo_controller"></a> [argo\_controller](#input\_argo\_controller) | Configuration for argo-controller application | <pre>object({<br/>    app_name    = optional(string, "argo-controller")<br/>    channel     = optional(string, "3.7/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_config_maps"></a> [config\_maps](#input\_config\_maps) | Config maps provider for kfp-profile-controller from resource-dispatcher:config-maps (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_dashboard_links"></a> [dashboard\_links](#input\_dashboard\_links) | Kubeflow Dashboard links provider for kfp-ui from kubeflow-dashboard:dashboard-links (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_envoy"></a> [envoy](#input\_envoy) | Configuration for envoy application | <pre>object({<br/>    app_name    = optional(string, "envoy")<br/>    channel     = optional(string, "2.4/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_ingress"></a> [ingress](#input\_ingress) | Ingress provider for kfp-ui from istio-pilot:ingress (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
@@ -73,6 +80,8 @@
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where KFP is deployed | `string` | n/a | yes |
 | <a name="input_mysql_database"></a> [mysql\_database](#input\_mysql\_database) | MySQL database provider for kfp-api from mysql-k8s:database (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_object_storage"></a> [object\_storage](#input\_object\_storage) | Object storage provider for KFP applications from minio:object-storage (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_s3_credentials"></a> [s3\_credentials](#input\_s3\_credentials) | S3 credentials provider for KFP applications from s3-integrator:s3-credentials (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
+| <a name="input_secrets"></a> [secrets](#input\_secrets) | Secrets provider for kfp-profile-controller from resource-dispatcher:secrets (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_service_mesh"></a> [service\_mesh](#input\_service\_mesh) | Service mesh provider for KFP applications from istio-beacon-k8s:service-mesh (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 
 ## Outputs

@@ -34,6 +34,33 @@ variable "mysql_database" {
   }
 }
 
+variable "s3_credentials" {
+  description = "S3 credentials provider for KFP applications from s3-integrator:s3-credentials (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.s3_credentials == null || contains(["endpoint", "offer"], var.s3_credentials.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.s3_credentials == null || var.s3_credentials.kind != "endpoint" || (var.s3_credentials.name != null && var.s3_credentials.name != "" && var.s3_credentials.endpoint != null && var.s3_credentials.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.s3_credentials == null || var.s3_credentials.kind != "offer" || (var.s3_credentials.url != null && var.s3_credentials.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
 variable "object_storage" {
   description = "Object storage provider for KFP applications from minio:object-storage (supports same-model endpoint or cross-model offer)"
   type = object({
@@ -51,7 +78,7 @@ variable "object_storage" {
   }
 
   validation {
-    condition     = var.object_storage == null || var.object_storage.kind != "endpoint" || (var.object_storage.kind != null && var.object_storage.kind != "" && var.object_storage.name != null && var.object_storage.name != "")
+    condition     = var.object_storage == null || var.object_storage.kind != "endpoint" || (var.object_storage.name != null && var.object_storage.name != "" && var.object_storage.endpoint != null && var.object_storage.endpoint != "")
     error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
   }
 
@@ -84,6 +111,60 @@ variable "dashboard_links" {
 
   validation {
     condition     = var.dashboard_links == null || var.dashboard_links.kind != "offer" || (var.dashboard_links.url != null && var.dashboard_links.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
+variable "config_maps" {
+  description = "Config maps provider for kfp-profile-controller from resource-dispatcher:config-maps (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.config_maps == null || contains(["endpoint", "offer"], var.config_maps.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.config_maps == null || var.config_maps.kind != "endpoint" || (var.config_maps.name != null && var.config_maps.name != "" && var.config_maps.endpoint != null && var.config_maps.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.config_maps == null || var.config_maps.kind != "offer" || (var.config_maps.url != null && var.config_maps.url != "")
+    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
+  }
+}
+
+variable "secrets" {
+  description = "Secrets provider for kfp-profile-controller from resource-dispatcher:secrets (supports same-model endpoint or cross-model offer)"
+  type = object({
+    kind     = string
+    name     = optional(string, null)
+    endpoint = optional(string, null)
+    url      = optional(string, null)
+  })
+  nullable = true
+  default  = null
+
+  validation {
+    condition     = var.secrets == null || contains(["endpoint", "offer"], var.secrets.kind)
+    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
+  }
+
+  validation {
+    condition     = var.secrets == null || var.secrets.kind != "endpoint" || (var.secrets.name != null && var.secrets.name != "" && var.secrets.endpoint != null && var.secrets.endpoint != "")
+    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
+  }
+
+  validation {
+    condition     = var.secrets == null || var.secrets.kind != "offer" || (var.secrets.url != null && var.secrets.url != "")
     error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }
