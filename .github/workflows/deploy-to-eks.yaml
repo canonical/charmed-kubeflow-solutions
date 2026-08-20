@@ -17,7 +17,7 @@ on:
         required: false
         default: 'stable'
   schedule:
-    - cron: "17 02 * * 1"
+    - cron: "17 03 * * 1"
 
 env:
   CLUSTER_NAME: kubeflow-eks-test
