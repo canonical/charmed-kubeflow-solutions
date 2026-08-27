@@ -41,7 +41,7 @@ jobs:
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow
             uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests
+            uats-extra-args: --include-multi-tenancy-tests --keep-artifacts
           - product: mlflow
             uats-env: mlflow-remote
           - product: feast
