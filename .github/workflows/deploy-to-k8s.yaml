@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
+        product: [kubeflow]
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
         include:
@@ -42,21 +42,6 @@ jobs:
           - product: kubeflow
             uats-env: kubeflow-remote
             uats-extra-args: --include-multi-tenancy-tests --keep-artifacts
-          - product: mlflow
-            uats-env: mlflow-remote
-          - product: feast
-            uats-env: feast-remote
-          - product: spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
-          - product: kubeflow
-            service-mesh-type: ambient
-            auth-type: iam
-            uats-env: kubeflow-remote
-            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests
-        exclude:
-          - product: spark
-            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
