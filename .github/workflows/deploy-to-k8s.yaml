@@ -227,6 +227,14 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
+      - name: Upload notebook UAT artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/artifacts/
+          if-no-files-found: ignore
+
       - name: Run Identity UI UATs
         id: ui-uats
         if: matrix.auth-type == 'iam'
