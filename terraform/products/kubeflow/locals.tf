@@ -60,7 +60,7 @@ locals {
   resource_dispatcher_channel = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
 
   # MLflow Component
-  # NOTE: the risk is forced to `edge` for the track `latest` as MLflow 3.14 is available only
+  # NOTE: the risk is forced to `edge` for the track `latest` as MLflow 3.15 is available only
   # on `latest/edge` so far, while changing risk on `latest` would end up deploying MLflow 2.22
   # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here 
   mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
