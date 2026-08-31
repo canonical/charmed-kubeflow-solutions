@@ -18,7 +18,7 @@ variable "base" {
 variable "channel" {
   description = "Channel of the charm."
   type        = string
-  default     = "latest/stable"
+  default     = "latest/edge"
   nullable    = false
 }
 
