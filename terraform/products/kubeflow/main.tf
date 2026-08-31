@@ -183,7 +183,7 @@ module "mysql" {
 
   model    = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   app_name = "mysql-db"
-  channel  = "8.0/stable"
+  channel  = "8.0/candidate"
   revision = var.mysql_revision
   config = merge(
     { "profile-limit-memory" = "2048" },
