@@ -29,6 +29,10 @@ jobs:
       fail-fast: false
       matrix:
         bundle:
+          - module: kubeflow
+            uats:
+              env: kubeflow-remote
+              extra-args: ""
           - module: kubeflow-mlflow
             uats:
               env: uats-remote
