@@ -245,35 +245,8 @@ jobs:
         run: juju status -m kubeflow --relations
         if: always()
 
-      - name: Get juju status for istio and iam models
-        if: always() && matrix.auth-type == 'iam'
-        run: |
-          for model in istio-system iam iam-core; do
-            echo "=== juju status -m $model ==="
-            juju status -m "$model" --relations || true
-          done
-
-      # On failure, capture debugging resources
-      - name: Get juju debug logs
-        run: juju debug-log --replay --no-tail -m kubeflow
-        if: failure() || cancelled()
-
-      - name: Get juju debug logs for istio and iam models
-        if: (failure() || cancelled()) && matrix.auth-type == 'iam'
-        run: |
-          for model in istio-system iam iam-core; do
-            echo "=== juju debug-log -m $model ==="
-            juju debug-log --replay --no-tail -m "$model" || true
-          done
-
-      - name: Get logs from pods with status = Pending
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
-
-      - name: Get logs from pods with status = Failed
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
-
-      - name: Get logs from pods with status = CrashLoopBackOff
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+      - name: Collect charm debug artifacts
+        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+        with:
+          artifact-prefix: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
         if: failure() || cancelled()
