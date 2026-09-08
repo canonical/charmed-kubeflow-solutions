@@ -265,7 +265,3 @@ jobs:
         with:
           artifact-prefix: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
         if: failure() || cancelled()
-
-      - name: Setup tmate session
-        if: failure() && (steps.deploy.outcome == 'failure' || steps.run-uats.outcome == 'failure')
-        uses: canonical/action-tmate@main
