@@ -212,6 +212,25 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
 
+      - name: Collect test-kubeflow pod logs
+        id: collect-pod-logs
+        if: failure() && steps.run-uats.outcome == 'failure'
+        run: |
+          LOG_DIR="${{ github.workspace }}/test-kubeflow-pod-logs"
+          mkdir -p "$LOG_DIR"
+          for pod in $(kubectl get pods -n test-kubeflow -o jsonpath='{.items[*].metadata.name}'); do
+            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
+            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
+          done
+
+      - name: Upload test-kubeflow pod logs
+        if: failure() && steps.collect-pod-logs.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-kubeflow-pod-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: test-kubeflow-pod-logs/
+          if-no-files-found: ignore
+
       - name: Upload notebook UAT artifacts
         if: always()
         uses: actions/upload-artifact@v4
