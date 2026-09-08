@@ -232,7 +232,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload notebook UAT artifacts
-        if: always()
+        if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
