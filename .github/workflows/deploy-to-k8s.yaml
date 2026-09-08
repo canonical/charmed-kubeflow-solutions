@@ -256,10 +256,6 @@ jobs:
           path: charmed-kubeflow-uats/playwright-artifacts/
           if-no-files-found: ignore
 
-      - name: Setup tmate session
-        if: failure() && (steps.deploy.outcome == 'failure' || steps.run-uats.outcome == 'failure')
-        uses: canonical/action-tmate@main
-
       - name: Get juju status
         run: juju status -m kubeflow --relations
         if: always()
@@ -269,3 +265,7 @@ jobs:
         with:
           artifact-prefix: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
         if: failure() || cancelled()
+
+      - name: Setup tmate session
+        if: failure() && (steps.deploy.outcome == 'failure' || steps.run-uats.outcome == 'failure')
+        uses: canonical/action-tmate@main
