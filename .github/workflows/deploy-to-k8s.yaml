@@ -41,7 +41,7 @@ jobs:
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow
             uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests --keep-artifacts
+            uats-extra-args: --include-multi-tenancy-tests
           - product: mlflow
             uats-env: mlflow-remote
           - product: feast
@@ -225,7 +225,7 @@ jobs:
         id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""  --keep-artifacts
 
       - name: Collect test-kubeflow pod logs
         id: collect-pod-logs
@@ -261,7 +261,7 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           poetry install --no-root
           poetry run playwright install --with-deps chromium
-          tox -e uats-remote -- --include-iam-ui-tests -k ui
+          tox -e uats-remote -- --include-iam-ui-tests --filter ui --keep-artifacts
 
       - name: Upload Playwright artifacts
         if: failure() && steps.ui-uats.outcome == 'failure'
