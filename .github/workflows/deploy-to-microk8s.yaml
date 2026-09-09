@@ -246,6 +246,33 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           tox -e ${{ matrix.product.uats-env }} -- --bundle="" --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --keep-artifacts
 
+      - name: Collect test-kubeflow pod logs
+        id: collect-pod-logs
+        if: failure() && steps.run-uats.outcome == 'failure'
+        run: |
+          LOG_DIR="${{ github.workspace }}/test-kubeflow-pod-logs"
+          mkdir -p "$LOG_DIR"
+          for pod in $(kubectl get pods -n test-kubeflow -o jsonpath='{.items[*].metadata.name}'); do
+            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
+            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
+          done
+
+      - name: Upload test-kubeflow pod logs
+        if: failure() && steps.collect-pod-logs.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-kubeflow-pod-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: test-kubeflow-pod-logs/
+          if-no-files-found: ignore
+
+      - name: Upload notebook UAT artifacts
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/artifacts/
+          if-no-files-found: ignore
+
       - name: Run Identity UI UATs
         id: ui-uats
         if: matrix.auth-type == 'iam'
