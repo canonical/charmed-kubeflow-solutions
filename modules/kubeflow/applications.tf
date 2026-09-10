@@ -3,7 +3,7 @@ module "admission_webhook" {
   source     = "git::https://github.com/canonical/admission-webhook-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.admission_webhook_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "2.0/${var.risk}"
 }
 
 module "argo_controller" {
@@ -65,7 +65,7 @@ module "jupyter_controller" {
   source     = "git::https://github.com/canonical/notebook-operators//charms/jupyter-controller/terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.jupyter_controller_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "jupyter_ui" {
@@ -73,7 +73,7 @@ module "jupyter_ui" {
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config     = var.jupyter_ui_config
   revision   = var.jupyter_ui_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "katib_controller" {
@@ -112,13 +112,13 @@ module "katib_ui" {
 }
 
 module "kfp_api" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-api/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_api_revision
   config = {
     object-store-bucket-name = var.kfp_api_object_store_bucket_name
   }
-  channel = "2.15/${var.risk}"
+  channel = "2.16/${var.risk}"
 }
 
 module "kfp_db" {
@@ -136,52 +136,52 @@ module "kfp_db" {
 }
 
 module "kfp_metadata_writer" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-metadata-writer/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-metadata-writer/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_metadata_writer_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "kfp_persistence" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-persistence/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-persistence/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_persistence_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "kfp_profile_controller" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-profile-controller/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-profile-controller/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_profile_controller_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "kfp_schedwf" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-schedwf/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-schedwf/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_schedwf_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "kfp_ui" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-ui/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-ui/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_ui_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "kfp_viewer" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viewer/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viewer/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_viewer_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "kfp_viz" {
-  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viz/terraform?ref=track/2.15"
+  source     = "git::https://github.com/canonical/kfp-operators//charms/kfp-viz/terraform?ref=track/2.16"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kfp_viz_revision
-  channel    = "2.15/${var.risk}"
+  channel    = "2.16/${var.risk}"
 }
 
 module "knative_eventing" {
@@ -213,7 +213,7 @@ module "knative_serving" {
 }
 
 module "kserve_controller" {
-  source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/0.15"
+  source     = "git::https://github.com/canonical/kserve-operators//charms/kserve-controller/terraform?ref=track/0.17"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   config = {
     deployment-mode = "serverless",
@@ -222,7 +222,7 @@ module "kserve_controller" {
     no-proxy        = var.no_proxy,
   }
   revision = var.kserve_controller_revision
-  channel  = "0.15/${var.risk}"
+  channel  = "0.17/${var.risk}"
 }
 
 module "kubeflow_dashboard" {
@@ -232,7 +232,7 @@ module "kubeflow_dashboard" {
     "registration-flow" : var.kubeflow_dashboard_registration_flow
   }
   revision = var.kubeflow_dashboard_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "2.0/${var.risk}"
 }
 
 module "kubeflow_profiles" {
@@ -242,7 +242,7 @@ module "kubeflow_profiles" {
     "security-policy" : var.kubeflow_profiles_security_policy
   }
   revision = var.kubeflow_profiles_revision
-  channel  = "1.10/${var.risk}"
+  channel  = "2.0/${var.risk}"
 }
 
 module "kubeflow_roles" {
@@ -257,14 +257,14 @@ module "kubeflow_trainer" {
   source     = "git::https://github.com/canonical/kubeflow-trainer-operator//terraform?ref=track/2.1"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_trainer_revision
-  channel    = "2.1/edge"
+  channel    = "2.1/${var.risk}"
 }
 
 module "kubeflow_volumes" {
   source     = "git::https://github.com/canonical/kubeflow-volumes-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.kubeflow_volumes_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "metacontroller_operator" {
@@ -315,21 +315,21 @@ module "pvcviewer_operator" {
   source     = "git::https://github.com/canonical/pvcviewer-operator//terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.pvcviewer_operator_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "tensorboard_controller" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboard-controller/terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.tensorboard_controller_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "tensorboards_web_app" {
   source     = "git::https://github.com/canonical/kubeflow-tensorboards-operator//charms/tensorboards-web-app/terraform?ref=track/1.10"
   model_name = var.create_model ? juju_model.kubeflow[0].name : local.model
   revision   = var.tensorboards_web_app_revision
-  channel    = "1.10/${var.risk}"
+  channel    = "1.11/${var.risk}"
 }
 
 module "training_operator" {

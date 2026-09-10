@@ -1,0 +1,7 @@
+{
+    "dex_static_username": "admin",
+    "dex_static_password": "admin",
+    "http_proxy": "http://egress.ps7.internal:3128",
+    "https_proxy": "http://egress.ps7.internal:3128",
+    "no_proxy": "10.0.0.0/8"
+}

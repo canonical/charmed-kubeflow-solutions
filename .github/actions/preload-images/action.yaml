@@ -1,0 +1,96 @@
+name: 'Preload Images into Containerd Cache'
+description: >
+  Pulls a list of images into the containerd cache with per-attempt logging,
+  progressive retry delays, and inline failure output.
+inputs:
+  image-list:
+    description: 'Path to the file containing the list of images to preload (one image per line).'
+    required: true
+  ctr-command:
+    description: >
+      Full command prefix used to invoke containerd ctr, including any flags
+      that precede the subcommand (e.g. "sudo microk8s ctr --namespace k8s.io"
+      or "sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io").
+    required: true
+  max-retries:
+    description: 'Maximum number of pull attempts per image.'
+    required: false
+    default: '5'
+  retry-delay:
+    description: 'Base delay in seconds between retry attempts (delay scales linearly with attempt number).'
+    required: false
+    default: '5'
+  pull-extra-args:
+    description: 'Additional arguments to pass to `ctr image pull`.'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Preload images
+      shell: bash
+      run: |
+        echo "Starting image preload process..."
+
+        MAX_RETRIES=${{ inputs.max-retries }}
+        RETRY_DELAY=${{ inputs.retry-delay }}
+        # Split into an array so each word is passed as a separate argument
+        read -ra CTR_CMD <<< "${{ inputs.ctr-command }}"
+        read -ra PULL_EXTRA_ARGS <<< "${{ inputs.pull-extra-args }}"
+
+        IMAGE_LIST="${{ inputs.image-list }}"
+        LOG_DIR=/tmp/image-preload-logs
+        mkdir -p "$LOG_DIR"
+
+        if [ ! -f "$IMAGE_LIST" ]; then touch "$IMAGE_LIST"; fi
+
+        while IFS= read -r image || [ -n "$image" ]; do
+          # Trim whitespace
+          image=$(echo "$image" | xargs)
+
+          # Skip empty lines or commented lines starting with #
+          if [[ -z "$image" || "$image" =~ ^# ]]; then
+            continue
+          fi
+
+          echo "--------------------------------------------------"
+          echo "🚀 Preloading: $image"
+          echo "--------------------------------------------------"
+
+          safe_name=$(echo "$image" | sed 's|[/:@]|_|g')
+          attempt=1
+          success=false
+
+          while [ "$attempt" -le "$MAX_RETRIES" ]; do
+            log_file="$LOG_DIR/${safe_name}.attempt-${attempt}.log"
+
+            if [ "$attempt" -gt 1 ]; then
+              delay=$(( RETRY_DELAY * (attempt - 1) ))
+              echo "⚠️ Attempt $attempt of $MAX_RETRIES: Retrying in ${delay}s..."
+              sleep "$delay"
+            fi
+
+            if "${CTR_CMD[@]}" image pull "${PULL_EXTRA_ARGS[@]}" "$image" >"$log_file" 2>&1; then
+
+              if "${CTR_CMD[@]}" image label "$image" io.cri-containerd.pinned=pinned >>"$log_file" 2>&1; then
+                echo "✅ Successfully pulled $image on attempt $attempt"
+                success=true
+                break
+              else
+                echo "❌ Label failed for $image on attempt $attempt"
+                cat "$log_file"
+              fi
+            else
+              echo "❌ Attempt $attempt failed for $image"
+              cat "$log_file"
+            fi
+
+            ((attempt++))
+          done
+
+          if [ "$success" = false ]; then
+            echo "::error::Failed to pull $image after $MAX_RETRIES attempts."
+            exit 1
+          fi
+        done < "$IMAGE_LIST"
