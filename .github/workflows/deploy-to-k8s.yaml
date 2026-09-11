@@ -126,6 +126,19 @@ jobs:
           sudo concierge prepare --trace
           cd ..
 
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Preload Images into Containerd Cache
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
+          pull-extra-args: --hosts-dir /etc/containerd/hosts.d
+
       - name: Configure Cilium for Istio
         if: matrix.service-mesh-type == 'ambient'
         run: |
@@ -181,6 +194,7 @@ jobs:
           terraform --version
 
       - name: Deploy
+        id: deploy
         timeout-minutes: ${{ matrix.auth-type == 'iam' && 60 || 45 }}
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
@@ -207,23 +221,38 @@ jobs:
 
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
-      - name: Clone UATs repository
-        run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
-          cd ${{ github.workspace }}/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-
-      - name: Preload Images into Containerd Cache
-        uses: ./.github/actions/preload-images
-        with:
-          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
-          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
-          pull-extra-args: --hosts-dir /etc/containerd/hosts.d
-
       - name: Run UATs
+        id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""  --keep-artifacts
+
+      - name: Collect test-kubeflow pod logs
+        id: collect-pod-logs
+        if: failure() && steps.run-uats.outcome == 'failure'
+        run: |
+          LOG_DIR="${{ github.workspace }}/test-kubeflow-pod-logs"
+          mkdir -p "$LOG_DIR"
+          for pod in $(kubectl get pods -n test-kubeflow -o jsonpath='{.items[*].metadata.name}'); do
+            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
+            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
+          done
+
+      - name: Upload test-kubeflow pod logs
+        if: failure() && steps.collect-pod-logs.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-kubeflow-pod-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: test-kubeflow-pod-logs/
+          if-no-files-found: ignore
+
+      - name: Upload notebook UAT artifacts
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/artifacts/
+          if-no-files-found: ignore
 
       - name: Run Identity UI UATs
         id: ui-uats
@@ -232,7 +261,7 @@ jobs:
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           poetry install --no-root
           poetry run playwright install --with-deps chromium
-          tox -e uats-remote -- --include-iam-ui-tests -k ui
+          tox -e uats-remote -- --include-iam-ui-tests --filter ui --keep-artifacts
 
       - name: Upload Playwright artifacts
         if: failure() && steps.ui-uats.outcome == 'failure'
@@ -241,10 +270,6 @@ jobs:
           name: playwright-artifacts-${{ matrix.auth-type }}
           path: charmed-kubeflow-uats/playwright-artifacts/
           if-no-files-found: ignore
-
-      - name: Setup tmate session
-        if: failure()
-        uses: canonical/action-tmate@main
 
       - name: Get juju status
         run: juju status -m kubeflow --relations
@@ -258,27 +283,8 @@ jobs:
             juju status -m "$model" --relations || true
           done
 
-      # On failure, capture debugging resources
-      - name: Get juju debug logs
-        run: juju debug-log --replay --no-tail -m kubeflow
-        if: failure() || cancelled()
-
-      - name: Get juju debug logs for istio and iam models
-        if: (failure() || cancelled()) && matrix.auth-type == 'iam'
-        run: |
-          for model in istio-system iam iam-core; do
-            echo "=== juju debug-log -m $model ==="
-            juju debug-log --replay --no-tail -m "$model" || true
-          done
-
-      - name: Get logs from pods with status = Pending
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
-
-      - name: Get logs from pods with status = Failed
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
-
-      - name: Get logs from pods with status = CrashLoopBackOff
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+      - name: Collect charm debug artifacts
+        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+        with:
+          artifact-prefix: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
         if: failure() || cancelled()
