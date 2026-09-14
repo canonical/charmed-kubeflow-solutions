@@ -276,7 +276,6 @@ jobs:
           name: test-m2m-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           path: |
             test-m2m-pods-logs/*.log
-            charmed-kubeflow-uats/driver/iam/**/*.log
           if-no-files-found: ignore
 
       - name: Upload UATs notebooks artifacts
@@ -284,7 +283,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: uats-notebooks-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          path: charmed-kubeflow-uats/artifacts/
+          path: |
+            charmed-kubeflow-uats/artifacts/
+            charmed-kubeflow-uats/pytest-session.log
           if-no-files-found: ignore
 
       - name: Run Identity UI UATs
