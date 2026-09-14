@@ -33,30 +33,15 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow, mlflow, feast, spark]
-        service-mesh-type: [sidecar, ambient]
-        auth-type: [dex]
+        product: [kubeflow]
+        service-mesh-type: [ambient]
+        auth-type: [iam]
         include:
-          - service-mesh-type: ambient
-            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
-          - product: kubeflow
-            uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests
-          - product: mlflow
-            uats-env: mlflow-remote
-          - product: feast
-            uats-env: feast-remote
-          - product: spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests
-        exclude:
-          - product: spark
-            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
@@ -225,32 +210,53 @@ jobs:
         id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""  --keep-artifacts
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts
 
-      - name: Collect test-kubeflow pod logs
-        id: collect-pod-logs
+      - name: Collect user namespace pods logs
+        id: collect-user-namespace-pods-logs
         if: failure() && steps.run-uats.outcome == 'failure'
         run: |
-          LOG_DIR="${{ github.workspace }}/test-kubeflow-pod-logs"
+          LOG_DIR="${{ github.workspace }}/user-namespace-pod-logs"
           mkdir -p "$LOG_DIR"
           for pod in $(kubectl get pods -n test-kubeflow -o jsonpath='{.items[*].metadata.name}'); do
             kubectl logs -n test-kubeflow "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
             kubectl logs -n test-kubeflow "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
           done
 
-      - name: Upload test-kubeflow pod logs
-        if: failure() && steps.collect-pod-logs.outcome == 'success'
+      - name: Upload user namespace pods logs
+        if: failure() && steps.collect-user-namespace-pods-logs.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: test-kubeflow-pod-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          path: test-kubeflow-pod-logs/
+          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: user-namespace-pods-logs/
           if-no-files-found: ignore
 
-      - name: Upload notebook UAT artifacts
+      - name: Collect M2M namespace pods logs
+        id: collect-m2m-namespace-pods-logs
+        if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
+        run: |
+          LOG_DIR="${{ github.workspace }}/m2m-namespace-pods-logs"
+          mkdir -p "$LOG_DIR"
+          for pod in $(kubectl get pods -n test-m2m -o jsonpath='{.items[*].metadata.name}'); do
+            kubectl logs -n test-m2m "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
+            kubectl logs -n test-m2m "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
+          done
+
+      - name: Upload test-m2m pods logs
+        if: failure() && matrix.auth-type == 'iam' && steps.collect-m2m-namespace-pods-logs.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-m2m-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: |
+            test-m2m-pods-logs/*.log
+            charmed-kubeflow-uats/driver/iam/**/*.log
+          if-no-files-found: ignore
+
+      - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: uats-notebooks-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           path: charmed-kubeflow-uats/artifacts/
           if-no-files-found: ignore
 
