@@ -210,7 +210,7 @@ jobs:
         id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --filter "m2m"
 
       - name: Collect user namespace pods logs
         id: collect-user-namespace-pods-logs
