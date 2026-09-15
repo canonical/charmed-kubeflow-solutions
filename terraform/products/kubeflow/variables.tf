@@ -50,18 +50,10 @@ variable "dex_auth_revision" {
   default     = null
 }
 
-variable "dex_static_username" {
-  description = "dex-auth static username value"
-  type        = string
-  default     = ""
-  sensitive   = true
-}
-
-variable "dex_static_password" {
-  description = "dex-auth static password"
-  type        = string
-  default     = ""
-  sensitive   = true
+variable "dex_auth_config" {
+  description = "Configuration for dex-auth application"
+  type        = map(string)
+  default     = {}
 }
 
 variable "oidc_gatekeeper_revision" {

@@ -80,9 +80,8 @@
 | <a name="input_auth_type"></a> [auth\_type](#input\_auth\_type) | Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service\_mesh\_type = 'ambient'. | `string` | `"dex"` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
 | <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | URL of the grafana\_dashboard interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
+| <a name="input_dex_auth_config"></a> [dex\_auth\_config](#input\_dex\_auth\_config) | Configuration for dex-auth application | `map(string)` | `{}` | no |
 | <a name="input_dex_auth_revision"></a> [dex\_auth\_revision](#input\_dex\_auth\_revision) | Revision of the dex-auth application | `number` | `null` | no |
-| <a name="input_dex_static_password"></a> [dex\_static\_password](#input\_dex\_static\_password) | dex-auth static password | `string` | `""` | no |
-| <a name="input_dex_static_username"></a> [dex\_static\_username](#input\_dex\_static\_username) | dex-auth static username value | `string` | `""` | no |
 | <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Whether to deploy the Feast component (feast-integrator and feast-ui) | `bool` | `false` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Whether to deploy the Katib component | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Whether to deploy the KFP component | `bool` | `true` | no |
