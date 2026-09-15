@@ -258,24 +258,34 @@ jobs:
           path: user-namespace-pods-logs/
           if-no-files-found: ignore
 
-      - name: Collect M2M namespace pods logs
-        id: collect-m2m-namespace-pods-logs
+      - name: Collect M2M namespaces data
+        id: collect-m2m-namespaces-data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
         run: |
-          LOG_DIR="${{ github.workspace }}/m2m-namespace-pods-logs"
-          mkdir -p "$LOG_DIR"
-          for pod in $(kubectl get pods -n test-m2m -o jsonpath='{.items[*].metadata.name}'); do
-            kubectl logs -n test-m2m "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
-            kubectl logs -n test-m2m "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
+          LOG_DIR="${{ github.workspace }}/m2m-namespaces-data"
+          
+          for ns in $(kubectl get namespaces | awk '{print $1}' | grep "test-m2m"); do
+            mkdir -p "$LOG_DIR/$ns/pods"
+            mkdir -p "$LOG_DIR/$ns/rolebindings"
+            mkdir -p "$LOG_DIR/$ns/authorizationpolicies"
+            for pod in $(kubectl get pods -n $ns -o jsonpath='{.items[*].metadata.name}'); do
+              kubectl logs -n $ns "$pod" --all-containers --prefix > "$LOG_DIR/${ns}/pods/${pod}.log" 2>&1 || true
+            done
+            for rolebinding in $(kubectl get rolebindings -n $ns -o jsonpath='{.items[*].metadata.name}'); do
+              kubectl get rolebinding -n $ns "$rolebinding" -o yaml > "$LOG_DIR/${ns}/rolebindings/${rolebinding}.log" 2>&1 || true
+            done
+            for authorizationpolicy in $(kubectl get authorizationpolicies -n $ns -o jsonpath='{.items[*].metadata.name}'); do
+              kubectl get authorizationpolicy -n $ns "$authorizationpolicy" -o yaml > "$LOG_DIR/${ns}/authorizationpolicies/${authorizationpolicy}.log" 2>&1 || true
+            done
           done
 
-      - name: Upload test-m2m pods logs
-        if: failure() && matrix.auth-type == 'iam' && steps.collect-m2m-namespace-pods-logs.outcome == 'success'
+      - name: Upload M2M namespaces data
+        if: failure() && matrix.auth-type == 'iam' && steps.collect-m2m-namespaces-data.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: test-m2m-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           path: |
-            test-m2m-pods-logs/*.log
+            m2m-namespaces-data/**/*.log
           if-no-files-found: ignore
 
       - name: Upload UATs notebooks artifacts
@@ -303,6 +313,29 @@ jobs:
         with:
           name: playwright-artifacts-${{ matrix.auth-type }}
           path: charmed-kubeflow-uats/playwright-artifacts/
+          if-no-files-found: ignore
+
+      - name: Collect control planes pods logs
+        id: collect-control-planes-pods-logs
+        if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
+        run: |
+          LOG_DIR="${{ github.workspace }}/control-planes-pods-logs"
+          
+          for ns in kubeflow istio-system iam iam-core; do
+            mkdir -p "$LOG_DIR/$ns"
+            for pod in $(kubectl get pods -n $ns -o jsonpath='{.items[*].metadata.name}'); do
+              kubectl logs -n $ns "$pod" --all-containers --prefix > "$LOG_DIR/${ns}/${pod}.log" 2>&1 || true
+              kubectl logs -n $ns "$pod" --all-containers --prefix --previous > "$LOG_DIR/${ns}/${pod}-previous.log" 2>&1 || true
+            done
+          done
+
+      - name: Upload control plane pods logs
+        if: failure() && matrix.auth-type == 'iam' && steps.collect-control-planes-pods-logs.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: |
+            control-planes-pods-logs/**/*.log
           if-no-files-found: ignore
 
       - name: Get juju status
