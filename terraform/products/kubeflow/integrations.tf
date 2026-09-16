@@ -91,10 +91,12 @@ resource "juju_integration" "request_auth_m2m" {
   }
 }
 
-# github-profiles-automator joins the in-model service mesh (ambient-iam).
+# github-profiles-automator (in gpa-model) joins the Kubeflow ambient mesh by
+# consuming the beacon's service-mesh offer cross-model. The integration is
+# created on the consuming side (gpa-model).
 resource "juju_integration" "github_profiles_automator_service_mesh" {
   count      = local.ambient_iam ? 1 : 0
-  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  model_uuid = juju_model.gpa[0].uuid
 
   application {
     name     = module.github_profiles_automator[0].requires.service_mesh.name
@@ -102,8 +104,7 @@ resource "juju_integration" "github_profiles_automator_service_mesh" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    offer_url = juju_offer.istio_beacon_k8s_service_mesh[0].url
   }
 }
 
