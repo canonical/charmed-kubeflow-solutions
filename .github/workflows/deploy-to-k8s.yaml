@@ -216,54 +216,20 @@ jobs:
           fi
           tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --filter "m2m"
 
-      - name: Collect user namespace pods logs
-        id: collect-user-namespace-pods-logs
+      - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
-        run: |
-          LOG_DIR="${{ github.workspace }}/user-namespace-pod-logs"
-          mkdir -p "$LOG_DIR"
-          for pod in $(kubectl get pods -n test-kubeflow -o jsonpath='{.items[*].metadata.name}'); do
-            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix > "$LOG_DIR/${pod}.log" 2>&1 || true
-            kubectl logs -n test-kubeflow "$pod" --all-containers --prefix --previous > "$LOG_DIR/${pod}-previous.log" 2>&1 || true
-          done
-
-      - name: Upload user namespace pods logs
-        if: failure() && steps.collect-user-namespace-pods-logs.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/collect-k8s-logs
         with:
           name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          path: user-namespace-pods-logs/
-          if-no-files-found: ignore
+          namespaces: test-kubeflow
 
-      - name: Collect M2M namespaces data
-        id: collect-m2m-namespaces-data
+      - name: Collect and upload M2M namespaces data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
-        run: |
-          LOG_DIR="${{ github.workspace }}/m2m-namespaces-data"
-          
-          for ns in $(kubectl get namespaces | awk '{print $1}' | grep "test-m2m"); do
-            mkdir -p "$LOG_DIR/$ns/pods"
-            mkdir -p "$LOG_DIR/$ns/rolebindings"
-            mkdir -p "$LOG_DIR/$ns/authorizationpolicies"
-            for pod in $(kubectl get pods -n $ns -o jsonpath='{.items[*].metadata.name}'); do
-              kubectl logs -n $ns "$pod" --all-containers --prefix > "$LOG_DIR/${ns}/pods/${pod}.log" 2>&1 || true
-            done
-            for rolebinding in $(kubectl get rolebindings -n $ns -o jsonpath='{.items[*].metadata.name}'); do
-              kubectl get rolebinding -n $ns "$rolebinding" -o yaml > "$LOG_DIR/${ns}/rolebindings/${rolebinding}.log" 2>&1 || true
-            done
-            for authorizationpolicy in $(kubectl get authorizationpolicies -n $ns -o jsonpath='{.items[*].metadata.name}'); do
-              kubectl get authorizationpolicy -n $ns "$authorizationpolicy" -o yaml > "$LOG_DIR/${ns}/authorizationpolicies/${authorizationpolicy}.log" 2>&1 || true
-            done
-          done
-
-      - name: Upload M2M namespaces data
-        if: failure() && matrix.auth-type == 'iam' && steps.collect-m2m-namespaces-data.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/collect-k8s-logs
         with:
           name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          path: |
-            m2m-namespaces-data/**/*.log
-          if-no-files-found: ignore
+          namespace-pattern: test-m2m
+          resources: rolebindings authorizationpolicies
 
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
@@ -281,28 +247,12 @@ jobs:
           path: charmed-kubeflow-uats/playwright-artifacts/
           if-no-files-found: ignore
 
-      - name: Collect control planes pods logs
-        id: collect-control-planes-pods-logs
+      - name: Collect and upload control plane pods logs
         if: failure()
-        run: |
-          LOG_DIR="${{ github.workspace }}/control-planes-pods-logs"
-
-          for ns in kubeflow istio-system iam iam-core; do
-            mkdir -p "$LOG_DIR/$ns"
-            for pod in $(kubectl get pods -n $ns -o jsonpath='{.items[*].metadata.name}'); do
-              kubectl logs -n $ns "$pod" --all-containers --prefix > "$LOG_DIR/${ns}/${pod}.log" 2>&1 || true
-              kubectl logs -n $ns "$pod" --all-containers --prefix --previous > "$LOG_DIR/${ns}/${pod}-previous.log" 2>&1 || true
-            done
-          done
-
-      - name: Upload control plane pods logs
-        if: failure() && matrix.auth-type == 'iam' && steps.collect-control-planes-pods-logs.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/collect-k8s-logs
         with:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          path: |
-            control-planes-pods-logs/**/*.log
-          if-no-files-found: ignore
+          namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
         run: juju status -m kubeflow --relations
@@ -315,9 +265,3 @@ jobs:
             echo "=== juju status -m $model ==="
             juju status -m "$model" --relations || true
           done
-
-      - name: Collect charm debug artifacts
-        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
-        with:
-          artifact-prefix: uat-artifacts-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-        if: failure() || cancelled()
