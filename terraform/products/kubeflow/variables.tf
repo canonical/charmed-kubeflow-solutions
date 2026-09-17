@@ -54,6 +54,7 @@ variable "dex_auth_config" {
   description = "Configuration for dex-auth application"
   type        = map(string)
   default     = {}
+  sensitive   = true
 }
 
 variable "oidc_gatekeeper_revision" {
