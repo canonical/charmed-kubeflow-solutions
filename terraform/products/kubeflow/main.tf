@@ -147,43 +147,16 @@ module "request_authentication_configurator" {
   } : null
 }
 
-# github-profiles-automator runs in a dedicated model so its GitHub-sync
-# workload is isolated from the Kubeflow control plane. The model is always
-# created by this module (there is no bring-your-own option for it).
-resource "juju_model" "gpa" {
-  count = local.ambient_iam ? 1 : 0
-  name  = "gpa-model"
-
-  config = {
-    juju-http-proxy             = var.http_proxy
-    juju-https-proxy            = var.https_proxy
-    juju-no-proxy               = var.no_proxy
-    update-status-hook-interval = "1h"
-  }
-}
-
-# Offer the Kubeflow beacon's service-mesh endpoint so github-profiles-automator,
-# deployed in gpa-model, can join the ambient mesh cross-model. The matching
-# consume is wired in integrations.tf.
-resource "juju_offer" "istio_beacon_k8s_service_mesh" {
-  count            = local.ambient_iam ? 1 : 0
-  model_uuid       = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  name             = "istio-beacon-k8s-service-mesh"
-  application_name = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
-  endpoints        = [module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint]
-}
-
 module "github_profiles_automator" {
   count  = local.ambient_iam ? 1 : 0
   source = "../../charms/github-profiles-automator"
 
-  model_uuid = juju_model.gpa[0].uuid
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   channel    = local.github_profiles_automator_channel
   revision   = var.github_profiles_automator_revision
   config = merge({
     # Istio ingress gateway service-account principals (SPIFFE identities) that
-    # are allowed to reach the profiles, one per ambient gateway. The gateways
-    # live in the Kubeflow model, so the namespace stays kubeflow_model_name.
+    # are allowed to reach the profiles, one per ambient gateway.
     "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient_iam[0].components.istio_ingress_k8s_ui.name}-istio"
     "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient_iam[0].components.istio_ingress_k8s_m2m.name}-istio"
   }, var.github_profiles_automator_config)
