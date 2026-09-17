@@ -33,15 +33,30 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow]
-        service-mesh-type: [ambient]
-        auth-type: [iam]
+        product: [kubeflow, mlflow, feast, spark]
+        service-mesh-type: [sidecar, ambient]
+        auth-type: [dex]
         include:
+          - service-mesh-type: ambient
+            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
+          - product: kubeflow
+            uats-env: kubeflow-remote
+            uats-extra-args: --include-multi-tenancy-tests
+          - product: mlflow
+            uats-env: mlflow-remote
+          - product: feast
+            uats-env: feast-remote
+          - product: spark
+            uats-env: spark-remote
+            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+        exclude:
+          - product: spark
+            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
@@ -214,7 +229,7 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --filter "m2m"
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
