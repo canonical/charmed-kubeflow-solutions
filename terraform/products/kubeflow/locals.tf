@@ -43,7 +43,7 @@ locals {
   istio_k8s_channel         = local.istio_channel
 
   # IAM Auth Charms (ambient)
-  oauth2_proxy_channel                        = "latest/edge"
+  oauth2_proxy_channel                        = "latest/stable"
   request_authentication_configurator_channel = var.release == "1.11" ? "1.0/edge" : "latest/edge"
   github_profiles_automator_channel           = var.release == "1.11" ? "1.0/edge" : "latest/edge"
 
