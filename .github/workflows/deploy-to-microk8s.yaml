@@ -248,7 +248,7 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts
+          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --log-file=uats-session.log
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
@@ -272,7 +272,7 @@ jobs:
           name: uats-notebooks-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           path: |
             charmed-kubeflow-uats/artifacts/
-            charmed-kubeflow-uats/pytest-session.log
+            charmed-kubeflow-uats/uats-session.log
           if-no-files-found: ignore
 
       - name: Upload Playwright artifacts
