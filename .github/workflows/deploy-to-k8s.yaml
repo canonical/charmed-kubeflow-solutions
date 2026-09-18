@@ -53,7 +53,7 @@ jobs:
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
-            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
         exclude:
           - product: spark
             service-mesh-type: ambient
@@ -126,6 +126,19 @@ jobs:
           sudo concierge prepare --trace
           cd ..
 
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Preload Images into Containerd Cache
+        uses: ./.github/actions/preload-images
+        with:
+          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
+          pull-extra-args: --hosts-dir /etc/containerd/hosts.d
+
       - name: Configure Cilium for Istio
         if: matrix.service-mesh-type == 'ambient'
         run: |
@@ -181,6 +194,7 @@ jobs:
           terraform --version
 
       - name: Deploy
+        id: deploy
         timeout-minutes: ${{ matrix.auth-type == 'iam' && 60 || 45 }}
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
@@ -207,44 +221,55 @@ jobs:
 
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
 
-      - name: Clone UATs repository
-        run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
-          cd ${{ github.workspace }}/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-
-      - name: Preload Images into Containerd Cache
-        uses: ./.github/actions/preload-images
-        with:
-          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
-          ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
-          pull-extra-args: --hosts-dir /etc/containerd/hosts.d
-
       - name: Run UATs
+        id: run-uats
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle=""
+          if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
+            poetry install --no-root
+            poetry run playwright install --with-deps chromium
+          fi
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --log-file=uats-session.log
 
-      - name: Run Identity UI UATs
-        id: ui-uats
-        if: matrix.auth-type == 'iam'
-        run: |
-          cd ${{ github.workspace }}/charmed-kubeflow-uats
-          poetry install --no-root
-          poetry run playwright install --with-deps chromium
-          tox -e uats-remote -- --include-iam-ui-tests -k ui
+      - name: Collect and upload user namespace pods logs
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespaces: test-kubeflow
+
+      - name: Collect and upload M2M namespaces data
+        if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespace-pattern: test-m2m
+          resources: rolebindings authorizationpolicies
+
+      - name: Upload UATs notebooks artifacts
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: uats-notebooks-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: |
+            charmed-kubeflow-uats/artifacts/
+            charmed-kubeflow-uats/uats-session.log
+          if-no-files-found: ignore
 
       - name: Upload Playwright artifacts
-        if: failure() && steps.ui-uats.outcome == 'failure'
+        if: failure() && steps.run-uats.outcome == 'failure' && matrix.auth-type == 'iam'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts-${{ matrix.auth-type }}
           path: charmed-kubeflow-uats/playwright-artifacts/
           if-no-files-found: ignore
 
-      - name: Setup tmate session
+      - name: Collect and upload control plane pods logs
         if: failure()
-        uses: canonical/action-tmate@main
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
         run: juju status -m kubeflow --relations
@@ -257,28 +282,3 @@ jobs:
             echo "=== juju status -m $model ==="
             juju status -m "$model" --relations || true
           done
-
-      # On failure, capture debugging resources
-      - name: Get juju debug logs
-        run: juju debug-log --replay --no-tail -m kubeflow
-        if: failure() || cancelled()
-
-      - name: Get juju debug logs for istio and iam models
-        if: (failure() || cancelled()) && matrix.auth-type == 'iam'
-        run: |
-          for model in istio-system iam iam-core; do
-            echo "=== juju debug-log -m $model ==="
-            juju debug-log --replay --no-tail -m "$model" || true
-          done
-
-      - name: Get logs from pods with status = Pending
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
-
-      - name: Get logs from pods with status = Failed
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
-
-      - name: Get logs from pods with status = CrashLoopBackOff
-        run: kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-        if: failure() || cancelled()
