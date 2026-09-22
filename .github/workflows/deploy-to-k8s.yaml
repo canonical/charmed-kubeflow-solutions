@@ -229,7 +229,7 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --log-file=uats-session.log
+          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --bundle="" --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
