@@ -50,6 +50,26 @@ jobs:
             istio-cni-conf-dir: /var/snap/microk8s/current/args/cni-network
         auth-type: [dex]
         include:
+          - product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            uats-extra-args: --include-multi-tenancy-tests
+          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
+          - service-mesh-type: ambient
+            product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
+          - service-mesh-type: ambient
+            product:
+              name: mlflow
+              uats-env: mlflow-remote
+            uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          - service-mesh-type: ambient
+            product:
+              name: feast
+              uats-env: feast-remote
+            uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - service-mesh-type: ambient
             product:
               name: kubeflow

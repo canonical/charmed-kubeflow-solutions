@@ -37,15 +37,23 @@ jobs:
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
         include:
-          - service-mesh-type: ambient
-            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow
             uats-env: kubeflow-remote
             uats-extra-args: --include-multi-tenancy-tests
+          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
+          - product: kubeflow
+            service-mesh-type: ambient
+            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: mlflow
             uats-env: mlflow-remote
+          - product: mlflow
+            service-mesh-type: ambient
+            uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - product: feast
             uats-env: feast-remote
+          - product: feast
+            service-mesh-type: ambient
+            uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - product: spark
             uats-env: spark-remote
             uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
