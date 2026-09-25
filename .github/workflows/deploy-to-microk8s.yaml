@@ -209,7 +209,7 @@ jobs:
 
       - name: Deploy solution
         id: deploy
-        timeout-minutes: ${{ matrix.auth-type == 'iam' && 60 || 45 }}
+        timeout-minutes: 60
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
