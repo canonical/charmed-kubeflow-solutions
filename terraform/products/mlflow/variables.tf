@@ -1,0 +1,364 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+# Juju Settings
+
+variable "release" {
+  type        = string
+  description = "Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks."
+  default     = "latest"
+
+  validation {
+    condition     = contains(["1.11", "latest"], var.release)
+    error_message = "Valid values for var: release are (1.11 and latest)."
+  }
+}
+
+variable "risk" {
+  type        = string
+  description = "Value for the risk to be used"
+  default     = "edge"
+
+  validation {
+    condition     = contains(["stable", "candidate", "beta", "edge"], var.risk)
+    error_message = "Valid values for var: risk are (stable, candidate, beta and edge)."
+  }
+}
+
+variable "create_model" {
+  description = "Create a Juju model named kubeflow for this product deployment"
+  type        = bool
+  default     = true
+}
+
+variable "model_uuid" {
+  description = "UUID of an existing Juju model (required when create_model is false)"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.create_model || var.model_uuid != null
+    error_message = "model_uuid must be provided when create_model is false."
+  }
+}
+
+# S3 Integrator (shared/global) variables
+
+variable "s3_secret_key_global" {
+  description = "S3 secret key for the shared object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_access_key_global" {
+  description = "S3 access key for the shared object storage integration"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_endpoint_global" {
+  description = "S3 endpoint for the shared object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket_global" {
+  description = "S3 bucket for the shared object storage integration"
+  type        = string
+  default     = ""
+}
+
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "s3_tls_ca_chain_global" {
+  description = "PEM-encoded CA chain used for HTTPS validation against the S3 endpoint. When set, it is base64-encoded and passed to the s3-integrator 'tls-ca-chain' config option. Leave empty to omit."
+  type        = string
+  default     = ""
+}
+
+variable "s3_revision_global" {
+  description = "Revision of the shared s3-integrator application"
+  type        = number
+  default     = null
+}
+
+# Object storage backend selection
+
+variable "object_storage_mode" {
+  description = "Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation)"
+  type        = string
+  default     = "S3"
+
+  validation {
+    condition     = contains(["minio", "S3"], var.object_storage_mode)
+    error_message = "Valid values for object_storage_mode are ('minio', 'S3')."
+  }
+}
+
+# Istio Component Applications
+
+variable "service_mesh_type" {
+  description = "Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh)."
+  type        = string
+  default     = "ambient"
+
+  validation {
+    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
+    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
+  }
+}
+
+variable "auth_type" {
+  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
+  type        = string
+  default     = "dex"
+
+  validation {
+    condition     = contains(["dex", "iam"], var.auth_type)
+    error_message = "Valid values for auth_type are (dex, iam)."
+  }
+
+  validation {
+    condition     = !(var.auth_type == "iam" && var.service_mesh_type != "ambient")
+    error_message = "auth_type = 'iam' requires service_mesh_type = 'ambient'."
+  }
+}
+
+# Ambient Component Applications
+
+variable "istio_k8s_revision" {
+  description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
+  type        = number
+  default     = null
+}
+
+variable "istio_k8s_config" {
+  description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_k8s_platform" {
+  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only)."
+  type        = string
+  default     = ""
+}
+
+variable "istio_ingress_k8s_revision" {
+  description = "Revision of the istio-ingress-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "istio_ingress_k8s_config" {
+  description = "Configuration for istio-ingress-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_beacon_k8s_revision" {
+  description = "Revision of the istio-beacon-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "istio_beacon_k8s_config" {
+  description = "Configuration for istio-beacon-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_ui_config" {
+  description = "Extra configuration for the UI istio-ingress-k8s gateway (merged over istio_ingress_k8s_config)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_k8s_m2m_config" {
+  description = "Extra configuration for the M2M istio-ingress-k8s gateway (merged over istio_ingress_k8s_config)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "istio_ingress_config_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of istio-k8s:istio-ingress-config from the
+    istio-system model. The UI ambient gateway consumes this offer. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+# Self-signed certificates for the ambient gateways
+
+variable "self_signed_certificates_channel" {
+  description = "Channel for the self-signed-certificates charm serving the ambient gateways."
+  type        = string
+  default     = "1/stable"
+  nullable    = false
+}
+
+variable "self_signed_certificates_revision" {
+  description = "Revision of the self-signed-certificates application."
+  type        = number
+  default     = null
+}
+
+variable "self_signed_certificates_config" {
+  description = "Configuration for the self-signed-certificates application."
+  type        = map(string)
+  default     = {}
+}
+
+# IAM Auth Applications (ambient only)
+
+variable "oauth_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of hydra:oauth from the iam model. Consumed by
+    oauth2-proxy and request-authentication-configurator. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "send_ca_cert_offer_url" {
+  description = <<-EOT
+    Cross-model offer URL of self-signed-certificates:send-ca-cert from the
+    iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the
+    self-signed CA fronting the Identity Platform. Required when
+    service_mesh_type is 'ambient'.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "oauth2_proxy_revision" {
+  description = "Revision of the oauth2-proxy-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "oauth2_proxy_config" {
+  description = "Configuration for the oauth2-proxy-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "request_authentication_configurator_revision" {
+  description = "Revision of the request-authentication-configurator application"
+  type        = number
+  default     = null
+}
+
+variable "request_authentication_configurator_config" {
+  description = "Configuration for the request-authentication-configurator application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "user_grants_across_workspaces" {
+  type = list(object({
+    data_integrator_app_name = string
+    entity_name              = string
+    entity_permissions       = string
+  }))
+  default = []
+}
+
+variable "mlflow_server_revision" {
+  description = "Revision of the mlflow-server application"
+  type        = number
+  default     = null
+}
+
+variable "mlflow_server_config" {
+  description = "Configuration for mlflow-server application"
+  type        = map(string)
+  default     = {
+    "identity_header_name" = "mlflow-userid"
+  }
+}
+
+# Observability Component
+
+variable "enable_observability" {
+  description = "Whether to deploy the observability component (opentelemetry-collector-k8s)"
+  type        = bool
+  default     = false
+}
+
+variable "dashboards_offer" {
+  description = "URL of the grafana_dashboard interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "logging_offer" {
+  description = "URL of the loki_push_api interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "metrics_offer" {
+  description = "URL of the prometheus_remote_write interface offer from the COS stack (required when enable_observability is true)"
+  type        = string
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_revision" {
+  description = "Revision of the opentelemetry-collector-k8s application"
+  type        = number
+  default     = null
+}
+
+variable "opentelemetry_collector_k8s_config" {
+  description = "Configuration for the opentelemetry-collector-k8s application"
+  type        = map(string)
+  default     = {}
+}
+
+# PostgreSQL
+
+variable "postgresql_revision" {
+  description = "Revision of the postgresql application"
+  type        = number
+  default     = null
+}
+
+variable "postgresql_config" {
+  description = "Configuration for the postgresql application"
+  type        = map(string)
+  default     = {}
+}
+
+variable "postgresql_storage_size" {
+  description = "PostgreSQL database storage size"
+  type        = string
+  default     = "10G"
+}
+
+variable "http_proxy" {
+  description = "Value of the http_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "https_proxy" {
+  description = "Value of the https_proxy environment variable"
+  type        = string
+  default     = ""
+}
+
+variable "no_proxy" {
+  description = "Value of the no_proxy environment variable"
+  type        = string
+  default     = ""
+}

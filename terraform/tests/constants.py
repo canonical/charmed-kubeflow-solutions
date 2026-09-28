@@ -3,7 +3,7 @@
 
 """Shared constants for the Terraform deployment tests."""
 
-# External hostnames for the kubeflow-ambient-iam solution, shared between the
+# External hostnames for the ambient-IAM solutions, shared between the
 # Terraform variables (conftest) and the DNS/assertion logic (test_deployment).
 UI_HOSTNAME = "ui.kubeflow.com"
 M2M_HOSTNAME = "api.kubeflow.com"
