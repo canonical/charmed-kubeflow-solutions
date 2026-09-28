@@ -5,6 +5,9 @@
 
 # External hostnames for the ambient-IAM solutions, shared between the
 # Terraform variables (conftest) and the DNS/assertion logic (test_deployment).
-UI_HOSTNAME = "ui.kubeflow.com"
-M2M_HOSTNAME = "api.kubeflow.com"
-AUTH_HOSTNAME = "auth.kubeflow.com"
+KUBEFLOW_AUTH_HOSTNAME = "auth.kubeflow.com"
+KUBEFLOW_M2M_HOSTNAME = "api.kubeflow.com"
+KUBEFLOW_UI_HOSTNAME = "ui.kubeflow.com"
+MLFLOW_AUTH_HOSTNAME = "auth.mlflow.com"
+MLFLOW_M2M_HOSTNAME = "api.mlflow.com"
+MLFLOW_UI_HOSTNAME = "ui.mlflow.com"

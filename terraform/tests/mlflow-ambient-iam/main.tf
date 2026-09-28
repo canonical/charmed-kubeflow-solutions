@@ -124,4 +124,6 @@ module "mlflow" {
   dashboards_offer     = var.dashboards_offer
   logging_offer        = var.logging_offer
   metrics_offer        = var.metrics_offer
+
+  user_grants_across_workspaces = var.user_grants_across_workspaces
 }

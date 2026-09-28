@@ -8,7 +8,14 @@ import lightkube
 import pytest
 import requests
 import tenacity
-from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
+from constants import (
+    KUBEFLOW_AUTH_HOSTNAME,
+    KUBEFLOW_M2M_HOSTNAME,
+    KUBEFLOW_UI_HOSTNAME,
+    MLFLOW_AUTH_HOSTNAME,
+    MLFLOW_M2M_HOSTNAME,
+    MLFLOW_UI_HOSTNAME,
+)
 from lightkube.core.exceptions import ApiError
 from lightkube.resources.core_v1 import ConfigMap, Service
 
@@ -116,7 +123,7 @@ class TestCharm:
             # requests.get substring check is brittle because the login-ui is a
             # client-rendered Next.js SPA whose __NEXT_DATA__ shape is not stable.
             result_status, _ = fetch_response(
-                f"https://{UI_HOSTNAME}", verify=False
+                f"https://{KUBEFLOW_UI_HOSTNAME}", verify=False
             )
             assert result_status == 200
             return
@@ -181,13 +188,13 @@ def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
         text=True,
         check=True,
     )
-    if f"http://{UI_HOSTNAME}" not in result.stdout:
+    if f"http://{KUBEFLOW_UI_HOSTNAME}" not in result.stdout:
         return
 
     logger.info(
         "Hydra has a stale http:// redirect_uri for %s; toggling the oauth "
         "relation to force re-registration (hydra-operator#591)",
-        UI_HOSTNAME,
+        KUBEFLOW_UI_HOSTNAME,
     )
     oauth2_proxy_oauth = f"{OAUTH2_PROXY_APP}:oauth"
     # Remove then re-add the relation so Hydra drops and recreates the client.
@@ -287,17 +294,17 @@ def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
     external hostnames and reconcile to active.
     """
     host_to_ip = {
-        UI_HOSTNAME: _wait_for_lb_ip(
+        KUBEFLOW_UI_HOSTNAME: _wait_for_lb_ip(
             lightkube_client,
             "kubeflow",
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-ui"},
         ),
-        M2M_HOSTNAME: _wait_for_lb_ip(
+        KUBEFLOW_M2M_HOSTNAME: _wait_for_lb_ip(
             lightkube_client,
             "kubeflow",
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-m2m"},
         ),
-        AUTH_HOSTNAME: _wait_for_lb_ip(
+        KUBEFLOW_AUTH_HOSTNAME: _wait_for_lb_ip(
             lightkube_client,
             "iam-core",
             {"kubernetes-resource-handler-scope": "traefik-loadbalancer"},

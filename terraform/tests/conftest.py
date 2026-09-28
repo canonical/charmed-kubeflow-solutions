@@ -1,7 +1,14 @@
 import jubilant
 import pytest
 
-from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
+from constants import (
+    KUBEFLOW_AUTH_HOSTNAME,
+    KUBEFLOW_M2M_HOSTNAME,
+    KUBEFLOW_UI_HOSTNAME,
+    MLFLOW_AUTH_HOSTNAME,
+    MLFLOW_M2M_HOSTNAME,
+    MLFLOW_UI_HOSTNAME,
+)
 from dotenv import load_dotenv
 import os
 
@@ -52,9 +59,14 @@ def pytest_addoption(parser):
         help="Risk to be used when deploying the terraform module",
     )
     parser.addoption(
+        "--enable-kubeflow",
+        action="store_true",
+        help="Enable to deploy also Kubeflow",
+    )
+    parser.addoption(
         "--enable-mlflow",
         action="store_true",
-        help="Enable to deploy also mlflow",
+        help="Enable to deploy also MLflow",
     )
     parser.addoption(
         "--enable-feast",
@@ -138,6 +150,14 @@ def risk(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def enable_kubeflow(request) -> list[str]:
+    """Terraform module customization for Kubeflow deployment."""
+    if request.config.getoption("--enable-kubeflow"):
+        return ["-var", "enable_kubeflow=true"]
+    return []
+
+
+@pytest.fixture(scope="module")
 def enable_mlflow(request) -> list[str]:
     """Terraform module customization for MLFlow deployment."""
     if request.config.getoption("--enable-mlflow"):
@@ -175,6 +195,12 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def is_mlflow_standalone(enable_kubeflow, enable_mlflow) -> bool:
+    """Return whether MLflow is deployed without Kubeflow."""
+    return enable_mlflow and not enable_kubeflow
+
+
+@pytest.fixture(scope="module")
 def solution_module_path(request) -> str:
     """Path to the Terraform root module to apply for the selected auth stack."""
     if request.config.getoption("--auth-type") == "iam":
@@ -200,6 +226,21 @@ def setup_s3_integrator_global() -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def mlflow_user_grants_across_workspaces(request) -> list[str]:
+    """Terraform module customization for MLflow user grants across workspaces."""
+    return [
+        "-var",
+        (
+            'user_grants_across_workspaces={'
+            'data_integrator_app_name="test-user-grants",'
+            'entity_name="test-kubeflow",'
+            'entity_permissions="[{\"resource_type\": \"workspace\", \"resource_name\": \"test-workspace\", \"privileges\": [\"admin\"]}]"'  # noqa: E501
+            '}'
+        ),
+    ]
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
     request,
     risk,
@@ -209,8 +250,10 @@ def tf_vars(
     enable_mlflow,
     enable_feast,
     enable_spark,
+    is_mlflow_standalone,
     pss,
     setup_s3_integrator_global,
+    mlflow_user_grants_across_workspaces,
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
@@ -225,23 +268,43 @@ def tf_vars(
                 "--auth-type=iam requires --service-mesh-type=ambient; "
                 f"got {service_mesh!r}"
             )
+        if is_mlflow_standalone:
+            return (
+                istio_k8s_platform
+                + risk
+                + setup_s3_integrator_global
+                + mlflow_user_grants_across_workspaces
+                + [
+                    "-var",
+                    "create_model=false",
+                    "-var",
+                    "object_storage_mode=S3",
+                    "-var",
+                    f"external_ui_hostname={MLFLOW_UI_HOSTNAME}",
+                    "-var",
+                    f"external_m2m_hostname={MLFLOW_M2M_HOSTNAME}",
+                    "-var",
+                    f"external_auth_hostname={MLFLOW_AUTH_HOSTNAME}",
+                ]
+            )
         return (
             enable_mlflow
             + enable_feast
             + istio_k8s_platform
             + risk
             + setup_s3_integrator_global
+            + mlflow_user_grants_across_workspaces
             + [
                 "-var",
                 "create_model=false",
                 "-var",
                 "object_storage_mode=S3",
                 "-var",
-                f"external_ui_hostname={UI_HOSTNAME}",
+                f"external_ui_hostname={KUBEFLOW_UI_HOSTNAME}",
                 "-var",
-                f"external_m2m_hostname={M2M_HOSTNAME}",
+                f"external_m2m_hostname={KUBEFLOW_M2M_HOSTNAME}",
                 "-var",
-                f"external_auth_hostname={AUTH_HOSTNAME}",
+                f"external_auth_hostname={KUBEFLOW_AUTH_HOSTNAME}",
                 "-var",
                 (
                     "github_profiles_automator_config={"
