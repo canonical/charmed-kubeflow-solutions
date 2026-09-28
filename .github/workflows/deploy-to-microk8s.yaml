@@ -35,11 +35,11 @@ jobs:
       matrix:
         service-mesh-type: [sidecar, ambient]
         product:
-          - name: kubeflow
+          - name: kubeflow-standalone
             uats-env: kubeflow-remote
-          - name: mlflow
+          - name: kubeflow-mlflow
             uats-env: mlflow-remote
-          - name: feast
+          - name: kubeflow-feast
             uats-env: feast-remote
         pod-security-standards:
           - policy: privileged
@@ -72,7 +72,7 @@ jobs:
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - service-mesh-type: ambient
             product:
-              name: kubeflow
+              name: kubeflow-standalone
               uats-env: kubeflow-remote
             pod-security-standards:
               policy: privileged
@@ -250,12 +250,14 @@ jobs:
             PLATFORM_ARG="--istio-k8s-platform microk8s"
           fi
 
-          if [[ "${{ matrix.product.name }}" == "mlflow" ]]; then
-            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-mlflow"
-          elif [[ "${{ matrix.product.name }}" == "feast" ]]; then
-            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-feast"
-          elif [[ "${{ matrix.product.name }}" == "spark" ]]; then
-            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-spark"
+          if [[ "${{ matrix.product.name }}" == "kubeflow-mlflow" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-mlflow"
+          elif [[ "${{ matrix.product.name }}" == "mlflow-standalone" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-kubeflow=false --enable-mlflow"
+          elif [[ "${{ matrix.product.name }}" == "kubeflow-feast" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-feast"
+          elif [[ "${{ matrix.product.name }}" == "kubeflow-spark" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
