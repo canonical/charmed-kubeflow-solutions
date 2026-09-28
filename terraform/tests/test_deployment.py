@@ -8,14 +8,6 @@ import lightkube
 import pytest
 import requests
 import tenacity
-from constants import (
-    KUBEFLOW_AUTH_HOSTNAME,
-    KUBEFLOW_M2M_HOSTNAME,
-    KUBEFLOW_UI_HOSTNAME,
-    MLFLOW_AUTH_HOSTNAME,
-    MLFLOW_M2M_HOSTNAME,
-    MLFLOW_UI_HOSTNAME,
-)
 from lightkube.core.exceptions import ApiError
 from lightkube.resources.core_v1 import ConfigMap, Service
 
@@ -72,7 +64,7 @@ class TestCharm:
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
     def test_assert_deployment(
-        self, juju: jubilant.Juju, lightkube_client, request
+        self, juju: jubilant.Juju, lightkube_client, request, hostname_ui
     ):
         """
         Wait for the applications to become active and idle and verify its public URL access.
@@ -123,7 +115,7 @@ class TestCharm:
             # requests.get substring check is brittle because the login-ui is a
             # client-rendered Next.js SPA whose __NEXT_DATA__ shape is not stable.
             result_status, _ = fetch_response(
-                f"https://{KUBEFLOW_UI_HOSTNAME}", verify=False
+                f"https://{hostname_ui}", verify=False
             )
             assert result_status == 200
             return
@@ -173,7 +165,7 @@ def fetch_response(url, headers=None, verify=True):
 
 # BEGIN workaround: hydra-operator#591 (remove this whole helper once fixed).
 # https://github.com/canonical/hydra-operator/issues/591
-def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
+def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str], hostname_ui: str) -> None:
     """Re-register oauth2-proxy's Hydra client if its redirect_uri is stale.
 
     Hydra does not patch an already-registered OAuth client when the requirer's
@@ -188,13 +180,13 @@ def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
         text=True,
         check=True,
     )
-    if f"http://{KUBEFLOW_UI_HOSTNAME}" not in result.stdout:
+    if f"http://{hostname_ui}" not in result.stdout:
         return
 
     logger.info(
         "Hydra has a stale http:// redirect_uri for %s; toggling the oauth "
         "relation to force re-registration (hydra-operator#591)",
-        KUBEFLOW_UI_HOSTNAME,
+        hostname_ui,
     )
     oauth2_proxy_oauth = f"{OAUTH2_PROXY_APP}:oauth"
     # Remove then re-add the relation so Hydra drops and recreates the client.
@@ -286,7 +278,12 @@ def _coredns_configmap(lightkube_client: lightkube.Client) -> ConfigMap:
     raise RuntimeError("CoreDNS ConfigMap not found in kube-system")
 
 
-def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
+def configure_dns(
+    lightkube_client: lightkube.Client,
+    hostname_auth: str,
+    hostname_m2m: str,
+    hostname_ui: str,
+) -> dict[str, str]:
     """Resolve the ambient-iam hostnames to their LoadBalancer IPs.
 
     Both the in-cluster DNS (CoreDNS) and the runner host (/etc/hosts) are
@@ -294,17 +291,17 @@ def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
     external hostnames and reconcile to active.
     """
     host_to_ip = {
-        KUBEFLOW_UI_HOSTNAME: _wait_for_lb_ip(
+        hostname_ui: _wait_for_lb_ip(
             lightkube_client,
             "kubeflow",
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-ui"},
         ),
-        KUBEFLOW_M2M_HOSTNAME: _wait_for_lb_ip(
+        hostname_m2m: _wait_for_lb_ip(
             lightkube_client,
             "kubeflow",
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-m2m"},
         ),
-        KUBEFLOW_AUTH_HOSTNAME: _wait_for_lb_ip(
+        hostname_auth: _wait_for_lb_ip(
             lightkube_client,
             "iam-core",
             {"kubernetes-resource-handler-scope": "traefik-loadbalancer"},
