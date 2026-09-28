@@ -1,28 +1,10 @@
 import jubilant
 import pytest
 
-from constants import (
-    KUBEFLOW_AUTH_HOSTNAME,
-    KUBEFLOW_M2M_HOSTNAME,
-    KUBEFLOW_UI_HOSTNAME,
-    MLFLOW_AUTH_HOSTNAME,
-    MLFLOW_M2M_HOSTNAME,
-    MLFLOW_UI_HOSTNAME,
-)
 from dotenv import load_dotenv
 import os
 
-MODEL_NAME = "kubeflow"
-
 load_dotenv()
-
-
-@pytest.fixture(scope="module")
-def juju():
-    juju_instance = jubilant.Juju()
-    juju_instance.add_model(MODEL_NAME)
-
-    yield juju_instance
 
 
 def pytest_addoption(parser):
@@ -201,9 +183,38 @@ def is_mlflow_standalone(enable_kubeflow, enable_mlflow) -> bool:
 
 
 @pytest.fixture(scope="module")
-def solution_module_path(request) -> str:
+def model_name(is_mlflow_standalone):
+    return "mlflow" if is_mlflow_standalone else "kubeflow"
+
+
+@pytest.fixture(scope="module")
+def juju(model_name):
+    juju_instance = jubilant.Juju()
+    juju_instance.add_model(model_name)
+    yield juju_instance
+
+
+@pytest.fixture(scope="module")
+def hostname_auth(model_name):
+    return f"auth.{model_name}.com"
+
+
+@pytest.fixture(scope="module")
+def hostname_m2m(model_name):
+    return f"api.{model_name}.com"
+
+
+@pytest.fixture(scope="module")
+def hostname_ui(model_name):
+    return f"ui.{model_name}.com"
+
+
+@pytest.fixture(scope="module")
+def solution_module_path(request, is_mlflow_standalone) -> str:
     """Path to the Terraform root module to apply for the selected auth stack."""
     if request.config.getoption("--auth-type") == "iam":
+        if is_mlflow_standalone:
+            return "./../tests/mlflow-ambient-iam"
         return "./../tests/kubeflow-ambient-iam"
     return "./../products/kubeflow"
 
@@ -251,6 +262,9 @@ def tf_vars(
     enable_feast,
     enable_spark,
     is_mlflow_standalone,
+    hostname_auth,
+    hostname_m2m,
+    hostname_ui,
     pss,
     setup_s3_integrator_global,
     mlflow_user_grants_across_workspaces,
@@ -280,11 +294,11 @@ def tf_vars(
                     "-var",
                     "object_storage_mode=S3",
                     "-var",
-                    f"external_ui_hostname={MLFLOW_UI_HOSTNAME}",
+                    f"external_ui_hostname={hostname_ui}",
                     "-var",
-                    f"external_m2m_hostname={MLFLOW_M2M_HOSTNAME}",
+                    f"external_m2m_hostname={hostname_m2m}",
                     "-var",
-                    f"external_auth_hostname={MLFLOW_AUTH_HOSTNAME}",
+                    f"external_auth_hostname={hostname_auth}",
                 ]
             )
         return (
@@ -300,11 +314,11 @@ def tf_vars(
                 "-var",
                 "object_storage_mode=S3",
                 "-var",
-                f"external_ui_hostname={KUBEFLOW_UI_HOSTNAME}",
+                f"external_ui_hostname={hostname_ui}",
                 "-var",
-                f"external_m2m_hostname={KUBEFLOW_M2M_HOSTNAME}",
+                f"external_m2m_hostname={hostname_m2m}",
                 "-var",
-                f"external_auth_hostname={KUBEFLOW_AUTH_HOSTNAME}",
+                f"external_auth_hostname={hostname_auth}",
                 "-var",
                 (
                     "github_profiles_automator_config={"
