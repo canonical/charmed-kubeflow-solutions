@@ -250,3 +250,13 @@ variable "s3_bucket_global" {
   type        = string
   default     = ""
 }
+
+variable "user_grants_across_workspaces" {
+  description = "Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances"
+  type        = list(object({
+    data_integrator_app_name = string
+    entity_name              = string
+    entity_permissions       = string
+  }))
+  default = []
+}
