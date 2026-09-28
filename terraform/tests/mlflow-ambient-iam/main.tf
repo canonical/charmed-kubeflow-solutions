@@ -26,10 +26,6 @@ locals {
     var.istio_ingress_k8s_m2m_config,
     var.external_m2m_hostname != null ? { external_hostname = var.external_m2m_hostname } : {}
   )
-  kserve_controller_config = merge(
-    var.kserve_controller_config,
-    var.external_m2m_hostname != null ? { "domain-name" = var.external_m2m_hostname } : {}
-  )
   traefik_config = merge(
     var.traefik_config,
     var.external_auth_hostname != null ? { external_hostname = var.external_auth_hostname } : {}
