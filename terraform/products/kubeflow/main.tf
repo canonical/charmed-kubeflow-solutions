@@ -356,7 +356,7 @@ module "katib" {
 
 resource "juju_secret" "s3_secret_global" {
   depends_on = [juju_model.kubeflow]
-  count      = local.deploy_s3_integrator ? 1 : 0
+  count      = 1
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   name       = "s3_secret_global"
   value = {
@@ -368,7 +368,7 @@ resource "juju_secret" "s3_secret_global" {
 
 module "s3_global" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global]
-  count      = local.deploy_s3_integrator ? 1 : 0
+  count      = 1
   source     = "../../charms/s3-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -391,7 +391,7 @@ module "s3_global" {
 
 resource "juju_access_secret" "s3_secret_access_global" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global, module.s3_global]
-  count      = local.deploy_s3_integrator ? 1 : 0
+  count      = 1
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   applications = [
@@ -420,7 +420,7 @@ module "kfp" {
     endpoint = module.minio[0].provides.object_storage.endpoint
   } : null
 
-  s3_credentials = local.deploy_s3_integrator ? {
+  s3_credentials = (!local.deploy_minio) ? {
     kind     = "endpoint"
     name     = module.s3_global[0].provides.s3_credentials.name
     endpoint = module.s3_global[0].provides.s3_credentials.endpoint
@@ -627,23 +627,17 @@ module "mlflow" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  mysql_database = {
+  postgresql_database = {
     kind     = "endpoint"
-    name     = module.mysql[0].app_name
-    endpoint = module.mysql[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
-  object_storage = local.deploy_minio ? {
-    kind     = "endpoint"
-    name     = module.minio[0].provides.object_storage.name
-    endpoint = module.minio[0].provides.object_storage.endpoint
-  } : null
-
-  s3_credentials = local.deploy_s3_integrator ? {
+  s3_credentials = {
     kind     = "endpoint"
     name     = module.s3_global[0].provides.s3_credentials.name
     endpoint = module.s3_global[0].provides.s3_credentials.endpoint
-  } : null
+  }
 
   secrets = {
     kind     = "endpoint"

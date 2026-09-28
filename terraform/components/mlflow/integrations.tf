@@ -18,9 +18,9 @@ resource "juju_integration" "mlflow_server_dashboard_links" {
   }
 }
 
-# MLflow Server relational-db integration (mysql-k8s:database -> mlflow-server)
-resource "juju_integration" "mlflow_server_mysql_database" {
-  count      = var.mysql_database != null ? 1 : 0
+# MLflow Server relational-db integration (postgresql-k8s:database -> mlflow-server)
+resource "juju_integration" "mlflow_server_postgresql_database" {
+  count      = var.postgresql_database != null ? 1 : 0
   model_uuid = var.model_uuid
 
   application {
@@ -29,9 +29,9 @@ resource "juju_integration" "mlflow_server_mysql_database" {
   }
 
   application {
-    name      = var.mysql_database.kind == "endpoint" ? var.mysql_database.name : null
-    endpoint  = var.mysql_database.kind == "endpoint" ? var.mysql_database.endpoint : null
-    offer_url = var.mysql_database.kind == "offer" ? var.mysql_database.url : null
+    name      = var.postgresql_database.kind == "endpoint" ? var.postgresql_database.name : null
+    endpoint  = var.postgresql_database.kind == "endpoint" ? var.postgresql_database.endpoint : null
+    offer_url = var.postgresql_database.kind == "offer" ? var.postgresql_database.url : null
   }
 }
 
@@ -49,40 +49,6 @@ resource "juju_integration" "mlflow_server_s3_credentials" {
     name      = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.name : null
     endpoint  = var.s3_credentials.kind == "endpoint" ? var.s3_credentials.endpoint : null
     offer_url = var.s3_credentials.kind == "offer" ? var.s3_credentials.url : null
-  }
-}
-
-# MLflow Server object-storage integration (minio:object-storage -> mlflow-server)
-resource "juju_integration" "mlflow_server_object_storage" {
-  count      = var.object_storage != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.mlflow_server.name
-    endpoint = "object-storage"
-  }
-
-  application {
-    name      = var.object_storage.kind == "endpoint" ? var.object_storage.name : null
-    endpoint  = var.object_storage.kind == "endpoint" ? var.object_storage.endpoint : null
-    offer_url = var.object_storage.kind == "offer" ? var.object_storage.url : null
-  }
-}
-
-# MLflow Server ingress integration - sidecar (istio-pilot:ingress -> mlflow-server)
-resource "juju_integration" "mlflow_server_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.mlflow_server.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
   }
 }
 
