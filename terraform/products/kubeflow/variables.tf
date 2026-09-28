@@ -756,7 +756,7 @@ variable "mlflow_server_revision" {
 variable "mlflow_server_config" {
   description = "Configuration for mlflow-server application"
   type        = map(string)
-  default     = {
+  default = {
     "identity_header_name" = "kubeflow-userid"
   }
 }

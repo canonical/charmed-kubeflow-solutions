@@ -72,8 +72,8 @@ locals {
   deploy_mysql    = var.enable_kfp || var.enable_katib
 
   # Object storage backend selection ('minio' or 'S3')
-  deploy_minio             = var.object_storage_mode == "minio" && (var.enable_kfp || var.enable_kserve)
-  deploy_s3_integrator     = var.enable_mlflow
+  deploy_minio         = var.object_storage_mode == "minio" && (var.enable_kfp || var.enable_kserve)
+  deploy_s3_integrator = var.enable_mlflow
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"

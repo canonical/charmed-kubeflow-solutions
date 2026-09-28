@@ -101,10 +101,10 @@ module "iam" {
 module "mlflow" {
   source = "../../products/mlflow"
 
-  release           = var.release
-  risk              = var.risk
-  create_model      = var.create_model
-  model_uuid        = var.model_uuid
+  release      = var.release
+  risk         = var.risk
+  create_model = var.create_model
+  model_uuid   = var.model_uuid
 
   # Cross-model wiring
   istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url
