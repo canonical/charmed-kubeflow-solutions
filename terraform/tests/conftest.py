@@ -244,7 +244,7 @@ def mlflow_user_grants_across_workspaces(request) -> list[str]:
         (
             'user_grants_across_workspaces={'
             'data_integrator_app_name="test-user-grants",'
-            'entity_name="test-kubeflow",'
+            'entity_name="test-kubeflow",'  # NOTE: same as the Kubeflow Profile's name in the UATs
             'entity_permissions="[{\"resource_type\": \"workspace\", \"resource_name\": \"test-workspace\", \"privileges\": [\"admin\"]}]"'  # noqa: E501
             '}'
         ),
@@ -271,9 +271,9 @@ def tf_vars(
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
-        # The kubeflow-ambient-iam root always deploys ambient + iam and lets
-        # Terraform create the istio-system, iam and iam-core models. Only the
-        # kubeflow model is pre-created by the test and referenced via model_uuid.
+        # The kubeflow-ambient-iam and mlflow-ambient-iam roots always  ambient + iam and lets
+        # Terraform create the istio-system, iam and iam-core models. Only the kubeflow/mlflow
+        # model is pre-created by the test and referenced via model_uuid.
 
         # Validate that the service mesh type is ambient, as required by the IAM auth stack.
         service_mesh = request.config.getoption("--service-mesh-type")
