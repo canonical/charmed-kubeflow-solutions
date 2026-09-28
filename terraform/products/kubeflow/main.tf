@@ -615,7 +615,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
+  depends_on = [module.ambient_iam, module.s3_global, module.postgresql, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
@@ -650,12 +650,6 @@ module "mlflow" {
     name     = module.resource_dispatcher.provides.pod_defaults.name
     endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
-
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
 
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
