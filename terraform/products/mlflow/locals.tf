@@ -38,16 +38,10 @@ locals {
     endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
   }
 
-  ui_gateway_metadata = {
+  m2m_istio_ingress_route = {
     kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
-  }
-
-  m2m_gateway_metadata = {
-    kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
   }
 
   # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
