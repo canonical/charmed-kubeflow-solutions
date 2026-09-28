@@ -12,31 +12,13 @@ resource "juju_model" "mlflow" {
   }
 }
 
-module "istio" {
-  count  = local.sidecar ? 1 : 0
-  source = "../../components/istio-sidecar"
-
-  model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
-
-  istio_pilot = {
-    channel  = local.istio_sidecar_channel
-    revision = var.istio_pilot_revision
-    config   = local.istio_pilot_config
-  }
-  istio_ingressgateway = {
-    channel  = local.istio_sidecar_channel
-    revision = var.istio_ingressgateway_revision
-    config   = var.istio_ingressgateway_config
-  }
-}
-
 # === Ambient service mesh =================================================
 # Unlike Kubeflow, only one ambient submode allowed:
 #  - ambient-iam: two gateways (UI/M2M) + beacon here; istio-k8s runs in the
 #    istio-system model (cross-model istio-ingress-config offer); IAM auth.
 
 module "ambient_iam" {
-  count  = local.ambient_iam ? 1 : 0
+  count  = 1
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
@@ -59,10 +41,10 @@ module "ambient_iam" {
   # istio-system model), so this object is gated on the known service_mesh_type
   # rather than on the URL value — otherwise the gateways' integration count
   # would depend on an unknown value.
-  istio_ingress_config = local.ambient_iam ? {
+  istio_ingress_config = {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
-  } : null
+  }
 }
 
 # === IAM forward-auth + request-auth stack (ambient only) ===================
@@ -71,7 +53,7 @@ module "ambient_iam" {
 # gateways. Both consume Hydra oauth from the iam model cross-model.
 
 module "oauth2_proxy" {
-  count  = local.ambient_iam ? 1 : 0
+  count  = 1
   source = "../../charms/oauth2-proxy-k8s"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
@@ -86,22 +68,22 @@ module "oauth2_proxy" {
 
   # Gated on the known mode (not the offer URL, which is only known
   # after apply) so oauth2-proxy's oauth integration count is plan-determinable.
-  oauth = local.ambient_iam ? {
+  oauth = {
     kind = "offer"
     url  = var.oauth_offer_url
-  } : null
+  }
 
   # Trust the self-signed CA fronting the Identity Platform via the send-ca-cert
   # offer from the iam-core model. Gated on the known mode so the
   # integration count is plan-determinable.
-  ca_cert = local.ambient_iam ? {
+  ca_cert = {
     kind = "offer"
     url  = var.send_ca_cert_offer_url
-  } : null
+  }
 }
 
 module "request_authentication_configurator" {
-  count  = local.ambient_iam ? 1 : 0
+  count  = 1
   source = "../../charms/request-authentication-configurator"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
@@ -114,16 +96,16 @@ module "request_authentication_configurator" {
 
   # Gated on the known mode (not the offer URL, which is only known
   # after apply) so the oauth integration count is plan-determinable.
-  oauth = local.ambient_iam ? {
+  oauth = {
     kind = "offer"
     url  = var.oauth_offer_url
-  } : null
+  }
 }
 
 # TLS certificates for the ambient gateways. Provides the `certificates`
 # relation consumed by both istio-ingress-k8s gateways.
 resource "juju_application" "self_signed_certificates" {
-  count = local.ambient_iam ? 1 : 0
+  count = 1
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
   name       = "self-signed-certificates"
@@ -189,7 +171,7 @@ resource "juju_access_secret" "s3_secret_access_global" {
 }
 
 module "mlflow" {
-  count      = var.enable_mlflow ? 1 : 0
+  count      = 1
   depends_on = [module.ambient_iam, module.s3_global, module.postgresql]
 
   source = "../../components/mlflow"
@@ -226,8 +208,8 @@ module "mlflow" {
 }
 
 module "postgresql" {
-  count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
+  count      = 1
+  depends_on = [module.ambient_iam]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
@@ -278,10 +260,6 @@ module "observability" {
     revision = var.opentelemetry_collector_k8s_revision
     config   = var.opentelemetry_collector_k8s_config
   }
-
-  # Minio
-  minio_grafana_dashboard = local.deploy_minio ? module.minio[0].provides.grafana_dashboard : null
-  minio_metrics_endpoint  = local.deploy_minio ? module.minio[0].provides.metrics_endpoint : null
 
   # Service mesh (ambient only)
   service_mesh = local.beacon
