@@ -214,8 +214,9 @@ module "mlflow" {
 
   pod_defaults = null
 
-  service_mesh        = local.service_mesh
-  istio_ingress_route = local.ui_istio_ingress_route
+  service_mesh            = local.service_mesh
+  m2m_istio_ingress_route = local.m2m_istio_ingress_route
+  ui_istio_ingress_route  = local.ui_istio_ingress_route
 
   mlflow_server = {
     channel  = local.mlflow_channel

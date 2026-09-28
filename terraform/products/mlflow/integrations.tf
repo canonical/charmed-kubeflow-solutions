@@ -130,3 +130,18 @@ resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
     endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
   }
 }
+
+resource "juju_integration" "mlflow_server_ui_istio_ingress_route" {
+  count      = 1
+  model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
+
+  application {
+    name     = module.mlflow[0].components.mlflow_server.name
+    endpoint = "istio-ingress-route"
+  }
+
+  application {
+    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
+    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+  }
+}
