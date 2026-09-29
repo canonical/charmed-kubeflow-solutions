@@ -38,12 +38,6 @@ locals {
     endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
   }
 
-  m2m_istio_ingress_route = {
-    kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
-  }
-
   # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
   # component inputs that expect it.
   beacon = {
