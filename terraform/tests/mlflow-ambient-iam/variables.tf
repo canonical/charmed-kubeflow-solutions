@@ -31,9 +31,9 @@ variable "istio_system_model_uuid" {
 
 # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
 # are required, which are only available on `dev/edge/upstream-images` at the time
-# of writing and not even on `dev/edge` - TODO: restore to `dev/dege` once possible:
+# of writing and not even on `dev/edge` - TODO: restore to `dev/edge` once possible:
 variable "istio_k8s_channel" {
-  description = "Channel for the istio-k8s control plane charm. Use dev/edge/upstream-images: it exposes jwks-ca-cert and supports the TrafficExtension API required by the ambient mesh (dev/edge predates these)."
+  description = "Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these)."
   type        = string
   default     = "dev/edge/upstream-images"
   nullable    = false
@@ -41,7 +41,7 @@ variable "istio_k8s_channel" {
 
 # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
 # are required, which are only available on `dev/edge/upstream-images` at the time
-# of writing and not even on `dev/edge`, a channel that reqiires explicit version
+# of writing and not even on `dev/edge`, a channel that requires explicit version
 # pinning to be accepted by Juju - TODO: restore to `null` once possible:
 variable "istio_k8s_revision" {
   description = "Revision for the istio-k8s control plane charm. Pinning the revision resolves the ambiguous arch/series selection on dev/edge/upstream-images."
