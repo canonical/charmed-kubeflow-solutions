@@ -436,7 +436,7 @@ variable "istio_ingressgateway_config" {
 
 # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
 # are required, which are only available on `dev/edge/upstream-images` at the time
-# of writing and not even on `dev/edge`, a channel that reqiires explicit version
+# of writing and not even on `dev/edge`, a channel that requires explicit version
 # pinning to be accepted by Juju - TODO: restore to `null` once possible:
 variable "istio_k8s_revision" {
   description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
