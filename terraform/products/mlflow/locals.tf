@@ -2,10 +2,6 @@
 # See LICENSE file for licensing details.
 
 locals {
-  # Name of the mlflow model (falls back to "mlflow" when deploying into an
-  # existing model referenced only by UUID).
-  mlflow_model_name = var.create_model ? juju_model.mlflow[0].name : "mlflow"
-
   # Standalone Charms
   s3_integrator_channel = "2/edge"
 
@@ -14,13 +10,12 @@ locals {
   # gateway-metadata and istio-request-auth endpoints, which are currently only
   # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
   # them). Move these back to a stable track once those endpoints graduate.
-  istio_channel             = "dev/edge"
+  # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
+  # are required, which are only available on `dev/edge/upstream-images` at the time
+  # of writing and not even on `dev/edge`:
+  istio_channel             = "dev/edge/upstream-images"
   istio_ingress_k8s_channel = local.istio_channel
   istio_beacon_k8s_channel  = local.istio_channel
-  # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
-  # are required, which are only available on this channel at the time of writing,
-  # so restore `local.istio_channel` when TrafficExtension is available there:
-  istio_k8s_channel         = "dev/edge/upstream-images"
 
   # IAM Auth Charms (ambient)
   oauth2_proxy_channel                        = "latest/edge"

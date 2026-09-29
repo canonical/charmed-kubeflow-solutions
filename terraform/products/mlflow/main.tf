@@ -238,8 +238,8 @@ module "data_integrator_integrations" {
   }
 
   mlflow_server_endpoint = {
-    name     = module.mlflow[0].components.mlflow_server.name
-    endpoint = "mlflow_client"
+    name     = module.mlflow[0].provides.mlflow_server_mlflow_client.name
+    endpoint = module.mlflow[0].provides.mlflow_server_mlflow_client.endpoint
   }
 }
 

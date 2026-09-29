@@ -255,7 +255,7 @@ variable "user_grants_across_workspaces" {
   description = <<-EOT
     Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,
     with each item of a list representing grants across all workspaces for a given user, and
-    with each key repsenting the instance's name and the corresponding value the respective
+    with each key representing the instance's name and the corresponding value the respective
     instance's relevant configurations for MLflow
   EOT
   type = map(object({

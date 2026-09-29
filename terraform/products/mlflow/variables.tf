@@ -5,7 +5,7 @@
 
 variable "release" {
   type        = string
-  description = "Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks."
+  description = "MLflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks."
   default     = "latest"
 
   validation {
@@ -26,7 +26,7 @@ variable "risk" {
 }
 
 variable "create_model" {
-  description = "Create a Juju model named kubeflow for this product deployment"
+  description = "Create a Juju model named mlflow for this product deployment"
   type        = bool
   default     = true
 }
@@ -88,54 +88,7 @@ variable "s3_revision_global" {
   default     = null
 }
 
-# Istio Component Applications
-
-variable "service_mesh_type" {
-  description = "Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh)."
-  type        = string
-  default     = "ambient"
-
-  validation {
-    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
-  }
-}
-
-variable "auth_type" {
-  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
-  type        = string
-  default     = "dex"
-
-  validation {
-    condition     = contains(["dex", "iam"], var.auth_type)
-    error_message = "Valid values for auth_type are (dex, iam)."
-  }
-
-  validation {
-    condition     = !(var.auth_type == "iam" && var.service_mesh_type != "ambient")
-    error_message = "auth_type = 'iam' requires service_mesh_type = 'ambient'."
-  }
-}
-
 # Ambient Component Applications
-
-variable "istio_k8s_revision" {
-  description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
-  type        = number
-  default     = null
-}
-
-variable "istio_k8s_config" {
-  description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
-  type        = map(string)
-  default     = {}
-}
-
-variable "istio_k8s_platform" {
-  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only)."
-  type        = string
-  default     = ""
-}
 
 variable "istio_ingress_k8s_revision" {
   description = "Revision of the istio-ingress-k8s application"
@@ -255,7 +208,7 @@ variable "user_grants_across_workspaces" {
   description = <<-EOT
     Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,
     with each item of a list representing grants across all workspaces for a given user, and
-    with each key repsenting the instance's name and the corresponding value the respective
+    with each key representing the instance's name and the corresponding value the respective
     instance's relevant configurations for MLflow
   EOT
   type = map(object({
