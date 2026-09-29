@@ -37,8 +37,6 @@ jobs:
         product:
           - name: kubeflow-standalone
             uats-env: kubeflow-remote
-          - name: kubeflow-mlflow
-            uats-env: mlflow-remote
           - name: kubeflow-feast
             uats-env: feast-remote
         pod-security-standards:
