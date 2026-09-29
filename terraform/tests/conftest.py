@@ -41,9 +41,9 @@ def pytest_addoption(parser):
         help="Risk to be used when deploying the terraform module",
     )
     parser.addoption(
-        "--enable-kubeflow",
+        "--disable-kubeflow",
         action="store_true",
-        help="Enable to deploy also Kubeflow",
+        help="Disable deploying Kubeflow underneath",
     )
     parser.addoption(
         "--enable-mlflow",
@@ -132,10 +132,10 @@ def risk(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def enable_kubeflow(request) -> list[str]:
+def disable_kubeflow(request) -> list[str]:
     """Terraform module customization for Kubeflow deployment."""
-    if request.config.getoption("--enable-kubeflow"):
-        return ["-var", "enable_kubeflow=true"]
+    if request.config.getoption("--disable-kubeflow"):
+        return ["-var", "enable_kubeflow=false"]
     return []
 
 
@@ -177,9 +177,9 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def is_mlflow_standalone(enable_kubeflow, enable_mlflow) -> bool:
+def is_mlflow_standalone(disable_kubeflow, enable_mlflow) -> bool:
     """Return whether MLflow is deployed without Kubeflow."""
-    return enable_mlflow and not enable_kubeflow
+    return enable_mlflow and disable_kubeflow
 
 
 @pytest.fixture(scope="module")
@@ -286,7 +286,6 @@ def tf_vars(
             return (
                 istio_k8s_platform
                 + risk
-                + setup_s3_integrator_global
                 + mlflow_user_grants_across_workspaces
                 + [
                     "-var",
