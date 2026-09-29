@@ -2,9 +2,9 @@
 # See LICENSE file for licensing details.
 
 locals {
-  # Name of the kubeflow model (falls back to "kubeflow" when deploying into an
+  # Name of the mlflow model (falls back to "mlflow" when deploying into an
   # existing model referenced only by UUID).
-  mlflow_model_name = var.create_model ? juju_model.kubeflow[0].name : "mlflow"
+  mlflow_model_name = var.create_model ? juju_model.mlflow[0].name : "mlflow"
 
   # Standalone Charms
   s3_integrator_channel = "2/edge"

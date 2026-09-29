@@ -69,22 +69,6 @@ resource "juju_integration" "request_auth_m2m" {
   }
 }
 
-# github-profiles-automator joins the in-model service mesh (ambient-iam).
-resource "juju_integration" "github_profiles_automator_service_mesh" {
-  count      = 1
-  model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
-
-  application {
-    name     = module.github_profiles_automator[0].requires.service_mesh.name
-    endpoint = module.github_profiles_automator[0].requires.service_mesh.endpoint
-  }
-
-  application {
-    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
-  }
-}
-
 # TLS certificates (ambient-iam): self-signed-certificates -> both gateways.
 resource "juju_integration" "istio_ingress_ui_certificates" {
   count      = 1
