@@ -64,10 +64,10 @@ locals {
   resource_dispatcher_channel = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
 
   # MLflow Component
-  # NOTE: the risk is forced to `edge` for the track `latest` as MLflow 3.15 is available only
   # on `latest/edge` so far, while changing risk on `latest` would end up deploying MLflow 2.22
-  # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here 
-  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
+  # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here
+  # TODO: restore `"latest/edge"` instead of `"latest/edge/pr-490"` once multi-tenancy is merged
+  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge/pr-490"
 
   # KServe Component
   kserve_channel    = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
