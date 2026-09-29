@@ -243,9 +243,10 @@ def mlflow_user_grants_across_workspaces(request) -> list[str]:
         "-var",
         (
             'user_grants_across_workspaces={'
-            'data_integrator_app_name="test-user-grants",'
+            'test-user-grants={'
             'entity_name="test-kubeflow",'  # NOTE: same as the Kubeflow Profile's name in the UATs
             'entity_permissions="[{\"resource_type\": \"workspace\", \"resource_name\": \"test-workspace\", \"privileges\": [\"admin\"]}]"'  # noqa: E501
+            '}'
             '}'
         ),
     ]
