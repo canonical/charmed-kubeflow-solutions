@@ -47,30 +47,23 @@ Terraform module deploying the `data-kubeflow-integrator` charm for Charmed Kube
 
 | Name | Type |
 | ---- | ---- |
-| [juju_application.integrator](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
-| [juju_integration.mysql](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.postgresql](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.resource_dispatcher_kubeflow_integrator](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_application.data_integrator](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
+| [juju_integration.data_integrator_mlflow_server](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_data_kubeflow_integrator"></a> [data\_kubeflow\_integrator](#input\_data\_kubeflow\_integrator) | Configuration for data-kubeflow-integrator application | <pre>object({<br/>    app_name    = optional(string, "data-kubeflow-integrator")<br/>    channel     = optional(string, "1/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, false)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_data_integrator"></a> [data\_integrator](#input\_data\_integrator) | Configuration for data-integrator application | <pre>object({<br/>    app_name    = optional(string, "data-integrator")<br/>    channel     = optional(string, "latest/edge")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, false)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>  })</pre> | `{}` | no |
+| <a name="input_mlflow_server_endpoint"></a> [mlflow\_server\_endpoint](#input\_mlflow\_server\_endpoint) | n/a | <pre>object({<br/>    name               = string<br/>    endpoint           = string<br/>  })</pre> | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | Reference to an existing model uuid. | `string` | n/a | yes |
-| <a name="input_mysql"></a> [mysql](#input\_mysql) | n/a | <pre>object({<br/>    kind             = string<br/>    name             = optional(string, null)<br/>    endpoint         = optional(string, null)<br/>    url              = optional(string, null)<br/>    database_name    = optional(string, null)<br/>    extra_user_roles = optional(string, null)<br/>  })</pre> | `null` | no |
-| <a name="input_postgresql"></a> [postgresql](#input\_postgresql) | n/a | <pre>object({<br/>    kind             = string<br/>    name             = optional(string, null)<br/>    endpoint         = optional(string, null)<br/>    url              = optional(string, null)<br/>    database_name    = optional(string, null)<br/>    extra_user_roles = optional(string, null)<br/>  })</pre> | `null` | no |
-| <a name="input_profile"></a> [profile](#input\_profile) | Name of Kubeflow profile to apply this to. Use `*` to apply the integration to all profiles. | `string` | `"*"` | no |
-| <a name="input_resource_dispatcher_endpoints"></a> [resource\_dispatcher\_endpoints](#input\_resource\_dispatcher\_endpoints) | Pointers for the resource dispatcher endpoints | <pre>map(object({<br/>    name     = string<br/>    endpoint = string<br/>  }))</pre> | `{}` | no |
-| <a name="input_spark"></a> [spark](#input\_spark) | n/a | <pre>object({<br/>    kind            = string<br/>    name            = optional(string, null)<br/>    endpoint        = optional(string, null)<br/>    url             = optional(string, null)<br/>    service_account = optional(string, null)<br/>  })</pre> | `null` | no |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_app_name"></a> [app\_name](#output\_app\_name) | Name of the deployed data-kubeflow integrator. |
+| <a name="output_app_name"></a> [app\_name](#output\_app\_name) | Name of the deployed data-integrator. |
 | <a name="output_application"></a> [application](#output\_application) | Object representing the deployed application. |
-| <a name="output_provides"></a> [provides](#output\_provides) | Map of provided endpoints. |
-| <a name="output_requires"></a> [requires](#output\_requires) | Map of required endpoints. |
+| <a name="output_provides"></a> [provides](#output\_provides) | Provides endpoints. |
+| <a name="output_requires"></a> [requires](#output\_requires) | Requires endpoints. |
 <!-- END_TF_DOCS -->
