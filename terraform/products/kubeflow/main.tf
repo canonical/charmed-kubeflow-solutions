@@ -356,7 +356,7 @@ module "katib" {
 
 resource "juju_secret" "s3_secret_global" {
   depends_on = [juju_model.kubeflow]
-  count      = 1
+  count      = local.deploy_s3_integrator ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   name       = "s3_secret_global"
   value = {
@@ -368,7 +368,7 @@ resource "juju_secret" "s3_secret_global" {
 
 module "s3_global" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global]
-  count      = 1
+  count      = local.deploy_s3_integrator ? 1 : 0
   source     = "../../charms/s3-integrator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -391,7 +391,7 @@ module "s3_global" {
 
 resource "juju_access_secret" "s3_secret_access_global" {
   depends_on = [juju_model.kubeflow, juju_secret.s3_secret_global, module.s3_global]
-  count      = 1
+  count      = local.deploy_s3_integrator ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   applications = [
@@ -420,7 +420,7 @@ module "kfp" {
     endpoint = module.minio[0].provides.object_storage.endpoint
   } : null
 
-  s3_credentials = (!local.deploy_minio) ? {
+  s3_credentials = local.deploy_s3_integrator ? {
     kind     = "endpoint"
     name     = module.s3_global[0].provides.s3_credentials.name
     endpoint = module.s3_global[0].provides.s3_credentials.endpoint
@@ -615,7 +615,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.ambient_iam, module.s3_global, module.postgresql, module.resource_dispatcher]
+  depends_on = [module.ambient_iam, module.s3_global, module.postgresql, module.s3_global, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
@@ -744,7 +744,7 @@ module "training" {
 }
 
 module "postgresql" {
-  count      = var.enable_feast ? 1 : 0
+  count      = local.deploy_postgresql ? 1 : 0
   depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"

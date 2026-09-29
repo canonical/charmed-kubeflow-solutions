@@ -74,10 +74,12 @@ locals {
   knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib
+  deploy_postgresql = var.enable_feast || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3')
-  deploy_minio         = var.object_storage_mode == "minio" && (var.enable_kfp || var.enable_kserve)
-  deploy_s3_integrator = var.enable_mlflow
+  general_object_storage_consumers = var.enable_kfp || var.enable_kserve
+  deploy_minio                     = var.object_storage_mode == "minio" && local.general_object_storage_consumers
+  deploy_s3_integrator             = (var.object_storage_mode == "S3" && local.general_object_storage_consumers) || var.enable_mlflow
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"
