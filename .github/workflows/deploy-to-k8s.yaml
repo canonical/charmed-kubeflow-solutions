@@ -222,7 +222,7 @@ jobs:
           if [[ "${{ matrix.product }}" == "kubeflow-mlflow" ]]; then
             EXTRA_COMPONENTS_ARG="--enable-mlflow"
           elif [[ "${{ matrix.product }}" == "mlflow-standalone" ]]; then
-            EXTRA_COMPONENTS_ARG="--enable-kubeflow=false --enable-mlflow"
+            EXTRA_COMPONENTS_ARG="--disable-kubeflow --enable-mlflow"
           elif [[ "${{ matrix.product }}" == "kubeflow-feast" ]]; then
             EXTRA_COMPONENTS_ARG="--enable-feast"
           elif [[ "${{ matrix.product }}" == "kubeflow-spark" ]]; then
