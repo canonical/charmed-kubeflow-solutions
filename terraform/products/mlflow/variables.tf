@@ -88,19 +88,6 @@ variable "s3_revision_global" {
   default     = null
 }
 
-# Object storage backend selection
-
-variable "object_storage_mode" {
-  description = "Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation)"
-  type        = string
-  default     = "S3"
-
-  validation {
-    condition     = contains(["minio", "S3"], var.object_storage_mode)
-    error_message = "Valid values for object_storage_mode are ('minio', 'S3')."
-  }
-}
-
 # Istio Component Applications
 
 variable "service_mesh_type" {
