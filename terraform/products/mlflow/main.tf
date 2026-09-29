@@ -223,17 +223,17 @@ module "postgresql" {
 }
 
 module "data_integrator_integrations" {
-  for_each   = var.user_grants_across_workspaces
+  for_each = var.user_grants_across_workspaces
 
   source = "../../components/data-integrator"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 
   data_integrator = {
-    app_name = each.data_integrator_app_name,
+    app_name = each.key,
     config = {
-      "entity-name"        = each.entity_name,
-      "entity-permissions" = each.entity_permissions
+      "entity-name"        = each.value.entity_name,
+      "entity-permissions" = each.value.entity_permissions
     }
   }
 
