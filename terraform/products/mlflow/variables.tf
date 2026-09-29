@@ -230,6 +230,7 @@ variable "mlflow_server_config" {
   type        = map(string)
   default = {
     "identity_header_name" = "mlflow-userid"
+    "serve_artifacts"      = true
   }
 }
 
