@@ -761,7 +761,8 @@ variable "external_integrations" {
 variable "mlflow_server_revision" {
   description = "Revision of the mlflow-server application"
   type        = number
-  default     = null
+  default     = 1579
+  # TODO: restore `null` instead of `1579` once multi-tenancy is merged
 }
 
 variable "mlflow_server_config" {
