@@ -282,7 +282,12 @@ jobs:
           namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
-        run: juju status -m kubeflow --relations
+        run: |
+          model="kubeflow"
+          if [[ "${{ matrix.product }}" == "mlflow-standalone" ]]; then
+            model="mlflow"
+          fi
+          juju status -m $model --relations
         if: always()
 
       - name: Get juju status for istio and iam models
