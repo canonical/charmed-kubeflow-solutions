@@ -37,13 +37,14 @@ locals {
   # gateway-metadata and istio-request-auth endpoints, which are currently only
   # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
   # them). Move these back to a stable track once those endpoints graduate.
-  # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
-  # are required, which are only available on `dev/edge/upstream-images` at the time
-  # of writing and not even on `dev/edge`:
-  istio_channel             = local.ambient_iam ? "dev/edge/upstream-images" : "2/stable"
+  istio_channel             = local.ambient_iam ? "dev/edge" : "2/stable"
   istio_ingress_k8s_channel = local.istio_channel
   istio_beacon_k8s_channel  = local.istio_channel
-  istio_k8s_channel         = local.istio_channel
+  # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
+  # are required, which are only available on `dev/edge/upstream-images` at the time
+  # of writing and not even on `dev/edge` - TODO: restore to `local.istio_channel`
+  # once possible:
+  istio_k8s_channel = "dev/edge/upstream-images"
 
   # IAM Auth Charms (ambient)
   oauth2_proxy_channel                        = "latest/stable"
