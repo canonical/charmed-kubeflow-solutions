@@ -10,7 +10,6 @@ import requests
 import tenacity
 from lightkube.core.exceptions import ApiError
 from lightkube.resources.core_v1 import ConfigMap, Service
-from terraform.tests.conftest import hostname_m2m
 
 
 logging.getLogger("jubilant.wait").setLevel("WARNING")
