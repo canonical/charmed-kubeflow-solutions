@@ -63,6 +63,8 @@ jobs:
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
         exclude:
+          - product: kubeflow-mlflow
+            service-mesh-type: sidecar
           - product: spark
             service-mesh-type: ambient
 
