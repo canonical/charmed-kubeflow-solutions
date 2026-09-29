@@ -237,6 +237,24 @@ def setup_s3_integrator_global() -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def github_profiles_automator_configs(request) -> list[str]:
+    """Terraform module customization for github-profiles-automator's configurations."""
+    return [
+        "-var",
+        (
+            "github_profiles_automator_config={"
+            'repository="https://github.com/canonical/github-profiles-automator.git",'
+            '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
+            # Pin to a revision tag for reproducibility.
+            '"git-revision"="rev295",'
+            # Slow the reconcile so it does not remove the m2m UATs'
+            # directly-created authorization mid-run.
+            '"sync-period"="86400"}'
+        ),
+    ]
+
+
+@pytest.fixture(scope="module")
 def mlflow_user_grants_across_workspaces(request) -> list[str]:
     """Terraform module customization for MLflow user grants across workspaces."""
     return [
@@ -253,6 +271,19 @@ def mlflow_user_grants_across_workspaces(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def hostnames(request, hostname_ui, hostname_m2m, hostname_auth) -> list[str]:
+    """Terraform module customization for external hostnames."""
+    return [
+        "-var",
+        f"external_ui_hostname={hostname_ui}",
+        "-var",
+        f"external_m2m_hostname={hostname_m2m}",
+        "-var",
+        f"external_auth_hostname={hostname_auth}",
+    ]
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
     request,
     risk,
@@ -263,11 +294,10 @@ def tf_vars(
     enable_feast,
     enable_spark,
     is_mlflow_standalone,
-    hostname_auth,
-    hostname_m2m,
-    hostname_ui,
+    hostnames,
     pss,
     setup_s3_integrator_global,
+    github_profiles_automator_configs,
     mlflow_user_grants_across_workspaces,
 ) -> list[str]:
     """Overall Terraform module customization."""
@@ -283,52 +313,18 @@ def tf_vars(
                 "--auth-type=iam requires --service-mesh-type=ambient; "
                 f"got {service_mesh!r}"
             )
-        if is_mlflow_standalone:
-            return (
-                istio_k8s_platform
-                + risk
-                + setup_s3_integrator_global
-                + mlflow_user_grants_across_workspaces
-                + [
-                    "-var",
-                    "create_model=false",
-                    "-var",
-                    f"external_ui_hostname={hostname_ui}",
-                    "-var",
-                    f"external_m2m_hostname={hostname_m2m}",
-                    "-var",
-                    f"external_auth_hostname={hostname_auth}",
-                ]
-            )
         return (
-            enable_mlflow
-            + enable_feast
+            risk
             + istio_k8s_platform
-            + risk
             + setup_s3_integrator_global
             + mlflow_user_grants_across_workspaces
-            + [
-                "-var",
-                "create_model=false",
-                "-var",
-                "object_storage_mode=S3",
-                "-var",
-                f"external_ui_hostname={hostname_ui}",
-                "-var",
-                f"external_m2m_hostname={hostname_m2m}",
-                "-var",
-                f"external_auth_hostname={hostname_auth}",
-                "-var",
-                (
-                    "github_profiles_automator_config={"
-                    'repository="https://github.com/canonical/github-profiles-automator.git",'
-                    '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
-                    # Pin to a revision tag for reproducibility.
-                    '"git-revision"="rev295",'
-                    # Slow the reconcile so it does not remove the m2m UATs'
-                    # directly-created authorization mid-run.
-                    '"sync-period"="86400"}'
-                ),
+            + hostnames
+            + ["-var", "create_model=false"]
+            + [] if is_mlflow_standalone else [
+                enable_mlflow
+                + enable_feast
+                + github_profiles_automator_configs
+                + ["-var", "object_storage_mode=S3"]
             ]
         )
     return (
