@@ -70,10 +70,10 @@ locals {
   mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
 
   # KServe Component
-  kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
-  knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
-  deploy_kserve   = var.enable_kserve || var.enable_mlflow
-  deploy_mysql    = var.enable_kfp || var.enable_katib
+  kserve_channel    = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
+  knative_channel   = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
+  deploy_kserve     = var.enable_kserve || var.enable_mlflow
+  deploy_mysql      = var.enable_kfp || var.enable_katib
   deploy_postgresql = var.enable_feast || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3')
