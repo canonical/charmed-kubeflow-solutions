@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow-standalone, kubeflow-mlflow, kubeflow-feast, kubeflow-spark]
+        product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark]
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
         include:
