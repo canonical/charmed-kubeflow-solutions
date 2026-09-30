@@ -177,9 +177,12 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def is_mlflow_standalone(disable_kubeflow, enable_mlflow) -> bool:
+def is_mlflow_standalone(request) -> bool:
     """Return whether MLflow is deployed without Kubeflow."""
-    return enable_mlflow and disable_kubeflow
+    return bool(
+        request.config.getoption("--disable-kubeflow")
+        and request.config.getoption("--enable-mlflow")
+    )
 
 
 @pytest.fixture(scope="module")
