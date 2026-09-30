@@ -284,7 +284,7 @@ jobs:
       - name: Select default juju model
         run: |
           model="kubeflow"
-          if [[ "${{ matrix.product.name }}" == "mlflow-standalone" ]]; then
+          if [[ "${{ matrix.product }}" == "mlflow-standalone" ]]; then
             model="mlflow"
           fi
           juju switch "$model"
