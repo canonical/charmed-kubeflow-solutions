@@ -323,14 +323,14 @@ def tf_vars(
             + hostnames
             + ["-var", "create_model=false"]
             + (
-                [
+                (
                     mlflow_user_grants_across_workspaces
-                ] if is_mlflow_standalone else [
+                ) if is_mlflow_standalone else (
                     enable_mlflow
                     + enable_feast
                     + github_profiles_automator_configs
                     + ["-var", "object_storage_mode=S3"]
-                ]
+                )
             )
         )
     return (
