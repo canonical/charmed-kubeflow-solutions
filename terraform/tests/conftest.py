@@ -317,15 +317,18 @@ def tf_vars(
             risk
             + istio_k8s_platform
             + setup_s3_integrator_global
-            + mlflow_user_grants_across_workspaces
             + hostnames
             + ["-var", "create_model=false"]
-            + [] if is_mlflow_standalone else [
-                enable_mlflow
-                + enable_feast
-                + github_profiles_automator_configs
-                + ["-var", "object_storage_mode=S3"]
-            ]
+            + (
+                [
+                    mlflow_user_grants_across_workspaces
+                ] if is_mlflow_standalone else [
+                    enable_mlflow
+                    + enable_feast
+                    + github_profiles_automator_configs
+                    + ["-var", "object_storage_mode=S3"]
+                ]
+            )
         )
     return (
         enable_mlflow
