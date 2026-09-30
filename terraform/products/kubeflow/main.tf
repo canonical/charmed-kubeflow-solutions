@@ -618,7 +618,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.ambient_iam, module.s3_global, module.postgresql, module.s3_global, module.resource_dispatcher]
+  depends_on = [module.ambient_iam, module.postgresql, module.s3_global, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 

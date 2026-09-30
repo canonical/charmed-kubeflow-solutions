@@ -172,7 +172,7 @@ resource "juju_access_secret" "s3_secret_access_global" {
 
 module "mlflow" {
   count      = 1
-  depends_on = [module.ambient_iam, module.s3_global, module.postgresql]
+  depends_on = [module.ambient_iam, module.postgresql, module.s3_global]
 
   source = "../../components/mlflow"
 
