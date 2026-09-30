@@ -69,6 +69,12 @@ locals {
   # TODO: restore `"latest/edge"` instead of `"latest/edge/pr-490"` once multi-tenancy is merged
   mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge/pr-490"
 
+  # SPIFFE principal of the platform namespace's waypoint proxy, required by
+  # mlflow-server's `istio_waypoint_principal` config when related over
+  # `service-mesh` (ambient). The waypoint name is derived by the
+  # istio-beacon-k8s charm as `<model>-istio-beacon-k8s-waypoint`.
+  istio_waypoint_principal = "cluster.local/ns/${local.kubeflow_model_name}/sa/${local.kubeflow_model_name}-istio-beacon-k8s-waypoint"
+
   # KServe Component
   kserve_channel    = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
   knative_channel   = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"

@@ -202,7 +202,10 @@ module "mlflow" {
   mlflow_server = {
     channel  = local.mlflow_channel
     revision = var.mlflow_server_revision
-    config   = var.mlflow_server_config
+    config = merge(
+      var.mlflow_server_config,
+      { "istio_waypoint_principal" = local.istio_waypoint_principal },
+    )
   }
 }
 
