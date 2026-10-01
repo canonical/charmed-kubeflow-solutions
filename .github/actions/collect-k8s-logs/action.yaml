@@ -1,0 +1,81 @@
+name: 'Collect and upload k8s logs'
+description: >
+  Dumps pod logs (current and previous) for a set of namespaces, optionally
+  dumps additional namespaced resources as YAML, and uploads the result as a
+  single artifact. Namespaces can be given explicitly and/or discovered by a
+  name pattern. Failures while dumping are tolerated so it is safe to run as a
+  best-effort debug collector.
+inputs:
+  name:
+    description: 'Name of the artifact to upload.'
+    required: true
+  namespaces:
+    description: 'Space-separated list of namespaces to collect from.'
+    required: false
+    default: ''
+  namespace-pattern:
+    description: >
+      Extended-regex (grep -E) matched against existing namespace names to
+      discover additional namespaces to collect from.
+    required: false
+    default: ''
+  resources:
+    description: >
+      Space-separated list of additional namespaced resource kinds to dump as
+      YAML per namespace (e.g. "rolebindings authorizationpolicies").
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Collect logs
+      id: collect
+      shell: bash
+      env:
+        NAME: ${{ inputs.name }}
+        NAMESPACES: ${{ inputs.namespaces }}
+        NAMESPACE_PATTERN: ${{ inputs.namespace-pattern }}
+        RESOURCES: ${{ inputs.resources }}
+      run: |
+        if [ -z "$NAMESPACES" ] && [ -z "$NAMESPACE_PATTERN" ]; then
+          echo "::error::collect-k8s-logs requires 'namespaces' or 'namespace-pattern'." >&2
+          exit 1
+        fi
+
+        out_dir="${RUNNER_TEMP}/collected-logs/${NAME}"
+        mkdir -p "$out_dir"
+
+        namespaces="$NAMESPACES"
+        if [ -n "$NAMESPACE_PATTERN" ]; then
+          discovered="$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' \
+            | tr ' ' '\n' | grep -E "$NAMESPACE_PATTERN" || true)"
+          namespaces="$namespaces $discovered"
+        fi
+
+        for ns in $namespaces; do
+          mkdir -p "$out_dir/$ns/pods"
+          for pod in $(kubectl get pods -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            kubectl logs -n "$ns" "$pod" --all-containers --prefix \
+              > "$out_dir/$ns/pods/${pod}.log" 2>&1 || true
+            kubectl logs -n "$ns" "$pod" --all-containers --prefix --previous \
+              > "$out_dir/$ns/pods/${pod}-previous.log" 2>&1 || true
+          done
+
+          for kind in $RESOURCES; do
+            mkdir -p "$out_dir/$ns/$kind"
+            for res in $(kubectl get "$kind" -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+              kubectl get "$kind" -n "$ns" "$res" -o yaml \
+                > "$out_dir/$ns/$kind/${res}.yaml" 2>&1 || true
+            done
+          done
+        done
+
+        echo "dir=$out_dir" >> "$GITHUB_OUTPUT"
+
+    - name: Upload logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ steps.collect.outputs.dir }}
+        if-no-files-found: ignore
