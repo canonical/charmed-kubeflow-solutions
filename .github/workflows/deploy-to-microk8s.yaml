@@ -49,23 +49,18 @@ jobs:
         auth-type: [dex]
         include:
           - product:
-              name: kubeflow
+              name: kubeflow-standalone
               uats-env: kubeflow-remote
             uats-extra-args: --include-multi-tenancy-tests
           # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
           - service-mesh-type: ambient
             product:
-              name: kubeflow
+              name: kubeflow-standalone
               uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - service-mesh-type: ambient
             product:
-              name: mlflow
-              uats-env: mlflow-remote
-            uats-extra-args: --bundle="assets/versions-ambient.yaml"
-          - service-mesh-type: ambient
-            product:
-              name: feast
+              name: kubeflow-feast
               uats-env: feast-remote
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - service-mesh-type: ambient
@@ -76,6 +71,39 @@ jobs:
               policy: privileged
             auth-type: iam
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+          # TODO: remove when the bug with istio-k8s on the temporary channel is fixed:
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: kubeflow-mlflow
+          #     uats-env: mlflow-remote
+          #   uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          #   pod-security-standards:
+          #     policy: privileged
+          #   auth-type: iam
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: kubeflow-mlflow
+          #     uats-env: mlflow-remote
+          #   uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          #   pod-security-standards:
+          #     policy: baseline
+          #   auth-type: iam
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: mlflow-standalone
+          #     uats-env: mlflow-remote
+          #   pod-security-standards:
+          #     policy: privileged
+          #   auth-type: iam
+          #   uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: mlflow-standalone
+          #     uats-env: mlflow-remote
+          #   pod-security-standards:
+          #     policy: standard
+          #   auth-type: iam
+          #   uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
 
     steps:
       - name: Checkout repository
@@ -313,8 +341,16 @@ jobs:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
+      - name: Select default juju model
+        run: |
+          model="kubeflow"
+          if [[ "${{ matrix.product.name }}" == "mlflow-standalone" ]]; then
+            model="mlflow"
+          fi
+          juju switch "$model"
+
       - name: Get juju status
-        run: juju status -m kubeflow --relations
+        run: juju status --relations
         if: always()
 
       - name: Get juju status for istio and iam models
