@@ -43,8 +43,9 @@ locals {
   # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
   # are required, which are only available on `dev/edge/upstream-images` at the time
   # of writing and not even on `dev/edge` - TODO: restore to `local.istio_channel`
-  # once possible:
-  istio_k8s_channel = "dev/edge/upstream-images"
+  # once possible - what's more, on MicroK8s the newer channel is unusable, so fall
+  # back to `local.istio_channel` there (see istio_k8s_without_trafficextension)
+  istio_k8s_channel = var.istio_k8s_without_trafficextension ? local.istio_channel : "dev/edge/upstream-images"
 
   # IAM Auth Charms (ambient)
   oauth2_proxy_channel                        = "latest/stable"

@@ -16,6 +16,10 @@ resource "juju_model" "istio_system" {
 locals {
   istio_system_model_uuid = var.create_istio_system_model ? juju_model.istio_system[0].uuid : var.istio_system_model_uuid
 
+  # TODO: remove when the bug with istio-k8s on the temporary channel is fixed:
+  # istio-k8s channel used when TrafficExtension is not used (on MicroK8s only, because of a bug):
+  istio_k8s_channel_without_trafficextension = "dev/edge"
+
   # Merge the top-level external hostname vars into the per-component config
   # maps (only when set, so an unset hostname never injects an empty value).
   istio_ingress_k8s_ui_config = merge(
@@ -41,8 +45,8 @@ module "istio_k8s" {
 
   model_uuid = local.istio_system_model_uuid
   app_name   = "istio-k8s"
-  channel    = var.istio_k8s_channel
-  revision   = var.istio_k8s_revision
+  channel    = var.istio_k8s_without_trafficextension ? local.istio_k8s_channel_without_trafficextension : var.istio_k8s_channel
+  revision   = var.istio_k8s_without_trafficextension ? null : var.istio_k8s_revision
   config     = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
 }
 
