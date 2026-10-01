@@ -49,6 +49,13 @@ variable "istio_k8s_revision" {
   default     = 76
 }
 
+# TODO: remove when the bug with istio-k8s on the temporary channel is fixed:
+variable "istio_k8s_without_trafficextension" {
+  description = "Deploy istio-k8s without the TrafficExtension API, using the older dev/edge channel (required on MicroK8s)."
+  type        = bool
+  default     = false
+}
+
 variable "istio_k8s_config" {
   description = "Configuration for the istio-k8s control plane charm."
   type        = map(string)

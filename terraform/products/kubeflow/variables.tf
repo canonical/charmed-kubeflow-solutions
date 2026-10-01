@@ -444,6 +444,12 @@ variable "istio_k8s_revision" {
   default     = 76
 }
 
+variable "istio_k8s_without_trafficextension" {
+  description = "Deploy istio-k8s without the TrafficExtension API, using the older dev/edge channel (required on MicroK8s)."
+  type        = bool
+  default     = false
+}
+
 variable "istio_k8s_config" {
   description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
   type        = map(string)
