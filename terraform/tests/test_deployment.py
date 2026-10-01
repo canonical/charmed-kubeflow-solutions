@@ -166,12 +166,23 @@ def get_public_url(
 
 
 @tenacity.retry(
-    wait=tenacity.wait_exponential(multiplier=2, min=1, max=10),
-    stop=tenacity.stop_after_attempt(30),
-    reraise=True,
+    retry=(
+        tenacity.retry_if_exception_type(requests.RequestException)
+        | tenacity.retry_if_result(lambda result: result[0] != 200)
+    ),
+    wait=tenacity.wait_fixed(10),
+    stop=tenacity.stop_after_delay(300),
+    # Return the last (status, text) instead of raising, so the caller's
+    # `assert == 200` reports the real status on a genuinely stuck endpoint.
+    retry_error_callback=lambda retry_state: retry_state.outcome.result(),
 )
 def fetch_response(url, headers=None, verify=True):
-    """Fetch provided URL and return (status, text)."""
+    """GET url, retrying on connection errors and non-200 until 200 or timeout.
+
+    Ambient ext-authz (oidc-gatekeeper / oauth2-proxy) is programmed into the
+    gateway's Envoy asynchronously after charms go active; until it converges
+    the gateway fails closed (403), so retrying waits that window out.
+    """
     response = requests.get(url, headers=headers, verify=verify)
     return response.status_code, response.text
 
