@@ -441,10 +441,20 @@ variable "istio_ingressgateway_config" {
 
 # Ambient Component Applications
 
+# NOTE: for Istio to support the TrafficExtension API, later versions of Istio
+# are required, which are only available on `dev/edge/upstream-images` at the time
+# of writing and not even on `dev/edge`, a channel that requires explicit version
+# pinning to be accepted by Juju - TODO: restore to `null` once possible:
 variable "istio_k8s_revision" {
   description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
   type        = number
-  default     = null
+  default     = 76
+}
+
+variable "istio_k8s_without_trafficextension" {
+  description = "Deploy istio-k8s without the TrafficExtension API, using the older dev/edge channel (required on MicroK8s)."
+  type        = bool
+  default     = false
 }
 
 variable "istio_k8s_config" {
@@ -757,13 +767,16 @@ variable "external_integrations" {
 variable "mlflow_server_revision" {
   description = "Revision of the mlflow-server application"
   type        = number
-  default     = null
+  default     = 1579
+  # TODO: restore `null` instead of `1579` once multi-tenancy is merged
 }
 
 variable "mlflow_server_config" {
   description = "Configuration for mlflow-server application"
   type        = map(string)
-  default     = {}
+  default = {
+    "identity_header_name" = "kubeflow-userid"
+  }
 }
 
 # Resource Dispatcher Charm

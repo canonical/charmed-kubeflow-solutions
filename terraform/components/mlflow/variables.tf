@@ -7,8 +7,8 @@ variable "model_uuid" {
   nullable    = false
 }
 
-variable "mysql_database" {
-  description = "MySQL database provider for mlflow-server from mysql-k8s:database (supports same-model endpoint or cross-model offer)"
+variable "postgresql_database" {
+  description = "PostgreSQL database provider for mlflow-server from postgresql-k8s:database (supports same-model endpoint or cross-model offer)"
   type = object({
     kind     = string
     name     = optional(string, null)
@@ -19,17 +19,17 @@ variable "mysql_database" {
   default  = null
 
   validation {
-    condition     = var.mysql_database == null || contains(["endpoint", "offer"], var.mysql_database.kind)
+    condition     = var.postgresql_database == null || contains(["endpoint", "offer"], var.postgresql_database.kind)
     error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
   }
 
   validation {
-    condition     = var.mysql_database == null || var.mysql_database.kind != "endpoint" || (var.mysql_database.name != null && var.mysql_database.name != "" && var.mysql_database.endpoint != null && var.mysql_database.endpoint != "")
+    condition     = var.postgresql_database == null || var.postgresql_database.kind != "endpoint" || (var.postgresql_database.name != null && var.postgresql_database.name != "" && var.postgresql_database.endpoint != null && var.postgresql_database.endpoint != "")
     error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
   }
 
   validation {
-    condition     = var.mysql_database == null || var.mysql_database.kind != "offer" || (var.mysql_database.url != null && var.mysql_database.url != "")
+    condition     = var.postgresql_database == null || var.postgresql_database.kind != "offer" || (var.postgresql_database.url != null && var.postgresql_database.url != "")
     error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }
@@ -57,60 +57,6 @@ variable "s3_credentials" {
 
   validation {
     condition     = var.s3_credentials == null || var.s3_credentials.kind != "offer" || (var.s3_credentials.url != null && var.s3_credentials.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
-variable "object_storage" {
-  description = "Object storage provider for mlflow-server from minio:object-storage (supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.object_storage == null || contains(["endpoint", "offer"], var.object_storage.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.object_storage == null || var.object_storage.kind != "endpoint" || (var.object_storage.name != null && var.object_storage.name != "" && var.object_storage.endpoint != null && var.object_storage.endpoint != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.object_storage == null || var.object_storage.kind != "offer" || (var.object_storage.url != null && var.object_storage.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
-variable "ingress" {
-  description = "Ingress provider for mlflow-server from istio-pilot:ingress (sidecar; supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.ingress == null || contains(["endpoint", "offer"], var.ingress.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "endpoint" || (var.ingress.name != null && var.ingress.name != "" && var.ingress.endpoint != null && var.ingress.endpoint != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "offer" || (var.ingress.url != null && var.ingress.url != "")
     error_message = "The 'url' attribute must be provided for a cross-model offer integration."
   }
 }

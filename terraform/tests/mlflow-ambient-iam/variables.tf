@@ -44,7 +44,7 @@ variable "istio_k8s_channel" {
 # of writing and not even on `dev/edge`, a channel that requires explicit version
 # pinning to be accepted by Juju - TODO: restore to `null` once possible:
 variable "istio_k8s_revision" {
-  description = "Revision for the istio-k8s control plane charm."
+  description = "Revision for the istio-k8s control plane charm. Pinning the revision resolves the ambiguous arch/series selection on dev/edge/upstream-images."
   type        = number
   default     = 76
 }
@@ -182,23 +182,23 @@ variable "traefik_config" {
 }
 
 # ---------------------------------------------------------------------------
-# kubeflow settings
+# MLflow settings
 # ---------------------------------------------------------------------------
 
 variable "create_model" {
-  description = "Create the kubeflow Juju model."
+  description = "Create the mlflow Juju model."
   type        = bool
   default     = true
 }
 
 variable "model_uuid" {
-  description = "UUID of an existing kubeflow model (required when create_model is false)."
+  description = "UUID of an existing mlflow model (required when create_model is false)."
   type        = string
   default     = null
 }
 
 variable "release" {
-  description = "Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks."
+  description = "MLflow release to deploy. Use 'latest' for latest tracks or '3.15' for pinned 3.15 tracks."
   type        = string
   default     = "latest"
 }
@@ -207,72 +207,6 @@ variable "risk" {
   description = "Charm channel risk level to deploy (stable, candidate, beta, edge)."
   type        = string
   default     = "edge"
-}
-
-variable "enable_kfp" {
-  description = "Deploy Kubeflow Pipelines."
-  type        = bool
-  default     = true
-}
-
-variable "enable_katib" {
-  description = "Deploy Katib."
-  type        = bool
-  default     = true
-}
-
-variable "enable_notebooks" {
-  description = "Deploy Notebooks."
-  type        = bool
-  default     = true
-}
-
-variable "enable_tensorboard" {
-  description = "Deploy Tensorboard."
-  type        = bool
-  default     = true
-}
-
-variable "enable_training_v1" {
-  description = "Deploy the v1 Training Operator."
-  type        = bool
-  default     = true
-}
-
-variable "enable_training_v2" {
-  description = "Deploy the v2 Kubeflow Trainer."
-  type        = bool
-  default     = false
-}
-
-variable "enable_mlflow" {
-  description = "Deploy MLflow."
-  type        = bool
-  default     = false
-}
-
-variable "enable_kserve" {
-  description = "Deploy KServe."
-  type        = bool
-  default     = true
-}
-
-variable "enable_feast" {
-  description = "Deploy Feast."
-  type        = bool
-  default     = false
-}
-
-variable "kserve_controller_config" {
-  description = "Configuration for the kserve-controller application (e.g. domain-name)."
-  type        = map(string)
-  default     = {}
-}
-
-variable "github_profiles_automator_config" {
-  description = "Configuration for the github-profiles-automator charm (e.g. repository and PMR path)."
-  type        = map(string)
-  default     = {}
 }
 
 # ---------------------------------------------------------------------------
@@ -305,17 +239,6 @@ variable "metrics_offer" {
 
 # Object storage (shared/global S3 integrator) variables
 
-variable "object_storage_mode" {
-  description = "Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation)"
-  type        = string
-  default     = "S3"
-
-  validation {
-    condition     = contains(["minio", "S3"], var.object_storage_mode)
-    error_message = "Valid values for object_storage_mode are ('minio', 'S3')."
-  }
-}
-
 variable "s3_secret_key_global" {
   description = "S3 secret key for the shared object storage integration"
   type        = string
@@ -340,4 +263,18 @@ variable "s3_bucket_global" {
   description = "S3 bucket for the shared object storage integration"
   type        = string
   default     = ""
+}
+
+variable "user_grants_across_workspaces" {
+  description = <<-EOT
+    Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,
+    with each item of a list representing grants across all workspaces for a given user, and
+    with each key representing the instance's name and the corresponding value the respective
+    instance's relevant configurations for MLflow
+  EOT
+  type = map(object({
+    entity_name        = string
+    entity_permissions = string
+  }))
+  default = {}
 }

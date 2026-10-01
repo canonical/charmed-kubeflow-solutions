@@ -36,8 +36,8 @@
 | <a name="module_postgresql"></a> [postgresql](#module\_postgresql) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
 | <a name="module_request_authentication_configurator"></a> [request\_authentication\_configurator](#module\_request\_authentication\_configurator) | ../../charms/request-authentication-configurator | n/a |
 | <a name="module_resource_dispatcher"></a> [resource\_dispatcher](#module\_resource\_dispatcher) | ../../charms/resource-dispatcher | n/a |
-| <a name="module_s3_global"></a> [s3\_global](#module\_s3\_global) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
-| <a name="module_s3_spark"></a> [s3\_spark](#module\_s3\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/charms/s3-integrator | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
+| <a name="module_s3_global"></a> [s3\_global](#module\_s3\_global) | ../../charms/s3-integrator | n/a |
+| <a name="module_s3_spark"></a> [s3\_spark](#module\_s3\_spark) | ../../charms/s3-integrator | n/a |
 | <a name="module_spark"></a> [spark](#module\_spark) | git::https://github.com/canonical/spark-k8s-bundle//terraform/components/spark-core | 1d6e6be0ec04facd9a5ad788c3c7a857813dd6d8 |
 | <a name="module_tensorboard"></a> [tensorboard](#module\_tensorboard) | ../../components/tensorboard | n/a |
 | <a name="module_training"></a> [training](#module\_training) | ../../components/training | n/a |
@@ -101,8 +101,6 @@
 | <a name="input_feast_integrator_revision"></a> [feast\_integrator\_revision](#input\_feast\_integrator\_revision) | Revision of the feast-integrator application | `number` | `null` | no |
 | <a name="input_feast_ui_config"></a> [feast\_ui\_config](#input\_feast\_ui\_config) | Configuration for feast-ui application | `map(string)` | `{}` | no |
 | <a name="input_feast_ui_revision"></a> [feast\_ui\_revision](#input\_feast\_ui\_revision) | Revision of the feast-ui application | `number` | `null` | no |
-| <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
-| <a name="input_https_proxy"></a> [https\_proxy](#input\_https\_proxy) | Value of the https\_proxy environment variable | `string` | `""` | no |
 | <a name="input_github_profiles_automator_config"></a> [github\_profiles\_automator\_config](#input\_github\_profiles\_automator\_config) | Configuration for the github-profiles-automator application | `map(string)` | `{}` | no |
 | <a name="input_github_profiles_automator_revision"></a> [github\_profiles\_automator\_revision](#input\_github\_profiles\_automator\_revision) | Revision of the github-profiles-automator application | `number` | `null` | no |
 | <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
@@ -120,7 +118,7 @@
 | <a name="input_istio_ingressgateway_revision"></a> [istio\_ingressgateway\_revision](#input\_istio\_ingressgateway\_revision) | Revision of the istio-ingressgateway application | `number` | `null` | no |
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control-plane charm (ambient-dex only). | `map(string)` | `{}` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only). | `string` | `""` | no |
-| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there). | `number` | `null` | no |
+| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there). | `number` | `76` | no |
 | <a name="input_istio_pilot_config"></a> [istio\_pilot\_config](#input\_istio\_pilot\_config) | Configuration for istio-pilot application | `map(string)` | <pre>{<br/>  "default-gateway": "kubeflow-gateway"<br/>}</pre> | no |
 | <a name="input_istio_pilot_revision"></a> [istio\_pilot\_revision](#input\_istio\_pilot\_revision) | Revision of the istio-pilot application | `number` | `null` | no |
 | <a name="input_jupyter_controller_config"></a> [jupyter\_controller\_config](#input\_jupyter\_controller\_config) | Configuration for jupyter-controller application | `map(string)` | `{}` | no |
@@ -175,8 +173,8 @@
 | <a name="input_minio_config"></a> [minio\_config](#input\_minio\_config) | Configuration for minio application | `map(string)` | `{}` | no |
 | <a name="input_minio_revision"></a> [minio\_revision](#input\_minio\_revision) | Revision of the minio application | `number` | `null` | no |
 | <a name="input_minio_storage_size"></a> [minio\_storage\_size](#input\_minio\_storage\_size) | MinIO database storage size | `string` | `"10G"` | no |
-| <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | `{}` | no |
-| <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `null` | no |
+| <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | <pre>{<br/>  "identity_header_name": "kubeflow-userid"<br/>}</pre> | no |
+| <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `1579` | no |
 | <a name="input_mlmd_config"></a> [mlmd\_config](#input\_mlmd\_config) | Configuration for mlmd application | `map(string)` | `{}` | no |
 | <a name="input_mlmd_revision"></a> [mlmd\_revision](#input\_mlmd\_revision) | Revision of the mlmd application | `number` | `null` | no |
 | <a name="input_mlmd_storage_size"></a> [mlmd\_storage\_size](#input\_mlmd\_storage\_size) | MLMD database storage size | `string` | `"10G"` | no |
@@ -185,10 +183,10 @@
 | <a name="input_mysql_revision"></a> [mysql\_revision](#input\_mysql\_revision) | Revision of the mysql-db application | `number` | `null` | no |
 | <a name="input_mysql_storage_size"></a> [mysql\_storage\_size](#input\_mysql\_storage\_size) | MySQL database storage size | `string` | `"10G"` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
-| <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
 | <a name="input_oauth2_proxy_config"></a> [oauth2\_proxy\_config](#input\_oauth2\_proxy\_config) | Configuration for the oauth2-proxy-k8s application | `map(string)` | `{}` | no |
 | <a name="input_oauth2_proxy_revision"></a> [oauth2\_proxy\_revision](#input\_oauth2\_proxy\_revision) | Revision of the oauth2-proxy-k8s application | `number` | `null` | no |
 | <a name="input_oauth_offer_url"></a> [oauth\_offer\_url](#input\_oauth\_offer\_url) | Cross-model offer URL of hydra:oauth from the iam model. Consumed by<br/>oauth2-proxy and request-authentication-configurator. Required when<br/>service\_mesh\_type is 'ambient'. | `string` | `null` | no |
+| <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
 | <a name="input_oidc_gatekeeper_config"></a> [oidc\_gatekeeper\_config](#input\_oidc\_gatekeeper\_config) | Configuration for oidc-gatekeeper application | `map(string)` | `{}` | no |
 | <a name="input_oidc_gatekeeper_revision"></a> [oidc\_gatekeeper\_revision](#input\_oidc\_gatekeeper\_revision) | Revision of the oidc-gatekeeper application | `number` | `null` | no |
 | <a name="input_opentelemetry_collector_k8s_config"></a> [opentelemetry\_collector\_k8s\_config](#input\_opentelemetry\_collector\_k8s\_config) | Configuration for the opentelemetry-collector-k8s application | `map(string)` | `{}` | no |
@@ -198,7 +196,7 @@
 | <a name="input_postgresql_storage_size"></a> [postgresql\_storage\_size](#input\_postgresql\_storage\_size) | PostgreSQL database storage size | `string` | `"10G"` | no |
 | <a name="input_pvcviewer_operator_config"></a> [pvcviewer\_operator\_config](#input\_pvcviewer\_operator\_config) | Configuration for pvcviewer-operator application | `map(string)` | `{}` | no |
 | <a name="input_pvcviewer_operator_revision"></a> [pvcviewer\_operator\_revision](#input\_pvcviewer\_operator\_revision) | Revision of the pvcviewer-operator application | `number` | `null` | no |
-| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"1.11"` | no |
+| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_request_authentication_configurator_config"></a> [request\_authentication\_configurator\_config](#input\_request\_authentication\_configurator\_config) | Configuration for the request-authentication-configurator application | `map(string)` | `{}` | no |
 | <a name="input_request_authentication_configurator_revision"></a> [request\_authentication\_configurator\_revision](#input\_request\_authentication\_configurator\_revision) | Revision of the request-authentication-configurator application | `number` | `null` | no |
 | <a name="input_resource_dispatcher_config"></a> [resource\_dispatcher\_config](#input\_resource\_dispatcher\_config) | Configuration for resource-dispatcher application | `map(string)` | `{}` | no |
@@ -217,7 +215,6 @@
 | <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_spark"></a> [s3\_secret\_key\_spark](#input\_s3\_secret\_key\_spark) | S3 secret key for Spark object storage integration | `string` | `""` | no |
 | <a name="input_s3_tls_ca_chain_global"></a> [s3\_tls\_ca\_chain\_global](#input\_s3\_tls\_ca\_chain\_global) | PEM-encoded CA chain used for HTTPS validation against the S3 endpoint. When set, it is base64-encoded and passed to the s3-integrator 'tls-ca-chain' config option. Leave empty to omit. | `string` | `""` | no |
-| <a name="input_service_mesh_type"></a> [service\_mesh\_type](#input\_service\_mesh\_type) | Which service mesh component to deploy: 'istio' (sidecar) or 'ambient' | `string` | `"sidecar"` | no |
 | <a name="input_self_signed_certificates_channel"></a> [self\_signed\_certificates\_channel](#input\_self\_signed\_certificates\_channel) | Channel for the self-signed-certificates charm serving the ambient gateways. | `string` | `"1/stable"` | no |
 | <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Configuration for the self-signed-certificates application. | `map(string)` | `{}` | no |
 | <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision of the self-signed-certificates application. | `number` | `null` | no |

@@ -77,7 +77,7 @@ module "ambient_dex" {
 
   istio_k8s = {
     channel  = local.istio_k8s_channel
-    revision = var.istio_k8s_revision
+    revision = var.istio_k8s_without_trafficextension ? null : var.istio_k8s_revision
     config   = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
   }
   istio_ingress_k8s = {
@@ -618,7 +618,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
+  depends_on = [module.ambient_iam, module.postgresql, module.s3_global, module.resource_dispatcher]
 
   source = "../../components/mlflow"
 
@@ -630,23 +630,17 @@ module "mlflow" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  mysql_database = {
+  postgresql_database = {
     kind     = "endpoint"
-    name     = module.mysql[0].app_name
-    endpoint = module.mysql[0].provides.database
+    name     = module.postgresql[0].app_name
+    endpoint = module.postgresql[0].provides.database
   }
 
-  object_storage = local.deploy_minio ? {
-    kind     = "endpoint"
-    name     = module.minio[0].provides.object_storage.name
-    endpoint = module.minio[0].provides.object_storage.endpoint
-  } : null
-
-  s3_credentials = local.deploy_s3_integrator ? {
+  s3_credentials = {
     kind     = "endpoint"
     name     = module.s3_global[0].provides.s3_credentials.name
     endpoint = module.s3_global[0].provides.s3_credentials.endpoint
-  } : null
+  }
 
   secrets = {
     kind     = "endpoint"
@@ -660,19 +654,16 @@ module "mlflow" {
     endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
-
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
   mlflow_server = {
     channel  = local.mlflow_channel
     revision = var.mlflow_server_revision
-    config   = var.mlflow_server_config
+    config = merge(
+      var.mlflow_server_config,
+      { "istio_waypoint_principal" = local.istio_waypoint_principal },
+    )
   }
 }
 
@@ -759,7 +750,7 @@ module "training" {
 }
 
 module "postgresql" {
-  count      = var.enable_feast ? 1 : 0
+  count      = local.deploy_postgresql ? 1 : 0
   depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"

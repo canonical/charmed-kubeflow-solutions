@@ -40,7 +40,12 @@ locals {
   istio_channel             = local.ambient_iam ? "dev/edge" : "2/stable"
   istio_ingress_k8s_channel = local.istio_channel
   istio_beacon_k8s_channel  = local.istio_channel
-  istio_k8s_channel         = local.istio_channel
+  # NOTE: for Istio to support the TrafficExtension API, later versions of Istio
+  # are required, which are only available on `dev/edge/upstream-images` at the time
+  # of writing and not even on `dev/edge` - TODO: restore to `local.istio_channel`
+  # once possible - what's more, on MicroK8s the newer channel is unusable, so fall
+  # back to `local.istio_channel` there (see istio_k8s_without_trafficextension)
+  istio_k8s_channel = var.istio_k8s_without_trafficextension ? local.istio_channel : "dev/edge/upstream-images"
 
   # IAM Auth Charms (ambient)
   oauth2_proxy_channel                        = "latest/stable"
@@ -60,21 +65,28 @@ locals {
   resource_dispatcher_channel = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
 
   # MLflow Component
-  # NOTE: the risk is forced to `edge` for the track `latest` as MLflow 3.15 is available only
   # on `latest/edge` so far, while changing risk on `latest` would end up deploying MLflow 2.22
-  # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here 
-  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
+  # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here
+  # TODO: restore `"latest/edge"` instead of `"latest/edge/pr-490"` once multi-tenancy is merged
+  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge/pr-490"
+
+  # SPIFFE principal of the platform namespace's waypoint proxy, required by
+  # mlflow-server's `istio_waypoint_principal` config when related over
+  # `service-mesh` (ambient). The waypoint name is derived by the
+  # istio-beacon-k8s charm as `<model>-istio-beacon-k8s-waypoint`.
+  istio_waypoint_principal = "cluster.local/ns/${local.kubeflow_model_name}/sa/${local.kubeflow_model_name}-istio-beacon-k8s-waypoint"
 
   # KServe Component
-  kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
-  knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
-  deploy_kserve   = var.enable_kserve || var.enable_mlflow
-  deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
+  kserve_channel    = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
+  knative_channel   = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
+  deploy_kserve     = var.enable_kserve || var.enable_mlflow
+  deploy_mysql      = var.enable_kfp || var.enable_katib
+  deploy_postgresql = var.enable_feast || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3')
-  object_storage_consumers = var.enable_kfp || var.enable_mlflow || var.enable_kserve
-  deploy_minio             = var.object_storage_mode == "minio" && local.object_storage_consumers
-  deploy_s3_integrator     = var.object_storage_mode == "S3" && local.object_storage_consumers
+  general_object_storage_consumers = var.enable_kfp || var.enable_kserve
+  deploy_minio                     = var.object_storage_mode == "minio" && local.general_object_storage_consumers
+  deploy_s3_integrator             = (var.object_storage_mode == "S3" && local.general_object_storage_consumers) || var.enable_mlflow
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"

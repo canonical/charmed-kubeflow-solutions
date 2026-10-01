@@ -11,6 +11,10 @@ output "components" {
 output "provides" {
   description = "Map of endpoints provided by this component to other components (outbound relations)"
   value = {
+    mlflow_server_mlflow_client = {
+      name     = juju_application.mlflow_server.name
+      endpoint = "mlflow-client"
+    }
     mlflow_server_grafana_dashboard = {
       name     = juju_application.mlflow_server.name
       endpoint = "grafana-dashboard"
@@ -36,14 +40,6 @@ output "requires" {
     mlflow_server_s3_credentials = {
       name     = juju_application.mlflow_server.name
       endpoint = "s3-credentials"
-    }
-    mlflow_server_object_storage = {
-      name     = juju_application.mlflow_server.name
-      endpoint = "object-storage"
-    }
-    mlflow_server_ingress = {
-      name     = juju_application.mlflow_server.name
-      endpoint = "ingress"
     }
     mlflow_server_istio_ingress_route = {
       name     = juju_application.mlflow_server.name

@@ -35,11 +35,9 @@ jobs:
       matrix:
         service-mesh-type: [sidecar, ambient]
         product:
-          - name: kubeflow
+          - name: kubeflow-standalone
             uats-env: kubeflow-remote
-          - name: mlflow
-            uats-env: mlflow-remote
-          - name: feast
+          - name: kubeflow-feast
             uats-env: feast-remote
         pod-security-standards:
           - policy: privileged
@@ -51,33 +49,61 @@ jobs:
         auth-type: [dex]
         include:
           - product:
-              name: kubeflow
+              name: kubeflow-standalone
               uats-env: kubeflow-remote
             uats-extra-args: --include-multi-tenancy-tests
           # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
           - service-mesh-type: ambient
             product:
-              name: kubeflow
+              name: kubeflow-standalone
               uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - service-mesh-type: ambient
             product:
-              name: mlflow
-              uats-env: mlflow-remote
-            uats-extra-args: --bundle="assets/versions-ambient.yaml"
-          - service-mesh-type: ambient
-            product:
-              name: feast
+              name: kubeflow-feast
               uats-env: feast-remote
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - service-mesh-type: ambient
             product:
-              name: kubeflow
+              name: kubeflow-standalone
               uats-env: kubeflow-remote
             pod-security-standards:
               policy: privileged
             auth-type: iam
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+          # TODO: remove when the bug with istio-k8s on the temporary channel is fixed:
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: kubeflow-mlflow
+          #     uats-env: mlflow-remote
+          #   uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          #   pod-security-standards:
+          #     policy: privileged
+          #   auth-type: iam
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: kubeflow-mlflow
+          #     uats-env: mlflow-remote
+          #   uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          #   pod-security-standards:
+          #     policy: baseline
+          #   auth-type: iam
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: mlflow-standalone
+          #     uats-env: mlflow-remote
+          #   pod-security-standards:
+          #     policy: privileged
+          #   auth-type: iam
+          #   uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+          # - service-mesh-type: ambient
+          #   product:
+          #     name: mlflow-standalone
+          #     uats-env: mlflow-remote
+          #   pod-security-standards:
+          #     policy: standard
+          #   auth-type: iam
+          #   uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
 
     steps:
       - name: Checkout repository
@@ -250,13 +276,18 @@ jobs:
             PLATFORM_ARG="--istio-k8s-platform microk8s"
           fi
 
-          if [[ "${{ matrix.product.name }}" == "mlflow" ]]; then
-            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-mlflow"
-          elif [[ "${{ matrix.product.name }}" == "feast" ]]; then
-            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-feast"
-          elif [[ "${{ matrix.product.name }}" == "spark" ]]; then
-            EXTRA_COMPONENTS_ARG=$EXTRA_COMPONENTS_ARG" --enable-spark"
+          if [[ "${{ matrix.product.name }}" == "kubeflow-mlflow" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-mlflow"
+          elif [[ "${{ matrix.product.name }}" == "mlflow-standalone" ]]; then
+            EXTRA_COMPONENTS_ARG="--disable-kubeflow --enable-mlflow"
+          elif [[ "${{ matrix.product.name }}" == "kubeflow-feast" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-feast"
+          elif [[ "${{ matrix.product.name }}" == "kubeflow-spark" ]]; then
+            EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
+
+          # TODO: remove when the bug with istio-k8s on the temporary channel is fixed:
+          EXTRA_COMPONENTS_ARG="$EXTRA_COMPONENTS_ARG --istio-k8s-without-trafficextension"
 
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
 
@@ -310,8 +341,16 @@ jobs:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
+      - name: Select default juju model
+        run: |
+          model="kubeflow"
+          if [[ "${{ matrix.product.name }}" == "mlflow-standalone" ]]; then
+            model="mlflow"
+          fi
+          juju switch "$model"
+
       - name: Get juju status
-        run: juju status -m kubeflow --relations
+        run: juju status --relations
         if: always()
 
       - name: Get juju status for istio and iam models
