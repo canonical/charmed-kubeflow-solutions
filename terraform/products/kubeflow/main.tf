@@ -666,6 +666,28 @@ module "mlflow" {
   }
 }
 
+# MLflow workspace grants; guarded on enable_mlflow (references the optional mlflow module).
+module "data_integrator_integrations" {
+  for_each = var.enable_mlflow ? var.user_grants_across_workspaces : {}
+
+  source = "../../components/data-integrator"
+
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  data_integrator = {
+    app_name = each.key,
+    config = {
+      "entity-name"        = each.value.entity_name,
+      "entity-permissions" = each.value.entity_permissions
+    }
+  }
+
+  mlflow_server_endpoint = {
+    name     = module.mlflow[0].provides.mlflow_server_mlflow_client.name
+    endpoint = module.mlflow[0].provides.mlflow_server_mlflow_client.endpoint
+  }
+}
+
 module "kserve" {
   count      = local.deploy_kserve ? 1 : 0
   depends_on = [module.istio, module.ambient_iam, module.ambient_dex]

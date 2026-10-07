@@ -345,6 +345,11 @@ def tf_vars(
                     + enable_feast
                     + github_profiles_automator_configs
                     + ["-var", "object_storage_mode=S3"]
+                    + (
+                        mlflow_user_grants_across_workspaces
+                        if request.config.getoption("--enable-mlflow")
+                        else []
+                    )
                 )
             )
         )
