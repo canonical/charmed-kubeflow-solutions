@@ -37,16 +37,9 @@ variable "istio_k8s_channel" {
 }
 
 variable "istio_k8s_revision" {
-  description = "Revision for the istio-k8s control plane charm. Pinning the revision resolves the ambiguous arch/series selection on dev/edge/upstream-images."
+  description = "Revision for the istio-k8s control plane charm."
   type        = number
   default     = null
-}
-
-# TODO: remove when the bug with istio-k8s on the temporary channel is fixed:
-variable "istio_k8s_without_trafficextension" {
-  description = "Deploy istio-k8s without the TrafficExtension API, using the older dev/edge channel (required on MicroK8s)."
-  type        = bool
-  default     = false
 }
 
 variable "istio_k8s_config" {

@@ -17,11 +17,6 @@ def pytest_addoption(parser):
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
     parser.addoption(
-        "--istio-k8s-without-trafficextension",
-        action="store_true",
-        help="Deploy istio-k8s without the TrafficExtension API (older channel)",
-    )
-    parser.addoption(
         "--service-mesh-type",
         nargs="?",
         default="sidecar",
@@ -113,14 +108,6 @@ def istio_k8s_platform(request) -> list[str]:
     """Terraform module customization for the istio-k8s platform."""
     platform = request.config.getoption("--istio-k8s-platform") or ""
     return ["-var", f"istio_k8s_platform={platform}"]
-
-
-@pytest.fixture(scope="module")
-def istio_k8s_without_trafficextension(request) -> list[str]:
-    """Terraform module customization to use the older istio-k8s channel."""
-    if request.config.getoption("--istio-k8s-without-trafficextension"):
-        return ["-var", "istio_k8s_without_trafficextension=true"]
-    return []
 
 
 @pytest.fixture(scope="module")
@@ -306,7 +293,6 @@ def tf_vars(
     service_mesh_type,
     auth_type,
     istio_k8s_platform,
-    istio_k8s_without_trafficextension,
     enable_mlflow,
     enable_feast,
     enable_spark,
@@ -333,7 +319,6 @@ def tf_vars(
         return (
             risk
             + istio_k8s_platform
-            + istio_k8s_without_trafficextension
             + setup_s3_integrator_global
             + hostnames
             + ["-var", "create_model=false"]
@@ -355,7 +340,6 @@ def tf_vars(
         + service_mesh_type
         + auth_type
         + istio_k8s_platform
-        + istio_k8s_without_trafficextension
         + risk
         + pss
         + setup_s3_integrator_global
