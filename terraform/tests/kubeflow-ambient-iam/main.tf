@@ -37,10 +37,11 @@ locals {
 }
 
 module "istio_k8s" {
-  source = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=df6c85dea5decdd014fd187404163ef2d73263da"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
 
   model_uuid = local.istio_system_model_uuid
   app_name   = "istio-k8s"
+  base       = "ubuntu@26.04"
   channel    = var.istio_k8s_channel
   revision   = var.istio_k8s_revision
   config     = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
