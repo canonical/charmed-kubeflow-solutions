@@ -287,7 +287,6 @@ jobs:
         uses: ./.github/actions/collect-k8s-logs
         with:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          # mlflow-standalone deploys into the "mlflow" model/namespace, not "kubeflow".
           namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Select default juju model
