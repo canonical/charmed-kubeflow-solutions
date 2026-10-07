@@ -289,6 +289,21 @@ jobs:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
+      # TEMP debug (IAM): oauth2-proxy registered-vs-sent redirect_uri + its status/replan state.
+      - name: Dump IAM oauth client + oauth2-proxy data (debug)
+        if: failure() && matrix.auth-type == 'iam'
+        run: |
+          model="kubeflow"
+          [[ "${{ matrix.product }}" == "mlflow-standalone" ]] && model="mlflow"
+          echo "=== hydra list-oauth-clients (iam) ==="
+          juju run -m iam hydra/0 list-oauth-clients || true
+          echo "=== oauth2-proxy config ($model) ==="
+          juju config -m "$model" oauth2-proxy || true
+          echo "=== oauth2-proxy unit data incl. oauth databag ($model) ==="
+          juju show-unit -m "$model" oauth2-proxy/0 || true
+          echo "=== oauth2-proxy status ($model) ==="
+          juju status -m "$model" oauth2-proxy --relations || true
+
       - name: Select default juju model
         run: |
           model="kubeflow"
