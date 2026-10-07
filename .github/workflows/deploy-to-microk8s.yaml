@@ -286,6 +286,8 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
+          EXTRA_COMPONENTS_ARG="$EXTRA_COMPONENTS_ARG --use-old-istio-bases"
+
           tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PLATFORM_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs

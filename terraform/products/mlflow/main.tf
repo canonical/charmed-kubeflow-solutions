@@ -23,6 +23,8 @@ module "ambient_iam" {
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 
+  use_old_istio_bases = var.use_old_istio_bases
+
   istio_ingress_k8s = {
     channel  = local.istio_ingress_k8s_channel
     revision = var.istio_ingress_k8s_revision

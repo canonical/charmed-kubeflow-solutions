@@ -41,7 +41,7 @@ module "istio_k8s" {
 
   model_uuid = local.istio_system_model_uuid
   app_name   = "istio-k8s"
-  base       = "ubuntu@26.04"
+  base       = var.use_old_istio_bases ? "ubuntu@24.04" : "ubuntu@26.04"
   channel    = var.istio_k8s_channel
   revision   = var.istio_k8s_revision
   config     = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
@@ -108,6 +108,8 @@ module "kubeflow" {
   model_uuid        = var.model_uuid
   service_mesh_type = "ambient"
   auth_type         = "iam"
+
+  use_old_istio_bases = var.use_old_istio_bases
 
   # Cross-model wiring
   istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url
