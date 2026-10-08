@@ -84,7 +84,12 @@ jobs:
             service-mesh-type: ambient
             auth-type: iam
             uats-env: mlflow-remote
-            uats-extra-args: --bundle="assets/versions-ambient-iam.yaml"
+            # TEMP: KServe can't route on ambient-IAM — it emits per-isvc subdomain hosts
+            # (<isvc>-<ns>.api.kubeflow.com) that don't match the gateway's exact-host listener
+            # (NoMatchingListenerHostname), so the predictor never becomes ready. The `and not
+            # kserve` skips the mlflow-kserve and e2e-wine-kfp-mlflow-kserve notebooks; drop it
+            # once istio-ingress-k8s can emit a *.api.kubeflow.com wildcard listener.
+            uats-extra-args: --filter "mlflow and not kserve" --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
