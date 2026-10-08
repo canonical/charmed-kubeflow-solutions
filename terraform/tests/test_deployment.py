@@ -99,6 +99,10 @@ class TestCharm:
             for system_model_name in ("istio-system", "iam"):
                 _wait_model_active(system_model_name)
 
+            # oauth2-proxy's workload recovers once the issuer DNS resolves, but
+            # the charm can stay stuck "Failed to replan"; restart it to clear.
+            _recover_oauth2_proxy(juju, model_name)
+
         apps = list(juju.status().apps.keys())
 
         for batched_apps in batched(apps, 5):
@@ -236,6 +240,63 @@ def _integrate_oauth_relation(oauth2_proxy_oauth: str, model_name: str) -> None:
         check=True,
     )
 # END workaround: hydra-operator#591
+
+
+# BEGIN workaround: oauth2-proxy-k8s "Failed to replan" blocked status.
+# After the issuer DNS is configured the workload recovers on its own (the
+# pebble check recovers and /ready returns 200), but the charm keeps the
+# "Failed to replan the pebble service" BlockedStatus and never clears it on
+# update-status (observed on latest/edge rev 29). A fresh pod replans cleanly
+# with DNS already in place, so bounce it until the charm reports active.
+def _oauth2_proxy_active(juju: jubilant.Juju) -> bool:
+    """Whether oauth2-proxy is active (or absent from this model)."""
+    status = juju.status()
+    return OAUTH2_PROXY_APP not in status.apps or jubilant.all_active(
+        status, OAUTH2_PROXY_APP
+    )
+
+
+def _oauth2_proxy_settled(juju: jubilant.Juju, timeout: int = 300) -> None:
+    """Poll until oauth2-proxy is active or the timeout elapses."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if _oauth2_proxy_active(juju):
+            return
+        time.sleep(10)
+
+
+def _recover_oauth2_proxy(
+    juju: jubilant.Juju, model_name: str, attempts: int = 5
+) -> None:
+    """Restart oauth2-proxy until the charm reports active."""
+    for attempt in range(attempts):
+        if _oauth2_proxy_active(juju):
+            return
+        logger.warning(
+            "oauth2-proxy is not active (attempt %d/%d); the workload is "
+            "healthy but the charm is stuck 'Failed to replan', so restart it",
+            attempt + 1,
+            attempts,
+        )
+        statefulset = f"statefulset/{OAUTH2_PROXY_APP}"
+        subprocess.run(
+            ["kubectl", "-n", model_name, "rollout", "restart", statefulset],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "kubectl",
+                "-n",
+                model_name,
+                "rollout",
+                "status",
+                statefulset,
+                "--timeout=300s",
+            ],
+            check=True,
+        )
+        _oauth2_proxy_settled(juju)
+# END workaround: oauth2-proxy-k8s "Failed to replan" blocked status
 
 
 def _wait_model_active(model_name: str) -> None:

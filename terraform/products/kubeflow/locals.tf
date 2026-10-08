@@ -43,7 +43,10 @@ locals {
   istio_k8s_channel         = local.istio_channel
 
   # IAM Auth Charms (ambient)
-  oauth2_proxy_channel                        = "latest/stable"
+  # latest/stable (rev 26) registers oauth2-proxy's internal cluster URL as the
+  # OAuth redirect_uri, so UI login fails with a Hydra redirect_uri mismatch;
+  # latest/edge (rev 29) registers the external ingress URL (as mlflow uses).
+  oauth2_proxy_channel                        = "latest/edge"
   request_authentication_configurator_channel = var.release == "1.11" ? "1.0/edge" : "latest/edge"
   github_profiles_automator_channel           = var.release == "1.11" ? "1.0/edge" : "latest/edge"
 
