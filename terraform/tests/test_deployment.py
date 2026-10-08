@@ -72,6 +72,7 @@ class TestCharm:
         hostname_m2m,
         hostname_ui,
         model_name,
+        is_mlflow_standalone,
     ):
         """
         Wait for the applications to become active and idle and verify its public URL access.
@@ -131,8 +132,14 @@ class TestCharm:
             # headless browser and assert the rendered "Sign in" form — a
             # requests.get substring check is brittle because the login-ui is a
             # client-rendered Next.js SPA whose __NEXT_DATA__ shape is not stable.
+            #
+            # Standalone MLflow has no root-path app on the UI gateway (unlike the
+            # Kubeflow dashboard): mlflow-server is served under /mlflow/, so "/"
+            # has no HTTPRoute and returns a bare istio-envoy 404. Probe the real
+            # UI path so the forward-auth -> IdP login chain is exercised.
+            ui_path = "/mlflow/" if is_mlflow_standalone else "/"
             result_status, _ = fetch_response(
-                f"https://{hostname_ui}", verify=False
+                f"https://{hostname_ui}{ui_path}", verify=False
             )
             assert result_status == 200
             return
