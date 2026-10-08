@@ -32,26 +32,49 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 3
+      # matrix:
+      #   product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark]
+      #   service-mesh-type: [sidecar, ambient]
+      #   auth-type: [dex]
+      #   include:
+      #     - product: kubeflow-standalone
+      #       uats-env: kubeflow-remote
+      #       uats-extra-args: --include-multi-tenancy-tests
+      #     # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
+      #     - product: kubeflow-standalone
+      #       service-mesh-type: ambient
+      #       uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
+      #     - product: kubeflow-feast
+      #       uats-env: feast-remote
+      #     - product: kubeflow-feast
+      #       service-mesh-type: ambient
+      #       uats-extra-args: --bundle="assets/versions-ambient.yaml"
+      #     - product: kubeflow-spark
+      #       uats-env: spark-remote
+      #       uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
+      #     - product: kubeflow-standalone
+      #       service-mesh-type: ambient
+      #       auth-type: iam
+      #       uats-env: kubeflow-remote
+      #       uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+      #     - product: kubeflow-mlflow
+      #       service-mesh-type: ambient
+      #       auth-type: iam
+      #       uats-env: mlflow-remote
+      #       uats-extra-args: --bundle="assets/versions-ambient.yaml"
+      #     - product: mlflow-standalone
+      #       service-mesh-type: ambient
+      #       auth-type: iam
+      #       uats-env: mlflow-remote
+      #       uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+      #   exclude:
+      #     - product: kubeflow-spark
+      #       service-mesh-type: ambient
       matrix:
-        product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark]
-        service-mesh-type: [sidecar, ambient]
-        auth-type: [dex]
+        product: [kubeflow-standalone]
+        service-mesh-type: [ambient]
+        auth-type: [iam]
         include:
-          - product: kubeflow-standalone
-            uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests
-          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
-          - product: kubeflow-standalone
-            service-mesh-type: ambient
-            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
-          - product: kubeflow-feast
-            uats-env: feast-remote
-          - product: kubeflow-feast
-            service-mesh-type: ambient
-            uats-extra-args: --bundle="assets/versions-ambient.yaml"
-          - product: kubeflow-spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow-standalone
             service-mesh-type: ambient
             auth-type: iam
@@ -289,8 +312,9 @@ jobs:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
-      # TEMP debug (IAM): oauth2-proxy registered-vs-sent redirect_uri + its status/replan state.
-      - name: Dump IAM oauth client + oauth2-proxy data (debug)
+      # TEMP debug (IAM): oauth2-proxy redirect_uri/replan state + ingress Gateway/HTTPRoute wiring
+      # and a live request to the UI host, to locate 404s.
+      - name: Dump IAM oauth + ingress routing data (debug)
         if: failure() && matrix.auth-type == 'iam'
         run: |
           model="kubeflow"
@@ -303,6 +327,19 @@ jobs:
           juju show-unit -m "$model" oauth2-proxy/0 || true
           echo "=== oauth2-proxy status ($model) ==="
           juju status -m "$model" oauth2-proxy --relations || true
+          echo "=== gateways ($model) ==="
+          kubectl -n "$model" get gateway -o yaml || true
+          echo "=== httproutes + Accepted conditions ($model) ==="
+          kubectl -n "$model" get httproute -o yaml || true
+          kubectl -n "$model" describe httproute || true
+          echo "=== live request to https://ui.$model.com/ (locate the 404) ==="
+          ui_ip=$(kubectl -n "$model" get svc istio-ingress-k8s-ui-istio -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+          echo "UI gateway LB IP: ${ui_ip:-<none>}"
+          if [[ -n "$ui_ip" ]]; then
+            curl -sk -D /tmp/h -o /tmp/b -w 'HTTP %{http_code}\n' --resolve "ui.$model.com:443:$ui_ip" "https://ui.$model.com/" || true
+            echo "--- response headers (server: istio-envoy => no route; else app/oauth2-proxy) ---"; cat /tmp/h || true
+            echo "--- body (first 500 bytes) ---"; head -c 500 /tmp/b || true; echo
+          fi
 
       - name: Select default juju model
         run: |
