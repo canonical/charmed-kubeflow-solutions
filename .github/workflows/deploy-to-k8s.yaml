@@ -66,6 +66,8 @@ jobs:
             # (NoMatchingListenerHostname), so the predictor never becomes ready. The `and not
             # kserve` skips the mlflow-kserve and e2e-wine-kfp-mlflow-kserve notebooks; drop it
             # once istio-ingress-k8s can emit a *.api.kubeflow.com wildcard listener.
+            # Refs: kserve-operators#491 (open); root cause service-mesh#102, "fixed" by
+            # service-mesh#156 — but that adds only exact-or-"" (any-host) listener-hostname, no wildcard.
             uats-extra-args: --filter "mlflow and not kserve" --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
             service-mesh-type: ambient
