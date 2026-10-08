@@ -341,6 +341,21 @@ jobs:
             echo "--- body (first 500 bytes) ---"; head -c 500 /tmp/b || true; echo
           fi
 
+      # TEMP debug: KServe isvc + HTTPRoute status. The isvc and its routes live in the
+      # user/profile namespace (test-kubeflow), not the app model ns; this confirms whether the
+      # failure is NoMatchingListenerHostname (gateway) vs a pod/image/storage problem.
+      - name: Dump KServe isvc + routes (debug)
+        if: failure()
+        run: |
+          echo "=== inferenceservices (all namespaces) ==="
+          kubectl get isvc -A || true
+          kubectl get isvc -A -o yaml || true
+          echo "=== httproutes (all namespaces) ==="
+          kubectl get httproute -A || true
+          kubectl get httproute -A -o yaml || true
+          echo "=== test-kubeflow pods (predictor / storage-initializer state) ==="
+          kubectl -n test-kubeflow get pods -o wide || true
+
       - name: Select default juju model
         run: |
           model="kubeflow"
