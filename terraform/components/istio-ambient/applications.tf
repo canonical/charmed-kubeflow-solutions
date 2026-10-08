@@ -31,7 +31,10 @@ module "istio_ingress_k8s_m2m" {
   revision    = var.istio_ingress_k8s.revision
   units       = var.istio_ingress_k8s.units
   constraints = var.istio_ingress_k8s.constraints
-  config      = merge(var.istio_ingress_k8s.config, var.istio_ingress_k8s_m2m_config)
+  # "listener-hostname" is required to accept every host, so KServe's per-isvc subdomain routes
+  # (<isvc>.api.<domain>) attach instead of being rejected (see issues service-mesh#102 and
+  # kserve-operators#491)
+  config = merge({ "listener-hostname" = "" }, var.istio_ingress_k8s.config, var.istio_ingress_k8s_m2m_config)
 }
 
 # Beacon: provides the in-model service mesh. It joins the Istio control plane
