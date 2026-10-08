@@ -79,12 +79,12 @@ jobs:
             service-mesh-type: ambient
             auth-type: iam
             uats-env: kubeflow-remote
-            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: kubeflow-mlflow
             service-mesh-type: ambient
             auth-type: iam
             uats-env: mlflow-remote
-            uats-extra-args: --bundle="assets/versions-ambient.yaml"
+            uats-extra-args: --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
