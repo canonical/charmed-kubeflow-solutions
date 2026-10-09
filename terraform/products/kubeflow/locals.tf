@@ -72,10 +72,12 @@ locals {
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
-  # Object storage backend selection ('minio' or 'S3')
+  # Object storage backend selection ('minio' or 'S3'). Integrated MLflow is MLflow 2,
+  # which only supports minio (object-storage) and has no s3-credentials relation, so
+  # enabling MLflow forces minio for the whole deployment (KServe/KFP share that store).
   object_storage_consumers = var.enable_kfp || var.enable_mlflow || var.enable_kserve
-  deploy_minio             = var.object_storage_mode == "minio" && local.object_storage_consumers
-  deploy_s3_integrator     = var.object_storage_mode == "S3" && local.object_storage_consumers
+  deploy_minio             = (var.object_storage_mode == "minio" || var.enable_mlflow) && local.object_storage_consumers
+  deploy_s3_integrator     = var.object_storage_mode == "S3" && !var.enable_mlflow && local.object_storage_consumers
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"
