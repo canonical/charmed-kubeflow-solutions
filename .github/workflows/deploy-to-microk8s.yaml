@@ -340,16 +340,10 @@ jobs:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
-      - name: Select default juju model
-        run: |
-          model="kubeflow"
-          if [[ "${{ matrix.product.name }}" == "mlflow-standalone" ]]; then
-            model="mlflow"
-          fi
-          juju switch "$model"
-
       - name: Get juju status
-        run: juju status --relations
+        env:
+          JUJU_MODEL: "${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }}"
+        run: juju status -m "${{ JUJU_MODEL }}" --relations
         if: always()
 
       - name: Get juju status for istio and iam models
