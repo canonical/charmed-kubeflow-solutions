@@ -8,7 +8,6 @@ import lightkube
 import pytest
 import requests
 import tenacity
-from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
 from lightkube.core.exceptions import ApiError
 from lightkube.resources.core_v1 import ConfigMap, Service
 
@@ -26,8 +25,8 @@ OAUTH_OFFER = "oauth-offer:oauth"
 
 
 @pytest.fixture()
-def lightkube_client() -> lightkube.Client:
-    client = lightkube.Client(field_manager="kubeflow")
+def lightkube_client(model_name: str) -> lightkube.Client:
+    client = lightkube.Client(field_manager=model_name)
     return client
 
 
@@ -65,7 +64,15 @@ class TestCharm:
 
     @pytest.mark.dependency(depends=["TestCharm::test_apply_terraform_solution"])
     def test_assert_deployment(
-        self, juju: jubilant.Juju, lightkube_client, request
+        self,
+        juju: jubilant.Juju,
+        lightkube_client,
+        request,
+        hostname_auth,
+        hostname_m2m,
+        hostname_ui,
+        model_name,
+        is_mlflow_standalone,
     ):
         """
         Wait for the applications to become active and idle and verify its public URL access.
@@ -73,7 +80,7 @@ class TestCharm:
         auth_type = request.config.getoption("--auth-type")
 
         # The ambient-iam solution spans multiple models; wait for the provider
-        # models to settle before asserting on the kubeflow model.
+        # models to settle before asserting on the application model.
         if auth_type == "iam":
             # iam-core (traefik / postgresql / self-signed) does not depend on
             # the external DNS, so wait for it first: this guarantees traefik's
@@ -82,10 +89,20 @@ class TestCharm:
 
             # The IAM charms and cross-model callbacks only reconcile to active
             # once the external hostnames resolve to their LoadBalancer IPs.
-            configure_dns(lightkube_client)
+            configure_dns(
+                lightkube_client,
+                hostname_auth,
+                hostname_m2m,
+                hostname_ui,
+                model_name,
+            )
 
-            for model_name in ("istio-system", "iam"):
-                _wait_model_active(model_name)
+            for system_model_name in ("istio-system", "iam"):
+                _wait_model_active(system_model_name)
+
+            # oauth2-proxy's workload recovers once the issuer DNS resolves, but
+            # the charm can stay stuck "Failed to replan"; restart it to clear.
+            _recover_oauth2_proxy(juju, model_name)
 
         apps = list(juju.status().apps.keys())
 
@@ -102,7 +119,7 @@ class TestCharm:
             # when it changes (http:// -> https://), which breaks the OIDC flow;
             # re-register the client before probing the UI (hydra-operator#591).
             # Remove when https://github.com/canonical/hydra-operator/issues/591 is resolved.
-            _refresh_hydra_oauth_client(juju, apps)
+            _refresh_hydra_oauth_client(juju, apps, hostname_ui, model_name)
 
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
@@ -115,8 +132,14 @@ class TestCharm:
             # headless browser and assert the rendered "Sign in" form — a
             # requests.get substring check is brittle because the login-ui is a
             # client-rendered Next.js SPA whose __NEXT_DATA__ shape is not stable.
+            #
+            # Standalone MLflow has no root-path app on the UI gateway (unlike the
+            # Kubeflow dashboard): mlflow-server is served under /mlflow/, so "/"
+            # has no HTTPRoute and returns a bare istio-envoy 404. Probe the real
+            # UI path so the forward-auth -> IdP login chain is exercised.
+            ui_path = "/mlflow/" if is_mlflow_standalone else "/"
             result_status, _ = fetch_response(
-                f"https://{UI_HOSTNAME}", verify=False
+                f"https://{hostname_ui}{ui_path}", verify=False
             )
             assert result_status == 200
             return
@@ -125,7 +148,7 @@ class TestCharm:
         istio_service = "istio-ingressgateway-workload"
         if request.config.getoption("--service-mesh-type") == "ambient":
             istio_service = "istio-ingress-k8s-istio"
-        url = get_public_url(lightkube_client, "kubeflow", istio_service)
+        url = get_public_url(lightkube_client, model_name, istio_service)
         result_status, result_text = fetch_response(url)
         assert result_status == 200
         assert "Log in to Your Account" in result_text
@@ -166,7 +189,12 @@ def fetch_response(url, headers=None, verify=True):
 
 # BEGIN workaround: hydra-operator#591 (remove this whole helper once fixed).
 # https://github.com/canonical/hydra-operator/issues/591
-def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
+def _refresh_hydra_oauth_client(
+    juju: jubilant.Juju,
+    apps: list[str],
+    hostname_ui: str,
+    model_name: str,
+) -> None:
     """Re-register oauth2-proxy's Hydra client if its redirect_uri is stale.
 
     Hydra does not patch an already-registered OAuth client when the requirer's
@@ -181,23 +209,23 @@ def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
         text=True,
         check=True,
     )
-    if f"http://{UI_HOSTNAME}" not in result.stdout:
+    if f"http://{hostname_ui}" not in result.stdout:
         return
 
     logger.info(
         "Hydra has a stale http:// redirect_uri for %s; toggling the oauth "
         "relation to force re-registration (hydra-operator#591)",
-        UI_HOSTNAME,
+        hostname_ui,
     )
     oauth2_proxy_oauth = f"{OAUTH2_PROXY_APP}:oauth"
     # Remove then re-add the relation so Hydra drops and recreates the client.
     subprocess.run(
-        ["juju", "remove-relation", "-m", "kubeflow", OAUTH_OFFER, oauth2_proxy_oauth],
+        ["juju", "remove-relation", "-m", model_name, OAUTH_OFFER, oauth2_proxy_oauth],
         check=True,
     )
     # remove-relation returns before the relation is fully gone; juju rejects a
     # re-integrate while it is still "dying", so retry until removal completes.
-    _integrate_oauth_relation(oauth2_proxy_oauth)
+    _integrate_oauth_relation(oauth2_proxy_oauth, model_name)
     _wait_model_active("iam")
     for batched_apps in batched(apps, 5):
         juju.wait(
@@ -212,13 +240,70 @@ def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str]) -> None:
     stop=tenacity.stop_after_delay(300),
     reraise=True,
 )
-def _integrate_oauth_relation(oauth2_proxy_oauth: str) -> None:
+def _integrate_oauth_relation(oauth2_proxy_oauth: str, model_name: str) -> None:
     """Re-integrate the oauth relation, retrying while the old one is removing."""
     subprocess.run(
-        ["juju", "integrate", "-m", "kubeflow", OAUTH_OFFER, oauth2_proxy_oauth],
+        ["juju", "integrate", "-m", model_name, OAUTH_OFFER, oauth2_proxy_oauth],
         check=True,
     )
 # END workaround: hydra-operator#591
+
+
+# BEGIN workaround: oauth2-proxy-k8s "Failed to replan" blocked status.
+# After the issuer DNS is configured the workload recovers on its own (the
+# pebble check recovers and /ready returns 200), but the charm keeps the
+# "Failed to replan the pebble service" BlockedStatus and never clears it on
+# update-status (observed on latest/edge rev 29). A fresh pod replans cleanly
+# with DNS already in place, so bounce it until the charm reports active.
+def _oauth2_proxy_active(juju: jubilant.Juju) -> bool:
+    """Whether oauth2-proxy is active (or absent from this model)."""
+    status = juju.status()
+    return OAUTH2_PROXY_APP not in status.apps or jubilant.all_active(
+        status, OAUTH2_PROXY_APP
+    )
+
+
+def _oauth2_proxy_settled(juju: jubilant.Juju, timeout: int = 300) -> None:
+    """Poll until oauth2-proxy is active or the timeout elapses."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if _oauth2_proxy_active(juju):
+            return
+        time.sleep(10)
+
+
+def _recover_oauth2_proxy(
+    juju: jubilant.Juju, model_name: str, attempts: int = 5
+) -> None:
+    """Restart oauth2-proxy until the charm reports active."""
+    for attempt in range(attempts):
+        if _oauth2_proxy_active(juju):
+            return
+        logger.warning(
+            "oauth2-proxy is not active (attempt %d/%d); the workload is "
+            "healthy but the charm is stuck 'Failed to replan', so restart it",
+            attempt + 1,
+            attempts,
+        )
+        statefulset = f"statefulset/{OAUTH2_PROXY_APP}"
+        subprocess.run(
+            ["kubectl", "-n", model_name, "rollout", "restart", statefulset],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "kubectl",
+                "-n",
+                model_name,
+                "rollout",
+                "status",
+                statefulset,
+                "--timeout=300s",
+            ],
+            check=True,
+        )
+        _oauth2_proxy_settled(juju)
+# END workaround: oauth2-proxy-k8s "Failed to replan" blocked status
 
 
 def _wait_model_active(model_name: str) -> None:
@@ -279,7 +364,13 @@ def _coredns_configmap(lightkube_client: lightkube.Client) -> ConfigMap:
     raise RuntimeError("CoreDNS ConfigMap not found in kube-system")
 
 
-def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
+def configure_dns(
+    lightkube_client: lightkube.Client,
+    hostname_auth: str,
+    hostname_m2m: str,
+    hostname_ui: str,
+    model_name: str,
+) -> dict[str, str]:
     """Resolve the ambient-iam hostnames to their LoadBalancer IPs.
 
     Both the in-cluster DNS (CoreDNS) and the runner host (/etc/hosts) are
@@ -287,17 +378,17 @@ def configure_dns(lightkube_client: lightkube.Client) -> dict[str, str]:
     external hostnames and reconcile to active.
     """
     host_to_ip = {
-        UI_HOSTNAME: _wait_for_lb_ip(
+        hostname_ui: _wait_for_lb_ip(
             lightkube_client,
-            "kubeflow",
+            model_name,
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-ui"},
         ),
-        M2M_HOSTNAME: _wait_for_lb_ip(
+        hostname_m2m: _wait_for_lb_ip(
             lightkube_client,
-            "kubeflow",
+            model_name,
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-m2m"},
         ),
-        AUTH_HOSTNAME: _wait_for_lb_ip(
+        hostname_auth: _wait_for_lb_ip(
             lightkube_client,
             "iam-core",
             {"kubernetes-resource-handler-scope": "traefik-loadbalancer"},

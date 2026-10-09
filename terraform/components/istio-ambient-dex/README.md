@@ -16,9 +16,9 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#module\_istio\_beacon\_k8s) | git::https://github.com/canonical/istio-beacon-k8s-operator//terraform | 51b204dd50392809692263f6e973d81dd9fe200a |
-| <a name="module_istio_ingress_k8s"></a> [istio\_ingress\_k8s](#module\_istio\_ingress\_k8s) | git::https://github.com/canonical/istio-ingress-k8s-operator//terraform | a9ef9646aea149a00a6a7620acaf483249714d04 |
-| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | e3c216c0fe5a9a42ab8d1b6e16725a97b72bf2a7 |
+| <a name="module_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#module\_istio\_beacon\_k8s) | git::https://github.com/canonical/istio-beacon-k8s-operator//terraform | 87fbeb0b5ad41b80dc006827293976c3db2bc911 |
+| <a name="module_istio_ingress_k8s"></a> [istio\_ingress\_k8s](#module\_istio\_ingress\_k8s) | git::https://github.com/canonical/istio-ingress-k8s-operator//terraform | f3c7cd585a5a2a8e36bc750274c48bd5f431051f |
+| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | 7b1162ba3a9b2af6896545f51e64dd21cc44ee39 |
 
 ## Resources
 

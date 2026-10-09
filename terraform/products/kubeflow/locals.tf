@@ -43,7 +43,10 @@ locals {
   istio_k8s_channel         = local.istio_channel
 
   # IAM Auth Charms (ambient)
-  oauth2_proxy_channel                        = "latest/stable"
+  # latest/stable (rev 26) registers oauth2-proxy's internal cluster URL as the
+  # OAuth redirect_uri, so UI login fails with a Hydra redirect_uri mismatch;
+  # latest/edge (rev 29) registers the external ingress URL (as the mlflow product uses).
+  oauth2_proxy_channel                        = "latest/edge"
   request_authentication_configurator_channel = var.release == "1.11" ? "1.0/edge" : "latest/edge"
   github_profiles_automator_channel           = var.release == "1.11" ? "1.0/edge" : "latest/edge"
 
@@ -59,11 +62,9 @@ locals {
   # Resource Dispatcher Charm
   resource_dispatcher_channel = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
 
-  # MLflow Component
-  # NOTE: the risk is forced to `edge` for the track `latest` as MLflow 3.15 is available only
-  # on `latest/edge` so far, while changing risk on `latest` would end up deploying MLflow 2.22
-  # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here 
-  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
+  # MLflow Component — integrated Kubeflow pins single-tenant MLflow 2.x (MySQL/dex);
+  # multi-tenant MLflow 3 lives in the standalone `mlflow` product.
+  mlflow_channel = "2.22/${var.risk}"
 
   # KServe Component
   kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
@@ -71,10 +72,12 @@ locals {
   deploy_kserve   = var.enable_kserve || var.enable_mlflow
   deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
-  # Object storage backend selection ('minio' or 'S3')
+  # Object storage backend selection ('minio' or 'S3'). Integrated MLflow is MLflow 2,
+  # which only supports minio (object-storage) and has no s3-credentials relation, so
+  # enabling MLflow forces minio for the whole deployment (KServe/KFP share that store).
   object_storage_consumers = var.enable_kfp || var.enable_mlflow || var.enable_kserve
-  deploy_minio             = var.object_storage_mode == "minio" && local.object_storage_consumers
-  deploy_s3_integrator     = var.object_storage_mode == "S3" && local.object_storage_consumers
+  deploy_minio             = (var.object_storage_mode == "minio" || var.enable_mlflow) && local.object_storage_consumers
+  deploy_s3_integrator     = var.object_storage_mode == "S3" && !var.enable_mlflow && local.object_storage_consumers
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"

@@ -78,7 +78,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | ---- | ------ | ------- |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../products/iam | n/a |
 | <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | df6c85dea5decdd014fd187404163ef2d73263da |
-| <a name="module_kubeflow"></a> [kubeflow](#module\_kubeflow) | ../../products/kubeflow | n/a |
+| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../products/mlflow | n/a |
 
 ## Resources
 
@@ -94,23 +94,13 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_create_iam_model"></a> [create\_iam\_model](#input\_create\_iam\_model) | Create the iam Juju model for the Identity Platform. | `bool` | `true` | no |
 | <a name="input_create_istio_system_model"></a> [create\_istio\_system\_model](#input\_create\_istio\_system\_model) | Create the istio-system Juju model for the Istio control plane (istio-k8s). | `bool` | `true` | no |
-| <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create the kubeflow Juju model. | `bool` | `true` | no |
+| <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create the mlflow Juju model. | `bool` | `true` | no |
 | <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | Offer URL for COS Grafana dashboards. | `string` | `null` | no |
-| <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Deploy Feast. | `bool` | `false` | no |
-| <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Deploy Katib. | `bool` | `true` | no |
-| <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Deploy Kubeflow Pipelines. | `bool` | `true` | no |
 | <a name="input_enable_kratos_external_idp_integrator"></a> [enable\_kratos\_external\_idp\_integrator](#input\_enable\_kratos\_external\_idp\_integrator) | Deploy the Kratos External IdP Integrator (Google / Entra / etc.). | `bool` | `false` | no |
-| <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Deploy KServe. | `bool` | `true` | no |
-| <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Deploy MLflow. | `bool` | `false` | no |
-| <a name="input_enable_notebooks"></a> [enable\_notebooks](#input\_enable\_notebooks) | Deploy Notebooks. | `bool` | `true` | no |
 | <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Enable observability wiring to an external COS deployment. | `bool` | `false` | no |
-| <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Deploy Tensorboard. | `bool` | `true` | no |
-| <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Deploy the v1 Training Operator. | `bool` | `true` | no |
-| <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Deploy the v2 Kubeflow Trainer. | `bool` | `false` | no |
 | <a name="input_external_auth_hostname"></a> [external\_auth\_hostname](#input\_external\_auth\_hostname) | External hostname for the iam Traefik ingress. | `string` | n/a | yes |
 | <a name="input_external_m2m_hostname"></a> [external\_m2m\_hostname](#input\_external\_m2m\_hostname) | External hostname for the M2M ambient ingress gateway. | `string` | n/a | yes |
 | <a name="input_external_ui_hostname"></a> [external\_ui\_hostname](#input\_external\_ui\_hostname) | External hostname for the UI ambient ingress gateway. | `string` | n/a | yes |
-| <a name="input_github_profiles_automator_config"></a> [github\_profiles\_automator\_config](#input\_github\_profiles\_automator\_config) | Configuration for the github-profiles-automator charm (e.g. repository and PMR path). | `map(string)` | `{}` | no |
 | <a name="input_hydra_revision"></a> [hydra\_revision](#input\_hydra\_revision) | Revision for the Hydra application. | `number` | `null` | no |
 | <a name="input_iam_model_name"></a> [iam\_model\_name](#input\_iam\_model\_name) | Name of the iam model to create. | `string` | `"iam"` | no |
 | <a name="input_iam_model_uuid"></a> [iam\_model\_uuid](#input\_iam\_model\_uuid) | UUID of an existing model to deploy the Identity Platform into (required when create\_iam\_model is false). | `string` | `null` | no |
@@ -119,31 +109,30 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these). | `string` | `"dev/edge/upstream-images"` | no |
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control plane charm. | `map(string)` | `{}` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s (always merged into its config as 'platform', including an empty string). | `string` | `""` | no |
-| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision for the istio-k8s control plane charm. | `number` | `76` | no |
+| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision for the istio-k8s control plane charm. Pinning the revision resolves the ambiguous arch/series selection on dev/edge/upstream-images. | `number` | `76` | no |
 | <a name="input_istio_system_model_name"></a> [istio\_system\_model\_name](#input\_istio\_system\_model\_name) | Name of the istio-system model to create. | `string` | `"istio-system"` | no |
 | <a name="input_istio_system_model_uuid"></a> [istio\_system\_model\_uuid](#input\_istio\_system\_model\_uuid) | UUID of an existing model to deploy istio-k8s into (required when create\_istio\_system\_model is false). | `string` | `null` | no |
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
 | <a name="input_kratos_revision"></a> [kratos\_revision](#input\_kratos\_revision) | Revision for the Kratos application. | `number` | `null` | no |
-| <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for the kserve-controller application (e.g. domain-name). | `map(string)` | `{}` | no |
 | <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | Offer URL for COS Loki logging. | `string` | `null` | no |
 | <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |
-| <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing kubeflow model (required when create\_model is false). | `string` | `null` | no |
-| <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
-| <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
+| <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing mlflow model (required when create\_model is false). | `string` | `null` | no |
+| <a name="input_release"></a> [release](#input\_release) | MLflow release to deploy. Use 'latest' for latest tracks or '3.15' for pinned 3.15 tracks. | `string` | `"latest"` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Charm channel risk level to deploy (stable, candidate, beta, edge). | `string` | `"edge"` | no |
 | <a name="input_s3_access_key_global"></a> [s3\_access\_key\_global](#input\_s3\_access\_key\_global) | S3 access key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_bucket_global"></a> [s3\_bucket\_global](#input\_s3\_bucket\_global) | S3 bucket for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_traefik_config"></a> [traefik\_config](#input\_traefik\_config) | Configuration for the iam Traefik ingress (e.g. external\_hostname). | `map(string)` | `{}` | no |
+| <a name="input_user_grants_across_workspaces"></a> [user\_grants\_across\_workspaces](#input\_user\_grants\_across\_workspaces) | Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,<br/>with each item of a list representing grants across all workspaces for a given user, and<br/>with each key representing the instance's name and the corresponding value the respective<br/>instance's relevant configurations for MLflow | <pre>map(object({<br/>    entity_name        = string<br/>    entity_permissions = string<br/>  }))</pre> | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
 | <a name="output_iam_model_uuid"></a> [iam\_model\_uuid](#output\_iam\_model\_uuid) | UUID of the iam model hosting the Canonical Identity Platform. |
-| <a name="output_istio_ingress_config_offer_url"></a> [istio\_ingress\_config\_offer\_url](#output\_istio\_ingress\_config\_offer\_url) | Cross-model offer URL of istio-k8s:istio-ingress-config consumed by the kubeflow gateways. |
+| <a name="output_istio_ingress_config_offer_url"></a> [istio\_ingress\_config\_offer\_url](#output\_istio\_ingress\_config\_offer\_url) | Cross-model offer URL of istio-k8s:istio-ingress-config consumed by the mlflow gateways. |
 | <a name="output_istio_system_model_uuid"></a> [istio\_system\_model\_uuid](#output\_istio\_system\_model\_uuid) | UUID of the istio-system model hosting the Istio control plane. |
-| <a name="output_oauth_offer_url"></a> [oauth\_offer\_url](#output\_oauth\_offer\_url) | Cross-model offer URL of hydra:oauth consumed by the kubeflow IAM auth charms. |
+| <a name="output_oauth_offer_url"></a> [oauth\_offer\_url](#output\_oauth\_offer\_url) | Cross-model offer URL of hydra:oauth consumed by the mlflow IAM auth charms. |
 <!-- END_TF_DOCS -->

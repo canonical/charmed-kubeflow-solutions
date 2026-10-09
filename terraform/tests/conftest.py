@@ -1,21 +1,10 @@
 import jubilant
 import pytest
 
-from constants import AUTH_HOSTNAME, M2M_HOSTNAME, UI_HOSTNAME
 from dotenv import load_dotenv
 import os
 
-MODEL_NAME = "kubeflow"
-
 load_dotenv()
-
-
-@pytest.fixture(scope="module")
-def juju():
-    juju_instance = jubilant.Juju()
-    juju_instance.add_model(MODEL_NAME)
-
-    yield juju_instance
 
 
 def pytest_addoption(parser):
@@ -26,6 +15,11 @@ def pytest_addoption(parser):
         default="",
         type=str,
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
+    )
+    parser.addoption(
+        "--use-old-istio-bases",
+        action="store_true",
+        help="Deploy all ambient-mode Istio charms with the old 24.04 bases",
     )
     parser.addoption(
         "--service-mesh-type",
@@ -52,9 +46,14 @@ def pytest_addoption(parser):
         help="Risk to be used when deploying the terraform module",
     )
     parser.addoption(
+        "--disable-kubeflow",
+        action="store_true",
+        help="Disable deploying Kubeflow underneath",
+    )
+    parser.addoption(
         "--enable-mlflow",
         action="store_true",
-        help="Enable to deploy also mlflow",
+        help="Enable to deploy also MLflow",
     )
     parser.addoption(
         "--enable-feast",
@@ -117,6 +116,14 @@ def istio_k8s_platform(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def use_old_istio_bases(request) -> list[str]:
+    """Terraform module customization to deploy Istio charms on their old bases."""
+    if request.config.getoption("--use-old-istio-bases"):
+        return ["-var", "use_old_istio_bases=true"]
+    return []
+
+
+@pytest.fixture(scope="module")
 def service_mesh_type(request) -> list[str]:
     """Terraform module customization for the service mesh type."""
     mesh = request.config.getoption("--service-mesh-type")
@@ -175,9 +182,47 @@ def enable_spark(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def solution_module_path(request) -> str:
+def is_mlflow_standalone(request) -> bool:
+    """Return whether MLflow is deployed without Kubeflow."""
+    return bool(
+        request.config.getoption("--disable-kubeflow")
+        and request.config.getoption("--enable-mlflow")
+    )
+
+
+@pytest.fixture(scope="module")
+def model_name(is_mlflow_standalone):
+    return "mlflow" if is_mlflow_standalone else "kubeflow"
+
+
+@pytest.fixture(scope="module")
+def juju(model_name):
+    juju_instance = jubilant.Juju()
+    juju_instance.add_model(model_name)
+    yield juju_instance
+
+
+@pytest.fixture(scope="module")
+def hostname_auth(model_name):
+    return f"auth.{model_name}.com"
+
+
+@pytest.fixture(scope="module")
+def hostname_m2m(model_name):
+    return f"api.{model_name}.com"
+
+
+@pytest.fixture(scope="module")
+def hostname_ui(model_name):
+    return f"ui.{model_name}.com"
+
+
+@pytest.fixture(scope="module")
+def solution_module_path(request, is_mlflow_standalone) -> str:
     """Path to the Terraform root module to apply for the selected auth stack."""
     if request.config.getoption("--auth-type") == "iam":
+        if is_mlflow_standalone:
+            return "./../tests/mlflow-ambient-iam"
         return "./../tests/kubeflow-ambient-iam"
     return "./../products/kubeflow"
 
@@ -200,23 +245,75 @@ def setup_s3_integrator_global() -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def github_profiles_automator_configs(request) -> list[str]:
+    """Terraform module customization for github-profiles-automator's configurations."""
+    return [
+        "-var",
+        (
+            "github_profiles_automator_config={"
+            'repository="https://github.com/canonical/github-profiles-automator.git",'
+            '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
+            # Pin to a revision tag for reproducibility.
+            '"git-revision"="rev295",'
+            # Slow the reconcile so it does not remove the m2m UATs'
+            # directly-created authorization mid-run.
+            '"sync-period"="86400"}'
+        ),
+    ]
+
+
+@pytest.fixture(scope="module")
+def mlflow_user_grants_across_workspaces(request) -> list[str]:
+    """Terraform module customization for MLflow user grants across workspaces."""
+    return [
+        "-var",
+        (
+            'user_grants_across_workspaces={'
+            '"test-user-grants"={'
+            'entity_name="test-kubeflow",'  # NOTE: same as the Kubeflow Profile's name in the UATs
+            'entity_permissions="[{\\"resource_type\\": \\"workspace\\", \\"resource_name\\": \\"test-workspace\\", \\"privileges\\": [\\"admin\\"]}]"'  # noqa: E501
+            '}'
+            '}'
+        ),
+    ]
+
+
+@pytest.fixture(scope="module")
+def hostnames(request, hostname_ui, hostname_m2m, hostname_auth) -> list[str]:
+    """Terraform module customization for external hostnames."""
+    return [
+        "-var",
+        f"external_ui_hostname={hostname_ui}",
+        "-var",
+        f"external_m2m_hostname={hostname_m2m}",
+        "-var",
+        f"external_auth_hostname={hostname_auth}",
+    ]
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
     request,
     risk,
     service_mesh_type,
     auth_type,
     istio_k8s_platform,
+    use_old_istio_bases,
     enable_mlflow,
     enable_feast,
     enable_spark,
+    is_mlflow_standalone,
+    hostnames,
     pss,
     setup_s3_integrator_global,
+    github_profiles_automator_configs,
+    mlflow_user_grants_across_workspaces,
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
-        # The kubeflow-ambient-iam root always deploys ambient + iam and lets
-        # Terraform create the istio-system, iam and iam-core models. Only the
-        # kubeflow model is pre-created by the test and referenced via model_uuid.
+        # The kubeflow-ambient-iam and mlflow-ambient-iam roots always  ambient + iam and lets
+        # Terraform create the istio-system, iam and iam-core models. Only the kubeflow/mlflow
+        # model is pre-created by the test and referenced via model_uuid.
 
         # Validate that the service mesh type is ambient, as required by the IAM auth stack.
         service_mesh = request.config.getoption("--service-mesh-type")
@@ -226,34 +323,22 @@ def tf_vars(
                 f"got {service_mesh!r}"
             )
         return (
-            enable_mlflow
-            + enable_feast
+            risk
             + istio_k8s_platform
-            + risk
+            + use_old_istio_bases
             + setup_s3_integrator_global
-            + [
-                "-var",
-                "create_model=false",
-                "-var",
-                "object_storage_mode=S3",
-                "-var",
-                f"external_ui_hostname={UI_HOSTNAME}",
-                "-var",
-                f"external_m2m_hostname={M2M_HOSTNAME}",
-                "-var",
-                f"external_auth_hostname={AUTH_HOSTNAME}",
-                "-var",
+            + hostnames
+            + ["-var", "create_model=false"]
+            + (
                 (
-                    "github_profiles_automator_config={"
-                    'repository="https://github.com/canonical/github-profiles-automator.git",'
-                    '"pmr-yaml-path"="tests/samples/pmr-sample-full.yaml",'
-                    # Pin to a revision tag for reproducibility.
-                    '"git-revision"="rev295",'
-                    # Slow the reconcile so it does not remove the m2m UATs'
-                    # directly-created authorization mid-run.
-                    '"sync-period"="86400"}'
-                ),
-            ]
+                    mlflow_user_grants_across_workspaces
+                ) if is_mlflow_standalone else (
+                    enable_mlflow
+                    + enable_feast
+                    + github_profiles_automator_configs
+                    + ["-var", "object_storage_mode=S3"]
+                )
+            )
         )
     return (
         enable_mlflow
@@ -262,6 +347,7 @@ def tf_vars(
         + service_mesh_type
         + auth_type
         + istio_k8s_platform
+        + use_old_istio_bases
         + risk
         + pss
         + setup_s3_integrator_global

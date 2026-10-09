@@ -452,6 +452,12 @@ variable "istio_k8s_platform" {
   default     = ""
 }
 
+variable "use_old_istio_bases" {
+  description = "Deploy the ambient-IAM Istio charms on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s; no-op for the dex/sidecar service-mesh paths."
+  type        = bool
+  default     = false
+}
+
 variable "istio_ingress_k8s_revision" {
   description = "Revision of the istio-ingress-k8s application"
   type        = number

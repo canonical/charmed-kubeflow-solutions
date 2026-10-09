@@ -59,3 +59,9 @@ variable "istio_beacon_k8s" {
   })
   default = {}
 }
+
+variable "use_old_istio_bases" {
+  description = "Deploy the ambient Istio gateways and beacon on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features are not needed."
+  type        = bool
+  default     = false
+}

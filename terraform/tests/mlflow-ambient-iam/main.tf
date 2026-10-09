@@ -4,7 +4,7 @@
 # ===========================================================================
 # istio-system model: Istio ambient control plane (istio-k8s).
 # The control plane is deployed in its own model and its istio-ingress-config
-# endpoint is offered cross-model so the gateways in the kubeflow model can
+# endpoint is offered cross-model so the gateways in the mlflow model can
 # attach to it.
 # ===========================================================================
 
@@ -25,10 +25,6 @@ locals {
   istio_ingress_k8s_m2m_config = merge(
     var.istio_ingress_k8s_m2m_config,
     var.external_m2m_hostname != null ? { external_hostname = var.external_m2m_hostname } : {}
-  )
-  kserve_controller_config = merge(
-    var.kserve_controller_config,
-    var.external_m2m_hostname != null ? { "domain-name" = var.external_m2m_hostname } : {}
   )
   traefik_config = merge(
     var.traefik_config,
@@ -74,7 +70,7 @@ resource "juju_integration" "istio_k8s_jwks_ca_cert" {
 # ===========================================================================
 # iam model: Canonical Identity Platform (Hydra / Kratos / Login UI).
 # Exposes oauth_offer_url (Hydra oauth), consumed cross-model by oauth2-proxy
-# and request-authentication-configurator in the kubeflow model.
+# and request-authentication-configurator in the mlflow model.
 # ===========================================================================
 
 module "iam" {
@@ -95,19 +91,17 @@ module "iam" {
 }
 
 # ===========================================================================
-# kubeflow model: Kubeflow applications + the two ambient gateways + beacon +
+# MLflow model: MLflow application + the two ambient gateways + beacon +
 # the IAM auth stack. Consumes the istio-system and iam offers cross-model.
 # ===========================================================================
 
-module "kubeflow" {
-  source = "../../products/kubeflow"
+module "mlflow" {
+  source = "../../products/mlflow"
 
-  release           = var.release
-  risk              = var.risk
-  create_model      = var.create_model
-  model_uuid        = var.model_uuid
-  service_mesh_type = "ambient"
-  auth_type         = "iam"
+  release      = var.release
+  risk         = var.risk
+  create_model = var.create_model
+  model_uuid   = var.model_uuid
 
   use_old_istio_bases = var.use_old_istio_bases
 
@@ -120,28 +114,15 @@ module "kubeflow" {
   istio_ingress_k8s_ui_config  = local.istio_ingress_k8s_ui_config
   istio_ingress_k8s_m2m_config = local.istio_ingress_k8s_m2m_config
 
-  enable_kfp         = var.enable_kfp
-  enable_katib       = var.enable_katib
-  enable_notebooks   = var.enable_notebooks
-  enable_tensorboard = var.enable_tensorboard
-  enable_training_v1 = var.enable_training_v1
-  enable_training_v2 = var.enable_training_v2
-  enable_mlflow      = var.enable_mlflow
-  enable_kserve      = var.enable_kserve
-  enable_feast       = var.enable_feast
-
-  kserve_controller_config = local.kserve_controller_config
-
-  object_storage_mode  = var.object_storage_mode
   s3_bucket_global     = var.s3_bucket_global
   s3_access_key_global = var.s3_access_key_global
   s3_secret_key_global = var.s3_secret_key_global
   s3_endpoint_global   = var.s3_endpoint_global
 
-  github_profiles_automator_config = var.github_profiles_automator_config
-
   enable_observability = var.enable_observability
   dashboards_offer     = var.dashboards_offer
   logging_offer        = var.logging_offer
   metrics_offer        = var.metrics_offer
+
+  user_grants_across_workspaces = var.user_grants_across_workspaces
 }
