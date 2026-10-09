@@ -45,7 +45,7 @@ locals {
   # IAM Auth Charms (ambient)
   # latest/stable (rev 26) registers oauth2-proxy's internal cluster URL as the
   # OAuth redirect_uri, so UI login fails with a Hydra redirect_uri mismatch;
-  # latest/edge (rev 29) registers the external ingress URL (as mlflow uses).
+  # latest/edge (rev 29) registers the external ingress URL (as the mlflow product uses).
   oauth2_proxy_channel                        = "latest/edge"
   request_authentication_configurator_channel = var.release == "1.11" ? "1.0/edge" : "latest/edge"
   github_profiles_automator_channel           = var.release == "1.11" ? "1.0/edge" : "latest/edge"
@@ -62,28 +62,20 @@ locals {
   # Resource Dispatcher Charm
   resource_dispatcher_channel = var.release == "1.11" ? "2.0/${var.risk}" : "latest/${var.risk}"
 
-  # MLflow Component
-  # on `latest/edge` so far, while changing risk on `latest` would end up deploying MLflow 2.22
-  # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here
-  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
-
-  # SPIFFE principal of the platform namespace's waypoint proxy, required by
-  # mlflow-server's `istio_waypoint_principal` config when related over
-  # `service-mesh` (ambient). The waypoint name is derived by the
-  # istio-beacon-k8s charm as `<model>-istio-beacon-k8s-waypoint`.
-  istio_waypoint_principal = "cluster.local/ns/${local.kubeflow_model_name}/sa/${local.kubeflow_model_name}-istio-beacon-k8s-waypoint"
+  # MLflow Component — integrated Kubeflow pins single-tenant MLflow 2.x (MySQL/dex);
+  # multi-tenant MLflow 3 lives in the standalone `mlflow` product.
+  mlflow_channel = "2.22/${var.risk}"
 
   # KServe Component
-  kserve_channel    = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
-  knative_channel   = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
-  deploy_kserve     = var.enable_kserve || var.enable_mlflow
-  deploy_mysql      = var.enable_kfp || var.enable_katib
-  deploy_postgresql = var.enable_feast || var.enable_mlflow
+  kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
+  knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
+  deploy_kserve   = var.enable_kserve || var.enable_mlflow
+  deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3')
-  general_object_storage_consumers = var.enable_kfp || var.enable_kserve
-  deploy_minio                     = var.object_storage_mode == "minio" && local.general_object_storage_consumers
-  deploy_s3_integrator             = (var.object_storage_mode == "S3" && local.general_object_storage_consumers) || var.enable_mlflow
+  object_storage_consumers = var.enable_kfp || var.enable_mlflow || var.enable_kserve
+  deploy_minio             = var.object_storage_mode == "minio" && local.object_storage_consumers
+  deploy_s3_integrator     = var.object_storage_mode == "S3" && local.object_storage_consumers
 
   # Feast Component
   feast_channel = var.release == "1.11" ? "0.49/${var.risk}" : "latest/${var.risk}"

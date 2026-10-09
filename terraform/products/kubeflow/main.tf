@@ -617,9 +617,9 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.ambient_iam, module.postgresql, module.s3_global, module.resource_dispatcher]
+  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
-  source = "../../components/mlflow"
+  source = "../../components/mlflow-unauthenticated"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
@@ -629,17 +629,23 @@ module "mlflow" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  postgresql_database = {
+  mysql_database = {
     kind     = "endpoint"
-    name     = module.postgresql[0].app_name
-    endpoint = module.postgresql[0].provides.database
+    name     = module.mysql[0].app_name
+    endpoint = module.mysql[0].provides.database
   }
 
-  s3_credentials = {
+  object_storage = local.deploy_minio ? {
+    kind     = "endpoint"
+    name     = module.minio[0].provides.object_storage.name
+    endpoint = module.minio[0].provides.object_storage.endpoint
+  } : null
+
+  s3_credentials = local.deploy_s3_integrator ? {
     kind     = "endpoint"
     name     = module.s3_global[0].provides.s3_credentials.name
     endpoint = module.s3_global[0].provides.s3_credentials.endpoint
-  }
+  } : null
 
   secrets = {
     kind     = "endpoint"
@@ -653,38 +659,19 @@ module "mlflow" {
     endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
+  ingress = local.sidecar ? {
+    kind     = "endpoint"
+    name     = module.istio[0].provides.istio_pilot_ingress.name
+    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
+  } : null
+
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
   mlflow_server = {
     channel  = local.mlflow_channel
     revision = var.mlflow_server_revision
-    config = merge(
-      var.mlflow_server_config,
-      { "istio_waypoint_principal" = local.istio_waypoint_principal },
-    )
-  }
-}
-
-# MLflow workspace grants; guarded on enable_mlflow (references the optional mlflow module).
-module "data_integrator_integrations" {
-  for_each = var.enable_mlflow ? var.user_grants_across_workspaces : {}
-
-  source = "../../components/data-integrator"
-
-  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-
-  data_integrator = {
-    app_name = each.key,
-    config = {
-      "entity-name"        = each.value.entity_name,
-      "entity-permissions" = each.value.entity_permissions
-    }
-  }
-
-  mlflow_server_endpoint = {
-    name     = module.mlflow[0].provides.mlflow_server_mlflow_client.name
-    endpoint = module.mlflow[0].provides.mlflow_server_mlflow_client.endpoint
+    config   = var.mlflow_server_config
   }
 }
 
@@ -771,7 +758,7 @@ module "training" {
 }
 
 module "postgresql" {
-  count      = local.deploy_postgresql ? 1 : 0
+  count      = var.enable_feast ? 1 : 0
   depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"

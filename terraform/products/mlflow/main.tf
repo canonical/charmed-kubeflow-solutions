@@ -173,7 +173,7 @@ module "mlflow" {
   count      = 1
   depends_on = [module.ambient_iam, module.postgresql, module.s3_global]
 
-  source = "../../components/mlflow"
+  source = "../../components/mlflow-multi-tenant"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 

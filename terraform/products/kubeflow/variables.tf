@@ -718,11 +718,6 @@ variable "enable_mlflow" {
   description = "Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher"
   type        = bool
   default     = false
-
-  validation {
-    condition     = !(var.enable_mlflow && var.service_mesh_type != "ambient")
-    error_message = "enable_mlflow can only be set when service_mesh_type is 'ambient'."
-  }
 }
 
 # Enable integrations
@@ -761,30 +756,13 @@ variable "external_integrations" {
 variable "mlflow_server_revision" {
   description = "Revision of the mlflow-server application"
   type        = number
-  default     = 1579
-  # TODO: restore `null` instead of `1579` once multi-tenancy is merged
+  default     = null
 }
 
 variable "mlflow_server_config" {
   description = "Configuration for mlflow-server application"
   type        = map(string)
-  default = {
-    "identity_header_name" = "kubeflow-userid"
-  }
-}
-
-variable "user_grants_across_workspaces" {
-  description = <<-EOT
-    Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,
-    with each item of a list representing grants across all workspaces for a given user, and
-    with each key representing the instance's name and the corresponding value the respective
-    instance's relevant configurations for MLflow
-  EOT
-  type = map(object({
-    entity_name        = string
-    entity_permissions = string
-  }))
-  default = {}
+  default     = {}
 }
 
 # Resource Dispatcher Charm

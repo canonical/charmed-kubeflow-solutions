@@ -227,8 +227,7 @@ variable "user_grants_across_workspaces" {
 variable "mlflow_server_revision" {
   description = "Revision of the mlflow-server application"
   type        = number
-  default     = 1579
-  # TODO: restore `null` instead of `1579` once multi-tenancy is merged
+  default     = null
 }
 
 variable "mlflow_server_config" {

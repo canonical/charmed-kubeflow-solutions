@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark]
+        product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark, kubeflow-mlflow]
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
         include:
@@ -49,6 +49,12 @@ jobs:
           - product: kubeflow-feast
             service-mesh-type: ambient
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          # Integrated Kubeflow + single-tenant MLflow 2 (dex), both meshes — like main.
+          - product: kubeflow-mlflow
+            uats-env: mlflow-remote
+          - product: kubeflow-mlflow
+            service-mesh-type: ambient
+            uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - product: kubeflow-spark
             uats-env: spark-remote
             uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
@@ -57,18 +63,6 @@ jobs:
             auth-type: iam
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
-          - product: kubeflow-mlflow
-            service-mesh-type: ambient
-            auth-type: iam
-            uats-env: mlflow-remote
-            # TEMP: KServe can't route on ambient-IAM — it emits per-isvc subdomain hosts
-            # (<isvc>-<ns>.api.kubeflow.com) that don't match the gateway's exact-host listener
-            # (NoMatchingListenerHostname), so the predictor never becomes ready. The `and not
-            # kserve` skips the mlflow-kserve and e2e-wine-kfp-mlflow-kserve notebooks; drop it
-            # once istio-ingress-k8s can emit a *.api.kubeflow.com wildcard listener.
-            # Refs: kserve-operators#491 (open); root cause service-mesh#102, "fixed" by
-            # service-mesh#156 — but that adds only exact-or-"" (any-host) listener-hostname, no wildcard.
-            uats-extra-args: --filter "mlflow and not kserve" --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
