@@ -718,6 +718,11 @@ variable "enable_mlflow" {
   description = "Whether to deploy the MLflow component (mlflow-server) and resource-dispatcher"
   type        = bool
   default     = false
+
+  validation {
+    condition     = var.service_mesh_type == "ambient"
+    error_message = "enable_mlflow can only be set when service_mesh_type is 'ambient'."
+  }
 }
 
 # Enable integrations
