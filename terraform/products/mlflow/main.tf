@@ -54,7 +54,6 @@ module "ambient_iam" {
 # gateways. Both consume Hydra oauth from the iam model cross-model.
 
 module "oauth2_proxy" {
-  count  = 1
   source = "../../charms/oauth2-proxy-k8s"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
