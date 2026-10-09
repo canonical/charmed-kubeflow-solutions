@@ -149,6 +149,11 @@ variable "enable_mlflow" {
   description = "Whether to deploy the MLflow component"
   type        = bool
   default     = false
+
+  validation {
+    condition     = !(var.enable_mlflow && var.service_mesh_type != "ambient")
+    error_message = "enable_mlflow can only be set when service_mesh_type is 'ambient'."
+  }
 }
 
 variable "enable_kserve" {
