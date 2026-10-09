@@ -83,7 +83,6 @@ module "oauth2_proxy" {
 }
 
 module "request_authentication_configurator" {
-  count  = 1
   source = "../../charms/request-authentication-configurator"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
