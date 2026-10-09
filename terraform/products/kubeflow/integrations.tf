@@ -31,8 +31,8 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.oauth2_proxy.provides.forward_auth.name
-    endpoint = module.oauth2_proxy.provides.forward_auth.endpoint
+    name     = module.oauth2_proxy[0].provides.forward_auth.name
+    endpoint = module.oauth2_proxy[0].provides.forward_auth.endpoint
   }
 
   application {
@@ -49,8 +49,8 @@ resource "juju_integration" "oauth2_proxy_ui_ingress" {
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.oauth2_proxy.requires.ingress.name
-    endpoint = module.oauth2_proxy.requires.ingress.endpoint
+    name     = module.oauth2_proxy[0].requires.ingress.name
+    endpoint = module.oauth2_proxy[0].requires.ingress.endpoint
   }
 
   application {
