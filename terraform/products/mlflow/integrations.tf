@@ -9,13 +9,13 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.oauth2_proxy[0].provides.forward_auth.name
-    endpoint = module.oauth2_proxy[0].provides.forward_auth.endpoint
+    name     = module.oauth2_proxy.provides.forward_auth.name
+    endpoint = module.oauth2_proxy.provides.forward_auth.endpoint
   }
 
   application {
-    name     = module.ambient_iam[0].requires.istio_ingress_k8s_ui_forward_auth.name
-    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_ui_forward_auth.endpoint
+    name     = module.ambient_iam.requires.istio_ingress_k8s_ui_forward_auth.name
+    endpoint = module.ambient_iam.requires.istio_ingress_k8s_ui_forward_auth.endpoint
   }
 }
 
@@ -27,13 +27,13 @@ resource "juju_integration" "oauth2_proxy_ui_ingress" {
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.oauth2_proxy[0].requires.ingress.name
-    endpoint = module.oauth2_proxy[0].requires.ingress.endpoint
+    name     = module.oauth2_proxy.requires.ingress.name
+    endpoint = module.oauth2_proxy.requires.ingress.endpoint
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
+    name     = module.ambient_iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
+    endpoint = module.ambient_iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
   }
 }
 
@@ -44,13 +44,13 @@ resource "juju_integration" "request_auth_ui" {
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.request_authentication_configurator[0].requires.request_auth_ui.name
-    endpoint = module.request_authentication_configurator[0].requires.request_auth_ui.endpoint
+    name     = module.request_authentication_configurator.requires.request_auth_ui.name
+    endpoint = module.request_authentication_configurator.requires.request_auth_ui.endpoint
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
+    name     = module.ambient_iam.provides.istio_ingress_k8s_ui_istio_request_auth.name
+    endpoint = module.ambient_iam.provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
   }
 }
 
@@ -59,13 +59,13 @@ resource "juju_integration" "request_auth_m2m" {
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
 
   application {
-    name     = module.request_authentication_configurator[0].requires.request_auth_m2m.name
-    endpoint = module.request_authentication_configurator[0].requires.request_auth_m2m.endpoint
+    name     = module.request_authentication_configurator.requires.request_auth_m2m.name
+    endpoint = module.request_authentication_configurator.requires.request_auth_m2m.endpoint
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
+    name     = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_request_auth.name
+    endpoint = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
   }
 }
 
@@ -80,8 +80,8 @@ resource "juju_integration" "istio_ingress_ui_certificates" {
   }
 
   application {
-    name     = module.ambient_iam[0].requires.istio_ingress_k8s_ui_certificates.name
-    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_ui_certificates.endpoint
+    name     = module.ambient_iam.requires.istio_ingress_k8s_ui_certificates.name
+    endpoint = module.ambient_iam.requires.istio_ingress_k8s_ui_certificates.endpoint
   }
 }
 
@@ -95,8 +95,8 @@ resource "juju_integration" "istio_ingress_m2m_certificates" {
   }
 
   application {
-    name     = module.ambient_iam[0].requires.istio_ingress_k8s_m2m_certificates.name
-    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_m2m_certificates.endpoint
+    name     = module.ambient_iam.requires.istio_ingress_k8s_m2m_certificates.name
+    endpoint = module.ambient_iam.requires.istio_ingress_k8s_m2m_certificates.endpoint
   }
 }
 
@@ -110,7 +110,7 @@ resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+    name     = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
   }
 }

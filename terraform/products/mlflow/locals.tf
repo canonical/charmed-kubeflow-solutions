@@ -36,15 +36,15 @@ locals {
 
   ui_istio_ingress_route = {
     kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+    name     = module.ambient_iam.provides.istio_ingress_k8s_ui_istio_ingress_route.name
+    endpoint = module.ambient_iam.provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
   }
 
   # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
   # component inputs that expect it.
   beacon = {
-    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    name     = module.ambient_iam.provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.ambient_iam.provides.istio_beacon_k8s_service_mesh.endpoint
   }
 
   service_mesh = local.beacon == null ? null : {
