@@ -26,8 +26,7 @@ locals {
   # NOTE: the risk is forced to `edge` for the track `latest` as MLflow 3.15 is available only
   # on `latest/edge` so far, while changing risk on `latest` would end up deploying MLflow 2.22
   # TODO: parametrize the risk as soon as MLflow 3 is promoted, for the track `latest` here
-  # TODO: restore `"latest/edge"` instead of `"latest/edge/pr-490"` once multi-tenancy is merged
-  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge/pr-490"
+  mlflow_channel = var.release == "1.11" ? "2.22/${var.risk}" : "latest/edge"
 
   # SPIFFE principal of the platform namespace's waypoint proxy, required by
   # mlflow-server's `istio_waypoint_principal` config when related over
