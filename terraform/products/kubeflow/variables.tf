@@ -720,7 +720,7 @@ variable "enable_mlflow" {
   default     = false
 
   validation {
-    condition     = var.service_mesh_type == "ambient"
+    condition     = !(var.enable_mlflow && var.service_mesh_type != "ambient")
     error_message = "enable_mlflow can only be set when service_mesh_type is 'ambient'."
   }
 }
