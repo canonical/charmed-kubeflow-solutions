@@ -145,14 +145,6 @@ def risk(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def disable_kubeflow(request) -> list[str]:
-    """Terraform module customization for Kubeflow deployment."""
-    if request.config.getoption("--disable-kubeflow"):
-        return ["-var", "enable_kubeflow=false"]
-    return []
-
-
-@pytest.fixture(scope="module")
 def enable_mlflow(request) -> list[str]:
     """Terraform module customization for MLFlow deployment."""
     if request.config.getoption("--enable-mlflow"):
