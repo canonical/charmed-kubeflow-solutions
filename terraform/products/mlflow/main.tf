@@ -18,7 +18,6 @@ resource "juju_model" "mlflow" {
 #    istio-system model (cross-model istio-ingress-config offer); IAM auth.
 
 module "ambient_iam" {
-  count  = 1
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
