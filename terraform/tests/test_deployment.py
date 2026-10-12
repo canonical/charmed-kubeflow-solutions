@@ -119,7 +119,7 @@ class TestCharm:
             # when it changes (http:// -> https://), which breaks the OIDC flow;
             # re-register the client before probing the UI (hydra-operator#591).
             # Remove when https://github.com/canonical/hydra-operator/issues/591 is resolved.
-            _refresh_hydra_oauth_client(juju, apps, hostname_ui, model_name)
+            _refresh_hydra_oauth_client(juju, apps, hostname_ui)
 
             # UI traffic is served over TLS by the dedicated UI ambient gateway.
             # The hostname resolves via the DNS configured above; the gateway
@@ -189,12 +189,7 @@ def fetch_response(url, headers=None, verify=True):
 
 # BEGIN workaround: hydra-operator#591 (remove this whole helper once fixed).
 # https://github.com/canonical/hydra-operator/issues/591
-def _refresh_hydra_oauth_client(
-    juju: jubilant.Juju,
-    apps: list[str],
-    hostname_ui: str,
-    model_name: str,
-) -> None:
+def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str], hostname_ui: str) -> None:
     """Re-register oauth2-proxy's Hydra client if its redirect_uri is stale.
 
     Hydra does not patch an already-registered OAuth client when the requirer's
@@ -219,13 +214,10 @@ def _refresh_hydra_oauth_client(
     )
     oauth2_proxy_oauth = f"{OAUTH2_PROXY_APP}:oauth"
     # Remove then re-add the relation so Hydra drops and recreates the client.
-    subprocess.run(
-        ["juju", "remove-relation", "-m", model_name, OAUTH_OFFER, oauth2_proxy_oauth],
-        check=True,
-    )
+    juju.remove_relation(oauth2_proxy_oauth, OAUTH_OFFER)
     # remove-relation returns before the relation is fully gone; juju rejects a
     # re-integrate while it is still "dying", so retry until removal completes.
-    _integrate_oauth_relation(oauth2_proxy_oauth, model_name)
+    _integrate_oauth_relation(juju, oauth2_proxy_oauth)
     _wait_model_active("iam")
     for batched_apps in batched(apps, 5):
         juju.wait(
@@ -240,12 +232,9 @@ def _refresh_hydra_oauth_client(
     stop=tenacity.stop_after_delay(300),
     reraise=True,
 )
-def _integrate_oauth_relation(oauth2_proxy_oauth: str, model_name: str) -> None:
+def _integrate_oauth_relation(juju_client: jubilant.Juju, oauth2_proxy_oauth: str) -> None:
     """Re-integrate the oauth relation, retrying while the old one is removing."""
-    subprocess.run(
-        ["juju", "integrate", "-m", model_name, OAUTH_OFFER, oauth2_proxy_oauth],
-        check=True,
-    )
+    juju_client.integrate(oauth2_proxy_oauth, OAUTH_OFFER)
 # END workaround: hydra-operator#591
 
 
