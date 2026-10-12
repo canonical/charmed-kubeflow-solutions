@@ -66,8 +66,8 @@ jobs:
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
-            # No UATs: mlflow-standalone has no Kubeflow Profiles, so the profile-based
-            # UAT suite can't run (see the `if` on the Run UATs step below).
+            # NOTE: UATs can't be run for mlflow-standalone unitl this is addressed:
+            # https://github.com/canonical/charmed-kubeflow-uats/issues/308
         exclude:
           - product: kubeflow-spark
             service-mesh-type: ambient
@@ -244,8 +244,8 @@ jobs:
 
       - name: Run UATs
         id: run-uats
-        # mlflow-standalone has no Kubeflow Profiles, which the profile-based UAT
-        # suite requires (test_create_profile), so it has no runnable UATs.
+        # NOTE: UATs can't be run for mlflow-standalone unitl this is addressed:
+        # https://github.com/canonical/charmed-kubeflow-uats/issues/308
         if: matrix.product != 'mlflow-standalone'
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
