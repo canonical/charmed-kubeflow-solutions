@@ -232,9 +232,9 @@ def _refresh_hydra_oauth_client(juju: jubilant.Juju, apps: list[str], hostname_u
     stop=tenacity.stop_after_delay(300),
     reraise=True,
 )
-def _integrate_oauth_relation(juju_client: jubilant.Juju, oauth2_proxy_oauth: str) -> None:
+def _integrate_oauth_relation(juju: jubilant.Juju, oauth2_proxy_oauth: str) -> None:
     """Re-integrate the oauth relation, retrying while the old one is removing."""
-    juju_client.integrate(oauth2_proxy_oauth, OAUTH_OFFER)
+    juju.integrate(oauth2_proxy_oauth, OAUTH_OFFER)
 # END workaround: hydra-operator#591
 
 
