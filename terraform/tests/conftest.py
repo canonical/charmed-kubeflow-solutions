@@ -336,7 +336,12 @@ def tf_vars(
                     enable_mlflow
                     + enable_feast
                     + github_profiles_automator_configs
-                    + ["-var", "object_storage_mode=S3"]
+                    + [
+                        "-var",
+                        "object_storage_mode=S3",
+                        "-var",
+                        "mlmd_storage_size=1G",
+                    ]
                 )
             )
         )
@@ -359,7 +364,9 @@ def tf_vars(
             "-var",
             "mysql_storage_size=1G",
             "-var",
-            "mlmd_storage_size=10G",
+            "mlmd_storage_size=1G",
+            "-var",
+            "minio_storage_size=1G",
             "-var",
             "postgresql_storage_size=1G",
             "-var",
