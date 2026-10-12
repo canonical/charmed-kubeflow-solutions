@@ -205,6 +205,9 @@ variable "risk" {
 # Observability (optional; wire to an external COS via offer URLs)
 # ---------------------------------------------------------------------------
 
+# TODO: restore when the integration with COS is available in MLflow 3:
+/*
+
 variable "enable_observability" {
   description = "Enable observability wiring to an external COS deployment."
   type        = bool
@@ -228,6 +231,8 @@ variable "metrics_offer" {
   type        = string
   default     = null
 }
+
+*/
 
 # Object storage (shared/global S3 integrator) variables
 
