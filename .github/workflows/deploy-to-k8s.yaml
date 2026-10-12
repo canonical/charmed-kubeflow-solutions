@@ -71,8 +71,6 @@ jobs:
         exclude:
           - product: kubeflow-spark
             service-mesh-type: ambient
-          - product: kubeflow-mlflow
-            service-mesh-type: sidecar
 
     steps:
       - name: Checkout repository
