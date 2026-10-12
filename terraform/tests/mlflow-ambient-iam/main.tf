@@ -119,10 +119,15 @@ module "mlflow" {
   s3_secret_key_global = var.s3_secret_key_global
   s3_endpoint_global   = var.s3_endpoint_global
 
+  # TODO: restore when the integration with COS is available in MLflow 3:
+  /*
+
   enable_observability = var.enable_observability
   dashboards_offer     = var.dashboards_offer
   logging_offer        = var.logging_offer
   metrics_offer        = var.metrics_offer
+
+  */
 
   user_grants_across_workspaces = var.user_grants_across_workspaces
 }
