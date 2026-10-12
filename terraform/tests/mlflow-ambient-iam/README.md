@@ -77,7 +77,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../products/iam | n/a |
-| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | df6c85dea5decdd014fd187404163ef2d73263da |
+| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../products/mlflow | n/a |
 
 ## Resources
@@ -106,10 +106,10 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_iam_model_uuid"></a> [iam\_model\_uuid](#input\_iam\_model\_uuid) | UUID of an existing model to deploy the Identity Platform into (required when create\_iam\_model is false). | `string` | `null` | no |
 | <a name="input_istio_ingress_k8s_m2m_config"></a> [istio\_ingress\_k8s\_m2m\_config](#input\_istio\_ingress\_k8s\_m2m\_config) | Configuration for the M2M ambient gateway (e.g. external\_hostname). | `map(string)` | `{}` | no |
 | <a name="input_istio_ingress_k8s_ui_config"></a> [istio\_ingress\_k8s\_ui\_config](#input\_istio\_ingress\_k8s\_ui\_config) | Configuration for the UI ambient gateway (e.g. external\_hostname). | `map(string)` | `{}` | no |
-| <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these). | `string` | `"dev/edge/upstream-images"` | no |
+| <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these). | `string` | `"dev/edge"` | no |
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control plane charm. | `map(string)` | `{}` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s (always merged into its config as 'platform', including an empty string). | `string` | `""` | no |
-| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision for the istio-k8s control plane charm. Pinning the revision resolves the ambiguous arch/series selection on dev/edge/upstream-images. | `number` | `76` | no |
+| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision for the istio-k8s control plane charm. | `number` | `null` | no |
 | <a name="input_istio_system_model_name"></a> [istio\_system\_model\_name](#input\_istio\_system\_model\_name) | Name of the istio-system model to create. | `string` | `"istio-system"` | no |
 | <a name="input_istio_system_model_uuid"></a> [istio\_system\_model\_uuid](#input\_istio\_system\_model\_uuid) | UUID of an existing model to deploy istio-k8s into (required when create\_istio\_system\_model is false). | `string` | `null` | no |
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
@@ -125,6 +125,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_traefik_config"></a> [traefik\_config](#input\_traefik\_config) | Configuration for the iam Traefik ingress (e.g. external\_hostname). | `map(string)` | `{}` | no |
+| <a name="input_use_old_istio_bases"></a> [use\_old\_istio\_bases](#input\_use\_old\_istio\_bases) | Deploy the ambient Istio charms (control plane, gateways, beacon) on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features (e.g. TrafficExtension) are not needed. | `bool` | `false` | no |
 | <a name="input_user_grants_across_workspaces"></a> [user\_grants\_across\_workspaces](#input\_user\_grants\_across\_workspaces) | Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,<br/>with each item of a list representing grants across all workspaces for a given user, and<br/>with each key representing the instance's name and the corresponding value the respective<br/>instance's relevant configurations for MLflow | <pre>map(object({<br/>    entity_name        = string<br/>    entity_permissions = string<br/>  }))</pre> | `{}` | no |
 
 ## Outputs

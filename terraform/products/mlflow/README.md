@@ -18,7 +18,7 @@
 | ---- | ------ | ------- |
 | <a name="module_ambient_iam"></a> [ambient\_iam](#module\_ambient\_iam) | ../../components/istio-ambient | n/a |
 | <a name="module_data_integrator_integrations"></a> [data\_integrator\_integrations](#module\_data\_integrator\_integrations) | ../../components/data-integrator | n/a |
-| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
+| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-multi-tenant | n/a |
 | <a name="module_oauth2_proxy"></a> [oauth2\_proxy](#module\_oauth2\_proxy) | ../../charms/oauth2-proxy-k8s | n/a |
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql"></a> [postgresql](#module\_postgresql) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |
@@ -60,7 +60,7 @@
 | <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | URL of the loki\_push\_api interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | URL of the prometheus\_remote\_write interface offer from the COS stack (required when enable\_observability is true) | `string` | `null` | no |
 | <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | <pre>{<br/>  "identity_header_name": "mlflow-userid",<br/>  "serve_artifacts": true<br/>}</pre> | no |
-| <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `1579` | no |
+| <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing Juju model (required when create\_model is false) | `string` | `null` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
 | <a name="input_oauth2_proxy_config"></a> [oauth2\_proxy\_config](#input\_oauth2\_proxy\_config) | Configuration for the oauth2-proxy-k8s application | `map(string)` | `{}` | no |
@@ -86,5 +86,6 @@
 | <a name="input_self_signed_certificates_config"></a> [self\_signed\_certificates\_config](#input\_self\_signed\_certificates\_config) | Configuration for the self-signed-certificates application. | `map(string)` | `{}` | no |
 | <a name="input_self_signed_certificates_revision"></a> [self\_signed\_certificates\_revision](#input\_self\_signed\_certificates\_revision) | Revision of the self-signed-certificates application. | `number` | `null` | no |
 | <a name="input_send_ca_cert_offer_url"></a> [send\_ca\_cert\_offer\_url](#input\_send\_ca\_cert\_offer\_url) | Cross-model offer URL of self-signed-certificates:send-ca-cert from the<br/>iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the<br/>self-signed CA fronting the Identity Platform. Required when<br/>service\_mesh\_type is 'ambient'. | `string` | `null` | no |
+| <a name="input_use_old_istio_bases"></a> [use\_old\_istio\_bases](#input\_use\_old\_istio\_bases) | Deploy the ambient Istio charms on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features are not needed. | `bool` | `false` | no |
 | <a name="input_user_grants_across_workspaces"></a> [user\_grants\_across\_workspaces](#input\_user\_grants\_across\_workspaces) | Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,<br/>with each item of a list representing grants across all workspaces for a given user, and<br/>with each key representing the instance's name and the corresponding value the respective<br/>instance's relevant configurations for MLflow | <pre>map(object({<br/>    entity_name        = string<br/>    entity_permissions = string<br/>  }))</pre> | `{}` | no |
 <!-- END_TF_DOCS -->

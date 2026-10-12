@@ -28,7 +28,7 @@
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | ../../charms/minio | n/a |
-| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow | n/a |
+| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-unauthenticated | n/a |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-operators//kubernetes/terraform | d7d75f78016006cdb883110706f8526b46785f2b |
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
 | <a name="module_oauth2_proxy"></a> [oauth2\_proxy](#module\_oauth2\_proxy) | ../../charms/oauth2-proxy-k8s | n/a |
@@ -117,7 +117,7 @@
 | <a name="input_istio_ingressgateway_revision"></a> [istio\_ingressgateway\_revision](#input\_istio\_ingressgateway\_revision) | Revision of the istio-ingressgateway application | `number` | `null` | no |
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control-plane charm (ambient-dex only). | `map(string)` | `{}` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only). | `string` | `""` | no |
-| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there). | `number` | `76` | no |
+| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there). | `number` | `null` | no |
 | <a name="input_istio_pilot_config"></a> [istio\_pilot\_config](#input\_istio\_pilot\_config) | Configuration for istio-pilot application | `map(string)` | <pre>{<br/>  "default-gateway": "kubeflow-gateway"<br/>}</pre> | no |
 | <a name="input_istio_pilot_revision"></a> [istio\_pilot\_revision](#input\_istio\_pilot\_revision) | Revision of the istio-pilot application | `number` | `null` | no |
 | <a name="input_jupyter_controller_config"></a> [jupyter\_controller\_config](#input\_jupyter\_controller\_config) | Configuration for jupyter-controller application | `map(string)` | `{}` | no |
@@ -172,8 +172,8 @@
 | <a name="input_minio_config"></a> [minio\_config](#input\_minio\_config) | Configuration for minio application | `map(string)` | `{}` | no |
 | <a name="input_minio_revision"></a> [minio\_revision](#input\_minio\_revision) | Revision of the minio application | `number` | `null` | no |
 | <a name="input_minio_storage_size"></a> [minio\_storage\_size](#input\_minio\_storage\_size) | MinIO database storage size | `string` | `"10G"` | no |
-| <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | <pre>{<br/>  "identity_header_name": "kubeflow-userid"<br/>}</pre> | no |
-| <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `1579` | no |
+| <a name="input_mlflow_server_config"></a> [mlflow\_server\_config](#input\_mlflow\_server\_config) | Configuration for mlflow-server application | `map(string)` | `{}` | no |
+| <a name="input_mlflow_server_revision"></a> [mlflow\_server\_revision](#input\_mlflow\_server\_revision) | Revision of the mlflow-server application | `number` | `null` | no |
 | <a name="input_mlmd_config"></a> [mlmd\_config](#input\_mlmd\_config) | Configuration for mlmd application | `map(string)` | `{}` | no |
 | <a name="input_mlmd_revision"></a> [mlmd\_revision](#input\_mlmd\_revision) | Revision of the mlmd application | `number` | `null` | no |
 | <a name="input_mlmd_storage_size"></a> [mlmd\_storage\_size](#input\_mlmd\_storage\_size) | MLMD database storage size | `string` | `"10G"` | no |
@@ -231,4 +231,5 @@
 | <a name="input_tensorboards_web_app_revision"></a> [tensorboards\_web\_app\_revision](#input\_tensorboards\_web\_app\_revision) | Revision of the tensorboards-web-app application | `number` | `null` | no |
 | <a name="input_training_operator_config"></a> [training\_operator\_config](#input\_training\_operator\_config) | Configuration for training-operator application | `map(string)` | `{}` | no |
 | <a name="input_training_operator_revision"></a> [training\_operator\_revision](#input\_training\_operator\_revision) | Revision of the training-operator application | `number` | `null` | no |
+| <a name="input_use_old_istio_bases"></a> [use\_old\_istio\_bases](#input\_use\_old\_istio\_bases) | Deploy the ambient-IAM Istio charms on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s; no-op for the dex/sidecar service-mesh paths. | `bool` | `false` | no |
 <!-- END_TF_DOCS -->
