@@ -1,0 +1,100 @@
+name: 'Teardown EKS cluster'
+description: >
+  Idempotent teardown of an eksctl-managed EKS cluster and its CloudFormation
+  stack. Kubernetes Services of type LoadBalancer create ELBs outside
+  CloudFormation whose ENIs keep the VPC subnets - and therefore the stack -
+  from deleting. This action clears those orphaned load balancers and retries
+  the stack deletion, failing if the stack still exists after all attempts.
+  Safe to run whether or not the cluster exists. Expects AWS credentials and
+  region to be configured in the job beforehand.
+inputs:
+  cluster-name:
+    description: 'Name of the EKS cluster (the eksctl stack is eksctl-<name>-cluster).'
+    required: true
+  max-attempts:
+    description: 'How many times to clear load balancers and retry the stack deletion before failing.'
+    required: false
+    default: '3'
+
+runs:
+  using: composite
+  steps:
+    - name: Delete EKS cluster
+      shell: bash
+      env:
+        CLUSTER_NAME: ${{ inputs.cluster-name }}
+      run: |
+        # Primary path: eksctl deletes nodegroups, the control plane (which stops
+        # the cloud-controller from recreating load balancers) and the stacks.
+        echo "Deleting EKS cluster '${CLUSTER_NAME}' (if it exists)..."
+        eksctl delete cluster --name "${CLUSTER_NAME}" --disable-nodegroup-eviction --wait \
+          || echo "eksctl delete reported an issue (continuing)."
+
+    - name: Delete CloudFormation stack
+      shell: bash
+      env:
+        CLUSTER_NAME: ${{ inputs.cluster-name }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+      run: |
+        STACK_NAME="eksctl-${CLUSTER_NAME}-cluster"
+
+        # Deletes every classic ELB and ALB/NLB living in the given VPC. These
+        # are created by Kubernetes LoadBalancer Services outside CloudFormation.
+        clear_load_balancers() {
+          vpc_id="$1"
+          [ -z "$vpc_id" ] || [ "$vpc_id" = "None" ] && return 0
+          echo "Clearing load balancers in VPC $vpc_id ..."
+          for arn in $(aws elbv2 describe-load-balancers \
+            --query "LoadBalancers[?VpcId=='$vpc_id'].LoadBalancerArn" \
+            --output text 2>/dev/null); do
+            echo "Deleting ALB/NLB $arn"
+            aws elbv2 delete-load-balancer --load-balancer-arn "$arn" || true
+          done
+          for name in $(aws elb describe-load-balancers \
+            --query "LoadBalancerDescriptions[?VPCId=='$vpc_id'].LoadBalancerName" \
+            --output text 2>/dev/null); do
+            echo "Deleting classic ELB $name"
+            aws elb delete-load-balancer --load-balancer-name "$name" || true
+          done
+        }
+
+        # Resolves the cluster VPC from the eksctl stack output, falling back to
+        # the eksctl VPC tag (the stack output is gone once it is deleted).
+        resolve_vpc() {
+          vpc_id="$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='VPC'].OutputValue" \
+            --output text 2>/dev/null || true)"
+          if [ -z "$vpc_id" ] || [ "$vpc_id" = "None" ]; then
+            vpc_id="$(aws ec2 describe-vpcs \
+              --filters "Name=tag:alpha.eksctl.io/cluster-name,Values=${CLUSTER_NAME}" \
+              --query 'Vpcs[0].VpcId' --output text 2>/dev/null || true)"
+          fi
+          echo "$vpc_id"
+        }
+
+        # Fallback: if the stack survived (DELETE_FAILED) because orphaned load
+        # balancers kept ENIs in the subnets, clear them and retry.
+        attempt=1
+        while [ "$attempt" -le "${MAX_ATTEMPTS}" ]; do
+          if ! aws cloudformation describe-stacks --stack-name "${STACK_NAME}" >/dev/null 2>&1; then
+            echo "Stack '${STACK_NAME}' no longer exists."
+            exit 0
+          fi
+
+          echo "Stack '${STACK_NAME}' still present (attempt ${attempt}/${MAX_ATTEMPTS})."
+          clear_load_balancers "$(resolve_vpc)"
+          # Give the just-deleted load balancers time to detach their ENIs.
+          sleep 30
+
+          echo "Deleting CloudFormation stack '${STACK_NAME}'..."
+          aws cloudformation delete-stack --stack-name "${STACK_NAME}" || true
+          if timeout 600s aws cloudformation wait stack-delete-complete --stack-name "${STACK_NAME}"; then
+            echo "Stack deleted."
+            exit 0
+          fi
+          echo "Stack deletion attempt ${attempt} timed out or failed."
+          attempt=$((attempt + 1))
+        done
+
+        echo "::error::Stack '${STACK_NAME}' could not be deleted after ${MAX_ATTEMPTS} attempts."
+        exit 1

@@ -120,29 +120,11 @@ jobs:
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
 
-      # Once working, do we want to keep these two pre-deletion steps?
-      - name: Pre-delete EKS cluster (if exists)
-        run: |
-          echo "Attempting to delete EKS cluster '${{ env.CLUSTER_NAME }}' (if it exists)..."
-          eksctl delete cluster --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
-
-          echo "Confirming deletion..."
-          aws eks describe-cluster --name ${{ env.CLUSTER_NAME }} || echo "Cluster no longer exists."
-
-      - name: Pre-delete CloudFormation stack (if exists)
-        run: |
-          STACK_NAME="eksctl-${{ env.CLUSTER_NAME }}-cluster"
-          echo "Deleting CloudFormation stack '$STACK_NAME' (if it exists)..."
-          aws cloudformation delete-stack --stack-name "$STACK_NAME" || echo "Stack not found."
-
-          echo "Waiting (max 10 minutes) for stack deletion to complete..."
-          timeout 600s aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" \
-            && echo "Stack deleted." \
-            || echo "Stack deletion timed out or failed (continuing)."
-
-          echo "Verifying stack is gone..."
-          aws cloudformation describe-stacks --stack-name "$STACK_NAME" 2>/dev/null \
-            || echo "Stack no longer exists."
+      # Pre-clean any leftover cluster/stack from a previous failed run.
+      - name: Pre-delete EKS cluster and stack (if they exist)
+        uses: ./.github/actions/teardown-eks-cluster
+        with:
+          cluster-name: ${{ env.CLUSTER_NAME }}
 
       - name: Create EKS cluster
         run: |
@@ -307,13 +289,11 @@ jobs:
             fi
           done
 
-      - name: Delete EKS cluster
+      - name: Delete EKS cluster and stack
         if: always()
-        run: eksctl delete cluster --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
-
-      - name: Delete CloudFormation stack
-        if: always()
-        run: aws cloudformation delete-stack --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster || echo "Stack not found."
+        uses: ./.github/actions/teardown-eks-cluster
+        with:
+          cluster-name: ${{ env.CLUSTER_NAME }}
 
   delete-unattached-volumes:
       name: Clean unattached EBS volumes
