@@ -195,6 +195,10 @@ def setup_s3_integrator_global() -> list[str]:
         "-var",
         f"s3_endpoint_global={os.environ['S3_SERVER_URL_GLOBAL']}",
     ]
+    # AWS S3 (unlike microceph) needs an explicit region for SigV4 signing.
+    s3_region_global = os.environ.get("S3_REGION_GLOBAL")
+    if s3_region_global:
+        args += ["-var", f's3_config_global={{region="{s3_region_global}"}}']
     print(f"Args for shared S3 integration: {args}")
     return args
 

@@ -1,4 +1,4 @@
-name: Create EKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+name: Create EKS cluster, deploy Kubeflow Terraform solution and run UATs
 
 on:
   workflow_dispatch:
@@ -16,6 +16,9 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
+      juju_agent_version:
+        description: 'Juju agent version to use when bootstrapping. Leave empty to use the default.'
+        required: false
   schedule:
     - cron: "17 02 * * 1"
 
@@ -33,14 +36,10 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        bundle:
-          - module: kubeflow-mlflow
-            uats:
-              env: uats-remote
-              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
+        service-mesh-type: [sidecar, ambient]
+        product:
+          - name: kubeflow
+            uats-env: kubeflow-remote
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
@@ -48,6 +47,26 @@ jobs:
           - policy: baseline
             istio-cni-bin-dir: /opt/cni/bin
             istio-cni-conf-dir: /etc/cni/net.d
+        auth-type: [dex]
+        include:
+          - product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            uats-extra-args: --include-multi-tenancy-tests
+          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
+          - service-mesh-type: ambient
+            product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
+          - service-mesh-type: ambient
+            product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            pod-security-standards:
+              policy: privileged
+            auth-type: iam
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
 
     steps:
       - name: Checkout repository
@@ -67,10 +86,9 @@ jobs:
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
+          RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
       - name: Extract AWS region from cluster.yaml
@@ -82,7 +100,7 @@ jobs:
 
       - name: Install CLI tools & dependencies
         run: |
-          pip install tox
+          pip install tox poetry
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --channel latest/stable --classic
           sudo snap install terraform --channel=latest/stable --classic
@@ -155,68 +173,157 @@ jobs:
       - name: Setup Juju controller
         run: |
           /snap/juju/current/bin/juju add-k8s eks --client
-          juju bootstrap eks eks-controller --agent-version 3.6.9
 
-      - name: Deploy and assert solution
+          AGENT_VERSION_ARG=""
+          if [[ -n "${{ inputs.juju_agent_version }}" ]]; then
+            AGENT_VERSION_ARG="--agent-version=${{ inputs.juju_agent_version }}"
+          fi
+
+          juju bootstrap eks eks-controller $AGENT_VERSION_ARG
+
+      - name: Setup object storage
+        id: object-storage
+        shell: bash
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          # KFP's shared object storage must be reachable from inside the EKS
+          # cluster, so back it with real S3 buckets instead of a runner-local
+          # microceph (which remote EKS pods could not reach). Buckets live in
+          # the cluster's region and are addressed via the regional endpoint.
+          REGION="${{ env.AWS_REGION }}"
+          GLOBAL_BUCKET="${CLUSTER_NAME}-kfp-global-${{ github.run_id }}-${{ strategy.job-index }}"
+          OVERRIDE_BUCKET="${CLUSTER_NAME}-kfp-override-${{ github.run_id }}-${{ strategy.job-index }}"
+
+          create_bucket() {
+            # us-east-1 rejects a LocationConstraint; every other region requires it.
+            if [[ "$REGION" == "us-east-1" ]]; then
+              aws s3api create-bucket --bucket "$1" --region "$REGION"
+            else
+              aws s3api create-bucket --bucket "$1" --region "$REGION" \
+                --create-bucket-configuration LocationConstraint="$REGION"
+            fi
+          }
+          create_bucket "$GLOBAL_BUCKET"
+          create_bucket "$OVERRIDE_BUCKET"
+
+          echo "global_bucket=$GLOBAL_BUCKET" >> "$GITHUB_OUTPUT"
+          echo "override_bucket=$OVERRIDE_BUCKET" >> "$GITHUB_OUTPUT"
+          {
+            echo "S3_SERVER_URL_GLOBAL=https://s3.${REGION}.amazonaws.com"
+            echo "S3_ACCESS_KEY_GLOBAL=${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "S3_SECRET_KEY_GLOBAL=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            echo "S3_BUCKET_KFP_GLOBAL=$GLOBAL_BUCKET"
+            echo "S3_REGION_GLOBAL=${REGION}"
+            echo "S3_SERVER_URL_OVERRIDE=https://s3.${REGION}.amazonaws.com"
+            echo "S3_ACCESS_KEY_OVERRIDE=${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "S3_SECRET_KEY_OVERRIDE=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            echo "S3_BUCKET_KFP_OVERRIDE=$OVERRIDE_BUCKET"
+          } >> .env
+
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Deploy solution
+        id: deploy
+        timeout-minutes: 60
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }}
+          CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          RISK_ARG="--risk ${{ env.RISK }}"
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
+
+          AUTH_TYPE_ARG=""
+          if [[ -n "${{ matrix.auth-type }}" ]]; then
+            AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
+          fi
+
+          EXTRA_COMPONENTS_ARG="--pss ${{ matrix.pod-security-standards.policy }}"
+
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
+        id: run-uats
         run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
+            poetry install --no-root
+            poetry run playwright install --with-deps chromium
+          fi
+          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
-      # On failure, capture debugging resources
-      - name: Select model (for debug)
-        if: failure() || cancelled()
-        run: juju switch eks-controller:kubeflow
+      - name: Collect and upload user namespace pods logs
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: user-namespace-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespaces: test-kubeflow
 
-      - name: Save debug artifacts
-        if: failure() || cancelled()
-        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+      - name: Collect and upload M2M namespaces data
+        if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: m2m-namespaces-data-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespace-pattern: test-m2m
+          resources: rolebindings authorizationpolicies
+
+      - name: Upload UATs notebooks artifacts
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: uats-notebooks-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          path: |
+            charmed-kubeflow-uats/artifacts/
+            charmed-kubeflow-uats/uats-session.log
+          if-no-files-found: ignore
+
+      - name: Upload Playwright artifacts
+        if: failure() && steps.run-uats.outcome == 'failure' && matrix.auth-type == 'iam'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/playwright-artifacts/
+          if-no-files-found: ignore
+
+      - name: Collect and upload control plane pods logs
+        if: failure()
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: control-planes-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
-        if: failure() || cancelled()
-        run: juju status
+        run: juju status -m kubeflow --relations
+        if: always()
 
-      - name: Get juju debug logs
-        if: failure() || cancelled()
-        run: juju debug-log --replay --no-tail
-
-      - name: Get all Kubernetes resources
-        if: failure() || cancelled()
-        run: kubectl get all -A
-
-      - name: Describe all pods
-        if: failure() || cancelled()
-        run: kubectl describe pods --all-namespaces
-
-      - name: Logs from Pending pods
-        if: failure() || cancelled()
+      - name: Get juju status for istio and iam models
+        if: always() && matrix.auth-type == 'iam'
         run: |
-          kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-
-      - name: Logs from Failed pods
-        if: failure() || cancelled()
-        run: |
-          kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-
-      - name: Logs from CrashLoopBackOff pods
-        if: failure() || cancelled()
-        run: |
-          kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+          for model in istio-system iam iam-core; do
+            echo "=== juju status -m $model ==="
+            juju status -m "$model" --relations || true
+          done
 
       # Clean up resources
+      - name: Delete object storage buckets
+        if: always()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          for bucket in "${{ steps.object-storage.outputs.global_bucket }}" "${{ steps.object-storage.outputs.override_bucket }}"; do
+            if [[ -n "$bucket" ]]; then
+              aws s3 rb "s3://$bucket" --force --region ${{ env.AWS_REGION }} || true
+            fi
+          done
+
       - name: Delete EKS cluster
         if: always()
         run: eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
