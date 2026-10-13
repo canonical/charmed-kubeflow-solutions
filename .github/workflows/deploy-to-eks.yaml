@@ -29,10 +29,9 @@ jobs:
   deploy-solution-to-eks:
     name: Deploy to EKS
     runs-on: ubuntu-24.04
-    outputs:
-      aws_region: ${{ steps.extract_region.outputs.region }}
 
     strategy:
+      # Serialize runs so concurrent workflows don't clash on the shared EKS cluster.
       max-parallel: 1
       fail-fast: false
       matrix:
@@ -91,13 +90,6 @@ jobs:
           UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      - name: Extract AWS region from cluster.yaml
-        id: extract_region
-        run: |
-          REGION=$(yq e '.metadata.region' .github/cluster.yaml)
-          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
-          echo "region=$REGION" >> $GITHUB_OUTPUT
-
       - name: Install CLI tools & dependencies
         run: |
           pip install tox poetry
@@ -109,15 +101,11 @@ jobs:
           charmcraft version
 
       - name: Configure AWS credentials
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          mkdir -p ~/.aws
-          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
-          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          aws configure set default.region "${{ env.AWS_REGION }}"
-          echo "AWS_SDK_LOAD_CONFIG=1" >> "$GITHUB_ENV"
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Install kubectl
         run: |
@@ -136,30 +124,31 @@ jobs:
       - name: Pre-delete EKS cluster (if exists)
         run: |
           echo "Attempting to delete EKS cluster '${{ env.CLUSTER_NAME }}' (if it exists)..."
-          eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
+          eksctl delete cluster --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
 
           echo "Confirming deletion..."
-          aws eks describe-cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster no longer exists."
+          aws eks describe-cluster --name ${{ env.CLUSTER_NAME }} || echo "Cluster no longer exists."
 
       - name: Pre-delete CloudFormation stack (if exists)
         run: |
           STACK_NAME="eksctl-${{ env.CLUSTER_NAME }}-cluster"
           echo "Deleting CloudFormation stack '$STACK_NAME' (if it exists)..."
-          aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack not found."
+          aws cloudformation delete-stack --stack-name "$STACK_NAME" || echo "Stack not found."
 
           echo "Waiting (max 10 minutes) for stack deletion to complete..."
-          timeout 600s aws cloudformation wait stack-delete-complete --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" \
+          timeout 600s aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" \
             && echo "Stack deleted." \
             || echo "Stack deletion timed out or failed (continuing)."
 
           echo "Verifying stack is gone..."
-          aws cloudformation describe-stacks --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" 2>/dev/null \
+          aws cloudformation describe-stacks --stack-name "$STACK_NAME" 2>/dev/null \
             || echo "Stack no longer exists."
 
       - name: Create EKS cluster
         run: |
           yq e ".metadata.name |= \"${{ env.CLUSTER_NAME }}\"" -i .github/cluster.yaml
           yq e ".metadata.version |= \"${{ env.K8S_VERSION }}\"" -i .github/cluster.yaml
+          yq e ".metadata.region |= \"${{ vars.AWS_REGION }}\"" -i .github/cluster.yaml
 
           ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
           eksctl create cluster -f .github/cluster.yaml
@@ -184,15 +173,12 @@ jobs:
       - name: Setup object storage
         id: object-storage
         shell: bash
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           # KFP's shared object storage must be reachable from inside the EKS
           # cluster, so back it with real S3 buckets instead of a runner-local
           # microceph (which remote EKS pods could not reach). Buckets live in
           # the cluster's region and are addressed via the regional endpoint.
-          REGION="${{ env.AWS_REGION }}"
+          REGION="${{ vars.AWS_REGION }}"
           GLOBAL_BUCKET="${CLUSTER_NAME}-kfp-global-${{ github.run_id }}-${{ strategy.job-index }}"
           OVERRIDE_BUCKET="${CLUSTER_NAME}-kfp-override-${{ github.run_id }}-${{ strategy.job-index }}"
 
@@ -314,23 +300,20 @@ jobs:
       # Clean up resources
       - name: Delete object storage buckets
         if: always()
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           for bucket in "${{ steps.object-storage.outputs.global_bucket }}" "${{ steps.object-storage.outputs.override_bucket }}"; do
             if [[ -n "$bucket" ]]; then
-              aws s3 rb "s3://$bucket" --force --region ${{ env.AWS_REGION }} || true
+              aws s3 rb "s3://$bucket" --force || echo "Bucket $bucket not found or already deleted."
             fi
           done
 
       - name: Delete EKS cluster
         if: always()
-        run: eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+        run: eksctl delete cluster --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
 
       - name: Delete CloudFormation stack
         if: always()
-        run: aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster
+        run: aws cloudformation delete-stack --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster || echo "Stack not found."
 
   delete-unattached-volumes:
       name: Clean unattached EBS volumes
@@ -338,5 +321,5 @@ jobs:
       needs: [deploy-solution-to-eks]
       uses: ./.github/workflows/delete-aws-volumes.yaml
       with:
-        region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}
+        region: ${{ vars.AWS_REGION }}
       secrets: inherit
