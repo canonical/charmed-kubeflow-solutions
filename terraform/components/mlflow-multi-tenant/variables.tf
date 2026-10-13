@@ -199,7 +199,7 @@ variable "pod_defaults" {
 variable "mlflow_server" {
   description = "Configuration for mlflow-server application"
   type = object({
-    app_name    = optional(string, "mlflow-server")
+    app_name = optional(string, "mlflow-server")
     # TODO: make "3.15/stable" the default channel when available:
     channel     = optional(string, "latest/edge")
     revision    = optional(number)
