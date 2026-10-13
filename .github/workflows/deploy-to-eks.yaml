@@ -90,15 +90,25 @@ jobs:
           UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      - name: Install CLI tools & dependencies
+      - name: Install tox & poetry
         run: |
-          pip install tox poetry
+          pipx install tox
+          pipx install poetry
+
+      - name: Install snaps
+        run: |
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
           sudo snap install charmcraft --channel 3.x/stable --classic
           sudo snap install terraform --channel=latest/stable --classic
-          juju version
-          terraform --version
-          charmcraft version
+          sudo snap install kubectl --classic --channel=${{ env.K8S_VERSION }}/stable
+          mkdir -p ~/.kube
+
+      - name: Install eksctl
+        run: |
+          PLATFORM=$(uname -s)_amd64
+          curl -fsSL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${PLATFORM}.tar.gz" | tar xz -C /tmp
+          sudo mv /tmp/eksctl /usr/local/bin
+          eksctl version
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -106,19 +116,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Install kubectl
-        run: |
-          sudo snap install kubectl --classic --channel=${{ env.K8S_VERSION }}/stable
-          mkdir ~/.kube
-          kubectl version --client
-
-      - name: Install eksctl
-        run: |
-          PLATFORM=$(uname -s)_amd64
-          curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${PLATFORM}.tar.gz" | tar xz -C /tmp
-          sudo mv /tmp/eksctl /usr/local/bin
-          eksctl version
 
       # Pre-clean any leftover cluster/stack from a previous failed run.
       - name: Pre-delete EKS cluster and stack (if they exist)
