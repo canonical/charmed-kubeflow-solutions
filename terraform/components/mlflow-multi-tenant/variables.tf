@@ -200,7 +200,8 @@ variable "mlflow_server" {
   description = "Configuration for mlflow-server application"
   type = object({
     app_name    = optional(string, "mlflow-server")
-    channel     = optional(string, "2.22/stable")
+    # TODO: make "3.15/stable" the default channel when available:
+    channel     = optional(string, "latest/edge")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)
