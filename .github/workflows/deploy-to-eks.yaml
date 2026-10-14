@@ -241,6 +241,13 @@ jobs:
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
 
+      - name: Collect and upload multi-tenancy namespaces logs
+        if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: multi-tenancy-namespaces-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          namespaces: mt-tenant-global mt-tenant-override
+
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
