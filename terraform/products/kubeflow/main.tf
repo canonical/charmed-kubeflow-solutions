@@ -454,9 +454,10 @@ module "kfp" {
   } : null
 
   argo_controller = {
-    channel  = local.argo_controller_channel
-    revision = var.argo_controller_revision
-    config   = local.argo_controller_config
+    channel   = local.argo_controller_channel
+    revision  = var.argo_controller_revision
+    config    = local.argo_controller_config
+    resources = var.argo_controller_resources
   }
   envoy = {
     channel  = local.envoy_channel

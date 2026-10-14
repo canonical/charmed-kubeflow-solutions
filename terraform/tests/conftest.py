@@ -204,6 +204,27 @@ def setup_s3_integrator_global() -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def argo_images() -> list[str]:
+    """Optional custom images for the argo-controller charm and its executor."""
+    args = []
+    executor_image = os.environ.get("ARGO_EXECUTOR_IMAGE")
+    if executor_image:
+        args += [
+            "-var",
+            f'argo_controller_config={{"executor-image"="{executor_image}"}}',
+        ]
+    controller_image = os.environ.get("ARGO_WORKFLOW_CONTROLLER_IMAGE")
+    if controller_image:
+        args += [
+            "-var",
+            f'argo_controller_resources={{"oci-image"="{controller_image}"}}',
+        ]
+    if args:
+        print(f"Args for custom argo images: {args}")
+    return args
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
     request,
     risk,
@@ -215,6 +236,7 @@ def tf_vars(
     enable_spark,
     pss,
     setup_s3_integrator_global,
+    argo_images,
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
@@ -269,6 +291,7 @@ def tf_vars(
         + risk
         + pss
         + setup_s3_integrator_global
+        + argo_images
         + [
             "-var",
             "create_model=false",
