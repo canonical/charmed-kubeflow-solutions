@@ -18,7 +18,7 @@
 | ---- | ------ | ------- |
 | <a name="module_ambient_iam"></a> [ambient\_iam](#module\_ambient\_iam) | ../../components/istio-ambient | n/a |
 | <a name="module_data_integrator_integrations"></a> [data\_integrator\_integrations](#module\_data\_integrator\_integrations) | ../../components/data-integrator | n/a |
-| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-multi-tenant | n/a |
+| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-v3 | n/a |
 | <a name="module_oauth2_proxy"></a> [oauth2\_proxy](#module\_oauth2\_proxy) | ../../charms/oauth2-proxy-k8s | n/a |
 | <a name="module_observability"></a> [observability](#module\_observability) | ../../components/observability | n/a |
 | <a name="module_postgresql"></a> [postgresql](#module\_postgresql) | git::https://github.com/canonical/postgresql-k8s-operator//terraform | b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43 |

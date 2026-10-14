@@ -619,7 +619,7 @@ module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
   depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
-  source = "../../components/mlflow-unauthenticated"
+  source = "../../components/mlflow-v2"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 

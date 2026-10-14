@@ -28,7 +28,7 @@
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |
 | <a name="module_minio"></a> [minio](#module\_minio) | ../../charms/minio | n/a |
-| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-unauthenticated | n/a |
+| <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-v2 | n/a |
 | <a name="module_mysql"></a> [mysql](#module\_mysql) | git::https://github.com/canonical/mysql-operators//kubernetes/terraform | d7d75f78016006cdb883110706f8526b46785f2b |
 | <a name="module_notebooks"></a> [notebooks](#module\_notebooks) | ../../components/notebooks | n/a |
 | <a name="module_oauth2_proxy"></a> [oauth2\_proxy](#module\_oauth2\_proxy) | ../../charms/oauth2-proxy-k8s | n/a |
