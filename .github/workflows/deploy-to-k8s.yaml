@@ -66,8 +66,9 @@ jobs:
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
-            # NOTE: UATs can't be run for mlflow-standalone unitl this is addressed:
-            # https://github.com/canonical/charmed-kubeflow-uats/issues/308
+            uats-env: mlflow-remote
+            # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
+            uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
         exclude:
           - product: kubeflow-spark
             service-mesh-type: ambient
@@ -242,9 +243,6 @@ jobs:
 
       - name: Run UATs
         id: run-uats
-        # NOTE: UATs can't be run for mlflow-standalone unitl this is addressed:
-        # https://github.com/canonical/charmed-kubeflow-uats/issues/308
-        if: matrix.product != 'mlflow-standalone'
         run: |
           cd ${{ github.workspace }}/charmed-kubeflow-uats
           if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
