@@ -187,6 +187,7 @@ jobs:
             echo "S3_ACCESS_KEY_OVERRIDE=${{ secrets.AWS_ACCESS_KEY_ID }}"
             echo "S3_SECRET_KEY_OVERRIDE=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
             echo "S3_BUCKET_KFP_OVERRIDE=$OVERRIDE_BUCKET"
+            echo "S3_REGION_OVERRIDE=${REGION}"
           } >> .env
 
       - name: Clone UATs repository
