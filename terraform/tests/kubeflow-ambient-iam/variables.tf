@@ -54,6 +54,12 @@ variable "istio_k8s_platform" {
   default     = ""
 }
 
+variable "use_old_istio_bases" {
+  description = "Deploy the ambient Istio charms (control plane, gateways, beacon) on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features (e.g. TrafficExtension) are not needed."
+  type        = bool
+  default     = false
+}
+
 variable "istio_ingress_k8s_ui_config" {
   description = "Configuration for the UI ambient gateway (e.g. external_hostname)."
   type        = map(string)

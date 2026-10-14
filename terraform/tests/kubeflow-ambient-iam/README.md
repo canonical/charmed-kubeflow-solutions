@@ -77,7 +77,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../products/iam | n/a |
-| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | df6c85dea5decdd014fd187404163ef2d73263da |
+| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
 | <a name="module_kubeflow"></a> [kubeflow](#module\_kubeflow) | ../../products/kubeflow | n/a |
 
 ## Resources
@@ -137,6 +137,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_traefik_config"></a> [traefik\_config](#input\_traefik\_config) | Configuration for the iam Traefik ingress (e.g. external\_hostname). | `map(string)` | `{}` | no |
+| <a name="input_use_old_istio_bases"></a> [use\_old\_istio\_bases](#input\_use\_old\_istio\_bases) | Deploy the ambient Istio charms (control plane, gateways, beacon) on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features (e.g. TrafficExtension) are not needed. | `bool` | `false` | no |
 
 ## Outputs
 
