@@ -35,24 +35,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # Always needs *some* region; if input empty we'll still iterate all inside the script
+          # Always needs *some* region; if input empty the action still iterates all regions
           aws-region: ${{ inputs.region || 'eu-central-1' }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Delete unattached EBS volumes
+        uses: ./.github/actions/delete-aws-volumes
         with:
-          python-version: '3.x'
-
-      - name: Install requirements
-        run: |
-          python -m pip install --upgrade pip
-          pip install boto3 tenacity
-
-      - name: Run delete volumes script
-        run: |
-          if [ -n "${{ inputs.region }}" ]; then
-            python scripts/delete_volumes.py "${{ inputs.region }}"
-          else
-            python scripts/delete_volumes.py
-          fi
+          region: ${{ inputs.region }}
 

@@ -1,0 +1,100 @@
+name: 'Delete unattached EBS volumes'
+description: >
+  Deletes unattached EBS volumes (state=available) in a single AWS region or,
+  when no region is given, across every region enabled for the account. Each
+  region is retried a few times with a fixed delay to ride out transient EC2 API
+  errors. Expects AWS credentials (and a default region) to be configured in the
+  job beforehand.
+inputs:
+  region:
+    description: >
+      AWS region to clean. Leave empty to clean every region enabled for the
+      account.
+    required: false
+    default: ''
+  max-attempts:
+    description: "How many times to try deleting a region's volumes before failing."
+    required: false
+    default: '3'
+  retry-delay:
+    description: 'Seconds to wait between retry attempts.'
+    required: false
+    default: '2'
+
+runs:
+  using: composite
+  steps:
+    - name: Delete unattached EBS volumes
+      shell: bash
+      env:
+        REGION: ${{ inputs.region }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        RETRY_DELAY: ${{ inputs.retry-delay }}
+      run: |
+        count=0
+
+        # Single pass: list and delete the available (unattached) volumes in the
+        # region. Already-deleted volumes drop out of the listing, so a retry
+        # only ever revisits what is left.
+        delete_volumes_in_region_once() {
+          region="$1"
+          volumes="$(aws ec2 describe-volumes --region "$region" \
+            --filters Name=status,Values=available \
+            --query 'Volumes[].VolumeId' --output text)" || return 1
+          for volume in $volumes; do
+            aws ec2 delete-volume --region "$region" --volume-id "$volume" || return 1
+            echo "Deleted unattached volume ${volume} in region ${region}."
+            count=$((count + 1))
+          done
+        }
+
+        # Deletes every available volume in the region, retrying the whole region
+        # up to $MAX_ATTEMPTS times with $RETRY_DELAY seconds in between.
+        delete_volumes_in_region() {
+          region="$1"
+          attempt=1
+          while true; do
+            if delete_volumes_in_region_once "$region"; then
+              return 0
+            fi
+            if [ "$attempt" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::error::Failed to delete volumes in region ${region} after ${MAX_ATTEMPTS} attempts."
+              return 1
+            fi
+            attempt=$((attempt + 1))
+            sleep "$RETRY_DELAY"
+          done
+        }
+
+        # True when $1 is one of the regions enabled for the account.
+        region_enabled() {
+          for r in $regions; do
+            if [ "$r" = "$1" ]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        # Fetched once up front so a failure here (e.g. bad credentials) is fatal
+        # rather than being mistaken for "no regions / no volumes".
+        regions="$(aws ec2 describe-regions --query 'Regions[].RegionName' --output text)"
+
+        if [ -n "$REGION" ]; then
+          if region_enabled "$REGION"; then
+            delete_volumes_in_region "$REGION" || exit 1
+          else
+            echo "::error::Region '${REGION}' isn't enabled for this AWS account."
+            exit 1
+          fi
+        else
+          for region in $regions; do
+            delete_volumes_in_region "$region" || exit 1
+          done
+        fi
+
+        if [ "$count" -gt 0 ]; then
+          echo "Deleted ${count} unattached volumes."
+        else
+          echo "No unattached volumes found for deletion."
+        fi
