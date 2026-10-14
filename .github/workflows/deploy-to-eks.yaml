@@ -230,14 +230,14 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: user-namespace-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: user-namespace-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespaces: test-kubeflow
 
       - name: Collect and upload M2M namespaces data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: m2m-namespaces-data-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: m2m-namespaces-data-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
 
@@ -252,7 +252,7 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: uats-notebooks-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: uats-notebooks-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           path: |
             charmed-kubeflow-uats/artifacts/
             charmed-kubeflow-uats/uats-session.log
@@ -270,7 +270,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: control-planes-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: control-planes-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
