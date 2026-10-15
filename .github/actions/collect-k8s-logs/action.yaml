@@ -1,10 +1,11 @@
 name: 'Collect and upload k8s logs'
 description: >
-  Dumps pod logs (current and previous) for a set of namespaces, optionally
-  dumps additional namespaced resources as YAML, and uploads the result as a
-  single artifact. Namespaces can be given explicitly and/or discovered by a
-  name pattern. Failures while dumping are tolerated so it is safe to run as a
-  best-effort debug collector.
+  Dumps pod logs (current and previous), `kubectl describe` per pod, namespace
+  events and a pod overview for a set of namespaces, plus cluster node capacity,
+  optionally dumps additional namespaced resources as YAML, and uploads the
+  result as a single artifact. Namespaces can be given explicitly and/or
+  discovered by a name pattern. Failures while dumping are tolerated so it is
+  safe to run as a best-effort debug collector.
 inputs:
   name:
     description: 'Name of the artifact to upload.'
@@ -46,6 +47,11 @@ runs:
         out_dir="${RUNNER_TEMP}/collected-logs/${NAME}"
         mkdir -p "$out_dir"
 
+        # Cluster node capacity/allocation to spot resource-starved scheduling of
+        # pods that never start (and therefore produce no logs).
+        kubectl describe nodes > "$out_dir/nodes-describe.txt" 2>&1 || true
+        kubectl top nodes > "$out_dir/nodes-top.txt" 2>&1 || true
+
         namespaces="$NAMESPACES"
         if [ -n "$NAMESPACE_PATTERN" ]; then
           discovered="$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' \
@@ -55,7 +61,17 @@ runs:
 
         for ns in $namespaces; do
           mkdir -p "$out_dir/$ns/pods"
+
+          # Namespace events and pod overview reveal why a pod never started
+          # (FailedScheduling, image pulls, volume mounts) when it has no logs.
+          kubectl get events -n "$ns" --sort-by=.lastTimestamp \
+            > "$out_dir/$ns/events.txt" 2>&1 || true
+          kubectl get pods -n "$ns" -o wide \
+            > "$out_dir/$ns/pods-overview.txt" 2>&1 || true
+
           for pod in $(kubectl get pods -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            kubectl describe pod -n "$ns" "$pod" \
+              > "$out_dir/$ns/pods/${pod}-describe.txt" 2>&1 || true
             kubectl logs -n "$ns" "$pod" --all-containers --prefix \
               > "$out_dir/$ns/pods/${pod}.log" 2>&1 || true
             kubectl logs -n "$ns" "$pod" --all-containers --prefix --previous \

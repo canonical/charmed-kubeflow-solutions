@@ -8,13 +8,12 @@
 # is wired in integrations.tf since the upstream module only deploys the
 # application. The M2M gateway is JWT-only and is intentionally not wired to it.
 #
-# The upstream module hardcodes trust = true and does not accept base/resources,
-# so those inputs from var.istio_ingress_k8s are intentionally not passed.
 module "istio_ingress_k8s_ui" {
-  source = "git::https://github.com/canonical/istio-ingress-k8s-operator//terraform?ref=a9ef9646aea149a00a6a7620acaf483249714d04"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s-ui"
+  base        = local.istio_ingress_base
   channel     = var.istio_ingress_k8s.channel
   revision    = var.istio_ingress_k8s.revision
   units       = var.istio_ingress_k8s.units
@@ -23,10 +22,11 @@ module "istio_ingress_k8s_ui" {
 }
 
 module "istio_ingress_k8s_m2m" {
-  source = "git::https://github.com/canonical/istio-ingress-k8s-operator//terraform?ref=a9ef9646aea149a00a6a7620acaf483249714d04"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s-m2m"
+  base        = local.istio_ingress_base
   channel     = var.istio_ingress_k8s.channel
   revision    = var.istio_ingress_k8s.revision
   units       = var.istio_ingress_k8s.units
@@ -37,12 +37,12 @@ module "istio_ingress_k8s_m2m" {
 # Beacon: provides the in-model service mesh. It joins the Istio control plane
 # natively (no Juju relation to istio-k8s).
 #
-# The upstream module hardcodes trust = true and does not accept base/resources.
 module "istio_beacon_k8s" {
-  source = "git::https://github.com/canonical/istio-beacon-k8s-operator//terraform?ref=51b204dd50392809692263f6e973d81dd9fe200a"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-beacon-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-beacon-k8s"
+  base        = local.istio_beacon_base
   channel     = var.istio_beacon_k8s.channel
   revision    = var.istio_beacon_k8s.revision
   units       = var.istio_beacon_k8s.units

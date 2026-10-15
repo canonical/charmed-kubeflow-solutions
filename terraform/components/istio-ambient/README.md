@@ -16,9 +16,9 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#module\_istio\_beacon\_k8s) | git::https://github.com/canonical/istio-beacon-k8s-operator//terraform | 51b204dd50392809692263f6e973d81dd9fe200a |
-| <a name="module_istio_ingress_k8s_m2m"></a> [istio\_ingress\_k8s\_m2m](#module\_istio\_ingress\_k8s\_m2m) | git::https://github.com/canonical/istio-ingress-k8s-operator//terraform | a9ef9646aea149a00a6a7620acaf483249714d04 |
-| <a name="module_istio_ingress_k8s_ui"></a> [istio\_ingress\_k8s\_ui](#module\_istio\_ingress\_k8s\_ui) | git::https://github.com/canonical/istio-ingress-k8s-operator//terraform | a9ef9646aea149a00a6a7620acaf483249714d04 |
+| <a name="module_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#module\_istio\_beacon\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-beacon-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
+| <a name="module_istio_ingress_k8s_m2m"></a> [istio\_ingress\_k8s\_m2m](#module\_istio\_ingress\_k8s\_m2m) | git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
+| <a name="module_istio_ingress_k8s_ui"></a> [istio\_ingress\_k8s\_ui](#module\_istio\_ingress\_k8s\_ui) | git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
 
 ## Resources
 
@@ -36,6 +36,7 @@
 | <a name="input_istio_ingress_k8s_m2m_config"></a> [istio\_ingress\_k8s\_m2m\_config](#input\_istio\_ingress\_k8s\_m2m\_config) | Extra configuration for the M2M gateway (merged over istio\_ingress\_k8s.config) | `map(string)` | `{}` | no |
 | <a name="input_istio_ingress_k8s_ui_config"></a> [istio\_ingress\_k8s\_ui\_config](#input\_istio\_ingress\_k8s\_ui\_config) | Extra configuration for the UI gateway (merged over istio\_ingress\_k8s.config) | `map(string)` | `{}` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where Istio Ambient is deployed | `string` | n/a | yes |
+| <a name="input_use_old_istio_bases"></a> [use\_old\_istio\_bases](#input\_use\_old\_istio\_bases) | Deploy the ambient Istio gateways and beacon on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features are not needed. | `bool` | `false` | no |
 
 ## Outputs
 
