@@ -327,3 +327,9 @@ variable "s3_bucket_global" {
   type        = string
   default     = ""
 }
+
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application (e.g. region)"
+  type        = map(string)
+  default     = {}
+}

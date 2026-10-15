@@ -134,6 +134,7 @@ module "kubeflow" {
   s3_access_key_global = var.s3_access_key_global
   s3_secret_key_global = var.s3_secret_key_global
   s3_endpoint_global   = var.s3_endpoint_global
+  s3_config_global     = var.s3_config_global
 
   github_profiles_automator_config = var.github_profiles_automator_config
 
