@@ -25,8 +25,8 @@ on:
 env:
   CLUSTER_NAME: kubeflow-eks-test
   # Custom argo images (with CA certificates) for the non-IAM products/kubeflow deployment.
-  ARGO_EXECUTOR_IMAGE: docker.io/dariofaccin/argoexec:3.7.17-d9d445d
-  ARGO_WORKFLOW_CONTROLLER_IMAGE: docker.io/dariofaccin/workflow-controller:3.7.17-d9d445d
+  ARGO_EXECUTOR_IMAGE: docker.io/charmedkubeflow/argoexec:3.7.17-71c8592-20261015075356
+  ARGO_WORKFLOW_CONTROLLER_IMAGE: docker.io/charmedkubeflow/workflow-controller:3.7.17-f98fcee-20261015081205
 
 jobs:
   deploy-solution-to-eks:
