@@ -240,6 +240,10 @@ def setup_s3_integrator_global() -> list[str]:
         "-var",
         f"s3_endpoint_global={os.environ['S3_SERVER_URL_GLOBAL']}",
     ]
+    # AWS S3 (unlike microceph) needs an explicit region for SigV4 signing.
+    s3_region_global = os.environ.get("S3_REGION_GLOBAL")
+    if s3_region_global:
+        args += ["-var", f's3_config_global={{region="{s3_region_global}"}}']
     print(f"Args for shared S3 integration: {args}")
     return args
 
@@ -292,6 +296,27 @@ def hostnames(request, hostname_ui, hostname_m2m, hostname_auth) -> list[str]:
 
 
 @pytest.fixture(scope="module")
+def argo_images() -> list[str]:
+    """Optional custom images for the argo-controller charm and its executor."""
+    args = []
+    executor_image = os.environ.get("ARGO_EXECUTOR_IMAGE")
+    if executor_image:
+        args += [
+            "-var",
+            f'argo_controller_config={{"executor-image"="{executor_image}"}}',
+        ]
+    controller_image = os.environ.get("ARGO_WORKFLOW_CONTROLLER_IMAGE")
+    if controller_image:
+        args += [
+            "-var",
+            f'argo_controller_resources={{"oci-image"="{controller_image}"}}',
+        ]
+    if args:
+        print(f"Args for custom argo images: {args}")
+    return args
+
+
+@pytest.fixture(scope="module")
 def tf_vars(
     request,
     risk,
@@ -308,6 +333,7 @@ def tf_vars(
     setup_s3_integrator_global,
     github_profiles_automator_configs,
     mlflow_user_grants_across_workspaces,
+    argo_images,
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
@@ -351,6 +377,7 @@ def tf_vars(
         + risk
         + pss
         + setup_s3_integrator_global
+        + argo_images
         + [
             "-var",
             "create_model=false",
