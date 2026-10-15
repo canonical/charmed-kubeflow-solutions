@@ -175,12 +175,6 @@ variable "argo_controller_config" {
   default     = {}
 }
 
-variable "argo_controller_resources" {
-  description = "Resources for argo-controller application (e.g. a custom `oci-image`)"
-  type        = map(string)
-  default     = {}
-}
-
 variable "envoy_revision" {
   description = "Revision of the envoy application"
   type        = number
