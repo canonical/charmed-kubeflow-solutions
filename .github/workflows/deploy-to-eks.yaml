@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       k8s_version:
-        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.27)'
+        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.35)'
         required: false
       uats_branch:
         description: 'Branch to run the UATs from, e.g., main or track/1.10'
@@ -81,7 +81,7 @@ jobs:
 
       - name: Update ENV variables from inputs if available
         run: |
-          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          K8S_VERSION=${{ inputs.k8s_version || env.EKS_VERSION }}
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
