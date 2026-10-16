@@ -33,9 +33,6 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        product: [mlflow-standalone]
-        service-mesh-type: [ambient]
-        auth-type: [iam]
         include:
           # - product: kubeflow-standalone
           #   uats-env: kubeflow-remote
