@@ -228,7 +228,15 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
+          extra_args=()
+          # TODO: drop this skip and set istio-ingress-k8s `listener-hostname=""` once it
+          # reaches 2/stable. On EKS the ambient gateway listener is pinned to the ELB
+          # hostname, so KServe routes are rejected with NoMatchingListenerHostname.
+          # See https://github.com/canonical/kserve-operators/issues/491
+          if [[ "${{ matrix.service-mesh-type }}" == "ambient" ]]; then
+            extra_args+=(-k "not kserve")
+          fi
+          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} "${extra_args[@]}" --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
