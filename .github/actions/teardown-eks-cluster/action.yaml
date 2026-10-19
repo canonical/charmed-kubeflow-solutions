@@ -3,18 +3,14 @@ description: >
   Idempotent teardown of an eksctl-managed EKS cluster and its CloudFormation
   stack. Kubernetes Services of type LoadBalancer create ELBs and security
   groups outside CloudFormation that keep the VPC - and therefore the stack -
-  from deleting. This action clears those orphaned load balancers and security
-  groups and retries the stack deletion, failing if the stack still exists after
-  all attempts. Safe to run whether or not the cluster exists. Expects AWS
-  credentials and region to be configured in the job beforehand.
+  from deleting. If the stack survives eksctl, this action clears those orphaned
+  load balancers and security groups and deletes the stack again, failing if it
+  still exists afterwards. Safe to run whether or not the cluster exists.
+  Expects AWS credentials and region to be configured in the job beforehand.
 inputs:
   cluster-name:
     description: 'Name of the EKS cluster (the eksctl stack is eksctl-<name>-cluster).'
     required: true
-  max-attempts:
-    description: 'How many times to clear leftover resources and retry the stack deletion before failing.'
-    required: false
-    default: '3'
 
 runs:
   using: composite
@@ -34,7 +30,6 @@ runs:
       shell: bash
       env:
         CLUSTER_NAME: ${{ inputs.cluster-name }}
-        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
       run: |
         STACK_NAME="eksctl-${CLUSTER_NAME}-cluster"
 
@@ -60,16 +55,24 @@ runs:
 
         # Deletes every non-default security group in the given VPC. Kubernetes
         # creates one per classic ELB (k8s-elb-*) that outlives the ELB itself.
+        # Deletion fails with DependencyViolation until the just-deleted load
+        # balancers have released their ENIs, so keep trying for a bounded time.
         clear_security_groups() {
           vpc_id="$1"
           [ -z "$vpc_id" ] || [ "$vpc_id" = "None" ] && return 0
-          for sg in $(aws ec2 describe-security-groups \
-            --filters "Name=vpc-id,Values=$vpc_id" \
-            --query "SecurityGroups[?GroupName!='default'].GroupId" \
-            --output text 2>/dev/null); do
-            echo "Deleting security group $sg"
-            aws ec2 delete-security-group --group-id "$sg" || true
+          for _ in $(seq 1 18); do
+            remaining=0
+            for sg in $(aws ec2 describe-security-groups \
+              --filters "Name=vpc-id,Values=$vpc_id" \
+              --query "SecurityGroups[?GroupName!='default'].GroupId" \
+              --output text 2>/dev/null); do
+              echo "Deleting security group $sg"
+              aws ec2 delete-security-group --group-id "$sg" || remaining=1
+            done
+            [ "$remaining" -eq 0 ] && return 0
+            sleep 10
           done
+          echo "Some security groups in VPC $vpc_id could not be deleted (continuing)."
         }
 
         # Resolves the cluster VPC from the eksctl stack output, falling back to
@@ -86,31 +89,25 @@ runs:
           echo "$vpc_id"
         }
 
-        # Fallback: if the stack survived (DELETE_FAILED) because orphaned load
-        # balancers or their security groups kept the VPC busy, clear them and retry.
-        attempt=1
-        while [ "$attempt" -le "${MAX_ATTEMPTS}" ]; do
-          if ! aws cloudformation describe-stacks --stack-name "${STACK_NAME}" >/dev/null 2>&1; then
-            echo "Stack '${STACK_NAME}' no longer exists."
-            exit 0
-          fi
+        if ! aws cloudformation describe-stacks --stack-name "${STACK_NAME}" >/dev/null 2>&1; then
+          echo "Stack '${STACK_NAME}' no longer exists."
+          exit 0
+        fi
 
-          echo "Stack '${STACK_NAME}' still present (attempt ${attempt}/${MAX_ATTEMPTS})."
-          vpc_id="$(resolve_vpc)"
-          clear_load_balancers "$vpc_id"
-          # Give the just-deleted load balancers time to detach their ENIs.
-          sleep 30
-          clear_security_groups "$vpc_id"
+        # Fallback: the stack survived (DELETE_FAILED) because orphaned load
+        # balancers or their security groups kept the VPC busy. Clear them and
+        # delete the stack again.
+        echo "Stack '${STACK_NAME}' still present, clearing leftover resources."
+        vpc_id="$(resolve_vpc)"
+        clear_load_balancers "$vpc_id"
+        clear_security_groups "$vpc_id"
 
-          echo "Deleting CloudFormation stack '${STACK_NAME}'..."
-          aws cloudformation delete-stack --stack-name "${STACK_NAME}" || true
-          if timeout 600s aws cloudformation wait stack-delete-complete --stack-name "${STACK_NAME}"; then
-            echo "Stack deleted."
-            exit 0
-          fi
-          echo "Stack deletion attempt ${attempt} timed out or failed."
-          attempt=$((attempt + 1))
-        done
+        echo "Deleting CloudFormation stack '${STACK_NAME}'..."
+        aws cloudformation delete-stack --stack-name "${STACK_NAME}" || true
+        if timeout 600s aws cloudformation wait stack-delete-complete --stack-name "${STACK_NAME}"; then
+          echo "Stack deleted."
+          exit 0
+        fi
 
-        echo "::error::Stack '${STACK_NAME}' could not be deleted after ${MAX_ATTEMPTS} attempts."
+        echo "::error::Stack '${STACK_NAME}' could not be deleted."
         exit 1
