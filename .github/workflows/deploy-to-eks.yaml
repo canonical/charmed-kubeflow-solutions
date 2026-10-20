@@ -125,6 +125,18 @@ jobs:
         with:
           cluster-name: ${{ env.CLUSTER_NAME }}
 
+      # Buckets are named per run, so leftovers never collide with this run, but
+      # nothing else would ever reclaim them. Runs share the cluster (pre-deleted
+      # above), so it is safe to drop every bucket belonging to it.
+      - name: Pre-delete leftover object storage buckets
+        shell: bash
+        run: |
+          for bucket in $(aws s3api list-buckets \
+            --query "Buckets[?starts_with(Name, '${CLUSTER_NAME}-kfp-')].Name" --output text); do
+            echo "Deleting leftover bucket $bucket"
+            aws s3 rb "s3://$bucket" --force || echo "::warning::Could not delete leftover bucket $bucket."
+          done
+
       - name: Create EKS cluster
         run: |
           yq e ".metadata.name |= \"${{ env.CLUSTER_NAME }}\"" -i .github/cluster.yaml
@@ -160,8 +172,15 @@ jobs:
           # microceph (which remote EKS pods could not reach). Buckets live in
           # the cluster's region and are addressed via the regional endpoint.
           REGION="${{ vars.AWS_REGION }}"
-          GLOBAL_BUCKET="${CLUSTER_NAME}-kfp-global-${{ github.run_id }}-${{ strategy.job-index }}"
-          OVERRIDE_BUCKET="${CLUSTER_NAME}-kfp-override-${{ github.run_id }}-${{ strategy.job-index }}"
+          # Include the run attempt so re-runs never collide with a previous attempt's buckets.
+          SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}"
+          GLOBAL_BUCKET="${CLUSTER_NAME}-kfp-global-${SUFFIX}"
+          OVERRIDE_BUCKET="${CLUSTER_NAME}-kfp-override-${SUFFIX}"
+
+          # Publish the names before creating anything, so the teardown step can
+          # still clean up if creation fails partway through.
+          echo "global_bucket=$GLOBAL_BUCKET" >> "$GITHUB_OUTPUT"
+          echo "override_bucket=$OVERRIDE_BUCKET" >> "$GITHUB_OUTPUT"
 
           create_bucket() {
             # us-east-1 rejects a LocationConstraint; every other region requires it.
@@ -175,8 +194,6 @@ jobs:
           create_bucket "$GLOBAL_BUCKET"
           create_bucket "$OVERRIDE_BUCKET"
 
-          echo "global_bucket=$GLOBAL_BUCKET" >> "$GITHUB_OUTPUT"
-          echo "override_bucket=$OVERRIDE_BUCKET" >> "$GITHUB_OUTPUT"
           {
             echo "S3_SERVER_URL_GLOBAL=https://s3.${REGION}.amazonaws.com"
             echo "S3_ACCESS_KEY_GLOBAL=${{ secrets.AWS_ACCESS_KEY_ID }}"
@@ -295,20 +312,32 @@ jobs:
           done
 
       # Clean up resources
-      - name: Delete object storage buckets
-        if: always()
-        run: |
-          for bucket in "${{ steps.object-storage.outputs.global_bucket }}" "${{ steps.object-storage.outputs.override_bucket }}"; do
-            if [[ -n "$bucket" ]]; then
-              aws s3 rb "s3://$bucket" --force || echo "Bucket $bucket not found or already deleted."
-            fi
-          done
-
       - name: Delete EKS cluster and stack
         if: always()
         uses: ./.github/actions/teardown-eks-cluster
         with:
           cluster-name: ${{ env.CLUSTER_NAME }}
+
+      # Runs after the cluster is gone: while it is alive, KFP keeps writing to
+      # the buckets and recreates them if they are missing.
+      - name: Delete object storage buckets
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          for bucket in "${{ steps.object-storage.outputs.global_bucket }}" "${{ steps.object-storage.outputs.override_bucket }}"; do
+            [[ -z "$bucket" ]] && continue
+            if output="$(aws s3 rb "s3://$bucket" --force 2>&1)"; then
+              echo "$output"
+            elif grep -q NoSuchBucket <<<"$output"; then
+              echo "Bucket $bucket does not exist, nothing to delete."
+            else
+              echo "$output"
+              echo "::error::Failed to delete bucket $bucket."
+              failed=1
+            fi
+          done
+          exit "$failed"
 
   delete-unattached-volumes:
       name: Clean unattached EBS volumes
