@@ -35,7 +35,7 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        service-mesh-type: [sidecar, ambient]
+        service-mesh-type: [ambient]
         product:
           - name: kubeflow
             uats-env: kubeflow-remote
