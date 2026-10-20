@@ -76,7 +76,6 @@
 | <a name="input_admission_webhook_config"></a> [admission\_webhook\_config](#input\_admission\_webhook\_config) | Configuration for admission-webhook application | `map(string)` | `{}` | no |
 | <a name="input_admission_webhook_revision"></a> [admission\_webhook\_revision](#input\_admission\_webhook\_revision) | Revision of the admission-webhook application | `number` | `null` | no |
 | <a name="input_argo_controller_config"></a> [argo\_controller\_config](#input\_argo\_controller\_config) | Configuration for argo-controller application | `map(string)` | `{}` | no |
-| <a name="input_argo_controller_resources"></a> [argo\_controller\_resources](#input\_argo\_controller\_resources) | Resources for argo-controller application (e.g. a custom `oci-image`) | `map(string)` | `{}` | no |
 | <a name="input_argo_controller_revision"></a> [argo\_controller\_revision](#input\_argo\_controller\_revision) | Revision of the argo-controller application | `number` | `null` | no |
 | <a name="input_auth_type"></a> [auth\_type](#input\_auth\_type) | Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service\_mesh\_type = 'ambient'. | `string` | `"dex"` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named kubeflow for this product deployment | `bool` | `true` | no |
