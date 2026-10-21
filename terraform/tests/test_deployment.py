@@ -1,4 +1,5 @@
 import logging
+import socket
 import subprocess
 import time
 from itertools import batched
@@ -308,13 +309,34 @@ def _wait_model_active(model_name: str) -> None:
         )
 
 
-def _wait_for_lb_ip(
+@tenacity.retry(
+    retry=tenacity.retry_if_exception_type(socket.gaierror),
+    wait=tenacity.wait_fixed(10),
+    stop=tenacity.stop_after_delay(600),
+    reraise=True,
+)
+def _resolve_ipv4(hostname: str) -> list[str]:
+    """Resolve a LoadBalancer hostname to its IPv4 addresses.
+
+    A new load balancer's DNS record (e.g. an AWS ELB) can take a few minutes
+    to propagate, so retry until it resolves.
+    """
+    addresses = socket.getaddrinfo(hostname, None, socket.AF_INET, socket.SOCK_STREAM)
+    return sorted({address[4][0] for address in addresses})
+
+
+def _wait_for_lb_ips(
     lightkube_client: lightkube.Client,
     namespace: str,
     labels: dict[str, str],
     timeout: int = 900,
-) -> str:
-    """Poll until a LoadBalancer Service matching labels has an ingress address."""
+) -> list[str]:
+    """Poll until a LoadBalancer Service matching labels has an ingress address.
+
+    Return its IP, or the IPv4 addresses of its hostname on clouds that publish
+    one instead (e.g. an AWS ELB on EKS): the CoreDNS hosts plugin and
+    /etc/hosts only accept IPs and silently skip any other entry.
+    """
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -332,9 +354,10 @@ def _wait_for_lb_ip(
             lb = svc.status.loadBalancer if svc.status else None
             ingress = lb.ingress if lb else None
             if ingress:
-                address = ingress[0].ip or ingress[0].hostname
-                if address:
-                    return address
+                if ingress[0].ip:
+                    return [ingress[0].ip]
+                if ingress[0].hostname:
+                    return _resolve_ipv4(ingress[0].hostname)
         time.sleep(5)
 
     raise TimeoutError(
@@ -361,36 +384,38 @@ def configure_dns(
     hostname_m2m: str,
     hostname_ui: str,
     model_name: str,
-) -> dict[str, str]:
+) -> dict[str, list[str]]:
     """Resolve the ambient-iam hostnames to their LoadBalancer IPs.
 
     Both the in-cluster DNS (CoreDNS) and the runner host (/etc/hosts) are
     updated so the IAM charms and cross-model callbacks can resolve the
     external hostnames and reconcile to active.
     """
-    host_to_ip = {
-        hostname_ui: _wait_for_lb_ip(
+    host_to_ips = {
+        hostname_ui: _wait_for_lb_ips(
             lightkube_client,
             model_name,
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-ui"},
         ),
-        hostname_m2m: _wait_for_lb_ip(
+        hostname_m2m: _wait_for_lb_ips(
             lightkube_client,
             model_name,
             {"gateway.networking.k8s.io/gateway-name": "istio-ingress-k8s-m2m"},
         ),
-        hostname_auth: _wait_for_lb_ip(
+        hostname_auth: _wait_for_lb_ips(
             lightkube_client,
             "iam-core",
             {"kubernetes-resource-handler-scope": "traefik-loadbalancer"},
         ),
     }
+    logger.info("Mapping the external hostnames to %s", host_to_ips)
+    host_entries = [f"{ip} {host}" for host, ips in host_to_ips.items() for ip in ips]
 
     # Inject a hosts block into the existing Corefile (right after the server
     # block opening brace), preserving the cluster's default DNS config.
     hosts_block = (
         "    hosts {\n"
-        + "".join(f"        {ip} {host}\n" for host, ip in host_to_ip.items())
+        + "".join(f"        {entry}\n" for entry in host_entries)
         + "        fallthrough\n"
         "    }\n"
     )
@@ -419,11 +444,10 @@ def configure_dns(
         check=True,
     )
 
-    host_entries = "".join(f"{ip} {host}\n" for host, ip in host_to_ip.items())
     subprocess.run(
         ["sudo", "tee", "-a", "/etc/hosts"],
-        input=host_entries.encode(),
+        input="".join(f"{entry}\n" for entry in host_entries).encode(),
         check=True,
         stdout=subprocess.DEVNULL,
     )
-    return host_to_ip
+    return host_to_ips
