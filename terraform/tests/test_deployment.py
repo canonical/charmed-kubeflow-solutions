@@ -24,6 +24,9 @@ OAUTH2_PROXY_APP = "oauth2-proxy"
 # with; toggled by the hydra-operator#591 workaround.
 OAUTH_OFFER = "oauth-offer:oauth"
 
+# Custom kfp-api oci-image resource to deploy instead of the charm's default.
+KFP_API_IMAGE = "dariofaccin/api-server:2.16.1-65e8152-20261022135745"
+
 
 @pytest.fixture()
 def lightkube_client(model_name: str) -> lightkube.Client:
@@ -39,6 +42,7 @@ class TestCharm:
         tf_vars,
         solution_module_path,
         request,
+        is_mlflow_standalone,
     ):
         """Initialize and apply the selected Terraform solution root module."""
         subprocess.run(
@@ -59,6 +63,9 @@ class TestCharm:
             apply_cmd.append("-parallelism=1")
         else:
             apply_cmd.append("-parallelism=5")
+        # Standalone MLflow roots do not deploy KFP, so they lack this variable.
+        if not is_mlflow_standalone:
+            apply_cmd += ["-var", f"kfp_api_image={KFP_API_IMAGE}"]
         subprocess.run(
             apply_cmd + tf_vars,
             check=True,

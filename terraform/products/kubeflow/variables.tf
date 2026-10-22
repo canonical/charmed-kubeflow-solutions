@@ -212,6 +212,12 @@ variable "kfp_api_revision" {
   default     = null
 }
 
+variable "kfp_api_image" {
+  description = "Custom OCI image (oci-image resource) for the kfp-api application"
+  type        = string
+  default     = null
+}
+
 variable "kfp_api_config" {
   description = "Configuration for kfp-api application"
   type        = map(string)
