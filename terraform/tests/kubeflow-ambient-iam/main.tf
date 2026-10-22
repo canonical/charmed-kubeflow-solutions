@@ -130,6 +130,8 @@ module "kubeflow" {
   enable_kserve      = var.enable_kserve
   enable_feast       = var.enable_feast
 
+  kfp_api_image = var.kfp_api_image
+
   kserve_controller_config = local.kserve_controller_config
 
   object_storage_mode  = var.object_storage_mode
@@ -137,6 +139,7 @@ module "kubeflow" {
   s3_access_key_global = var.s3_access_key_global
   s3_secret_key_global = var.s3_secret_key_global
   s3_endpoint_global   = var.s3_endpoint_global
+  s3_config_global     = var.s3_config_global
 
   github_profiles_automator_config = var.github_profiles_automator_config
 

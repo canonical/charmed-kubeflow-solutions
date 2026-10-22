@@ -131,6 +131,7 @@
 | <a name="input_katib_ui_config"></a> [katib\_ui\_config](#input\_katib\_ui\_config) | Configuration for katib-ui application | `map(string)` | `{}` | no |
 | <a name="input_katib_ui_revision"></a> [katib\_ui\_revision](#input\_katib\_ui\_revision) | Revision of the katib-ui application | `number` | `null` | no |
 | <a name="input_kfp_api_config"></a> [kfp\_api\_config](#input\_kfp\_api\_config) | Configuration for kfp-api application | `map(string)` | `{}` | no |
+| <a name="input_kfp_api_image"></a> [kfp\_api\_image](#input\_kfp\_api\_image) | Custom OCI image (oci-image resource) for the kfp-api application | `string` | `null` | no |
 | <a name="input_kfp_api_revision"></a> [kfp\_api\_revision](#input\_kfp\_api\_revision) | Revision of the kfp-api application | `number` | `null` | no |
 | <a name="input_kfp_metadata_writer_config"></a> [kfp\_metadata\_writer\_config](#input\_kfp\_metadata\_writer\_config) | Configuration for kfp-metadata-writer application | `map(string)` | `{}` | no |
 | <a name="input_kfp_metadata_writer_revision"></a> [kfp\_metadata\_writer\_revision](#input\_kfp\_metadata\_writer\_revision) | Revision of the kfp-metadata-writer application | `number` | `null` | no |

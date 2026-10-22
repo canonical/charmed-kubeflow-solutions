@@ -207,6 +207,12 @@ variable "enable_kfp" {
   default     = true
 }
 
+variable "kfp_api_image" {
+  description = "Custom OCI image (oci-image resource) for the kfp-api application."
+  type        = string
+  default     = null
+}
+
 variable "enable_katib" {
   description = "Deploy Katib."
   type        = bool
@@ -332,4 +338,10 @@ variable "s3_bucket_global" {
   description = "S3 bucket for the shared object storage integration"
   type        = string
   default     = ""
+}
+
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application (e.g. region)"
+  type        = map(string)
+  default     = {}
 }
