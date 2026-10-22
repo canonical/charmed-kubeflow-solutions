@@ -24,9 +24,6 @@ OAUTH2_PROXY_APP = "oauth2-proxy"
 # with; toggled by the hydra-operator#591 workaround.
 OAUTH_OFFER = "oauth-offer:oauth"
 
-# TEMP: custom KFP launcher image under test; remove before merging.
-KFP_LAUNCHER_IMAGE = "dariofaccin/kfp-launcher:2.16.1-57a385b-20261022080948"
-
 
 @pytest.fixture()
 def lightkube_client(model_name: str) -> lightkube.Client:
@@ -84,9 +81,6 @@ class TestCharm:
         Wait for the applications to become active and idle and verify its public URL access.
         """
         auth_type = request.config.getoption("--auth-type")
-
-        if not is_mlflow_standalone:
-            juju.config("kfp-api", {"launcher-image": KFP_LAUNCHER_IMAGE})
 
         # The ambient-iam solution spans multiple models; wait for the provider
         # models to settle before asserting on the application model.
