@@ -130,8 +130,6 @@ module "kubeflow" {
   enable_kserve      = var.enable_kserve
   enable_feast       = var.enable_feast
 
-  kfp_api_image = var.kfp_api_image
-
   kserve_controller_config = local.kserve_controller_config
 
   object_storage_mode  = var.object_storage_mode

@@ -207,12 +207,6 @@ variable "enable_kfp" {
   default     = true
 }
 
-variable "kfp_api_image" {
-  description = "Custom OCI image (oci-image resource) for the kfp-api application."
-  type        = string
-  default     = null
-}
-
 variable "enable_katib" {
   description = "Deploy Katib."
   type        = bool

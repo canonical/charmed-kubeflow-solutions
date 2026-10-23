@@ -476,10 +476,9 @@ module "kfp" {
   }
 
   kfp_api = {
-    channel   = local.kfp_channel
-    revision  = var.kfp_api_revision
-    config    = local.kfp_api_config
-    resources = var.kfp_api_image != null ? { oci-image = var.kfp_api_image } : {}
+    channel  = local.kfp_channel
+    revision = var.kfp_api_revision
+    config   = local.kfp_api_config
   }
 
   kfp_metadata_writer = {
