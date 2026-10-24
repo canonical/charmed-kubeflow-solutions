@@ -17,11 +17,6 @@ def pytest_addoption(parser):
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
     parser.addoption(
-        "--use-old-istio-bases",
-        action="store_true",
-        help="Deploy all ambient-mode Istio charms with the old 24.04 bases",
-    )
-    parser.addoption(
         "--service-mesh-type",
         nargs="?",
         default="sidecar",
@@ -113,14 +108,6 @@ def istio_k8s_platform(request) -> list[str]:
     """Terraform module customization for the istio-k8s platform."""
     platform = request.config.getoption("--istio-k8s-platform") or ""
     return ["-var", f"istio_k8s_platform={platform}"]
-
-
-@pytest.fixture(scope="module")
-def use_old_istio_bases(request) -> list[str]:
-    """Terraform module customization to deploy Istio charms on their old bases."""
-    if request.config.getoption("--use-old-istio-bases"):
-        return ["-var", "use_old_istio_bases=true"]
-    return []
 
 
 @pytest.fixture(scope="module")
@@ -298,7 +285,6 @@ def tf_vars(
     service_mesh_type,
     auth_type,
     istio_k8s_platform,
-    use_old_istio_bases,
     enable_mlflow,
     enable_feast,
     enable_spark,
@@ -325,7 +311,6 @@ def tf_vars(
         return (
             risk
             + istio_k8s_platform
-            + use_old_istio_bases
             + setup_s3_integrator_global
             + hostnames
             + ["-var", "create_model=false"]
@@ -347,7 +332,6 @@ def tf_vars(
         + service_mesh_type
         + auth_type
         + istio_k8s_platform
-        + use_old_istio_bases
         + risk
         + pss
         + setup_s3_integrator_global
