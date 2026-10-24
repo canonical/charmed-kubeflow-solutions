@@ -36,6 +36,14 @@ jobs:
         product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark, kubeflow-mlflow]
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
+        # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
+        pod-security-standards:
+          - policy: privileged
+            istio-cni-bin-dir: ""  # meaning Istio CNI disabled when in sidecar mode
+            istio-cni-conf-dir: ""  # meaning Istio CNI disabled when in sidecar mode
+          - policy: baseline
+            istio-cni-bin-dir: ...TODO...same as Istio's default on Canonical K8s
+            istio-cni-conf-dir: ...TODO...same as Istio's default on Canonical K8s
         include:
           - product: kubeflow-standalone
             uats-env: kubeflow-remote
@@ -222,6 +230,7 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
+          PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
           EXTRA_COMPONENTS_ARG=""
 
           TF_VARS_ARG=""
@@ -239,7 +248,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PSS_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
         id: run-uats
@@ -249,7 +258,7 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
+          tox -e ${{ matrix.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
