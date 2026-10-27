@@ -69,11 +69,38 @@ jobs:
           - product: kubeflow-standalone
             service-mesh-type: ambient
             auth-type: iam
+            pod-security-standards:
+              policy: privileged
+              istio-cni-bin-dir: ""
+              istio-cni-conf-dir: ""
+            uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
+          - product: kubeflow-standalone
+            service-mesh-type: ambient
+            auth-type: iam
+            pod-security-standards:
+              policy: baseline
+              istio-cni-bin-dir: /opt/cni/bin
+              istio-cni-conf-dir: /etc/cni/net.d
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
+            pod-security-standards:
+              policy: privileged
+              istio-cni-bin-dir: ""
+              istio-cni-conf-dir: ""
+            uats-env: mlflow-remote
+            # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
+            uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
+          - product: mlflow-standalone
+            service-mesh-type: ambient
+            auth-type: iam
+            pod-security-standards:
+              policy: baseline
+              istio-cni-bin-dir: /opt/cni/bin
+              istio-cni-conf-dir: /etc/cni/net.d
             uats-env: mlflow-remote
             # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
