@@ -257,7 +257,7 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
-          PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }} --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
           EXTRA_COMPONENTS_ARG=""
 
           TF_VARS_ARG=""
