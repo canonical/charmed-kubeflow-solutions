@@ -42,8 +42,8 @@ jobs:
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled when in sidecar mode
             istio-cni-conf-dir: ""  # meaning Istio CNI disabled when in sidecar mode
           - policy: baseline
-            istio-cni-bin-dir: ...TODO...same as Istio's default on Canonical K8s
-            istio-cni-conf-dir: ...TODO...same as Istio's default on Canonical K8s
+            istio-cni-bin-dir: /opt/cni/bin  # for Canonical K8s, default containerd path
+            istio-cni-conf-dir: /etc/cni/net.d  # for Canonical K8s, default containerd path
         include:
           - product: kubeflow-standalone
             uats-env: kubeflow-remote
