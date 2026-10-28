@@ -128,6 +128,7 @@ module "kubeflow" {
   enable_feast       = var.enable_feast
 
   kserve_controller_config = local.kserve_controller_config
+  kubeflow_profiles_security_policy = var.kubeflow_profiles_security_policy
 
   object_storage_mode  = var.object_storage_mode
   s3_bucket_global     = var.s3_bucket_global

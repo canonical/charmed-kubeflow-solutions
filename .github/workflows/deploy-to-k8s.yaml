@@ -71,8 +71,6 @@ jobs:
             auth-type: iam
             pod-security-standards:
               policy: privileged
-              istio-cni-bin-dir: ""
-              istio-cni-conf-dir: ""
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: kubeflow-standalone
@@ -80,8 +78,6 @@ jobs:
             auth-type: iam
             pod-security-standards:
               policy: baseline
-              istio-cni-bin-dir: /opt/cni/bin
-              istio-cni-conf-dir: /etc/cni/net.d
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
@@ -247,8 +243,11 @@ jobs:
           EXTRA_COMPONENTS_ARG=""
 
           PSS_ARGS=""
-          if [[ -n "${{ matrix.bundle.pod-security-standards }}" ]]; then
-            PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }} --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+            PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }}"
+            if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
+              PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+            fi
           fi
 
           TF_VARS_ARG=""
@@ -278,7 +277,7 @@ jobs:
           fi
 
           PSS_ARGS=""
-          if [[ -n "${{ matrix.bundle.pod-security-standards }}" ]]; then
+          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
             PSS_ARGS="--security-policy ${{ matrix.pod-security-standards.policy }}"
           fi
 
