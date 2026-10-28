@@ -87,20 +87,7 @@ jobs:
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
-            pod-security-standards:
-              policy: privileged
-              istio-cni-bin-dir: ""
-              istio-cni-conf-dir: ""
-            uats-env: mlflow-remote
-            # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
-            uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
-          - product: mlflow-standalone
-            service-mesh-type: ambient
-            auth-type: iam
-            pod-security-standards:
-              policy: baseline
-              istio-cni-bin-dir: /opt/cni/bin
-              istio-cni-conf-dir: /etc/cni/net.d
+            # `pod-security-standards` would be ignored by MLflow standalone as they only affect Kubeflow's Profile controller 
             uats-env: mlflow-remote
             # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
@@ -257,8 +244,12 @@ jobs:
           RISK_ARG="--risk ${{ env.RISK }}"
           SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
-          PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }} --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
           EXTRA_COMPONENTS_ARG=""
+
+          PSS_ARGS=""
+          if [[ -n "${{ matrix.bundle.pod-security-standards }}" ]]; then
+            PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }} --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          fi
 
           TF_VARS_ARG=""
           if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
@@ -285,7 +276,13 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
+
+          PSS_ARGS=""
+          if [[ -n "${{ matrix.bundle.pod-security-standards }}" ]]; then
+            PSS_ARGS="--security-policy ${{ matrix.pod-security-standards.policy }}"
+          fi
+
+          tox -e ${{ matrix.uats-env }} -- $PSS_ARGS ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
