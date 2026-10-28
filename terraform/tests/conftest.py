@@ -320,6 +320,7 @@ def tf_vars(
                 ) if is_mlflow_standalone else (
                     enable_mlflow
                     + enable_feast
+                    + pss
                     + github_profiles_automator_configs
                     + ["-var", "object_storage_mode=S3"]
                 )
