@@ -77,7 +77,7 @@ def pytest_addoption(parser):
         help="Directory of configurations for Istio CNI",
     )
     parser.addoption(
-        "--pss",
+        "--kubeflow-profiles-pss",
         nargs="?",
         choices=["privileged", "baseline"],
         const="privileged",
@@ -88,9 +88,15 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="module")
-def pss(request) -> list[str]:
+def kubeflow_profiles_pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
-    pss = request.config.getoption("--pss")
+    kubeflow_profiles_pss = request.config.getoption("--kubeflow-profiles-pss")
+    return ["-var", f"kubeflow_profiles_security_policy={kubeflow_profiles_pss}"]
+
+
+@pytest.fixture(scope="module")
+def sidecar_mode_istio_cni(request) -> list[str]:
+    """Istio's CNI configurations for the sidecar-mode Istio charms."""
     istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
     istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
     return [
@@ -98,8 +104,6 @@ def pss(request) -> list[str]:
         f"istio_cni_bin_dir={istio_cni_bin_dir}",
         "-var",
         f"istio_cni_conf_dir={istio_cni_conf_dir}",
-        "-var",
-        f"kubeflow_profiles_security_policy={pss}",
     ]
 
 
@@ -290,7 +294,8 @@ def tf_vars(
     enable_spark,
     is_mlflow_standalone,
     hostnames,
-    pss,
+    kubeflow_profiles_pss,
+    sidecar_mode_istio_cni,
     setup_s3_integrator_global,
     github_profiles_automator_configs,
     mlflow_user_grants_across_workspaces,
@@ -320,7 +325,7 @@ def tf_vars(
                 ) if is_mlflow_standalone else (
                     enable_mlflow
                     + enable_feast
-                    + pss
+                    + kubeflow_profiles_pss
                     + github_profiles_automator_configs
                     + ["-var", "object_storage_mode=S3"]
                 )
@@ -334,7 +339,8 @@ def tf_vars(
         + auth_type
         + istio_k8s_platform
         + risk
-        + pss
+        + kubeflow_profiles_pss
+        + sidecar_mode_istio_cni
         + setup_s3_integrator_global
         + [
             "-var",

@@ -244,7 +244,7 @@ jobs:
 
           PSS_ARGS=""
           if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
-            PSS_ARGS="--pss ${{ matrix.pod-security-standards.policy }}"
+            PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards.policy }}"
             if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
               PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
             fi
