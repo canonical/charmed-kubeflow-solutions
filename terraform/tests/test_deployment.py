@@ -57,8 +57,6 @@ class TestCharm:
         # serially to work around juju/terraform-provider-juju#1308.
         if request.config.getoption("--auth-type") == "iam":
             apply_cmd.append("-parallelism=1")
-        else:
-            apply_cmd.append("-parallelism=5")
         subprocess.run(
             apply_cmd + tf_vars,
             check=True,
