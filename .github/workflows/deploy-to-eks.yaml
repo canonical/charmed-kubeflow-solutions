@@ -1,10 +1,10 @@
-name: Create EKS cluster, deploy kubeflow-mlflow Terraform solution and run UATs
+name: Create EKS cluster, deploy Kubeflow Terraform solution and run UATs
 
 on:
   workflow_dispatch:
     inputs:
       k8s_version:
-        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.27)'
+        description: 'Kubernetes version to use for the EKS cluster (e.g. 1.35)'
         required: false
       uats_branch:
         description: 'Branch to run the UATs from, e.g., main or track/1.10'
@@ -16,8 +16,11 @@ on:
         description: 'The risk level to be tested'
         required: false
         default: 'stable'
+      juju_agent_version:
+        description: 'Juju agent version to use when bootstrapping. Leave empty to use the default.'
+        required: false
   schedule:
-    - cron: "17 02 * * 1"
+    - cron: "30 00 * * 1"
 
 env:
   CLUSTER_NAME: kubeflow-eks-test
@@ -26,21 +29,16 @@ jobs:
   deploy-solution-to-eks:
     name: Deploy to EKS
     runs-on: ubuntu-24.04
-    outputs:
-      aws_region: ${{ steps.extract_region.outputs.region }}
 
     strategy:
+      # Serialize runs so concurrent workflows don't clash on the shared EKS cluster.
       max-parallel: 1
       fail-fast: false
       matrix:
-        bundle:
-          - module: kubeflow-mlflow
-            uats:
-              env: uats-remote
-              extra-args: --filter "not feast and not spark" --include-kubeflow-trainer-tests
-          - module: kubeflow-feast
-            uats:
-              env: feast-remote
+        service-mesh-type: [sidecar, ambient]
+        product:
+          - name: kubeflow
+            uats-env: kubeflow-remote
         pod-security-standards:
           - policy: privileged
             istio-cni-bin-dir: ""  # meaning Istio CNI disabled
@@ -48,6 +46,26 @@ jobs:
           - policy: baseline
             istio-cni-bin-dir: /opt/cni/bin
             istio-cni-conf-dir: /etc/cni/net.d
+        auth-type: [dex]
+        include:
+          - product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            uats-extra-args: --include-multi-tenancy-tests
+          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
+          - service-mesh-type: ambient
+            product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
+          - service-mesh-type: ambient
+            product:
+              name: kubeflow
+              uats-env: kubeflow-remote
+            pod-security-standards:
+              policy: privileged
+            auth-type: iam
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests
 
     steps:
       - name: Checkout repository
@@ -63,85 +81,67 @@ jobs:
 
       - name: Update ENV variables from inputs if available
         run: |
-          K8S_VERSION=${{ inputs.k8s_version || env.K8S_VERSION }}
+          K8S_VERSION=${{ inputs.k8s_version || env.EKS_VERSION }}
           echo "K8S_VERSION=${K8S_VERSION}" >> $GITHUB_ENV
           CKF_BRANCH=${{ inputs.ckf_branch || env.CKF_BRANCH }}
           echo "CKF_BRANCH=${CKF_BRANCH}" >> $GITHUB_ENV
-          RISK=${{ inputs.risk }}
+          RISK=${{ inputs.risk || env.RISK }}
           echo "RISK=${RISK}" >> $GITHUB_ENV
-
-          if [[ -z "${{ inputs.uats_branch }}" ]]; then UATS_BRANCH=${UATS_BRANCH}; else UATS_BRANCH=${{ inputs.uats_branch }}; fi
+          UATS_BRANCH=${{ inputs.uats_branch || env.UATS_BRANCH }}
           echo "UATS_BRANCH=${UATS_BRANCH}" >> $GITHUB_ENV
 
-      - name: Extract AWS region from cluster.yaml
-        id: extract_region
+      - name: Install tox & poetry
         run: |
-          REGION=$(yq e '.metadata.region' .github/cluster.yaml)
-          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
-          echo "region=$REGION" >> $GITHUB_OUTPUT
+          pipx install tox
+          pipx install poetry
 
-      - name: Install CLI tools & dependencies
+      - name: Install snaps
         run: |
-          pip install tox
           sudo snap install juju --channel=${{ env.JUJU_VERSION }}/stable
-          sudo snap install charmcraft --channel latest/stable --classic
+          sudo snap install charmcraft --channel 3.x/stable --classic
           sudo snap install terraform --channel=latest/stable --classic
-          juju version
-          terraform --version
-          charmcraft version
-
-      - name: Configure AWS credentials
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          mkdir -p ~/.aws
-          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
-          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          aws configure set default.region "${{ env.AWS_REGION }}"
-          echo "AWS_SDK_LOAD_CONFIG=1" >> "$GITHUB_ENV"
-
-      - name: Install kubectl
-        run: |
           sudo snap install kubectl --classic --channel=${{ env.K8S_VERSION }}/stable
-          mkdir ~/.kube
-          kubectl version --client
+          mkdir -p ~/.kube
 
       - name: Install eksctl
         run: |
           PLATFORM=$(uname -s)_amd64
-          curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${PLATFORM}.tar.gz" | tar xz -C /tmp
+          curl -fsSL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${PLATFORM}.tar.gz" | tar xz -C /tmp
           sudo mv /tmp/eksctl /usr/local/bin
           eksctl version
 
-      # Once working, do we want to keep these two pre-deletion steps?
-      - name: Pre-delete EKS cluster (if exists)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-profile: default
+          output-env-credentials: true
+
+      # Pre-clean any leftover cluster/stack from a previous failed run.
+      - name: Pre-delete EKS cluster and stack (if they exist)
+        uses: ./.github/actions/teardown-eks-cluster
+        with:
+          cluster-name: ${{ env.CLUSTER_NAME }}
+
+      # Buckets are named per run, so leftovers never collide with this run, but
+      # nothing else would ever reclaim them. Runs share the cluster (pre-deleted
+      # above), so it is safe to drop every bucket belonging to it.
+      - name: Pre-delete leftover object storage buckets
+        shell: bash
         run: |
-          echo "Attempting to delete EKS cluster '${{ env.CLUSTER_NAME }}' (if it exists)..."
-          eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster not found or already deleted."
-
-          echo "Confirming deletion..."
-          aws eks describe-cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }} || echo "Cluster no longer exists."
-
-      - name: Pre-delete CloudFormation stack (if exists)
-        run: |
-          STACK_NAME="eksctl-${{ env.CLUSTER_NAME }}-cluster"
-          echo "Deleting CloudFormation stack '$STACK_NAME' (if it exists)..."
-          aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" || echo "Stack not found."
-
-          echo "Waiting (max 10 minutes) for stack deletion to complete..."
-          timeout 600s aws cloudformation wait stack-delete-complete --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" \
-            && echo "Stack deleted." \
-            || echo "Stack deletion timed out or failed (continuing)."
-
-          echo "Verifying stack is gone..."
-          aws cloudformation describe-stacks --region ${{ env.AWS_REGION }} --stack-name "$STACK_NAME" 2>/dev/null \
-            || echo "Stack no longer exists."
+          for bucket in $(aws s3api list-buckets \
+            --query "Buckets[?starts_with(Name, '${CLUSTER_NAME}-kfp-')].Name" --output text); do
+            echo "Deleting leftover bucket $bucket"
+            aws s3 rb "s3://$bucket" --force || echo "::warning::Could not delete leftover bucket $bucket."
+          done
 
       - name: Create EKS cluster
         run: |
           yq e ".metadata.name |= \"${{ env.CLUSTER_NAME }}\"" -i .github/cluster.yaml
           yq e ".metadata.version |= \"${{ env.K8S_VERSION }}\"" -i .github/cluster.yaml
+          yq e ".metadata.region |= \"${{ vars.AWS_REGION }}\"" -i .github/cluster.yaml
 
           ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
           eksctl create cluster -f .github/cluster.yaml
@@ -155,75 +155,181 @@ jobs:
       - name: Setup Juju controller
         run: |
           /snap/juju/current/bin/juju add-k8s eks --client
-          juju bootstrap eks eks-controller --agent-version 3.6.9
 
-      - name: Deploy and assert solution
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AGENT_VERSION_ARG=""
+          if [[ -n "${{ inputs.juju_agent_version }}" ]]; then
+            AGENT_VERSION_ARG="--agent-version=${{ inputs.juju_agent_version }}"
+          fi
+
+          juju bootstrap eks eks-controller $AGENT_VERSION_ARG
+
+      - name: Setup object storage
+        id: object-storage
+        shell: bash
+        run: |
+          # KFP's shared object storage must be reachable from inside the EKS
+          # cluster, so back it with real S3 buckets instead of a runner-local
+          # microceph (which remote EKS pods could not reach). Buckets live in
+          # the cluster's region and are addressed via the regional endpoint.
+          REGION="${{ vars.AWS_REGION }}"
+          # Include the run attempt so re-runs never collide with a previous attempt's buckets.
+          SUFFIX="${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}"
+          GLOBAL_BUCKET="${CLUSTER_NAME}-kfp-global-${SUFFIX}"
+          OVERRIDE_BUCKET="${CLUSTER_NAME}-kfp-override-${SUFFIX}"
+
+          # Publish the names before creating anything, so the teardown step can
+          # still clean up if creation fails partway through.
+          echo "global_bucket=$GLOBAL_BUCKET" >> "$GITHUB_OUTPUT"
+          echo "override_bucket=$OVERRIDE_BUCKET" >> "$GITHUB_OUTPUT"
+
+          create_bucket() {
+            # us-east-1 rejects a LocationConstraint; every other region requires it.
+            if [[ "$REGION" == "us-east-1" ]]; then
+              aws s3api create-bucket --bucket "$1" --region "$REGION"
+            else
+              aws s3api create-bucket --bucket "$1" --region "$REGION" \
+                --create-bucket-configuration LocationConstraint="$REGION"
+            fi
+          }
+          create_bucket "$GLOBAL_BUCKET"
+          create_bucket "$OVERRIDE_BUCKET"
+
+          {
+            echo "S3_SERVER_URL_GLOBAL=https://s3.${REGION}.amazonaws.com"
+            echo "S3_ACCESS_KEY_GLOBAL=${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "S3_SECRET_KEY_GLOBAL=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            echo "S3_BUCKET_KFP_GLOBAL=$GLOBAL_BUCKET"
+            echo "S3_REGION_GLOBAL=${REGION}"
+            echo "S3_SERVER_URL_OVERRIDE=https://s3.${REGION}.amazonaws.com"
+            echo "S3_ACCESS_KEY_OVERRIDE=${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "S3_SECRET_KEY_OVERRIDE=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            echo "S3_BUCKET_KFP_OVERRIDE=$OVERRIDE_BUCKET"
+            echo "S3_REGION_OVERRIDE=${REGION}"
+          } >> .env
+
+      - name: Clone UATs repository
+        run: |
+          git clone https://github.com/canonical/charmed-kubeflow-uats.git ${{ github.workspace }}/charmed-kubeflow-uats
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          git checkout ${{ env.UATS_BRANCH }}
+
+      - name: Deploy solution
+        id: deploy
+        timeout-minutes: 60
         run: |
           if [[ '${{ github.event_name }}' != 'pull_request' ]]; then
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          tox -c ./modules/${{ matrix.bundle.module }} -e test_deployment -- -vv -s --risk ${{ env.RISK }} --istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }} --pss ${{ matrix.pod-security-standards.policy }}
+          CNI_ARGS="--istio-cni-bin-dir ${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir ${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+          RISK_ARG="--risk ${{ env.RISK }}"
+          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
+
+          AUTH_TYPE_ARG=""
+          if [[ -n "${{ matrix.auth-type }}" ]]; then
+            AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
+          fi
+
+          EXTRA_COMPONENTS_ARG="--pss ${{ matrix.pod-security-standards.policy }}"
+
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $CNI_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
+        id: run-uats
         run: |
-          git clone https://github.com/canonical/charmed-kubeflow-uats.git ~/charmed-kubeflow-uats
-          cd ~/charmed-kubeflow-uats
-          git checkout ${{ env.UATS_BRANCH }}
-          tox -e ${{ matrix.bundle.uats.env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.bundle.uats.extra-args }}
+          cd ${{ github.workspace }}/charmed-kubeflow-uats
+          if [[ "${{ matrix.auth-type }}" == "iam" ]]; then
+            poetry install --no-root
+            poetry run playwright install --with-deps chromium
+          fi
+          tox -e ${{ matrix.product.uats-env }} -- --security-policy ${{ matrix.pod-security-standards.policy }} ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
-      # On failure, capture debugging resources
-      - name: Select model (for debug)
-        if: failure() || cancelled()
-        run: juju switch eks-controller:kubeflow
+      - name: Collect and upload user namespace pods logs
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: user-namespace-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          namespaces: test-kubeflow
 
-      - name: Save debug artifacts
-        if: failure() || cancelled()
-        uses: canonical/kubeflow-ci/actions/dump-charm-debug-artifacts@main
+      - name: Collect and upload M2M namespaces data
+        if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: m2m-namespaces-data-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          namespace-pattern: test-m2m
+          resources: rolebindings authorizationpolicies
+
+      - name: Collect and upload multi-tenancy namespaces logs
+        if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: multi-tenancy-namespaces-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          namespaces: mt-tenant-global mt-tenant-override
+
+      - name: Upload UATs notebooks artifacts
+        if: failure() && steps.run-uats.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: uats-notebooks-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          path: |
+            charmed-kubeflow-uats/artifacts/
+            charmed-kubeflow-uats/uats-session.log
+          if-no-files-found: ignore
+
+      - name: Upload Playwright artifacts
+        if: failure() && steps.run-uats.outcome == 'failure' && matrix.auth-type == 'iam'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ matrix.auth-type }}
+          path: charmed-kubeflow-uats/playwright-artifacts/
+          if-no-files-found: ignore
+
+      - name: Collect and upload control plane pods logs
+        if: failure()
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: control-planes-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
-        if: failure() || cancelled()
-        run: juju status
+        run: juju status -m kubeflow --relations
+        if: always()
 
-      - name: Get juju debug logs
-        if: failure() || cancelled()
-        run: juju debug-log --replay --no-tail
-
-      - name: Get all Kubernetes resources
-        if: failure() || cancelled()
-        run: kubectl get all -A
-
-      - name: Describe all pods
-        if: failure() || cancelled()
-        run: kubectl describe pods --all-namespaces
-
-      - name: Logs from Pending pods
-        if: failure() || cancelled()
+      - name: Get juju status for istio and iam models
+        if: always() && matrix.auth-type == 'iam'
         run: |
-          kubectl -n kubeflow get pods | tail -n +2 | grep Pending | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-
-      - name: Logs from Failed pods
-        if: failure() || cancelled()
-        run: |
-          kubectl -n kubeflow get pods | tail -n +2 | grep Failed | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
-
-      - name: Logs from CrashLoopBackOff pods
-        if: failure() || cancelled()
-        run: |
-          kubectl -n kubeflow get pods | tail -n +2 | grep CrashLoopBackOff | awk '{print $1}' | xargs -r -n1 kubectl -n kubeflow logs --all-containers=true --tail 100 || true
+          for model in istio-system iam iam-core; do
+            echo "=== juju status -m $model ==="
+            juju status -m "$model" --relations || true
+          done
 
       # Clean up resources
-      - name: Delete EKS cluster
+      - name: Delete EKS cluster and stack
         if: always()
-        run: eksctl delete cluster --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+        uses: ./.github/actions/teardown-eks-cluster
+        with:
+          cluster-name: ${{ env.CLUSTER_NAME }}
 
-      - name: Delete CloudFormation stack
+      # Runs after the cluster is gone: while it is alive, KFP keeps writing to
+      # the buckets and recreates them if they are missing.
+      - name: Delete object storage buckets
         if: always()
-        run: aws cloudformation delete-stack --region ${{ env.AWS_REGION }} --stack-name eksctl-${{ env.CLUSTER_NAME }}-cluster
+        shell: bash
+        run: |
+          failed=0
+          for bucket in "${{ steps.object-storage.outputs.global_bucket }}" "${{ steps.object-storage.outputs.override_bucket }}"; do
+            [[ -z "$bucket" ]] && continue
+            if output="$(aws s3 rb "s3://$bucket" --force 2>&1)"; then
+              echo "$output"
+            elif grep -q NoSuchBucket <<<"$output"; then
+              echo "Bucket $bucket does not exist, nothing to delete."
+            else
+              echo "$output"
+              echo "::error::Failed to delete bucket $bucket."
+              failed=1
+            fi
+          done
+          exit "$failed"
 
   delete-unattached-volumes:
       name: Clean unattached EBS volumes
@@ -231,5 +337,5 @@ jobs:
       needs: [deploy-solution-to-eks]
       uses: ./.github/workflows/delete-aws-volumes.yaml
       with:
-        region: ${{ needs.deploy-solution-to-eks.outputs.aws_region }}
+        region: ${{ vars.AWS_REGION }}
       secrets: inherit
