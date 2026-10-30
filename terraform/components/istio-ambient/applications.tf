@@ -13,7 +13,6 @@ module "istio_ingress_k8s_ui" {
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s-ui"
-  base        = local.istio_ingress_base
   channel     = var.istio_ingress_k8s.channel
   revision    = var.istio_ingress_k8s.revision
   units       = var.istio_ingress_k8s.units
@@ -26,7 +25,6 @@ module "istio_ingress_k8s_m2m" {
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s-m2m"
-  base        = local.istio_ingress_base
   channel     = var.istio_ingress_k8s.channel
   revision    = var.istio_ingress_k8s.revision
   units       = var.istio_ingress_k8s.units
@@ -42,7 +40,6 @@ module "istio_beacon_k8s" {
 
   model_uuid  = var.model_uuid
   app_name    = "istio-beacon-k8s"
-  base        = local.istio_beacon_base
   channel     = var.istio_beacon_k8s.channel
   revision    = var.istio_beacon_k8s.revision
   units       = var.istio_beacon_k8s.units

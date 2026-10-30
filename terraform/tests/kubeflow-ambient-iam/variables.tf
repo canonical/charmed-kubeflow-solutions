@@ -54,12 +54,6 @@ variable "istio_k8s_platform" {
   default     = ""
 }
 
-variable "use_old_istio_bases" {
-  description = "Deploy the ambient Istio charms (control plane, gateways, beacon) on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s, where the 1.31-only features (e.g. TrafficExtension) are not needed."
-  type        = bool
-  default     = false
-}
-
 variable "istio_ingress_k8s_ui_config" {
   description = "Configuration for the UI ambient gateway (e.g. external_hostname)."
   type        = map(string)
@@ -259,6 +253,17 @@ variable "kserve_controller_config" {
   description = "Configuration for the kserve-controller application (e.g. domain-name)."
   type        = map(string)
   default     = {}
+}
+
+variable "kubeflow_profiles_security_policy" {
+  description = "Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported"
+  type        = string
+  default     = "privileged"
+
+  validation {
+    condition     = contains(["baseline", "privileged"], var.kubeflow_profiles_security_policy)
+    error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)."
+  }
 }
 
 variable "github_profiles_automator_config" {

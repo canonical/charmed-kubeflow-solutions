@@ -231,5 +231,4 @@
 | <a name="input_tensorboards_web_app_revision"></a> [tensorboards\_web\_app\_revision](#input\_tensorboards\_web\_app\_revision) | Revision of the tensorboards-web-app application | `number` | `null` | no |
 | <a name="input_training_operator_config"></a> [training\_operator\_config](#input\_training\_operator\_config) | Configuration for training-operator application | `map(string)` | `{}` | no |
 | <a name="input_training_operator_revision"></a> [training\_operator\_revision](#input\_training\_operator\_revision) | Revision of the training-operator application | `number` | `null` | no |
-| <a name="input_use_old_istio_bases"></a> [use\_old\_istio\_bases](#input\_use\_old\_istio\_bases) | Deploy the ambient-IAM Istio charms on their old pre-26.04 dev/edge bases (Istio 1.29) instead of ubuntu@26.04 (Istio 1.31). Used on MicroK8s; no-op for the dex/sidecar service-mesh paths. | `bool` | `false` | no |
 <!-- END_TF_DOCS -->
