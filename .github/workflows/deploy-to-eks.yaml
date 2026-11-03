@@ -163,6 +163,10 @@ jobs:
 
           juju bootstrap eks eks-controller $AGENT_VERSION_ARG
 
+          # Classic ELB drops idle Juju websockets after 60s by default.
+          kubectl -n controller-eks-controller annotate svc controller-service \
+            service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout=3600 --overwrite
+
       - name: Setup object storage
         id: object-storage
         shell: bash
