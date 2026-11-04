@@ -17,11 +17,6 @@ def pytest_addoption(parser):
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
     parser.addoption(
-        "--use-old-istio-bases",
-        action="store_true",
-        help="Deploy all ambient-mode Istio charms with the old 24.04 bases",
-    )
-    parser.addoption(
         "--service-mesh-type",
         nargs="?",
         default="sidecar",
@@ -82,7 +77,7 @@ def pytest_addoption(parser):
         help="Directory of configurations for Istio CNI",
     )
     parser.addoption(
-        "--pss",
+        "--kubeflow-profiles-pss",
         nargs="?",
         choices=["privileged", "baseline"],
         const="privileged",
@@ -93,9 +88,15 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="module")
-def pss(request) -> list[str]:
+def kubeflow_profiles_pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
-    pss = request.config.getoption("--pss")
+    kubeflow_profiles_pss = request.config.getoption("--kubeflow-profiles-pss")
+    return ["-var", f"kubeflow_profiles_security_policy={kubeflow_profiles_pss}"]
+
+
+@pytest.fixture(scope="module")
+def sidecar_mode_istio_cni(request) -> list[str]:
+    """Istio's CNI configurations for the sidecar-mode Istio charms."""
     istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
     istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
     return [
@@ -103,8 +104,6 @@ def pss(request) -> list[str]:
         f"istio_cni_bin_dir={istio_cni_bin_dir}",
         "-var",
         f"istio_cni_conf_dir={istio_cni_conf_dir}",
-        "-var",
-        f"kubeflow_profiles_security_policy={pss}",
     ]
 
 
@@ -113,14 +112,6 @@ def istio_k8s_platform(request) -> list[str]:
     """Terraform module customization for the istio-k8s platform."""
     platform = request.config.getoption("--istio-k8s-platform") or ""
     return ["-var", f"istio_k8s_platform={platform}"]
-
-
-@pytest.fixture(scope="module")
-def use_old_istio_bases(request) -> list[str]:
-    """Terraform module customization to deploy Istio charms on their old bases."""
-    if request.config.getoption("--use-old-istio-bases"):
-        return ["-var", "use_old_istio_bases=true"]
-    return []
 
 
 @pytest.fixture(scope="module")
@@ -298,13 +289,13 @@ def tf_vars(
     service_mesh_type,
     auth_type,
     istio_k8s_platform,
-    use_old_istio_bases,
     enable_mlflow,
     enable_feast,
     enable_spark,
     is_mlflow_standalone,
     hostnames,
-    pss,
+    kubeflow_profiles_pss,
+    sidecar_mode_istio_cni,
     setup_s3_integrator_global,
     github_profiles_automator_configs,
     mlflow_user_grants_across_workspaces,
@@ -325,7 +316,6 @@ def tf_vars(
         return (
             risk
             + istio_k8s_platform
-            + use_old_istio_bases
             + setup_s3_integrator_global
             + hostnames
             + ["-var", "create_model=false"]
@@ -335,6 +325,7 @@ def tf_vars(
                 ) if is_mlflow_standalone else (
                     enable_mlflow
                     + enable_feast
+                    + kubeflow_profiles_pss
                     + github_profiles_automator_configs
                     + ["-var", "object_storage_mode=S3"]
                 )
@@ -347,9 +338,9 @@ def tf_vars(
         + service_mesh_type
         + auth_type
         + istio_k8s_platform
-        + use_old_istio_bases
         + risk
-        + pss
+        + kubeflow_profiles_pss
+        + sidecar_mode_istio_cni
         + setup_s3_integrator_global
         + [
             "-var",

@@ -31,11 +31,19 @@ jobs:
 
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 6
       matrix:
         product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark, kubeflow-mlflow]
         service-mesh-type: [sidecar, ambient]
         auth-type: [dex]
+        # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
+        pod-security-standards:
+          - policy: privileged
+            istio-cni-bin-dir: ""  # meaning Istio CNI disabled when in sidecar mode
+            istio-cni-conf-dir: ""  # meaning Istio CNI disabled when in sidecar mode
+          - policy: baseline
+            istio-cni-bin-dir: /opt/cni/bin  # for Canonical K8s, default containerd path
+            istio-cni-conf-dir: /etc/cni/net.d  # for Canonical K8s, default containerd path
         include:
           - product: kubeflow-standalone
             uats-env: kubeflow-remote
@@ -61,11 +69,21 @@ jobs:
           - product: kubeflow-standalone
             service-mesh-type: ambient
             auth-type: iam
+            pod-security-standards:
+              policy: privileged
+            uats-env: kubeflow-remote
+            uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
+          - product: kubeflow-standalone
+            service-mesh-type: ambient
+            auth-type: iam
+            pod-security-standards:
+              policy: baseline
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
             service-mesh-type: ambient
             auth-type: iam
+            # `pod-security-standards` would be ignored by MLflow standalone as they only affect Kubeflow's Profile controller 
             uats-env: mlflow-remote
             # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
@@ -224,6 +242,14 @@ jobs:
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
           EXTRA_COMPONENTS_ARG=""
 
+          PSS_ARGS=""
+          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+            PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards.policy }}"
+            if [[ "${{ matrix.service-mesh-type }}" == "sidecar" ]]; then
+              PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
+            fi
+          fi
+
           TF_VARS_ARG=""
           if [[ -n "${{ matrix.bundle.tf-vars-file }}" ]]; then
             TF_VARS_ARG="--tf-vars-file ${{ matrix.bundle.tf-vars-file }}"
@@ -239,7 +265,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PSS_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
         id: run-uats
@@ -249,7 +275,13 @@ jobs:
             poetry install --no-root
             poetry run playwright install --with-deps chromium
           fi
-          tox -e ${{ matrix.uats-env }} -- ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
+
+          PSS_ARGS=""
+          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+            PSS_ARGS="--security-policy ${{ matrix.pod-security-standards.policy }}"
+          fi
+
+          tox -e ${{ matrix.uats-env }} -- $PSS_ARGS ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
 
       - name: Collect and upload user namespace pods logs
         if: failure() && steps.run-uats.outcome == 'failure'
