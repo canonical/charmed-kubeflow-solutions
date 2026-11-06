@@ -49,14 +49,6 @@ output "requires" {
       name     = juju_application.mlflow_server.name
       endpoint = "service-mesh"
     }
-    mlflow_server_secrets = {
-      name     = juju_application.mlflow_server.name
-      endpoint = "secrets"
-    }
-    mlflow_server_pod_defaults = {
-      name     = juju_application.mlflow_server.name
-      endpoint = "pod-defaults"
-    }
     mlflow_server_logging = {
       name     = juju_application.mlflow_server.name
       endpoint = "logging"
