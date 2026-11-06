@@ -1,0 +1,76 @@
+name: 'Delete unattached EBS volumes'
+description: >
+  Deletes unattached EBS volumes (state=available) in a single AWS region or,
+  when no region is given, across every region enabled for the account.
+  Transient EC2 API errors are retried by the AWS CLI itself; any remaining
+  error fails the action. Expects AWS credentials (and a default region) to be
+  configured in the job beforehand.
+inputs:
+  region:
+    description: >
+      AWS region to clean. Leave empty to clean every region enabled for the
+      account.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Delete unattached EBS volumes
+      shell: bash
+      env:
+        REGION: ${{ inputs.region }}
+      run: |
+        count=0
+
+        # Lists and deletes the available (unattached) volumes in the region.
+        delete_volumes_in_region() {
+          region="$1"
+          volumes="$(aws ec2 describe-volumes --region "$region" \
+            --filters Name=status,Values=available \
+            --query 'Volumes[].VolumeId' --output text)" || {
+            echo "::error::Failed to list volumes in region ${region}."
+            return 1
+          }
+          for volume in $volumes; do
+            aws ec2 delete-volume --region "$region" --volume-id "$volume" || {
+              echo "::error::Failed to delete volume ${volume} in region ${region}."
+              return 1
+            }
+            echo "Deleted unattached volume ${volume} in region ${region}."
+            count=$((count + 1))
+          done
+        }
+
+        # True when $1 is one of the regions enabled for the account.
+        region_enabled() {
+          for r in $regions; do
+            if [ "$r" = "$1" ]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        # Fetched once up front so a failure here (e.g. bad credentials) is fatal
+        # rather than being mistaken for "no regions / no volumes".
+        regions="$(aws ec2 describe-regions --query 'Regions[].RegionName' --output text)"
+
+        if [ -n "$REGION" ]; then
+          if region_enabled "$REGION"; then
+            delete_volumes_in_region "$REGION" || exit 1
+          else
+            echo "::error::Region '${REGION}' isn't enabled for this AWS account."
+            exit 1
+          fi
+        else
+          for region in $regions; do
+            delete_volumes_in_region "$region" || exit 1
+          done
+        fi
+
+        if [ "$count" -gt 0 ]; then
+          echo "Deleted ${count} unattached volumes."
+        else
+          echo "No unattached volumes found for deletion."
+        fi

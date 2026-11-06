@@ -26,7 +26,7 @@ on:
 jobs:
   deploy-solution:
     name: Deploy to Canonical K8s
-    runs-on: ${{ matrix.auth-type == 'iam' && 'self-hosted-linux-amd64-noble-2xlarge-extra' || 'self-hosted-linux-amd64-noble-xlarge' }}
+    runs-on: ${{ (matrix.auth-type == 'iam' || matrix.product == 'kubeflow-mlflow') && 'self-hosted-linux-amd64-noble-2xlarge-extra' || 'self-hosted-linux-amd64-noble-xlarge' }}
     timeout-minutes: 150
 
     strategy:
@@ -297,6 +297,13 @@ jobs:
           name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
+
+      - name: Collect and upload multi-tenancy namespaces logs
+        if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
+        uses: ./.github/actions/collect-k8s-logs
+        with:
+          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          namespaces: mt-tenant-global mt-tenant-override
 
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
