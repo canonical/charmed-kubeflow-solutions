@@ -189,10 +189,6 @@ module "mlflow" {
     endpoint = module.s3_global[0].provides.s3_credentials.endpoint
   }
 
-  secrets = null
-
-  pod_defaults = null
-
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
