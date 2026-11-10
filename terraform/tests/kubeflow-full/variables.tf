@@ -1,10 +1,9 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# --------------------------
-# general settings
-# --------------------------
-
+# ---------------------------------------------------------------------------
+# Juju provider and proxy settings
+# ---------------------------------------------------------------------------
 
 variable "JUJU_CONTROLLER_IPS" {
   type        = string
@@ -332,6 +331,17 @@ variable "kserve_controller_config" {
   default     = {}
 }
 
+variable "kubeflow_profiles_security_policy" {
+  description = "Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported"
+  type        = string
+  default     = "privileged"
+
+  validation {
+    condition     = contains(["baseline", "privileged"], var.kubeflow_profiles_security_policy)
+    error_message = "Valid values for var.kubeflow_profiles_security_policy are (baseline, privileged)."
+  }
+}
+
 variable "github_profiles_automator_config" {
   description = "Configuration for the github-profiles-automator charm (e.g. repository and PMR path)."
   type        = map(string)
@@ -375,4 +385,10 @@ variable "s3_bucket_global" {
   description = "S3 bucket for the shared object storage integration"
   type        = string
   default     = ""
+}
+
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application (e.g. region)"
+  type        = map(string)
+  default     = {}
 }
