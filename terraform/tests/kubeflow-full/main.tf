@@ -1,6 +1,11 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
+# ===========================================================================
+# cos model: COS Lite. Its Grafana, Loki and Prometheus offers are consumed
+# cross-model by opentelemetry-collector-k8s in the kubeflow model.
+# ===========================================================================
+
 resource "juju_model" "cos" {
   count = var.create_cos_model ? 1 : 0
   name  = var.cos_model_name
@@ -61,7 +66,7 @@ locals {
 }
 
 module "istio_k8s" {
-  source = "git::https://github.com/canonical/istio-k8s-operator//terraform?ref=df6c85dea5decdd014fd187404163ef2d73263da"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
 
   model_uuid = local.istio_system_model_uuid
   app_name   = "istio-k8s"
@@ -155,18 +160,19 @@ module "kubeflow" {
   enable_kserve      = var.enable_kserve
   enable_feast       = var.enable_feast
 
-  kserve_controller_config = local.kserve_controller_config
+  kserve_controller_config          = local.kserve_controller_config
+  kubeflow_profiles_security_policy = var.kubeflow_profiles_security_policy
 
   object_storage_mode  = var.object_storage_mode
   s3_bucket_global     = var.s3_bucket_global
   s3_access_key_global = var.s3_access_key_global
   s3_secret_key_global = var.s3_secret_key_global
   s3_endpoint_global   = var.s3_endpoint_global
+  s3_config_global     = var.s3_config_global
 
   github_profiles_automator_config = var.github_profiles_automator_config
 
-  # enable_observability = false
-  # Observability is always enabled in kubeflow-cos and automatically wired to COS
+  # Observability is always enabled and wired to the COS Lite deployed above.
   enable_observability = true
   dashboards_offer     = module.cos.offers.grafana_dashboards.url
   logging_offer        = module.cos.offers.loki_logging.url
