@@ -1,21 +1,30 @@
-# kubeflow-ambient-iam deployment
+# kubeflow-full deployment
 
 End-to-end deployment that composes Charmed Kubeflow on the **Istio ambient**
-service mesh with the **Canonical Identity Platform** (IAM), wiring everything
-together across three Juju models in a single Terraform root:
+service mesh with the **Canonical Identity Platform** (IAM) and **COS Lite**
+observability, optionally behind an HTTP(S) proxy, wiring everything together
+across five Juju models in a single Terraform root:
 
-| Model          | Contents                                                                                   |
-| -------------- | ------------------------------------------------------------------------------------------ |
-| `istio-system` | The Istio control plane (`istio-k8s`). Offers `istio-ingress-config` cross-model.           |
-| `iam`          | Hydra / Kratos / Login UI (`products/iam`). Offers Hydra `oauth` cross-model.                |
-| `kubeflow`     | Kubeflow apps + the two ambient gateways (`-ui` / `-m2m`) + beacon + the IAM auth charms.   |
+| Model          | Contents                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `cos`          | COS Lite. Offers Grafana dashboards, Loki logging and Prometheus remote-write cross-model.                           |
+| `istio-system` | The Istio control plane (`istio-k8s`). Offers `istio-ingress-config` cross-model.                                    |
+| `iam-core`     | PostgreSQL, Traefik and self-signed-certificates (`products/iam`). Offers `send-ca-cert` cross-model.                |
+| `iam`          | Hydra / Kratos / Login UI (`products/iam`). Offers Hydra `oauth` cross-model.                                        |
+| `kubeflow`     | Kubeflow apps + the two ambient gateways (`-ui` / `-m2m`) + beacon + the IAM auth charms + the OTel collector.       |
 
 ## Architecture
 
 ```mermaid
 flowchart LR
+  subgraph cos["model: cos"]
+    coslite[COS Lite]
+  end
   subgraph istioSystem["model: istio-system"]
     istiok8s[istio-k8s]
+  end
+  subgraph iamCore["model: iam-core"]
+    ssc[self-signed-certificates]
   end
   subgraph iam["model: iam"]
     hydra[hydra]
@@ -26,20 +35,26 @@ flowchart LR
     beacon[istio-beacon-k8s]
     o2p[oauth2-proxy]
     rac[request-authentication-configurator]
+    otel[opentelemetry-collector-k8s]
     apps[Kubeflow applications]
   end
 
   ingUI == istio_ingress_config offer ==> istiok8s
+  istiok8s == send-ca-cert offer ==> ssc
+  o2p == send-ca-cert offer ==> ssc
   o2p == oauth offer ==> hydra
   rac == oauth offer ==> hydra
+  otel == COS offers ==> coslite
   o2p -- forward-auth --> ingUI
   rac -- request-auth --> ingUI
   rac -- request-auth --> ingM2M
   apps -. service mesh .- beacon
+  apps -. logs / metrics .- otel
 ```
 
-The deployment always uses `service_mesh_type = "ambient"` and `auth_type = "iam"`.
-The legacy sidecar + Dex/OIDC path is not used here.
+The deployment always uses `service_mesh_type = "ambient"`, `auth_type = "iam"`
+and `enable_observability = true`. The legacy sidecar + Dex/OIDC path is not
+used here.
 
 ## Cross-model wiring
 
@@ -48,14 +63,41 @@ The legacy sidecar + Dex/OIDC path is not used here.
   is JWT-only and is intentionally not wired to it.
 - `hydra:oauth` is offered from `iam` and consumed by `oauth2-proxy` and
   `request-authentication-configurator` in `kubeflow` (`oauth_offer_url`).
+- `self-signed-certificates:send-ca-cert` is offered from `iam-core` and consumed
+  by `istio-k8s:jwks-ca-cert` and by `oauth2-proxy` in `kubeflow`
+  (`send_ca_cert_offer_url`).
+- The COS Lite Grafana dashboards, Loki logging and Prometheus remote-write
+  offers are consumed by `opentelemetry-collector-k8s` in `kubeflow`.
+
+## Usage
+
+The root configures the Juju provider explicitly through the `JUJU_*` variables.
+Source (do not execute) `setup.sh` to export them from the current controller
+of the local Juju client (requires `yq`), then apply as usual:
+
+```bash
+source setup.sh
+terraform init
+terraform apply -var-file=<vars-file>.tfvars.json
+```
 
 ## Notes
 
+- `http_proxy`, `https_proxy` and `no_proxy` are set as the `juju-http-proxy`,
+  `juju-https-proxy` and `juju-no-proxy` model config of the `cos`,
+  `istio-system` and `kubeflow` models when this root creates them. The `iam`
+  and `iam-core` models do not take these variables, so they inherit the
+  controller's model defaults.
+- `istio-k8s` and the gateways/beacon in `products/kubeflow` come from the same
+  `canonical/service-mesh` ref and are deployed on `ubuntu@26.04` (Istio 1.31).
+  Keep them aligned: older revisions, such as the `ubuntu@24.04` ones on
+  `dev/edge`, ship Istio 1.29.0, where kubelet health probes can be rejected by
+  ztunnel after a node restart
+  ([#277](https://github.com/canonical/charmed-kubeflow-solutions/issues/277)).
 - The `iam` product uses a **vendored, patched** copy of
-  `iam-bundle-integration` (see
-  `terraform-refactoring/vendor/iam-bundle-integration/`) so the Identity
-  Platform can compose in the same Terraform root as the rest of the deployment
-  on the Juju provider `1.x`.
+  `iam-bundle-integration` (see `terraform/vendor/iam-bundle-integration/`) so
+  the Identity Platform can compose in the same Terraform root as the rest of
+  the deployment on the Juju provider `1.x`.
 - Spark integration is not part of this deployment.
 
 <!-- BEGIN_TF_DOCS -->
@@ -76,8 +118,9 @@ The legacy sidecar + Dex/OIDC path is not used here.
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_cos"></a> [cos](#module\_cos) | git::https://github.com/canonical/observability-stack//terraform/cos-lite | 04ab6c618dbbec62292a052a61cdb402d80e5974 |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../products/iam | n/a |
-| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/istio-k8s-operator//terraform | df6c85dea5decdd014fd187404163ef2d73263da |
+| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
 | <a name="module_kubeflow"></a> [kubeflow](#module\_kubeflow) | ../../products/kubeflow | n/a |
 
 ## Resources
@@ -85,6 +128,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | Name | Type |
 | ---- | ---- |
 | [juju_integration.istio_k8s_jwks_ca_cert](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
+| [juju_model.cos](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
 | [juju_model.istio_system](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
 | [juju_offer.istio_ingress_config](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/offer) | resource |
 
@@ -92,10 +136,17 @@ The legacy sidecar + Dex/OIDC path is not used here.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_JUJU_CA_CERTIFICATE"></a> [JUJU\_CA\_CERTIFICATE](#input\_JUJU\_CA\_CERTIFICATE) | Juju controller CA certificate | `string` | n/a | yes |
+| <a name="input_JUJU_CONTROLLER_IPS"></a> [JUJU\_CONTROLLER\_IPS](#input\_JUJU\_CONTROLLER\_IPS) | Juju controller IP addresses, comma separated | `string` | n/a | yes |
+| <a name="input_JUJU_PASSWORD"></a> [JUJU\_PASSWORD](#input\_JUJU\_PASSWORD) | Password for the juju controller | `string` | n/a | yes |
+| <a name="input_JUJU_USERNAME"></a> [JUJU\_USERNAME](#input\_JUJU\_USERNAME) | Username for the juju controller | `string` | n/a | yes |
+| <a name="input_cos_channel"></a> [cos\_channel](#input\_cos\_channel) | Channel to deploy COS Lite applications from | `string` | `"2/stable"` | no |
+| <a name="input_cos_model_name"></a> [cos\_model\_name](#input\_cos\_model\_name) | Name of the Juju model to create for COS | `string` | `"cos"` | no |
+| <a name="input_cos_model_uuid"></a> [cos\_model\_uuid](#input\_cos\_model\_uuid) | UUID of an existing Juju model to deploy COS into (required when create\_cos\_model is false) | `string` | `null` | no |
+| <a name="input_create_cos_model"></a> [create\_cos\_model](#input\_create\_cos\_model) | Create a Juju model for the COS deployment | `bool` | `true` | no |
 | <a name="input_create_iam_model"></a> [create\_iam\_model](#input\_create\_iam\_model) | Create the iam Juju model for the Identity Platform. | `bool` | `true` | no |
 | <a name="input_create_istio_system_model"></a> [create\_istio\_system\_model](#input\_create\_istio\_system\_model) | Create the istio-system Juju model for the Istio control plane (istio-k8s). | `bool` | `true` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create the kubeflow Juju model. | `bool` | `true` | no |
-| <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | Offer URL for COS Grafana dashboards. | `string` | `null` | no |
 | <a name="input_enable_feast"></a> [enable\_feast](#input\_enable\_feast) | Deploy Feast. | `bool` | `false` | no |
 | <a name="input_enable_katib"></a> [enable\_katib](#input\_enable\_katib) | Deploy Katib. | `bool` | `true` | no |
 | <a name="input_enable_kfp"></a> [enable\_kfp](#input\_enable\_kfp) | Deploy Kubeflow Pipelines. | `bool` | `true` | no |
@@ -103,7 +154,6 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_enable_kserve"></a> [enable\_kserve](#input\_enable\_kserve) | Deploy KServe. | `bool` | `true` | no |
 | <a name="input_enable_mlflow"></a> [enable\_mlflow](#input\_enable\_mlflow) | Deploy MLflow. | `bool` | `false` | no |
 | <a name="input_enable_notebooks"></a> [enable\_notebooks](#input\_enable\_notebooks) | Deploy Notebooks. | `bool` | `true` | no |
-| <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Enable observability wiring to an external COS deployment. | `bool` | `false` | no |
 | <a name="input_enable_tensorboard"></a> [enable\_tensorboard](#input\_enable\_tensorboard) | Deploy Tensorboard. | `bool` | `true` | no |
 | <a name="input_enable_training_v1"></a> [enable\_training\_v1](#input\_enable\_training\_v1) | Deploy the v1 Training Operator. | `bool` | `true` | no |
 | <a name="input_enable_training_v2"></a> [enable\_training\_v2](#input\_enable\_training\_v2) | Deploy the v2 Kubeflow Trainer. | `bool` | `false` | no |
@@ -111,6 +161,8 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_external_m2m_hostname"></a> [external\_m2m\_hostname](#input\_external\_m2m\_hostname) | External hostname for the M2M ambient ingress gateway. | `string` | n/a | yes |
 | <a name="input_external_ui_hostname"></a> [external\_ui\_hostname](#input\_external\_ui\_hostname) | External hostname for the UI ambient ingress gateway. | `string` | n/a | yes |
 | <a name="input_github_profiles_automator_config"></a> [github\_profiles\_automator\_config](#input\_github\_profiles\_automator\_config) | Configuration for the github-profiles-automator charm (e.g. repository and PMR path). | `map(string)` | `{}` | no |
+| <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
+| <a name="input_https_proxy"></a> [https\_proxy](#input\_https\_proxy) | Value of the https\_proxy environment variable | `string` | `""` | no |
 | <a name="input_hydra_revision"></a> [hydra\_revision](#input\_hydra\_revision) | Revision for the Hydra application. | `number` | `null` | no |
 | <a name="input_iam_model_name"></a> [iam\_model\_name](#input\_iam\_model\_name) | Name of the iam model to create. | `string` | `"iam"` | no |
 | <a name="input_iam_model_uuid"></a> [iam\_model\_uuid](#input\_iam\_model\_uuid) | UUID of an existing model to deploy the Identity Platform into (required when create\_iam\_model is false). | `string` | `null` | no |
@@ -125,15 +177,16 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
 | <a name="input_kratos_revision"></a> [kratos\_revision](#input\_kratos\_revision) | Revision for the Kratos application. | `number` | `null` | no |
 | <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for the kserve-controller application (e.g. domain-name). | `map(string)` | `{}` | no |
-| <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | Offer URL for COS Loki logging. | `string` | `null` | no |
+| <a name="input_kubeflow_profiles_security_policy"></a> [kubeflow\_profiles\_security\_policy](#input\_kubeflow\_profiles\_security\_policy) | Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported | `string` | `"privileged"` | no |
 | <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
-| <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing kubeflow model (required when create\_model is false). | `string` | `null` | no |
+| <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
 | <a name="input_object_storage_mode"></a> [object\_storage\_mode](#input\_object\_storage\_mode) | Object storage backend for KFP and MLflow: 'minio' (in-cluster minio charm via the object-storage relation) or 'S3' (external s3-integrator via the s3-credentials relation) | `string` | `"S3"` | no |
 | <a name="input_release"></a> [release](#input\_release) | Kubeflow release to deploy. Use 'latest' for latest tracks or '1.11' for pinned 1.11 tracks. | `string` | `"latest"` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Charm channel risk level to deploy (stable, candidate, beta, edge). | `string` | `"edge"` | no |
 | <a name="input_s3_access_key_global"></a> [s3\_access\_key\_global](#input\_s3\_access\_key\_global) | S3 access key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_bucket_global"></a> [s3\_bucket\_global](#input\_s3\_bucket\_global) | S3 bucket for the shared object storage integration | `string` | `""` | no |
+| <a name="input_s3_config_global"></a> [s3\_config\_global](#input\_s3\_config\_global) | Configuration for the shared s3-integrator application (e.g. region) | `map(string)` | `{}` | no |
 | <a name="input_s3_endpoint_global"></a> [s3\_endpoint\_global](#input\_s3\_endpoint\_global) | S3 endpoint for the shared object storage integration | `string` | `""` | no |
 | <a name="input_s3_secret_key_global"></a> [s3\_secret\_key\_global](#input\_s3\_secret\_key\_global) | S3 secret key for the shared object storage integration | `string` | `""` | no |
 | <a name="input_traefik_config"></a> [traefik\_config](#input\_traefik\_config) | Configuration for the iam Traefik ingress (e.g. external\_hostname). | `map(string)` | `{}` | no |
