@@ -1,5 +1,9 @@
 name: Create EKS cluster, deploy Kubeflow Terraform solution and run UATs
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:
