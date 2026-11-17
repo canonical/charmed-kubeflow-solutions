@@ -26,7 +26,7 @@ resource "juju_integration" "data_integrator_mlflow_server" {
   }
 
   application {
-    name      = var.mlflow_server_endpoint.name
-    endpoint  = var.mlflow_server_endpoint.endpoint
+    name     = var.mlflow_server_endpoint.name
+    endpoint = var.mlflow_server_endpoint.endpoint
   }
 }
