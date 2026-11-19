@@ -2,9 +2,9 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 #
-# Sets up a PS7 VM created with model-config.yaml to host kubeflow-full (see README.md): a
-# single-node Canonical K8s cluster, a Juju controller on it and S3 object storage (MicroCeph
-# in an LXD container). Run it as the user that will run Juju and Terraform, not as root. It
+# Sets up a PS7 VM created as described in README.md to host kubeflow-full: a single-node
+# Canonical K8s cluster, a Juju controller on it and S3 object storage (MicroCeph in an LXD
+# container). Run it as the user that will run Juju and Terraform, not as root. It
 # skips the steps already done, so it can be re-run after a failure.
 #
 # It does not use Concierge, unlike the CI: Concierge does not have an option to set the Cilium
