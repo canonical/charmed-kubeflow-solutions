@@ -137,9 +137,7 @@ class TestCharm:
             return
 
         # Verify deployment by checking the public URL
-        istio_service = "istio-ingressgateway-workload"
-        if request.config.getoption("--service-mesh-type") == "ambient":
-            istio_service = "istio-ingress-k8s-istio"
+        istio_service = "istio-ingress-k8s-istio"
         url = get_public_url(lightkube_client, model_name, istio_service)
         result_status, result_text = fetch_response(url)
         assert result_status == 200
