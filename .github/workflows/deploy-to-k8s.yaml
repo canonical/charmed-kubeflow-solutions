@@ -165,7 +165,6 @@ jobs:
           pull-extra-args: --hosts-dir /etc/containerd/hosts.d
 
       - name: Configure Cilium for Istio
-        if: matrix.service-mesh-type == 'ambient'
         run: |
           # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
@@ -227,16 +226,13 @@ jobs:
           fi
 
           RISK_ARG="--risk ${{ env.RISK }}"
-          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
           EXTRA_COMPONENTS_ARG=""
 
           PSS_ARGS=""
           if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
             PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards.policy }}"
-            if [[ "${{ matrix.service-mesh-type }}" == "sidecar" ]]; then
-              PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
-            fi
+            PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
           fi
 
           TF_VARS_ARG=""
@@ -254,7 +250,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PSS_ARGS $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $AUTH_TYPE_ARG $PSS_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
         id: run-uats
@@ -276,14 +272,14 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}
           namespaces: test-kubeflow
 
       - name: Collect and upload M2M namespaces data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.auth-type }}
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
 
@@ -291,14 +287,14 @@ jobs:
         if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.auth-type }}
           namespaces: mt-tenant-global mt-tenant-override
 
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: uats-notebooks-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: uats-notebooks-${{ matrix.product }}-${{ matrix.auth-type }}
           path: |
             charmed-kubeflow-uats/artifacts/
             charmed-kubeflow-uats/uats-session.log
@@ -316,7 +312,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}
           namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status

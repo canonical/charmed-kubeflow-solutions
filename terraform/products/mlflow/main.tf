@@ -37,9 +37,8 @@ module "ambient_iam" {
   }
 
   # The offer URL is only known after apply (it comes from a juju_offer in the
-  # istio-system model), so this object is gated on the known service_mesh_type
-  # rather than on the URL value — otherwise the gateways' integration count
-  # would depend on an unknown value.
+  # istio-system model), so this object is configured with the cross-model offer
+  # URL — otherwise the gateways' integration count would depend on an unknown value.
   istio_ingress_config = {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
