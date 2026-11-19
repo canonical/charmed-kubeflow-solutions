@@ -128,13 +128,6 @@ variable "kubeflow_trainer_grafana_dashboard" {
   default     = null
 }
 
-variable "istio_pilot_grafana_dashboard" {
-  description = "Grafana dashboard endpoint from istio-sidecar istio-pilot application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
 variable "minio_grafana_dashboard" {
   description = "Grafana dashboard endpoint from minio charm"
   type        = object({ name = string, endpoint = string })
@@ -246,20 +239,6 @@ variable "kubeflow_trainer_metrics_endpoint" {
 
 variable "tensorboard_controller_metrics_endpoint" {
   description = "Metrics endpoint from tensorboard tensorboard-controller application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
-variable "istio_ingressgateway_metrics_endpoint" {
-  description = "Metrics endpoint from istio-sidecar istio-ingressgateway application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
-variable "istio_pilot_metrics_endpoint" {
-  description = "Metrics endpoint from istio-sidecar istio-pilot application"
   type        = object({ name = string, endpoint = string })
   nullable    = true
   default     = null

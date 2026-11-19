@@ -53,22 +53,6 @@ def pytest_addoption(parser):
         help="Enable to deploy also Spark",
     )
     parser.addoption(
-        "--istio-cni-bin-dir",
-        nargs="?",
-        const="",
-        default="",
-        type=str,
-        help="Directory of binaries for Istio CNI",
-    )
-    parser.addoption(
-        "--istio-cni-conf-dir",
-        nargs="?",
-        const="",
-        default="",
-        type=str,
-        help="Directory of configurations for Istio CNI",
-    )
-    parser.addoption(
         "--kubeflow-profiles-pss",
         nargs="?",
         choices=["privileged", "baseline"],
@@ -84,19 +68,6 @@ def kubeflow_profiles_pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
     kubeflow_profiles_pss = request.config.getoption("--kubeflow-profiles-pss")
     return ["-var", f"kubeflow_profiles_security_policy={kubeflow_profiles_pss}"]
-
-
-@pytest.fixture(scope="module")
-def sidecar_mode_istio_cni(request) -> list[str]:
-    """Istio's CNI configurations for the sidecar-mode Istio charms."""
-    istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
-    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
-    return [
-        "-var",
-        f"istio_cni_bin_dir={istio_cni_bin_dir}",
-        "-var",
-        f"istio_cni_conf_dir={istio_cni_conf_dir}",
-    ]
 
 
 @pytest.fixture(scope="module")
@@ -283,7 +254,6 @@ def tf_vars(
     is_mlflow_standalone,
     hostnames,
     kubeflow_profiles_pss,
-    sidecar_mode_istio_cni,
     setup_s3_integrator_global,
     github_profiles_automator_configs,
     mlflow_user_grants_across_workspaces,
@@ -319,7 +289,6 @@ def tf_vars(
         + istio_k8s_platform
         + risk
         + kubeflow_profiles_pss
-        + sidecar_mode_istio_cni
         + setup_s3_integrator_global
         + [
             "-var",

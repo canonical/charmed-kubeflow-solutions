@@ -248,21 +248,6 @@ resource "juju_integration" "kubeflow_trainer_grafana_dashboard" {
   }
 }
 
-resource "juju_integration" "istio_pilot_grafana_dashboard" {
-  count      = var.istio_pilot_grafana_dashboard != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.istio_pilot_grafana_dashboard.name
-    endpoint = var.istio_pilot_grafana_dashboard.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "grafana-dashboards-consumer"
-  }
-}
-
 resource "juju_integration" "minio_grafana_dashboard" {
   count      = var.minio_grafana_dashboard != null ? 1 : 0
   model_uuid = var.model_uuid
@@ -499,36 +484,6 @@ resource "juju_integration" "tensorboard_controller_metrics_endpoint" {
   application {
     name     = var.tensorboard_controller_metrics_endpoint.name
     endpoint = var.tensorboard_controller_metrics_endpoint.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "metrics-endpoint"
-  }
-}
-
-resource "juju_integration" "istio_ingressgateway_metrics_endpoint" {
-  count      = var.istio_ingressgateway_metrics_endpoint != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.istio_ingressgateway_metrics_endpoint.name
-    endpoint = var.istio_ingressgateway_metrics_endpoint.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "metrics-endpoint"
-  }
-}
-
-resource "juju_integration" "istio_pilot_metrics_endpoint" {
-  count      = var.istio_pilot_metrics_endpoint != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.istio_pilot_metrics_endpoint.name
-    endpoint = var.istio_pilot_metrics_endpoint.endpoint
   }
 
   application {

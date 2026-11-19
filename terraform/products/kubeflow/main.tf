@@ -163,7 +163,7 @@ resource "juju_application" "self_signed_certificates" {
 module "auth" {
   # Legacy Dex/OIDC auth: used on the ambient-dex path.
   # The ambient-iam path uses the IAM stack instead.
-  count = local.legacy_auth ? 1 : 0
+  count = local.ambient_dex ? 1 : 0
 
   depends_on = [module.ambient_dex]
 
@@ -907,10 +907,10 @@ module "observability" {
   pvcviewer_operator_logging                = module.core.requires.pvcviewer_operator_logging
 
   # Auth (ambient-dex only; the ambient-iam path uses the IAM stack)
-  dex_auth_grafana_dashboard = local.legacy_auth ? module.auth[0].provides.dex_auth_grafana_dashboard : null
-  dex_auth_metrics_endpoint  = local.legacy_auth ? module.auth[0].provides.dex_auth_metrics_endpoint : null
-  dex_auth_logging           = local.legacy_auth ? module.auth[0].requires.dex_auth_logging : null
-  oidc_gatekeeper_logging    = local.legacy_auth ? module.auth[0].requires.oidc_gatekeeper_logging : null
+  dex_auth_grafana_dashboard = local.ambient_dex ? module.auth[0].provides.dex_auth_grafana_dashboard : null
+  dex_auth_metrics_endpoint  = local.ambient_dex ? module.auth[0].provides.dex_auth_metrics_endpoint : null
+  dex_auth_logging           = local.ambient_dex ? module.auth[0].requires.dex_auth_logging : null
+  oidc_gatekeeper_logging    = local.ambient_dex ? module.auth[0].requires.oidc_gatekeeper_logging : null
 
   # KFP
   argo_controller_grafana_dashboard = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null

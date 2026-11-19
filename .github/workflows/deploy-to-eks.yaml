@@ -38,31 +38,19 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        service-mesh-type: [sidecar, ambient]
         product:
           - name: kubeflow
             uats-env: kubeflow-remote
         pod-security-standards:
           - policy: privileged
-            istio-cni-bin-dir: ""  # meaning Istio CNI disabled
-            istio-cni-conf-dir: ""  # meaning Istio CNI disabled
           - policy: baseline
-            istio-cni-bin-dir: /opt/cni/bin
-            istio-cni-conf-dir: /etc/cni/net.d
         auth-type: [dex]
         include:
           - product:
               name: kubeflow
               uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests
-          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
-          - service-mesh-type: ambient
-            product:
-              name: kubeflow
-              uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
-          - service-mesh-type: ambient
-            product:
+          - product:
               name: kubeflow
               uats-env: kubeflow-remote
             pod-security-standards:
@@ -228,20 +216,10 @@ jobs:
             git checkout '${{ env.CKF_BRANCH }}'
           fi
 
-          RISK_ARG="--risk ${{ env.RISK }}"
-          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
-
-          AUTH_TYPE_ARG=""
-          if [[ -n "${{ matrix.auth-type }}" ]]; then
-            AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
-          fi
-
-          PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards.policy }}"
-          if [[ "${{ matrix.service-mesh-type }}" == "sidecar" ]]; then
-            PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
-          fi
-
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PSS_ARGS
+          tox -c ./terraform/tests -e test-deployment -- -vv -s \
+            --risk "${{ env.RISK }}" \
+            --auth-type "${{ matrix.auth-type }}" \
+            --kubeflow-profiles-pss "${{ matrix.pod-security-standards.policy }}"
 
       - name: Run UATs
         id: run-uats
@@ -257,14 +235,14 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: user-namespace-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          name: user-namespace-pods-logs-${{ matrix.product.name }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespaces: test-kubeflow
 
       - name: Collect and upload M2M namespaces data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: m2m-namespaces-data-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          name: m2m-namespaces-data-${{ matrix.product.name }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
 
@@ -272,14 +250,14 @@ jobs:
         if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: multi-tenancy-namespaces-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          name: multi-tenancy-namespaces-logs-${{ matrix.product.name }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespaces: mt-tenant-global mt-tenant-override
 
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: uats-notebooks-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          name: uats-notebooks-${{ matrix.product.name }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           path: |
             charmed-kubeflow-uats/artifacts/
             charmed-kubeflow-uats/uats-session.log
@@ -297,7 +275,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: control-planes-pods-logs-${{ matrix.product.name }}-${{ matrix.service-mesh-type }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
+          name: control-planes-pods-logs-${{ matrix.product.name }}-${{ matrix.pod-security-standards.policy }}-${{ matrix.auth-type }}
           namespaces: kubeflow istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status

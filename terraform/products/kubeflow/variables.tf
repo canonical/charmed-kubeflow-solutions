@@ -392,30 +392,6 @@ variable "auth_type" {
   }
 }
 
-variable "istio_pilot_revision" {
-  description = "Revision of the istio-pilot application"
-  type        = number
-  default     = null
-}
-
-variable "istio_pilot_config" {
-  description = "Configuration for istio-pilot application"
-  type        = map(string)
-  default     = { default-gateway = "kubeflow-gateway" }
-}
-
-variable "istio_ingressgateway_revision" {
-  description = "Revision of the istio-ingressgateway application"
-  type        = number
-  default     = null
-}
-
-variable "istio_ingressgateway_config" {
-  description = "Configuration for istio-ingressgateway application"
-  type        = map(string)
-  default     = { kind = "ingress" }
-}
-
 # Ambient Component Applications
 
 variable "istio_k8s_revision" {
@@ -1049,18 +1025,6 @@ variable "https_proxy" {
 
 variable "no_proxy" {
   description = "Value of the no_proxy environment variable"
-  type        = string
-  default     = ""
-}
-
-variable "istio_cni_bin_dir" {
-  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
-  type        = string
-  default     = ""
-}
-
-variable "istio_cni_conf_dir" {
-  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
   type        = string
   default     = ""
 }

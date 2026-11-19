@@ -185,20 +185,20 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
 | <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.1.1 |
 
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [juju_application.opentelemetry_collector_k8s](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.admission_webhook_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.argo_controller_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -210,9 +210,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | [juju_integration.envoy_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.istio_ingressgateway_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.istio_pilot_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.istio_pilot_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.jupyter_controller_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.jupyter_controller_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.jupyter_controller_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -274,7 +271,7 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_admission_webhook_logging"></a> [admission\_webhook\_logging](#input\_admission\_webhook\_logging) | Logging endpoint from core admission-webhook application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_argo_controller_grafana_dashboard"></a> [argo\_controller\_grafana\_dashboard](#input\_argo\_controller\_grafana\_dashboard) | Grafana dashboard endpoint from kfp argo-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_argo_controller_logging"></a> [argo\_controller\_logging](#input\_argo\_controller\_logging) | Logging endpoint from kfp argo-controller application | `object({ name = string, endpoint = string })` | `null` | no |
@@ -286,9 +283,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | <a name="input_envoy_grafana_dashboard"></a> [envoy\_grafana\_dashboard](#input\_envoy\_grafana\_dashboard) | Grafana dashboard endpoint from kfp envoy application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_envoy_logging"></a> [envoy\_logging](#input\_envoy\_logging) | Logging endpoint from kfp envoy application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_envoy_metrics_endpoint"></a> [envoy\_metrics\_endpoint](#input\_envoy\_metrics\_endpoint) | Metrics endpoint from kfp envoy application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_istio_ingressgateway_metrics_endpoint"></a> [istio\_ingressgateway\_metrics\_endpoint](#input\_istio\_ingressgateway\_metrics\_endpoint) | Metrics endpoint from istio-sidecar istio-ingressgateway application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_istio_pilot_grafana_dashboard"></a> [istio\_pilot\_grafana\_dashboard](#input\_istio\_pilot\_grafana\_dashboard) | Grafana dashboard endpoint from istio-sidecar istio-pilot application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_istio_pilot_metrics_endpoint"></a> [istio\_pilot\_metrics\_endpoint](#input\_istio\_pilot\_metrics\_endpoint) | Metrics endpoint from istio-sidecar istio-pilot application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_jupyter_controller_grafana_dashboard"></a> [jupyter\_controller\_grafana\_dashboard](#input\_jupyter\_controller\_grafana\_dashboard) | Grafana dashboard endpoint from notebooks jupyter-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_jupyter_controller_logging"></a> [jupyter\_controller\_logging](#input\_jupyter\_controller\_logging) | Logging endpoint from notebooks jupyter-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_jupyter_controller_metrics_endpoint"></a> [jupyter\_controller\_metrics\_endpoint](#input\_jupyter\_controller\_metrics\_endpoint) | Metrics endpoint from notebooks jupyter-controller application | `object({ name = string, endpoint = string })` | `null` | no |
@@ -349,7 +343,7 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_components"></a> [components](#output\_components) | Map of the deployed observability component applications |
 | <a name="output_provides"></a> [provides](#output\_provides) | Map of endpoints provided by this component to other components (outbound relations) |
 <!-- END_TF_DOCS -->
