@@ -7,8 +7,10 @@
 # in an LXD container). Run it as the user that will run Juju and Terraform, not as root. It
 # skips the steps already done, so it can be re-run after a failure.
 #
-# It does not use concierge, unlike the CI: concierge cannot set the Cilium tunnel port in
-# k8s-bootstrap.yaml, without which the cluster never becomes ready on PS7.
+# It does not use Concierge, unlike the CI: Concierge does not have an option to set the Cilium
+# tunnel port directly, without which the cluster never becomes ready on PS7 because the port
+# Cilium uses for its tunnel is already taken by Juju's overlay network, so bootstrapping Canonical
+# K8s directly is necessary.
 
 set -euo pipefail
 trap 'echo "ERROR: line $LINENO: $BASH_COMMAND" >&2' ERR
