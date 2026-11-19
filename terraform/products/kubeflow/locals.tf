@@ -88,12 +88,6 @@ locals {
     "istio-gateway-service-account" = local.ambient_iam ? "istio-ingress-k8s-ui-istio" : "istio-ingress-k8s-istio"
   }
 
-  istio_pilot_config = merge(
-    var.istio_pilot_config,
-    var.istio_cni_bin_dir != "" ? { "cni-bin-dir" = var.istio_cni_bin_dir } : {},
-    var.istio_cni_conf_dir != "" ? { "cni-conf-dir" = var.istio_cni_conf_dir } : {}
-  )
-
   argo_controller_config = merge(
     var.argo_controller_config,
     { "bucket" = var.s3_bucket_global }

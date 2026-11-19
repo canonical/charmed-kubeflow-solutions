@@ -172,9 +172,9 @@ resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
   }
 }
 
-# minio service-mesh integration (any ambient mode)
+# minio service-mesh integration
 resource "juju_integration" "minio_service_mesh" {
-  count      = (local.deploy_minio && local.ambient) ? 1 : 0
+  count      = local.deploy_minio ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -223,10 +223,9 @@ resource "juju_integration" "kserve_controller_s3_credentials" {
   }
 }
 
-# resource-dispatcher service-mesh integration (ambient only)
-# resource-dispatcher service-mesh integration (any ambient mode)
+# resource-dispatcher service-mesh integration
 resource "juju_integration" "resource_dispatcher_service_mesh" {
-  count      = ((var.enable_mlflow || var.enable_feast) && local.ambient) ? 1 : 0
+  count      = (var.enable_mlflow || var.enable_feast) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
