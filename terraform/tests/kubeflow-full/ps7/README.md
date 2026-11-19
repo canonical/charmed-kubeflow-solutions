@@ -8,21 +8,49 @@ configured to use it.
 
 | File | Purpose |
 | ---- | ------- |
-| [`model-config.yaml`](model-config.yaml) | Juju model configuration for the VM: proxy settings and a minimal cloud-init. |
 | [`setup-cluster.sh`](setup-cluster.sh) | Sets up Canonical K8s, a Juju controller and MicroCeph on the VM. |
 | [`k8s-bootstrap.yaml`](k8s-bootstrap.yaml) | Canonical K8s bootstrap configuration, used by `setup-cluster.sh`. |
 | [`configure-dns.sh`](configure-dns.sh) | Makes the external hostnames resolve inside the cluster after the deployment. |
 
 ## 1. Create the VM
 
-From where you run Juju for your PS7 model, apply `model-config.yaml`, which affects every
-machine created afterwards in the model, then create the VM:
+From where you run Juju for your PS7 model, write the model configuration, with the proxy
+settings and a minimal cloud-init, and apply it, which affects every machine created
+afterwards in the model. Then create the VM:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/canonical/charmed-kubeflow-solutions/main/terraform/tests/kubeflow-full/ps7/model-config.yaml
+cat > model-config.yaml << 'EOF'
+http-proxy: 'http://egress.ps7.internal:3128'
+https-proxy: 'http://egress.ps7.internal:3128'
+no-proxy: '127.0.0.1,localhost,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+# Juju refuses the legacy proxy settings above together with the juju-* ones
+juju-http-proxy: ''
+juju-https-proxy: ''
+cloudinit-userdata: |
+  package_upgrade: true
+  package_reboot_if_required: true
+  write_files:
+  - path: /etc/environment
+    # Unlike on PS6, .canonical.com, .launchpad.net and .internal must go through the proxy
+    content: |
+      http_proxy='http://egress.ps7.internal:3128'
+      https_proxy='http://egress.ps7.internal:3128'
+      no_proxy='127.0.0.1,localhost,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local'
+      HTTP_PROXY='http://egress.ps7.internal:3128'
+      HTTPS_PROXY='http://egress.ps7.internal:3128'
+      NO_PROXY='127.0.0.1,localhost,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local'
+    append: true
+  snap:
+    commands:
+      - snap wait system seed.loaded
+      - snap set system proxy.http=http://egress.ps7.internal:3128 proxy.https=http://egress.ps7.internal:3128
+EOF
 juju model-config --file model-config.yaml
 juju deploy --base ubuntu@24.04 --constraints "cores=8 mem=32G root-disk=150G" ubuntu kubeflow-full
 ```
+
+The configuration is inline because the PS7 proxy refuses connections to
+`raw.githubusercontent.com`.
 
 The disk needs about 150 GB: besides the OS and the container images, the local storage of
 Canonical K8s needs free space for the full size of every volume, about 80 GiB in total.
