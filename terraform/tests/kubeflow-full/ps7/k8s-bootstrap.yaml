@@ -1,0 +1,23 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+#
+# Canonical K8s bootstrap configuration used by setup-cluster.sh, with the same features as
+# the CI. With a configuration file, k8s bootstrap enables only the features listed in it.
+
+cluster-config:
+  annotations:
+    # PS7 machines run Juju's Fan overlay (ftun0) on Cilium's default VXLAN port, 8472
+    k8sd/v1alpha1/cilium/tunnel-port: "8473"
+  network:
+    enabled: true
+  dns:
+    enabled: true
+  gateway:
+    enabled: true
+  local-storage:
+    enabled: true
+  load-balancer:
+    enabled: true
+    l2-mode: true
+    # At least 4 IPs: the two Kubeflow gateways and the Traefik ingresses of iam-core and cos
+    cidrs: [10.64.140.43/29]
