@@ -159,7 +159,8 @@ runcmd:
 EOF
 fi
 [[ $(sudo lxc list ceph -c s -f csv) == RUNNING ]] || sudo lxc start ceph
-timeout 300 bash -c 'until sudo lxc exec ceph -- id -u ubuntu >/dev/null 2>&1; do sleep 1; done'
+# timeout runs this loop in the background, where lxc exec would hang reading the terminal
+timeout 300 bash -c 'until sudo lxc exec ceph -- id -u ubuntu </dev/null >/dev/null 2>&1; do sleep 1; done'
 sudo lxc exec ceph -- cloud-init status --wait >/dev/null || true
 ceph_ip=$(sudo lxc list ceph -c 4 -f csv | cut -d' ' -f1)
 timeout 600 bash -c "until curl -s -o /dev/null --noproxy '*' http://$ceph_ip; do sleep 5; done"
