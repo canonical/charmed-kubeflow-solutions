@@ -177,10 +177,6 @@ Watch the models until all their units are active, which can take a while:
 juju status -m kubeflow --watch 5s  # likewise for cos, iam, iam-core and istio-system
 ```
 
-If `configure-dns.sh` reports that a Service does not exist, check the application behind it
-as the message suggests. For example, the two gateways only get their Services once
-`istio-k8s` is active in the `istio-system` model.
-
 If oauth2-proxy is still not active a few minutes after `configure-dns.sh`, restart it with
 `kubectl -n kubeflow delete pod oauth2-proxy-0`. If the VM restarts, check that CoreDNS
 still has the hosts block with `kubectl -n kube-system get configmap ck-dns-coredns -o yaml`,
