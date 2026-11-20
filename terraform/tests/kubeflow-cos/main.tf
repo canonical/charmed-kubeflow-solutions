@@ -21,7 +21,6 @@ module "kubeflow" {
   risk               = var.risk
   create_model       = var.create_model
   model_uuid         = var.model_uuid
-  service_mesh_type  = var.service_mesh_type
   auth_type          = var.auth_type
   istio_k8s_platform = var.istio_k8s_platform
 

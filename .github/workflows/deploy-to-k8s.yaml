@@ -45,54 +45,40 @@ jobs:
         # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
         pod-security-standards:
           - policy: privileged
-            istio-cni-bin-dir: ""  # meaning Istio CNI disabled when in sidecar mode
-            istio-cni-conf-dir: ""  # meaning Istio CNI disabled when in sidecar mode
+            istio-cni-bin-dir: ""
+            istio-cni-conf-dir: ""
           - policy: baseline
             istio-cni-bin-dir: /opt/cni/bin  # for Canonical K8s, default containerd path
             istio-cni-conf-dir: /etc/cni/net.d  # for Canonical K8s, default containerd path
         include:
           - product: kubeflow-standalone
             uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests
-          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
-          - product: kubeflow-standalone
-            service-mesh-type: ambient
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow-feast
             uats-env: feast-remote
-          - product: kubeflow-feast
-            service-mesh-type: ambient
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
-          # Integrated Kubeflow + single-tenant MLflow 2 (dex), both meshes — like main.
+          # Integrated Kubeflow + single-tenant MLflow 2 (dex), ambient mesh.
           - product: kubeflow-mlflow
             uats-env: mlflow-remote
-          - product: kubeflow-mlflow
-            service-mesh-type: ambient
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
           - product: kubeflow-standalone
-            service-mesh-type: ambient
             auth-type: iam
             pod-security-standards:
               policy: privileged
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: kubeflow-standalone
-            service-mesh-type: ambient
             auth-type: iam
             pod-security-standards:
               policy: baseline
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
-            service-mesh-type: ambient
             auth-type: iam
             # `pod-security-standards` would be ignored by MLflow standalone as they only affect Kubeflow's Profile controller 
             uats-env: mlflow-remote
             # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
-        exclude:
-          - product: kubeflow-spark
-            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository

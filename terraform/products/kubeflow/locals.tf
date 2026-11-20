@@ -29,9 +29,6 @@ locals {
   minio_channel         = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
   s3_integrator_channel = "2/edge"
 
-  # Istio Component (sidecar)
-  istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
-
   # Istio Component (ambient gateways + beacon)
   # NOTE: the ambient IAM architecture needs the istio-ingress-route,
   # gateway-metadata and istio-request-auth endpoints, which are currently only
@@ -86,12 +83,9 @@ locals {
   training_operator_channel = var.release == "1.11" ? "1.9/${var.risk}" : "latest/${var.risk}"
   kubeflow_trainer_channel  = var.release == "1.11" ? "2.1/edge" : "latest/${var.risk}"
 
-  kubeflow_profiles_service_mesh_config = local.ambient ? {
+  kubeflow_profiles_service_mesh_config = {
     "service-mesh-mode"             = "istio-ambient"
     "istio-gateway-service-account" = local.ambient_iam ? "istio-ingress-k8s-ui-istio" : "istio-ingress-k8s-istio"
-    } : {
-    "service-mesh-mode"             = "istio-sidecar"
-    "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
   }
 
   istio_pilot_config = merge(
@@ -140,22 +134,15 @@ locals {
   )
 
   # ------------------------------------------------------------------
-  # Service-mesh + auth mode helpers and gateway/mesh selectors, derived from
-  # the two inputs var.service_mesh_type ('sidecar' | 'ambient') and
-  # var.auth_type ('dex' | 'iam'). Supported combinations:
-  #   sidecar + dex : istio-pilot + istio-ingressgateway; Dex/OIDC auth.
+  # Ambient service mesh + auth type configuration
+  # Supported combinations:
   #   ambient + dex : single gateway + beacon + istio-k8s in-model (component
   #                   istio-ambient-dex); Dex/OIDC auth.
   #   ambient + iam : two gateways (UI/M2M) + beacon (component istio-ambient);
   #                   istio-k8s in istio-system; IAM auth stack.
-  # (sidecar + iam is rejected by variable validation.)
-  # For ambient_dex the UI and M2M selectors both resolve to the single gateway.
   # ------------------------------------------------------------------
-  sidecar     = var.service_mesh_type == "sidecar"
-  ambient     = var.service_mesh_type == "ambient"
-  ambient_iam = local.ambient && var.auth_type == "iam"
-  ambient_dex = local.ambient && var.auth_type == "dex"
-  legacy_auth = var.auth_type == "dex"
+  ambient_iam = var.auth_type == "iam"
+  ambient_dex = var.auth_type == "dex"
 
   ui_istio_ingress_route = local.ambient_iam ? {
     kind     = "endpoint"
