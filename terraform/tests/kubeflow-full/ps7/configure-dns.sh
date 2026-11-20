@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+#
+# Makes the external hostnames of kubeflow-full resolve to the IPs of their load balancers,
+# as the CI does: inside the cluster, through a hosts block in CoreDNS, which workloads such
+# as oauth2-proxy and istiod need to reach the Identity Platform, and on this machine, through
+# /etc/hosts. Run it after terraform apply (see README.md); re-running it replaces the entries
+# of the previous run.
+
+set -euo pipefail
+trap 'echo "ERROR: line $LINENO: $BASH_COMMAND" >&2' ERR
+
+# The values of the external_*_hostname Terraform variables
+UI_HOSTNAME=${UI_HOSTNAME:-ui.kubeflow.com}
+M2M_HOSTNAME=${M2M_HOSTNAME:-api.kubeflow.com}
+AUTH_HOSTNAME=${AUTH_HOSTNAME:-auth.kubeflow.com}
+
+kubectl() { sudo k8s kubectl "$@"; }
+
+# Prints the IP of a LoadBalancer Service, waiting up to 15 minutes for it to get one
+lb_ip() {
+  local ip
+  echo "Waiting for the load balancer IP of Service $2 in namespace $1..." >&2
+  for _ in $(seq 90); do
+    ip=$(kubectl -n "$1" get service "$2" -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+    if [[ -n $ip ]]; then
+      echo "$ip"
+      return
+    fi
+    sleep 10
+  done
+  if kubectl -n "$1" get service "$2" >/dev/null 2>&1; then
+    echo "Service $2 in namespace $1 has no load balancer IP, see 'sudo k8s kubectl -n $1 describe service $2'." >&2
+  else
+    echo "Service $2 in namespace $1 does not exist, see the status of its application with 'juju status -m $1'." >&2
+  fi
+  return 1
+}
+
+ui_ip=$(lb_ip kubeflow istio-ingress-k8s-ui-istio)
+m2m_ip=$(lb_ip kubeflow istio-ingress-k8s-m2m-istio)
+auth_ip=$(lb_ip iam-core traefik-lb)
+
+patch=$(kubectl -n kube-system get configmap ck-dns-coredns -o json | python3 -c '
+import json, re, sys
+
+marker = "    # kubeflow-full external hostnames\n"
+corefile = json.load(sys.stdin)["data"]["Corefile"]
+corefile = re.sub(re.escape(marker) + r"    hosts \{\n.*?\n    \}\n", "", corefile, flags=re.S)
+# CoreDNS accepts a single hosts block per server block
+if re.search(r"^\s*hosts\b", corefile, flags=re.M):
+    sys.exit("CoreDNS already has a hosts block: remove it from ConfigMap ck-dns-coredns, then re-run.")
+entries = "".join(f"        {ip} {host}\n" for ip, host in zip(sys.argv[1::2], sys.argv[2::2]))
+block = marker + "    hosts {\n" + entries + "        fallthrough\n    }\n"
+start = corefile.index("{\n") + 2
+print(json.dumps({"data": {"Corefile": corefile[:start] + block + corefile[start:]}}))
+' "$ui_ip" "$UI_HOSTNAME" "$m2m_ip" "$M2M_HOSTNAME" "$auth_ip" "$AUTH_HOSTNAME")
+kubectl -n kube-system patch configmap ck-dns-coredns --type merge -p "$patch"
+kubectl -n kube-system rollout restart deployment coredns
+kubectl -n kube-system rollout status deployment coredns --timeout 5m
+
+# The same entries in /etc/hosts, tagged so that re-runs replace them
+hosts_marker='# kubeflow-full external hostnames'
+sudo sed -i "/ $hosts_marker\$/d" /etc/hosts
+printf '%s %s %s\n' "$ui_ip" "$UI_HOSTNAME" "$hosts_marker" "$m2m_ip" "$M2M_HOSTNAME" "$hosts_marker" \
+  "$auth_ip" "$AUTH_HOSTNAME" "$hosts_marker" | sudo tee -a /etc/hosts >/dev/null
+
+printf '%s -> %s\n' "$UI_HOSTNAME" "$ui_ip" "$M2M_HOSTNAME" "$m2m_ip" "$AUTH_HOSTNAME" "$auth_ip"
