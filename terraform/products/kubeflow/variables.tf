@@ -381,30 +381,14 @@ variable "minio_storage_size" {
 
 # Istio Component Applications
 
-variable "service_mesh_type" {
-  description = "Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh)."
-  type        = string
-  default     = "ambient"
-
-  validation {
-    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
-  }
-}
-
 variable "auth_type" {
-  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
+  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform)."
   type        = string
   default     = "dex"
 
   validation {
     condition     = contains(["dex", "iam"], var.auth_type)
     error_message = "Valid values for auth_type are (dex, iam)."
-  }
-
-  validation {
-    condition     = !(var.auth_type == "iam" && var.service_mesh_type != "ambient")
-    error_message = "auth_type = 'iam' requires service_mesh_type = 'ambient'."
   }
 }
 
@@ -491,8 +475,7 @@ variable "istio_ingress_k8s_m2m_config" {
 variable "istio_ingress_config_offer_url" {
   description = <<-EOT
     Cross-model offer URL of istio-k8s:istio-ingress-config from the
-    istio-system model. The UI ambient gateway consumes this offer. Required when
-    service_mesh_type is 'ambient'.
+    istio-system model. The UI ambient gateway consumes this offer. Required for ambient IAM deployment.
   EOT
   type        = string
   default     = null
@@ -524,8 +507,7 @@ variable "self_signed_certificates_config" {
 variable "oauth_offer_url" {
   description = <<-EOT
     Cross-model offer URL of hydra:oauth from the iam model. Consumed by
-    oauth2-proxy and request-authentication-configurator. Required when
-    service_mesh_type is 'ambient'.
+    oauth2-proxy and request-authentication-configurator. Required for IAM authentication.
   EOT
   type        = string
   default     = null
@@ -535,8 +517,7 @@ variable "send_ca_cert_offer_url" {
   description = <<-EOT
     Cross-model offer URL of self-signed-certificates:send-ca-cert from the
     iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the
-    self-signed CA fronting the Identity Platform. Required when
-    service_mesh_type is 'ambient'.
+    self-signed CA fronting the Identity Platform. Required for IAM authentication.
   EOT
   type        = string
   default     = null
@@ -797,11 +778,6 @@ variable "kserve_controller_config" {
   description = "Configuration for kserve-controller application"
   type        = map(string)
   default     = {}
-
-  validation {
-    condition     = !(var.service_mesh_type != "sidecar" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
-    error_message = "deployment-mode cannot be set to 'knative' unless service_mesh_type is 'sidecar'."
-  }
 }
 
 variable "knative_operator_revision" {
