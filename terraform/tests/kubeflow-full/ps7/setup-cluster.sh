@@ -64,6 +64,13 @@ sudo systemctl daemon-reload
 
 step "Bootstrapping Canonical K8s"
 if [[ $(sudo k8s status 2>&1 || true) == *"not part of a Kubernetes cluster"* ]]; then
+  # Rejected credentials would make every image pull from Docker Hub fail, but only later on
+  if [[ -n ${DOCKERHUB_USERNAME:-} && -n ${DOCKERHUB_TOKEN:-} ]] &&
+    ! curl -fsS -o /dev/null --proxy "$PROXY" -K - 'https://auth.docker.io/token?service=registry.docker.io' \
+      <<< "user = \"$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN\""; then
+    echo "Docker Hub rejected DOCKERHUB_USERNAME and DOCKERHUB_TOKEN: set them again, then re-run." >&2
+    exit 1
+  fi
   {
     cat "$HERE/k8s-bootstrap.yaml"
     if [[ -n ${DOCKERHUB_USERNAME:-} && -n ${DOCKERHUB_TOKEN:-} ]]; then
