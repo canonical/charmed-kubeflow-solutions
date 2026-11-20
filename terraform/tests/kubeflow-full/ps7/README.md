@@ -183,7 +183,7 @@ To eventually confirm they're all active:
 for model in istio-system iam-core iam cos kubeflow
 do
     juju status -m $model
-    printf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 done
 ```
 
