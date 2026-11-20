@@ -17,9 +17,10 @@ AUTH_HOSTNAME=${AUTH_HOSTNAME:-auth.kubeflow.com}
 
 kubectl() { sudo k8s kubectl "$@"; }
 
-# Prints the IP of a LoadBalancer Service, waiting for it to get one
+# Prints the IP of a LoadBalancer Service, waiting up to 15 minutes for it to get one
 lb_ip() {
   local ip
+  echo "Waiting for the load balancer IP of Service $2 in namespace $1..." >&2
   for _ in $(seq 90); do
     ip=$(kubectl -n "$1" get service "$2" -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
     if [[ -n $ip ]]; then
@@ -28,7 +29,11 @@ lb_ip() {
     fi
     sleep 10
   done
-  echo "Service $2 in namespace $1 has no load balancer IP." >&2
+  if kubectl -n "$1" get service "$2" >/dev/null 2>&1; then
+    echo "Service $2 in namespace $1 has no load balancer IP, see 'sudo k8s kubectl -n $1 describe service $2'." >&2
+  else
+    echo "Service $2 in namespace $1 does not exist, see the status of its application with 'juju status -m $1'." >&2
+  fi
   return 1
 }
 
