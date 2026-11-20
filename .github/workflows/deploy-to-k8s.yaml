@@ -39,8 +39,7 @@ jobs:
       max-parallel: 6
       matrix:
         product: [kubeflow-standalone, kubeflow-feast, kubeflow-mlflow]
-        # TODO: Re-enable kubeflow-spark tests with ambient
-        service-mesh-type: [ambient]
+        # TODO: Add kubeflow-spark back once Spark is validated using Ambient
         auth-type: [dex]
         # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
         pod-security-standards:
@@ -57,6 +56,10 @@ jobs:
           - product: kubeflow-mlflow
             uats-env: mlflow-remote
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          # TO BE RE-ENABLED USING LATEST SPARK
+          # - product: kubeflow-spark
+          #   uats-env: spark-remote
+          #   uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow-standalone
             auth-type: iam
             pod-security-standards:
