@@ -2,10 +2,11 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 #
-# Makes the external hostnames of kubeflow-full resolve inside the cluster to the IPs of
-# their load balancers, through a hosts block in CoreDNS, as the CI does. In-cluster
-# workloads such as oauth2-proxy and istiod need it to reach the Identity Platform. Run it
-# after terraform apply (see README.md); re-running it replaces the block.
+# Makes the external hostnames of kubeflow-full resolve to the IPs of their load balancers,
+# as the CI does: inside the cluster, through a hosts block in CoreDNS, which workloads such
+# as oauth2-proxy and istiod need to reach the Identity Platform, and on this machine, through
+# /etc/hosts. Run it after terraform apply (see README.md); re-running it replaces the entries
+# of the previous run.
 
 set -euo pipefail
 trap 'echo "ERROR: line $LINENO: $BASH_COMMAND" >&2' ERR
@@ -58,5 +59,11 @@ print(json.dumps({"data": {"Corefile": corefile[:start] + block + corefile[start
 kubectl -n kube-system patch configmap ck-dns-coredns --type merge -p "$patch"
 kubectl -n kube-system rollout restart deployment coredns
 kubectl -n kube-system rollout status deployment coredns --timeout 5m
+
+# The same entries in /etc/hosts, tagged so that re-runs replace them
+hosts_marker='# kubeflow-full external hostnames'
+sudo sed -i "/ $hosts_marker\$/d" /etc/hosts
+printf '%s %s %s\n' "$ui_ip" "$UI_HOSTNAME" "$hosts_marker" "$m2m_ip" "$M2M_HOSTNAME" "$hosts_marker" \
+  "$auth_ip" "$AUTH_HOSTNAME" "$hosts_marker" | sudo tee -a /etc/hosts >/dev/null
 
 printf '%s -> %s\n' "$UI_HOSTNAME" "$ui_ip" "$M2M_HOSTNAME" "$m2m_ip" "$AUTH_HOSTNAME" "$auth_ip"

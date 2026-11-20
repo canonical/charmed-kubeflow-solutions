@@ -10,7 +10,7 @@ configured to use it.
 | ---- | ------- |
 | [`setup-cluster.sh`](setup-cluster.sh) | Sets up Canonical K8s, a Juju controller and MicroCeph on the VM. |
 | [`k8s-bootstrap.yaml`](k8s-bootstrap.yaml) | Canonical K8s bootstrap configuration, used by `setup-cluster.sh`. |
-| [`configure-dns.sh`](configure-dns.sh) | Makes the external hostnames resolve inside the cluster after the deployment. |
+| [`configure-dns.sh`](configure-dns.sh) | Makes the external hostnames resolve inside the cluster and on the VM after the deployment. |
 
 ## 1. Create the VM
 
@@ -149,7 +149,7 @@ EOF
   `setup-cluster.sh` printed.
 - `external_*_hostname` are the hostnames of the two Kubeflow gateways and of the Identity
   Platform. They need no public DNS record: `configure-dns.sh` makes them resolve inside
-  the cluster.
+  the cluster and on the VM, through `/etc/hosts`.
 - `http_proxy`, `https_proxy` and `no_proxy` set the proxy of the models that Terraform
   creates with these settings, while the other models get it from the controller's model
   defaults. `no_proxy` must include the domain of the hostnames: otherwise, in-cluster
