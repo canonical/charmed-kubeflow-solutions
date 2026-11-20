@@ -187,6 +187,7 @@ module "mysql" {
     var.mysql_config
   )
   storage_size = var.mysql_storage_size
+  units        = var.mysql_units
 }
 
 module "katib" {
