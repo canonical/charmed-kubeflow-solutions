@@ -174,7 +174,17 @@ ps7/configure-dns.sh
 Watch the models until all their units are active, which can take a while:
 
 ```bash
-juju status -m kubeflow --watch 5s  # likewise for cos, iam, iam-core and istio-system
+juju status -m kubeflow --watch 5s  # likewise for istio-system, iam-core, iam and cos
+```
+
+To eventually confirm they're all active:
+
+```bash
+for model in istio-system iam-core iam cos kubeflow
+do
+    juju status -m $model
+    printf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+done
 ```
 
 If oauth2-proxy is still not active a few minutes after `configure-dns.sh`, restart it with
