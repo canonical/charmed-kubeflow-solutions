@@ -156,11 +156,13 @@ EOF
   workloads such as oauth2-proxy send their requests for them to the PS7 proxy, which
   refuses them.
 
-To use other hostnames, also add their domain to `NO_PROXY_LIST` before running
-`setup-cluster.sh`, and pass them to `configure-dns.sh` as `UI_HOSTNAME`, `M2M_HOSTNAME`
-and `AUTH_HOSTNAME`.
+`configure-dns.sh` maps these hostnames by default, so it needs no settings. To use other
+hostnames, also add their domain to `NO_PROXY_LIST` before running `setup-cluster.sh`, and
+pass them to `configure-dns.sh` as `UI_HOSTNAME`, `M2M_HOSTNAME` and `AUTH_HOSTNAME`.
 
-Then deploy, and map the hostnames once Terraform has created their load balancers:
+Then deploy and map the hostnames. `configure-dns.sh` first waits for the load balancers of
+the gateways and of the Identity Platform, which get their IPs a few minutes after
+`terraform apply` finishes:
 
 ```bash
 source setup.sh
@@ -174,6 +176,10 @@ Watch the models until all their units are active, which can take a while:
 ```bash
 juju status -m kubeflow --watch 5s  # likewise for cos, iam, iam-core and istio-system
 ```
+
+If `configure-dns.sh` reports that a Service does not exist, check the application behind it
+as the message suggests. For example, the two gateways only get their Services once
+`istio-k8s` is active in the `istio-system` model.
 
 If oauth2-proxy is still not active a few minutes after `configure-dns.sh`, restart it with
 `kubectl -n kubeflow delete pod oauth2-proxy-0`. If the VM restarts, check that CoreDNS
