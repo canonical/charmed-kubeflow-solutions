@@ -39,60 +39,45 @@ jobs:
       max-parallel: 6
       matrix:
         product: [kubeflow-standalone, kubeflow-feast, kubeflow-mlflow]
-        # TODO: Re-enable kubeflow-spark tests with ambient
-        service-mesh-type: [ambient]
+        # TODO: Add kubeflow-spark back once Spark is validated using Ambient
         auth-type: [dex]
         # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
         pod-security-standards:
           - policy: privileged
-            istio-cni-bin-dir: ""  # meaning Istio CNI disabled when in sidecar mode
-            istio-cni-conf-dir: ""  # meaning Istio CNI disabled when in sidecar mode
           - policy: baseline
-            istio-cni-bin-dir: /opt/cni/bin  # for Canonical K8s, default containerd path
-            istio-cni-conf-dir: /etc/cni/net.d  # for Canonical K8s, default containerd path
         include:
           - product: kubeflow-standalone
             uats-env: kubeflow-remote
-            uats-extra-args: --include-multi-tenancy-tests
-          # Keep after the kubeflow entry above so it overrides that uats-extra-args value.
-          - product: kubeflow-standalone
-            service-mesh-type: ambient
             uats-extra-args: --include-ambient-tests --include-multi-tenancy-tests
           - product: kubeflow-feast
             uats-env: feast-remote
-          - product: kubeflow-feast
-            service-mesh-type: ambient
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
-          # Integrated Kubeflow + single-tenant MLflow 2 (dex), both meshes — like main.
+          # Integrated Kubeflow + single-tenant MLflow 2 (dex), ambient mesh.
           - product: kubeflow-mlflow
             uats-env: mlflow-remote
-          - product: kubeflow-mlflow
-            service-mesh-type: ambient
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
+          # TO BE RE-ENABLED USING LATEST SPARK
+          # - product: kubeflow-spark
+          #   uats-env: spark-remote
+          #   uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow-standalone
-            service-mesh-type: ambient
             auth-type: iam
             pod-security-standards:
               policy: privileged
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: kubeflow-standalone
-            service-mesh-type: ambient
             auth-type: iam
             pod-security-standards:
               policy: baseline
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
-            service-mesh-type: ambient
             auth-type: iam
             # `pod-security-standards` would be ignored by MLflow standalone as they only affect Kubeflow's Profile controller 
             uats-env: mlflow-remote
             # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
-        exclude:
-          - product: kubeflow-spark
-            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
@@ -179,7 +164,6 @@ jobs:
           pull-extra-args: --hosts-dir /etc/containerd/hosts.d
 
       - name: Configure Cilium for Istio
-        if: matrix.service-mesh-type == 'ambient'
         run: |
           # for context, see https://docs.cilium.io/en/stable/network/servicemesh/istio/
           kubectl -n kube-system patch configmap cilium-config --type merge --patch '{"data":{"bpf-lb-sock-hostns-only":"true"}}'
@@ -241,16 +225,12 @@ jobs:
           fi
 
           RISK_ARG="--risk ${{ env.RISK }}"
-          SERVICE_MESH_TYPE_ARG="--service-mesh-type=${{ matrix.service-mesh-type }}"
           AUTH_TYPE_ARG="--auth-type=${{ matrix.auth-type }}"
           EXTRA_COMPONENTS_ARG=""
 
           PSS_ARGS=""
-          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+          if [[ -n "${{ matrix.pod-security-standards.policy }}" ]]; then
             PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards.policy }}"
-            if [[ "${{ matrix.service-mesh-type }}" == "sidecar" ]]; then
-              PSS_ARGS="$PSS_ARGS --istio-cni-bin-dir=${{ matrix.pod-security-standards.istio-cni-bin-dir }} --istio-cni-conf-dir=${{ matrix.pod-security-standards.istio-cni-conf-dir }}"
-            fi
           fi
 
           TF_VARS_ARG=""
@@ -268,7 +248,7 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-spark"
           fi
 
-          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $SERVICE_MESH_TYPE_ARG $AUTH_TYPE_ARG $PSS_ARGS $EXTRA_COMPONENTS_ARG
+          tox -c ./terraform/tests -e test-deployment -- -vv -s $RISK_ARG $AUTH_TYPE_ARG $PSS_ARGS $EXTRA_COMPONENTS_ARG
 
       - name: Run UATs
         id: run-uats
@@ -280,7 +260,7 @@ jobs:
           fi
 
           PSS_ARGS=""
-          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+          if [[ -n "${{ matrix.pod-security-standards.policy }}" ]]; then
             PSS_ARGS="--security-policy ${{ matrix.pod-security-standards.policy }}"
           fi
 
@@ -290,14 +270,14 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
           namespaces: test-kubeflow
 
       - name: Collect and upload M2M namespaces data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
 
@@ -305,14 +285,14 @@ jobs:
         if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
           namespaces: mt-tenant-global mt-tenant-override
 
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: uats-notebooks-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: uats-notebooks-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
           path: |
             charmed-kubeflow-uats/artifacts/
             charmed-kubeflow-uats/uats-session.log
@@ -322,7 +302,7 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure' && matrix.auth-type == 'iam'
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts-${{ matrix.auth-type }}
+          name: playwright-artifacts-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
           path: charmed-kubeflow-uats/playwright-artifacts/
           if-no-files-found: ignore
 
@@ -330,7 +310,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
           namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
