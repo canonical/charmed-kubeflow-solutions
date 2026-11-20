@@ -181,6 +181,7 @@
 | <a name="input_mysql_config"></a> [mysql\_config](#input\_mysql\_config) | Configuration for the mysql-db application | `map(string)` | `{}` | no |
 | <a name="input_mysql_revision"></a> [mysql\_revision](#input\_mysql\_revision) | Revision of the mysql-db application | `number` | `null` | no |
 | <a name="input_mysql_storage_size"></a> [mysql\_storage\_size](#input\_mysql\_storage\_size) | MySQL database storage size | `string` | `"10G"` | no |
+| <a name="input_mysql_units"></a> [mysql\_units](#input\_mysql\_units) | Number of units of the mysql-db application | `number` | `3` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | Value of the no\_proxy environment variable | `string` | `""` | no |
 | <a name="input_oauth2_proxy_config"></a> [oauth2\_proxy\_config](#input\_oauth2\_proxy\_config) | Configuration for the oauth2-proxy-k8s application | `map(string)` | `{}` | no |
 | <a name="input_oauth2_proxy_revision"></a> [oauth2\_proxy\_revision](#input\_oauth2\_proxy\_revision) | Revision of the oauth2-proxy-k8s application | `number` | `null` | no |

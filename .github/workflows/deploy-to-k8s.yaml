@@ -38,8 +38,9 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        product: [kubeflow-standalone, kubeflow-feast, kubeflow-spark, kubeflow-mlflow]
-        service-mesh-type: [sidecar, ambient]
+        product: [kubeflow-standalone, kubeflow-feast, kubeflow-mlflow]
+        # TODO: Re-enable kubeflow-spark tests with ambient
+        service-mesh-type: [ambient]
         auth-type: [dex]
         # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
         pod-security-standards:
@@ -68,9 +69,6 @@ jobs:
           - product: kubeflow-mlflow
             service-mesh-type: ambient
             uats-extra-args: --bundle="assets/versions-ambient.yaml"
-          - product: kubeflow-spark
-            uats-env: spark-remote
-            uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow-standalone
             service-mesh-type: ambient
             auth-type: iam

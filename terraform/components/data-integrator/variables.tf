@@ -23,8 +23,8 @@ variable "data_integrator" {
 
 variable "mlflow_server_endpoint" {
   type = object({
-    name               = string
-    endpoint           = string
+    name     = string
+    endpoint = string
   })
   default = null
 }
