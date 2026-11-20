@@ -187,7 +187,9 @@ do
 done
 ```
 
-If oauth2-proxy is still not active a few minutes after `configure-dns.sh`, restart it with
-`kubectl -n kubeflow delete pod oauth2-proxy-0`. If the VM restarts, check that CoreDNS
+If oauth2-proxy is still not active a few minutes after `configure-dns.sh`, try restarting it with
+`kubectl -n kubeflow delete pod oauth2-proxy-0`, and if that still doesn't make it active, try reintegrating it with Hydra bt running `juju remove-relation --model kubeflow oauth2-proxy:oauth oauth-offer:oauth` first and then `juju integrate --model kubeflow oauth2-proxy:oauth oauth-offer:oauth`.
+
+If the VM restarts, check that CoreDNS
 still has the hosts block with `kubectl -n kube-system get configmap ck-dns-coredns -o yaml`,
 and re-run `configure-dns.sh` otherwise.
