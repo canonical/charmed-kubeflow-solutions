@@ -16,13 +16,13 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_ambient_dex"></a> [ambient\_dex](#module\_ambient\_dex) | ../../components/istio-ambient-dex | n/a |
-| <a name="module_ambient_iam"></a> [ambient\_iam](#module\_ambient\_iam) | ../../components/istio-ambient | n/a |
 | <a name="module_auth"></a> [auth](#module\_auth) | ../../components/auth | n/a |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
+| <a name="module_dex"></a> [dex](#module\_dex) | ../../components/istio-ambient-dex | n/a |
 | <a name="module_external_integrations"></a> [external\_integrations](#module\_external\_integrations) | ../../components/data-kubeflow-integrator | n/a |
 | <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
 | <a name="module_github_profiles_automator"></a> [github\_profiles\_automator](#module\_github\_profiles\_automator) | ../../charms/github-profiles-automator | n/a |
+| <a name="module_iam"></a> [iam](#module\_iam) | ../../components/istio-ambient | n/a |
 | <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |
@@ -110,9 +110,9 @@
 | <a name="input_istio_ingress_k8s_m2m_config"></a> [istio\_ingress\_k8s\_m2m\_config](#input\_istio\_ingress\_k8s\_m2m\_config) | Extra configuration for the M2M istio-ingress-k8s gateway (merged over istio\_ingress\_k8s\_config) | `map(string)` | `{}` | no |
 | <a name="input_istio_ingress_k8s_revision"></a> [istio\_ingress\_k8s\_revision](#input\_istio\_ingress\_k8s\_revision) | Revision of the istio-ingress-k8s application | `number` | `null` | no |
 | <a name="input_istio_ingress_k8s_ui_config"></a> [istio\_ingress\_k8s\_ui\_config](#input\_istio\_ingress\_k8s\_ui\_config) | Extra configuration for the UI istio-ingress-k8s gateway (merged over istio\_ingress\_k8s\_config) | `map(string)` | `{}` | no |
-| <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control-plane charm (ambient-dex only). | `map(string)` | `{}` | no |
-| <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only). | `string` | `""` | no |
-| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there). | `number` | `null` | no |
+| <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control-plane charm used by the Dex deployment. | `map(string)` | `{}` | no |
+| <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s, merged into its config as 'platform' when non-empty (Dex deployment only). | `string` | `""` | no |
+| <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision of the istio-k8s control-plane charm used by the Dex deployment. | `number` | `null` | no |
 | <a name="input_jupyter_controller_config"></a> [jupyter\_controller\_config](#input\_jupyter\_controller\_config) | Configuration for jupyter-controller application | `map(string)` | `{}` | no |
 | <a name="input_jupyter_controller_revision"></a> [jupyter\_controller\_revision](#input\_jupyter\_controller\_revision) | Revision of the jupyter-controller application | `number` | `null` | no |
 | <a name="input_jupyter_ui_config"></a> [jupyter\_ui\_config](#input\_jupyter\_ui\_config) | Configuration for jupyter-ui application | `map(string)` | `{}` | no |

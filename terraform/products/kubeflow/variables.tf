@@ -395,19 +395,19 @@ variable "auth_type" {
 # Ambient Component Applications
 
 variable "istio_k8s_revision" {
-  description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
+  description = "Revision of the istio-k8s control-plane charm used by the Dex deployment."
   type        = number
   default     = null
 }
 
 variable "istio_k8s_config" {
-  description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
+  description = "Configuration for the istio-k8s control-plane charm used by the Dex deployment."
   type        = map(string)
   default     = {}
 }
 
 variable "istio_k8s_platform" {
-  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only)."
+  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (Dex deployment only)."
   type        = string
   default     = ""
 }

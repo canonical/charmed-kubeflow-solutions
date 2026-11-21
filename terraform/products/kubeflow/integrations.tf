@@ -6,10 +6,10 @@
 # See main.tf for the wiring of service_mesh, istio_ingress_route, and
 # istio_ingress_route_unauthenticated into module "core".
 
-# forward-auth (ambient-dex): oidc-gatekeeper (auth) -> the single ambient
-# gateway. On the ambient-iam path this is replaced by the IAM stack below.
+# forward-auth (Dex): oidc-gatekeeper (auth) -> the single gateway. On the IAM
+# path this is replaced by the IAM stack below.
 resource "juju_integration" "oidc_gatekeeper_istio_ingress_forward_auth" {
-  count      = local.ambient_dex ? 1 : 0
+  count      = local.dex ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -18,16 +18,16 @@ resource "juju_integration" "oidc_gatekeeper_istio_ingress_forward_auth" {
   }
 
   application {
-    name     = module.ambient_dex[0].requires.istio_ingress_k8s_forward_auth.name
-    endpoint = module.ambient_dex[0].requires.istio_ingress_k8s_forward_auth.endpoint
+    name     = module.dex[0].requires.istio_ingress_k8s_forward_auth.name
+    endpoint = module.dex[0].requires.istio_ingress_k8s_forward_auth.endpoint
   }
 }
 
-# forward-auth (ambient-iam): oauth2-proxy -> UI gateway (istio-ingress-k8s-ui).
+# forward-auth (IAM): oauth2-proxy -> UI gateway (istio-ingress-k8s-ui).
 # Browser sessions on the UI gateway are authenticated by oauth2-proxy, which
 # federates to Hydra (iam model) through the oauth cross-model offer.
 resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -36,8 +36,8 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
   }
 
   application {
-    name     = module.ambient_iam[0].requires.istio_ingress_k8s_ui_forward_auth.name
-    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_ui_forward_auth.endpoint
+    name     = module.iam[0].requires.istio_ingress_k8s_ui_forward_auth.name
+    endpoint = module.iam[0].requires.istio_ingress_k8s_ui_forward_auth.endpoint
   }
 }
 
@@ -45,7 +45,7 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
 # authenticator for the login flow): oauth2-proxy:ingress -> UI gateway's
 # ingress-unauthenticated.
 resource "juju_integration" "oauth2_proxy_ui_ingress" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -54,15 +54,15 @@ resource "juju_integration" "oauth2_proxy_ui_ingress" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
   }
 }
 
-# request-authentication (ambient-iam): request-authentication-configurator
+# request-authentication (IAM): request-authentication-configurator
 # installs Istio RequestAuthentication (JWT validation) on each gateway.
 resource "juju_integration" "request_auth_ui" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -71,13 +71,13 @@ resource "juju_integration" "request_auth_ui" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
   }
 }
 
 resource "juju_integration" "request_auth_m2m" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -86,14 +86,14 @@ resource "juju_integration" "request_auth_m2m" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
   }
 }
 
-# github-profiles-automator joins the in-model service mesh (ambient-iam).
+# github-profiles-automator joins the in-model service mesh on the IAM path.
 resource "juju_integration" "github_profiles_automator_service_mesh" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -102,14 +102,14 @@ resource "juju_integration" "github_profiles_automator_service_mesh" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    name     = module.iam[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
   }
 }
 
-# TLS certificates (ambient-iam): self-signed-certificates -> both gateways.
+# TLS certificates (IAM): self-signed-certificates -> both gateways.
 resource "juju_integration" "istio_ingress_ui_certificates" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -118,13 +118,13 @@ resource "juju_integration" "istio_ingress_ui_certificates" {
   }
 
   application {
-    name     = module.ambient_iam[0].requires.istio_ingress_k8s_ui_certificates.name
-    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_ui_certificates.endpoint
+    name     = module.iam[0].requires.istio_ingress_k8s_ui_certificates.name
+    endpoint = module.iam[0].requires.istio_ingress_k8s_ui_certificates.endpoint
   }
 }
 
 resource "juju_integration" "istio_ingress_m2m_certificates" {
-  count      = local.ambient_iam ? 1 : 0
+  count      = local.iam ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -133,8 +133,8 @@ resource "juju_integration" "istio_ingress_m2m_certificates" {
   }
 
   application {
-    name     = module.ambient_iam[0].requires.istio_ingress_k8s_m2m_certificates.name
-    endpoint = module.ambient_iam[0].requires.istio_ingress_k8s_m2m_certificates.endpoint
+    name     = module.iam[0].requires.istio_ingress_k8s_m2m_certificates.name
+    endpoint = module.iam[0].requires.istio_ingress_k8s_m2m_certificates.endpoint
   }
 }
 
@@ -143,7 +143,7 @@ resource "juju_integration" "istio_ingress_m2m_certificates" {
 # their component modules. The istio-ingress-route requirer endpoint has no
 # limit, so a second relation to the M2M gateway is permitted.
 resource "juju_integration" "kfp_ui_m2m_istio_ingress_route" {
-  count      = (local.ambient_iam && var.enable_kfp) ? 1 : 0
+  count      = (local.iam && var.enable_kfp) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -152,13 +152,13 @@ resource "juju_integration" "kfp_ui_m2m_istio_ingress_route" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
   }
 }
 
 resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
-  count      = (local.ambient_iam && var.enable_mlflow) ? 1 : 0
+  count      = (local.iam && var.enable_mlflow) ? 1 : 0
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
   application {
@@ -167,8 +167,8 @@ resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
   }
 
   application {
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
   }
 }
 
