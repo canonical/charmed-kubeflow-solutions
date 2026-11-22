@@ -21,10 +21,10 @@ variable "istio_k8s" {
 
 variable "istio_ingress_config" {
   description = <<-EOT
-    Optional external istio-k8s:istio-ingress-config provider consumed by the
-    first ingress gateway. Supports a same-model endpoint (kind = "endpoint")
+    Optional external istio-k8s:istio-ingress-config provider consumed by each
+    ingress gateway. Supports a same-model endpoint (kind = "endpoint")
     or a cross-model offer (kind = "offer"). When null, this component deploys
-    its own istio-k8s control plane and integrates the gateway with it.
+    its own istio-k8s control plane and integrates each gateway with it.
   EOT
   type = object({
     kind     = string
@@ -35,13 +35,17 @@ variable "istio_ingress_config" {
   default = null
 
   validation {
-    condition     = var.istio_ingress_config == null || contains(["endpoint", "offer"], var.istio_ingress_config.kind)
-    error_message = "istio_ingress_config.kind must be either \"endpoint\" or \"offer\"."
+    condition = var.istio_ingress_config == null ? true : (
+      var.istio_ingress_config.kind == "endpoint" ?
+      try(trimspace(var.istio_ingress_config.name) != "" && trimspace(var.istio_ingress_config.endpoint) != "", false) :
+      var.istio_ingress_config.kind == "offer" ? try(trimspace(var.istio_ingress_config.url) != "", false) : false
+    )
+    error_message = "istio_ingress_config must specify a non-empty name and endpoint for kind \"endpoint\", or a non-empty url for kind \"offer\"."
   }
 }
 
 variable "istio_ingress_k8s_gateways" {
-  description = "Ingress gateways to deploy, keyed by gateway role. The UI gateway is required because it consumes istio_ingress_config."
+  description = "Ingress gateways to deploy, keyed by role; each gateway consumes istio_ingress_config."
   type = map(object({
     app_name = string
     config   = optional(map(string), {})
@@ -54,12 +58,13 @@ variable "istio_ingress_k8s_gateways" {
       app_name = "istio-ingress-k8s-m2m"
     }
   }
+  nullable = false
 
   validation {
-    condition = contains(keys(var.istio_ingress_k8s_gateways), "ui") && alltrue([
-      for gateway in values(var.istio_ingress_k8s_gateways) : trimspace(gateway.app_name) != ""
+    condition = alltrue([
+      for gateway in values(var.istio_ingress_k8s_gateways) : try(trimspace(gateway.app_name) != "", false)
     ])
-    error_message = "istio_ingress_k8s_gateways must include a UI gateway with a non-empty app_name for every gateway."
+    error_message = "Each ingress gateway must have a non-empty app_name."
   }
 }
 

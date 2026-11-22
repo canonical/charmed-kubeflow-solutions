@@ -16,7 +16,7 @@ module "istio_k8s" {
 }
 
 # Deploy one ingress gateway for each configured role.
-module "istio_ingress_k8s_ui" {
+module "istio_ingress_k8s" {
   for_each = var.istio_ingress_k8s_gateways
   source   = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
 

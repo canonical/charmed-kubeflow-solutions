@@ -19,7 +19,7 @@ resource "juju_model" "kubeflow" {
 
 module "iam" {
   count  = local.iam ? 1 : 0
-  source = "../../components/istio-ambient"
+  source = "../../components/istio"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   istio_ingress_k8s_gateways = {
@@ -54,7 +54,7 @@ module "iam" {
 # the Dex/OIDC `auth` component.
 module "dex" {
   count  = local.dex ? 1 : 0
-  source = "../../components/istio-ambient"
+  source = "../../components/istio"
 
   model_uuid           = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   istio_ingress_config = null

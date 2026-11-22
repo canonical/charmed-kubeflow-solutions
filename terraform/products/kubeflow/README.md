@@ -23,11 +23,11 @@ an existing deployment.
 | ---- | ------ | ------- |
 | <a name="module_auth"></a> [auth](#module\_auth) | ../../components/auth | n/a |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
-| <a name="module_dex"></a> [dex](#module\_dex) | ../../components/istio-ambient | n/a |
+| <a name="module_dex"></a> [dex](#module\_dex) | ../../components/istio | n/a |
 | <a name="module_external_integrations"></a> [external\_integrations](#module\_external\_integrations) | ../../components/data-kubeflow-integrator | n/a |
 | <a name="module_feast"></a> [feast](#module\_feast) | ../../components/feast | n/a |
 | <a name="module_github_profiles_automator"></a> [github\_profiles\_automator](#module\_github\_profiles\_automator) | ../../charms/github-profiles-automator | n/a |
-| <a name="module_iam"></a> [iam](#module\_iam) | ../../components/istio-ambient | n/a |
+| <a name="module_iam"></a> [iam](#module\_iam) | ../../components/istio | n/a |
 | <a name="module_katib"></a> [katib](#module\_katib) | ../../components/katib | n/a |
 | <a name="module_kfp"></a> [kfp](#module\_kfp) | ../../components/kfp | n/a |
 | <a name="module_kserve"></a> [kserve](#module\_kserve) | ../../components/kserve | n/a |

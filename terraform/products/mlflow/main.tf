@@ -17,7 +17,7 @@ resource "juju_model" "mlflow" {
 # in the istio-system model (cross-model istio-ingress-config offer).
 
 module "iam" {
-  source = "../../components/istio-ambient"
+  source = "../../components/istio"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
   istio_ingress_k8s_gateways = {
