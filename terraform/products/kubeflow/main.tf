@@ -56,8 +56,13 @@ module "dex" {
   count  = local.dex ? 1 : 0
   source = "../../components/istio"
 
-  model_uuid           = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-  istio_ingress_config = null
+  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+
+  istio_ingress_config = var.istio_ingress_config_offer_url != null ? {
+    kind = "offer"
+    url  = var.istio_ingress_config_offer_url
+  } : null
+
   istio_ingress_k8s_gateways = {
     ui = {
       app_name = "istio-ingress-k8s"
@@ -66,14 +71,16 @@ module "dex" {
 
   istio_k8s = {
     channel  = local.istio_k8s_channel
+    config   = var.istio_k8s_config
     revision = var.istio_k8s_revision
-    config   = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
   }
+
   istio_ingress_k8s = {
     channel  = local.istio_ingress_k8s_channel
     revision = var.istio_ingress_k8s_revision
     config   = var.istio_ingress_k8s_config
   }
+
   istio_beacon_k8s = {
     channel  = local.istio_beacon_k8s_channel
     revision = var.istio_beacon_k8s_revision

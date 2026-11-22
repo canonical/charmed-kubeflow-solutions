@@ -17,12 +17,11 @@ module "cos" {
 module "kubeflow" {
   source = "../../products/kubeflow"
 
-  release            = var.release
-  risk               = var.risk
-  create_model       = var.create_model
-  model_uuid         = var.model_uuid
-  auth_type          = var.auth_type
-  istio_k8s_platform = var.istio_k8s_platform
+  release      = var.release
+  risk         = var.risk
+  create_model = var.create_model
+  model_uuid   = var.model_uuid
+  auth_type    = var.auth_type
 
   enable_kfp         = var.enable_kfp
   enable_katib       = var.enable_katib
