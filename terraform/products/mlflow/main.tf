@@ -20,15 +20,22 @@ module "iam" {
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
+  istio_ingress_k8s_gateways = {
+    ui = {
+      app_name = "istio-ingress-k8s-ui"
+      config   = var.istio_ingress_k8s_ui_config
+    }
+    m2m = {
+      app_name = "istio-ingress-k8s-m2m"
+      config   = var.istio_ingress_k8s_m2m_config
+    }
+  }
 
   istio_ingress_k8s = {
     channel  = local.istio_ingress_k8s_channel
     revision = var.istio_ingress_k8s_revision
     config   = var.istio_ingress_k8s_config
   }
-  istio_ingress_k8s_ui_config  = var.istio_ingress_k8s_ui_config
-  istio_ingress_k8s_m2m_config = var.istio_ingress_k8s_m2m_config
-
   istio_beacon_k8s = {
     channel  = local.istio_beacon_k8s_channel
     revision = var.istio_beacon_k8s_revision

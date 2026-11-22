@@ -136,40 +136,40 @@ locals {
 
   ui_istio_ingress_route = local.iam ? {
     kind     = "endpoint"
-    name     = module.iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
-    endpoint = module.iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s.ui.istio_ingress_route.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s.ui.istio_ingress_route.endpoint
     } : local.dex ? {
     kind     = "endpoint"
-    name     = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s.ui.istio_ingress_route.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s.ui.istio_ingress_route.endpoint
   } : null
 
   ui_gateway_metadata = local.iam ? {
     kind     = "endpoint"
-    name     = module.iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
-    endpoint = module.iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s.ui.gateway_metadata.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s.ui.gateway_metadata.endpoint
     } : local.dex ? {
     kind     = "endpoint"
-    name     = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s.ui.gateway_metadata.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s.ui.gateway_metadata.endpoint
   } : null
 
   m2m_gateway_metadata = local.iam ? {
     kind     = "endpoint"
-    name     = module.iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
-    endpoint = module.iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+    name     = module.iam[0].provides.istio_ingress_k8s.m2m.gateway_metadata.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s.m2m.gateway_metadata.endpoint
     } : local.dex ? {
     kind     = "endpoint"
-    name     = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s.ui.gateway_metadata.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s.ui.gateway_metadata.endpoint
   } : null
 
   # Unauthenticated route on the single gateway, consumed by oidc-gatekeeper on
   # the Dex path.
   istio_ingress_route_unauthenticated = local.dex ? {
     kind     = "endpoint"
-    name     = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.name
-    endpoint = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s.ui.istio_ingress_route_unauthenticated.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s.ui.istio_ingress_route_unauthenticated.endpoint
   } : null
 
   # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
