@@ -88,12 +88,6 @@ variable "auth_type" {
   }
 }
 
-variable "istio_k8s_platform" {
-  description = "Platform configuration for istio-k8s (ambient mode only)"
-  type        = string
-  default     = ""
-}
-
 # ---------------------------------------------------------------------------
 # Component Toggles
 # ---------------------------------------------------------------------------
