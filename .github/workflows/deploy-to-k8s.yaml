@@ -174,7 +174,7 @@ jobs:
       - name: Preload Images into Containerd Cache
         uses: ./.github/actions/preload-images
         with:
-          image-list: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.txt
+          images-file: ${{ github.workspace }}/charmed-kubeflow-uats/assets/test.images.yaml
           ctr-command: sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io
           pull-extra-args: --hosts-dir /etc/containerd/hosts.d
 
