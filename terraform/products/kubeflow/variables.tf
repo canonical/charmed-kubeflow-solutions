@@ -421,6 +421,12 @@ variable "mysql_storage_size" {
   default     = "10G"
 }
 
+variable "mysql_units" {
+  description = "Number of units of the mysql-db application"
+  type        = number
+  default     = 3
+}
+
 # Katib Component Applications
 
 variable "enable_katib" {
