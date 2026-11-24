@@ -41,10 +41,10 @@ jobs:
         product: [kubeflow-standalone, kubeflow-feast, kubeflow-mlflow]
         # TODO: Add kubeflow-spark back once Spark is validated using Ambient
         auth-type: [dex]
-        # keep PSS last so the cumbersome paths for baseline PSS don't clog the matrix title preview:
+        # Keep PSS last in the matrix title.
         pod-security-standards:
-          - policy: privileged
-          - policy: baseline
+          - privileged
+          - baseline
         include:
           - product: kubeflow-standalone
             uats-env: kubeflow-remote
@@ -62,14 +62,12 @@ jobs:
           #   uats-extra-args: --test-image ghcr.io/canonical/charmed-spark-jupyterlab:3.5-22.04_stable
           - product: kubeflow-standalone
             auth-type: iam
-            pod-security-standards:
-              policy: privileged
+            pod-security-standards: privileged
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: kubeflow-standalone
             auth-type: iam
-            pod-security-standards:
-              policy: baseline
+            pod-security-standards: baseline
             uats-env: kubeflow-remote
             uats-extra-args: --include-ambient-tests --include-iam-m2m-tests --include-iam-ui-tests --bundle="assets/versions-ambient-iam.yaml"
           - product: mlflow-standalone
@@ -229,8 +227,8 @@ jobs:
           EXTRA_COMPONENTS_ARG=""
 
           PSS_ARGS=""
-          if [[ -n "${{ matrix.pod-security-standards.policy }}" ]]; then
-            PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards.policy }}"
+          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+            PSS_ARGS="--kubeflow-profiles-pss ${{ matrix.pod-security-standards }}"
           fi
 
           TF_VARS_ARG=""
@@ -260,8 +258,8 @@ jobs:
           fi
 
           PSS_ARGS=""
-          if [[ -n "${{ matrix.pod-security-standards.policy }}" ]]; then
-            PSS_ARGS="--security-policy ${{ matrix.pod-security-standards.policy }}"
+          if [[ -n "${{ matrix.pod-security-standards }}" ]]; then
+            PSS_ARGS="--security-policy ${{ matrix.pod-security-standards }}"
           fi
 
           tox -e ${{ matrix.uats-env }} -- $PSS_ARGS ${{ matrix.uats-extra-args }} --keep-artifacts --log-file=uats-session.log --retry-timeout=1200
@@ -270,14 +268,14 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
+          name: user-namespace-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           namespaces: test-kubeflow
 
       - name: Collect and upload M2M namespaces data
         if: failure() && matrix.auth-type == 'iam' && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
+          name: m2m-namespaces-data-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           namespace-pattern: test-m2m
           resources: rolebindings authorizationpolicies
 
@@ -285,14 +283,14 @@ jobs:
         if: failure() && contains(matrix.uats-extra-args, '--include-multi-tenancy-tests') && steps.run-uats.outcome == 'failure'
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
+          name: multi-tenancy-namespaces-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           namespaces: mt-tenant-global mt-tenant-override
 
       - name: Upload UATs notebooks artifacts
         if: failure() && steps.run-uats.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: uats-notebooks-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
+          name: uats-notebooks-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           path: |
             charmed-kubeflow-uats/artifacts/
             charmed-kubeflow-uats/uats-session.log
@@ -302,7 +300,7 @@ jobs:
         if: failure() && steps.run-uats.outcome == 'failure' && matrix.auth-type == 'iam'
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
+          name: playwright-artifacts-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           path: charmed-kubeflow-uats/playwright-artifacts/
           if-no-files-found: ignore
 
@@ -310,7 +308,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards.policy || 'no-pss' }}
+          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
 
       - name: Get juju status
