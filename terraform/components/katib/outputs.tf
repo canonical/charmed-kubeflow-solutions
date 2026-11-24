@@ -35,10 +35,6 @@ output "requires" {
       name     = juju_application.katib_ui.name
       endpoint = "dashboard-links"
     }
-    katib_ui_ingress = {
-      name     = juju_application.katib_ui.name
-      endpoint = "ingress"
-    }
     katib_ui_istio_ingress_route = {
       name     = juju_application.katib_ui.name
       endpoint = "istio-ingress-route"

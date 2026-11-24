@@ -30,18 +30,6 @@ output "provides" {
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
-    dex_auth_ingress = {
-      name     = juju_application.dex_auth.name
-      endpoint = "ingress"
-    }
-    oidc_gatekeeper_ingress = {
-      name     = juju_application.oidc_gatekeeper.name
-      endpoint = "ingress"
-    }
-    oidc_gatekeeper_ingress_auth = {
-      name     = juju_application.oidc_gatekeeper.name
-      endpoint = "ingress-auth"
-    }
     dex_auth_service_mesh = {
       name     = juju_application.dex_auth.name
       endpoint = "service-mesh"

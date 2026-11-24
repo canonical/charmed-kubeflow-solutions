@@ -54,14 +54,6 @@ output "provides" {
 output "requires" {
   description = "Map of endpoints required by this component from other components (inbound relations)"
   value = {
-    kubeflow_dashboard_ingress = {
-      name     = juju_application.kubeflow_dashboard.name
-      endpoint = "ingress"
-    }
-    kubeflow_volumes_ingress = {
-      name     = juju_application.kubeflow_volumes.name
-      endpoint = "ingress"
-    }
     kubeflow_dashboard_service_mesh = {
       name     = juju_application.kubeflow_dashboard.name
       endpoint = "service-mesh"

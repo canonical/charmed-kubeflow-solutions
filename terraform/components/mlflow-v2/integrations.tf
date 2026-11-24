@@ -69,23 +69,6 @@ resource "juju_integration" "mlflow_server_object_storage" {
   }
 }
 
-# MLflow Server ingress integration - sidecar (istio-pilot:ingress -> mlflow-server)
-resource "juju_integration" "mlflow_server_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.mlflow_server.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
 # MLflow Server istio-ingress-route integration - ambient (istio-ingress-k8s:istio-ingress-route -> mlflow-server)
 resource "juju_integration" "mlflow_server_istio_ingress_route" {
   count      = var.istio_ingress_route != null ? 1 : 0

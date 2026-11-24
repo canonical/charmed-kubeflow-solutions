@@ -432,42 +432,6 @@ resource "juju_integration" "kfp_ui_istio_ingress_route" {
   }
 }
 
-# Sidecar ingress integration (istio-pilot:ingress -> kfp-ui)
-
-resource "juju_integration" "kfp_ui_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.kfp_ui.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
-# Sidecar ingress integration (istio-pilot:ingress -> envoy)
-
-resource "juju_integration" "envoy_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.envoy.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
 # Ambient service-mesh integration (istio-beacon-k8s:service-mesh -> envoy)
 
 resource "juju_integration" "envoy_service_mesh" {

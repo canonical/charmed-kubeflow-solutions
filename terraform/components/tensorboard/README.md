@@ -16,7 +16,6 @@ Terraform module deploying the Tensorboard component for Charmed Kubeflow.
 | `model_uuid` | UUID of the Juju model | yes |
 | `dashboard_links` | Kubeflow Dashboard links provider for tensorboards-web-app | no |
 | `ingress` | Ingress provider for tensorboards-web-app (istio sidecar) | no |
-| `gateway_info` | Gateway info provider for tensorboard-controller (istio sidecar) | no |
 | `gateway_metadata` | Gateway metadata provider for tensorboard-controller (ambient) | no |
 | `istio_ingress_route` | Istio ingress route for tensorboards-web-app (ambient) | no |
 | `service_mesh` | Service mesh provider for all Tensorboard apps (ambient) | no |
@@ -50,11 +49,9 @@ Terraform module deploying the Tensorboard component for Charmed Kubeflow.
 | ---- | ---- |
 | [juju_application.tensorboard_controller](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_application.tensorboards_web_app](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
-| [juju_integration.tensorboard_controller_gateway_info](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.tensorboard_controller_gateway_metadata](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.tensorboard_controller_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.tensorboards_web_app_dashboard_links](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.tensorboards_web_app_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.tensorboards_web_app_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.tensorboards_web_app_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
@@ -63,9 +60,7 @@ Terraform module deploying the Tensorboard component for Charmed Kubeflow.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_dashboard_links"></a> [dashboard\_links](#input\_dashboard\_links) | Kubeflow Dashboard links provider for tensorboards-web-app from kubeflow-dashboard:links (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
-| <a name="input_gateway_info"></a> [gateway\_info](#input\_gateway\_info) | Gateway info provider for tensorboard-controller from istio-pilot:gateway-info (sidecar; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_gateway_metadata"></a> [gateway\_metadata](#input\_gateway\_metadata) | Gateway metadata provider for tensorboard-controller from istio-ingress-k8s:gateway-metadata (ambient; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
-| <a name="input_ingress"></a> [ingress](#input\_ingress) | Ingress provider for tensorboards-web-app from istio-pilot:ingress (sidecar; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_istio_ingress_route"></a> [istio\_ingress\_route](#input\_istio\_ingress\_route) | Istio ingress route provider for tensorboards-web-app from istio-ingress-k8s:istio-ingress-route (ambient; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where Tensorboard is deployed | `string` | n/a | yes |
 | <a name="input_service_mesh"></a> [service\_mesh](#input\_service\_mesh) | Service mesh provider for Tensorboard applications from istio-beacon-k8s:service-mesh (ambient; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |

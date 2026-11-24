@@ -417,21 +417,6 @@ resource "juju_integration" "kserve_controller_metrics_endpoint" {
   }
 }
 
-resource "juju_integration" "knative_operator_metrics_endpoint" {
-  count      = var.knative_operator_metrics_endpoint != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_operator_metrics_endpoint.name
-    endpoint = var.knative_operator_metrics_endpoint.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "metrics-endpoint"
-  }
-}
-
 resource "juju_integration" "jupyter_controller_metrics_endpoint" {
   count      = var.jupyter_controller_metrics_endpoint != null ? 1 : 0
   model_uuid = var.model_uuid
@@ -841,21 +826,6 @@ resource "juju_integration" "kserve_controller_logging" {
   }
 }
 
-resource "juju_integration" "knative_operator_logging" {
-  count      = var.knative_operator_logging != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_operator_logging.name
-    endpoint = var.knative_operator_logging.endpoint
-  }
-
-  application {
-    name     = juju_application.opentelemetry_collector_k8s.name
-    endpoint = "receive-loki-logs"
-  }
-}
-
 resource "juju_integration" "jupyter_controller_logging" {
   count      = var.jupyter_controller_logging != null ? 1 : 0
   model_uuid = var.model_uuid
@@ -962,35 +932,5 @@ resource "juju_integration" "mlflow_server_logging" {
   application {
     name     = juju_application.opentelemetry_collector_k8s.name
     endpoint = "receive-loki-logs"
-  }
-}
-
-resource "juju_integration" "knative_serving_otel_collector" {
-  count      = var.knative_operator_otel_collector != null && var.knative_serving_otel_collector != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_operator_otel_collector.name
-    endpoint = var.knative_operator_otel_collector.endpoint
-  }
-
-  application {
-    name     = var.knative_serving_otel_collector.name
-    endpoint = var.knative_serving_otel_collector.endpoint
-  }
-}
-
-resource "juju_integration" "knative_eventing_otel_collector" {
-  count      = var.knative_operator_otel_collector != null && var.knative_eventing_otel_collector != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = var.knative_operator_otel_collector.name
-    endpoint = var.knative_operator_otel_collector.endpoint
-  }
-
-  application {
-    name     = var.knative_eventing_otel_collector.name
-    endpoint = var.knative_eventing_otel_collector.endpoint
   }
 }

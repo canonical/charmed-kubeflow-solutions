@@ -33,42 +33,6 @@ resource "juju_integration" "kubeflow_profiles_dashboard_kubeflow_profiles" {
   }
 }
 
-# External ingress integrations (istio-pilot:ingress -> core apps)
-# The same var.ingress is reused for all consumers, supporting both
-# same-model (kind="endpoint") and cross-model (kind="offer") scenarios.
-
-resource "juju_integration" "kubeflow_dashboard_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.kubeflow_dashboard.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
-resource "juju_integration" "kubeflow_volumes_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.kubeflow_volumes.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
 # Ambient service-mesh integrations (istio-beacon-k8s:service-mesh -> core apps)
 
 resource "juju_integration" "kubeflow_dashboard_service_mesh" {
@@ -200,5 +164,4 @@ resource "juju_integration" "kubeflow_volumes_istio_ingress_route" {
     offer_url = var.istio_ingress_route.kind == "offer" ? var.istio_ingress_route.url : null
   }
 }
-
 

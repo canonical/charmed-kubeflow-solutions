@@ -4,33 +4,6 @@ variable "model_uuid" {
   nullable    = false
 }
 
-variable "gateway_info" {
-  description = "Gateway info provider for kserve-controller from istio-pilot:gateway-info (sidecar; supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.gateway_info == null || contains(["endpoint", "offer"], var.gateway_info.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.gateway_info == null || var.gateway_info.kind != "endpoint" || (var.gateway_info.name != null && var.gateway_info.name != "" && var.gateway_info.endpoint != null && var.gateway_info.endpoint != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.gateway_info == null || var.gateway_info.kind != "offer" || (var.gateway_info.url != null && var.gateway_info.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
 variable "service_mesh" {
   description = "Service mesh provider for kserve-controller from istio-beacon-k8s:service-mesh (ambient; supports same-model endpoint or cross-model offer)"
   type = object({
@@ -90,51 +63,6 @@ variable "kserve_controller" {
   type = object({
     app_name    = optional(string, "kserve-controller")
     channel     = optional(string, "0.15/stable")
-    revision    = optional(number)
-    units       = optional(number, 1)
-    trust       = optional(bool, true)
-    constraints = optional(string, "arch=amd64")
-    config      = optional(map(string), {})
-    resources   = optional(map(string), {})
-  })
-  default = {}
-}
-
-variable "knative_operator" {
-  description = "Configuration for knative-operator application"
-  type = object({
-    app_name    = optional(string, "knative-operator")
-    channel     = optional(string, "1.16/stable")
-    revision    = optional(number)
-    units       = optional(number, 1)
-    trust       = optional(bool, true)
-    constraints = optional(string, "arch=amd64")
-    config      = optional(map(string), {})
-    resources   = optional(map(string), {})
-  })
-  default = {}
-}
-
-variable "knative_serving" {
-  description = "Configuration for knative-serving application"
-  type = object({
-    app_name    = optional(string, "knative-serving")
-    channel     = optional(string, "1.16/stable")
-    revision    = optional(number)
-    units       = optional(number, 1)
-    trust       = optional(bool, true)
-    constraints = optional(string, "arch=amd64")
-    config      = optional(map(string), {})
-    resources   = optional(map(string), {})
-  })
-  default = {}
-}
-
-variable "knative_eventing" {
-  description = "Configuration for knative-eventing application"
-  type = object({
-    app_name    = optional(string, "knative-eventing")
-    channel     = optional(string, "1.16/stable")
     revision    = optional(number)
     units       = optional(number, 1)
     trust       = optional(bool, true)

@@ -181,10 +181,6 @@ module "auth" {
   }
 
   # The Dex path joins the mesh and uses the single gateway's unauthenticated route.
-  ingress = null
-
-  ingress_auth = null
-
   service_mesh                        = local.dex ? local.service_mesh : null
   istio_ingress_route_unauthenticated = local.istio_ingress_route_unauthenticated
 }
@@ -227,8 +223,6 @@ module "core" {
     revision = var.pvcviewer_operator_revision
     config   = var.pvcviewer_operator_config
   }
-
-  ingress = null
 
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
@@ -286,8 +280,6 @@ module "katib" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  ingress = null
 
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
@@ -406,8 +398,6 @@ module "kfp" {
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
-  ingress = null
-
   argo_controller = {
     channel  = local.argo_controller_channel
     revision = var.argo_controller_revision
@@ -491,8 +481,6 @@ module "notebooks" {
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
 
-  ingress = null
-
   gateway_metadata    = local.ui_gateway_metadata
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
@@ -523,10 +511,6 @@ module "tensorboard" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  gateway_info = null
-
-  ingress = null
 
   gateway_metadata    = local.ui_gateway_metadata
   service_mesh        = local.service_mesh
@@ -600,8 +584,6 @@ module "mlflow" {
     endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
-  ingress = null
-
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
@@ -620,8 +602,6 @@ module "kserve" {
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
-  gateway_info = null
-
   gateway_metadata = local.m2m_gateway_metadata
   service_mesh     = local.service_mesh
 
@@ -634,27 +614,6 @@ module "kserve" {
       "https-proxy"     = var.https_proxy,
       "no-proxy"        = var.no_proxy,
     }, var.kserve_controller_config)
-  }
-
-  knative_operator = {
-    channel  = local.knative_channel
-    revision = var.knative_operator_revision
-    config   = var.knative_operator_config
-  }
-
-  knative_serving = {
-    channel  = local.knative_channel
-    revision = var.knative_serving_revision
-    config = merge({
-      "istio.gateway.namespace" = var.create_model ? juju_model.kubeflow[0].name : "kubeflow"
-      "istio.gateway.name"      = "kubeflow-gateway"
-    }, var.knative_serving_config)
-  }
-
-  knative_eventing = {
-    channel  = local.knative_channel
-    revision = var.knative_eventing_revision
-    config   = var.knative_eventing_config
   }
 }
 
@@ -749,8 +708,6 @@ module "feast" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  ingress = null
 
   istio_ingress_route = local.ui_istio_ingress_route
   service_mesh        = local.service_mesh
@@ -937,12 +894,7 @@ module "observability" {
 
   # KServe
   kserve_controller_metrics_endpoint = local.deploy_kserve ? module.kserve[0].provides.kserve_controller_metrics_endpoint : null
-  knative_operator_metrics_endpoint  = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_metrics_endpoint, null) : null
-  knative_operator_otel_collector    = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_otel_collector, null) : null
   kserve_controller_logging          = local.deploy_kserve ? module.kserve[0].requires.kserve_controller_logging : null
-  knative_operator_logging           = local.deploy_kserve ? try(module.kserve[0].requires.knative_operator_logging, null) : null
-  knative_serving_otel_collector     = local.deploy_kserve ? try(module.kserve[0].requires.knative_serving_otel_collector, null) : null
-  knative_eventing_otel_collector    = local.deploy_kserve ? try(module.kserve[0].requires.knative_eventing_otel_collector, null) : null
 
   # Notebooks
   jupyter_controller_grafana_dashboard = var.enable_notebooks ? module.notebooks[0].provides.jupyter_controller_grafana_dashboard : null

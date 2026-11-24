@@ -223,33 +223,6 @@ variable "istio_ingress_route" {
   }
 }
 
-variable "ingress" {
-  description = "Ingress provider for kfp-ui from istio-pilot:ingress (supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.ingress == null || contains(["endpoint", "offer"], var.ingress.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "endpoint" || (var.ingress.kind != null && var.ingress.kind != "" && var.ingress.name != null && var.ingress.name != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "offer" || (var.ingress.url != null && var.ingress.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
 variable "argo_controller" {
   description = "Configuration for argo-controller application"
   type = object({

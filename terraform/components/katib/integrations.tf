@@ -51,23 +51,6 @@ resource "juju_integration" "katib_ui_dashboard_links" {
   }
 }
 
-# Katib UI ingress integration - sidecar (istio-pilot:ingress -> katib-ui)
-resource "juju_integration" "katib_ui_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.katib_ui.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
 # Katib UI istio-ingress-route integration - ambient (istio-ingress-k8s:istio-ingress-route -> katib-ui)
 resource "juju_integration" "katib_ui_istio_ingress_route" {
   count      = var.istio_ingress_route != null ? 1 : 0

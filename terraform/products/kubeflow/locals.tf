@@ -64,10 +64,9 @@ locals {
   mlflow_channel = "2.22/${var.risk}"
 
   # KServe Component
-  kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
-  knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
-  deploy_kserve   = var.enable_kserve || var.enable_mlflow
-  deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
+  kserve_channel = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
+  deploy_kserve  = var.enable_kserve || var.enable_mlflow
+  deploy_mysql   = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3'). Integrated MLflow is MLflow 2,
   # which only supports minio (object-storage) and has no s3-credentials relation, so

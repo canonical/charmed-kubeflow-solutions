@@ -41,10 +41,6 @@ output "requires" {
       name     = juju_application.mlflow_server.name
       endpoint = "object-storage"
     }
-    mlflow_server_ingress = {
-      name     = juju_application.mlflow_server.name
-      endpoint = "ingress"
-    }
     mlflow_server_istio_ingress_route = {
       name     = juju_application.mlflow_server.name
       endpoint = "istio-ingress-route"
