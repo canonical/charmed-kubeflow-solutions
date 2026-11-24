@@ -60,10 +60,7 @@ module "auth" {
   dex_auth = {
     channel  = local.dex_auth_channel
     revision = var.dex_auth_revision
-    config = {
-      "static-username" : var.dex_static_username
-      "static-password" : var.dex_static_password
-    }
+    config   = var.dex_auth_config
   }
 
   oidc_gatekeeper = {
@@ -190,6 +187,7 @@ module "mysql" {
     var.mysql_config
   )
   storage_size = var.mysql_storage_size
+  units        = var.mysql_units
 }
 
 module "katib" {

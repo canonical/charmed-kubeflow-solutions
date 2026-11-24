@@ -50,17 +50,10 @@ variable "dex_auth_revision" {
   default     = null
 }
 
-variable "dex_static_username" {
-  description = "dex-auth static username value"
-  type        = string
-  default     = ""
-  sensitive   = true
-}
-
-variable "dex_static_password" {
-  description = "dex-auth static password"
-  type        = string
-  default     = ""
+variable "dex_auth_config" {
+  description = "Configuration for dex-auth application"
+  type        = map(string)
+  default     = {}
   sensitive   = true
 }
 
@@ -426,6 +419,12 @@ variable "mysql_storage_size" {
   description = "MySQL database storage size"
   type        = string
   default     = "10G"
+}
+
+variable "mysql_units" {
+  description = "Number of units of the mysql-db application"
+  type        = number
+  default     = 3
 }
 
 # Katib Component Applications
