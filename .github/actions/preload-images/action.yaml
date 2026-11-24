@@ -3,8 +3,11 @@ description: >
   Pulls a list of images into the containerd cache with per-attempt logging,
   progressive retry delays, and inline failure output.
 inputs:
-  image-list:
-    description: 'Path to the file containing the list of images to preload (one image per line).'
+  images-file:
+    description: >
+      Path to a YAML file listing the images to preload, in the format of
+      charmed-kubeflow-uats' assets/test.images.yaml (images are read from
+      `.charms.*.images[].image` and `.static[]`).
     required: true
   ctr-command:
     description: >
@@ -39,20 +42,22 @@ runs:
         read -ra CTR_CMD <<< "${{ inputs.ctr-command }}"
         read -ra PULL_EXTRA_ARGS <<< "${{ inputs.pull-extra-args }}"
 
-        IMAGE_LIST="${{ inputs.image-list }}"
+        IMAGES_FILE="${{ inputs.images-file }}"
         LOG_DIR=/tmp/image-preload-logs
         mkdir -p "$LOG_DIR"
 
-        if [ ! -f "$IMAGE_LIST" ]; then touch "$IMAGE_LIST"; fi
+        if [ ! -f "$IMAGES_FILE" ]; then
+          echo "::warning::Images file $IMAGES_FILE not found, skipping preload."
+          exit 0
+        fi
 
-        while IFS= read -r image || [ -n "$image" ]; do
-          # Trim whitespace
-          image=$(echo "$image" | xargs)
+        mapfile -t IMAGES < <(
+          yq e '((.charms // {})[] | (.images // [])[] | .image), (.static // [])[]' "$IMAGES_FILE" \
+            | grep -v -e '^null$' -e '^[[:space:]]*$' | sort -u
+        )
+        echo "Found ${#IMAGES[@]} images to preload."
 
-          # Skip empty lines or commented lines starting with #
-          if [[ -z "$image" || "$image" =~ ^# ]]; then
-            continue
-          fi
+        for image in "${IMAGES[@]}"; do
 
           echo "--------------------------------------------------"
           echo "🚀 Preloading: $image"
@@ -93,4 +98,4 @@ runs:
             echo "::error::Failed to pull $image after $MAX_RETRIES attempts."
             exit 1
           fi
-        done < "$IMAGE_LIST"
+        done
