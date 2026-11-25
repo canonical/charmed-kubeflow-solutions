@@ -16,9 +16,9 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#module\_istio\_beacon\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-beacon-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
-| <a name="module_istio_ingress_k8s_m2m"></a> [istio\_ingress\_k8s\_m2m](#module\_istio\_ingress\_k8s\_m2m) | git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
-| <a name="module_istio_ingress_k8s_ui"></a> [istio\_ingress\_k8s\_ui](#module\_istio\_ingress\_k8s\_ui) | git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
+| <a name="module_istio_beacon_k8s"></a> [istio\_beacon\_k8s](#module\_istio\_beacon\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-beacon-k8s/terraform | 63a66b199ecfc486283845cee187c2d97c90669d |
+| <a name="module_istio_ingress_k8s_m2m"></a> [istio\_ingress\_k8s\_m2m](#module\_istio\_ingress\_k8s\_m2m) | git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform | 63a66b199ecfc486283845cee187c2d97c90669d |
+| <a name="module_istio_ingress_k8s_ui"></a> [istio\_ingress\_k8s\_ui](#module\_istio\_ingress\_k8s\_ui) | git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform | 63a66b199ecfc486283845cee187c2d97c90669d |
 
 ## Resources
 

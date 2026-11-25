@@ -11,10 +11,10 @@ locals {
 
   # Istio Component (ambient gateways + beacon)
   # NOTE: the ambient IAM architecture needs the istio-ingress-route,
-  # gateway-metadata and istio-request-auth endpoints, which are currently only
-  # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
-  # them). Move these back to a stable track once those endpoints graduate.
-  istio_channel             = "dev/edge"
+  # gateway-metadata and istio-request-auth endpoints, which are published on
+  # the 1.31 track of the Istio charms (2/* and 1/* predate them). Keep in sync
+  # with istio_k8s_channel in the tests/mlflow-* root modules.
+  istio_channel             = "1.31/stable"
   istio_ingress_k8s_channel = local.istio_channel
   istio_beacon_k8s_channel  = local.istio_channel
 

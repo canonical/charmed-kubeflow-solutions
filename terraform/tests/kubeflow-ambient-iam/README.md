@@ -77,7 +77,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../products/iam | n/a |
-| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform | 7ee9a3d468dbc85ae6e1492de1ba2b83015e8870 |
+| <a name="module_istio_k8s"></a> [istio\_k8s](#module\_istio\_k8s) | git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform | 63a66b199ecfc486283845cee187c2d97c90669d |
 | <a name="module_kubeflow"></a> [kubeflow](#module\_kubeflow) | ../../products/kubeflow | n/a |
 
 ## Resources
@@ -116,7 +116,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_iam_model_uuid"></a> [iam\_model\_uuid](#input\_iam\_model\_uuid) | UUID of an existing model to deploy the Identity Platform into (required when create\_iam\_model is false). | `string` | `null` | no |
 | <a name="input_istio_ingress_k8s_m2m_config"></a> [istio\_ingress\_k8s\_m2m\_config](#input\_istio\_ingress\_k8s\_m2m\_config) | Configuration for the M2M ambient gateway (e.g. external\_hostname). | `map(string)` | `{}` | no |
 | <a name="input_istio_ingress_k8s_ui_config"></a> [istio\_ingress\_k8s\_ui\_config](#input\_istio\_ingress\_k8s\_ui\_config) | Configuration for the UI ambient gateway (e.g. external\_hostname). | `map(string)` | `{}` | no |
-| <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these). | `string` | `"dev/edge"` | no |
+| <a name="input_istio_k8s_channel"></a> [istio\_k8s\_channel](#input\_istio\_k8s\_channel) | Channel for the istio-k8s control plane charm. Must be on the 1.31 track (enforced by the pinned upstream module) and match the gateways' istio-ingress-config version. | `string` | `"1.31/stable"` | no |
 | <a name="input_istio_k8s_config"></a> [istio\_k8s\_config](#input\_istio\_k8s\_config) | Configuration for the istio-k8s control plane charm. | `map(string)` | `{}` | no |
 | <a name="input_istio_k8s_platform"></a> [istio\_k8s\_platform](#input\_istio\_k8s\_platform) | Platform value for istio-k8s (always merged into its config as 'platform', including an empty string). | `string` | `""` | no |
 | <a name="input_istio_k8s_revision"></a> [istio\_k8s\_revision](#input\_istio\_k8s\_revision) | Revision for the istio-k8s control plane charm. | `number` | `null` | no |
@@ -125,6 +125,7 @@ The legacy sidecar + Dex/OIDC path is not used here.
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
 | <a name="input_kratos_revision"></a> [kratos\_revision](#input\_kratos\_revision) | Revision for the Kratos application. | `number` | `null` | no |
 | <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for the kserve-controller application (e.g. domain-name). | `map(string)` | `{}` | no |
+| <a name="input_kubeflow_profiles_security_policy"></a> [kubeflow\_profiles\_security\_policy](#input\_kubeflow\_profiles\_security\_policy) | Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported | `string` | `"privileged"` | no |
 | <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | Offer URL for COS Loki logging. | `string` | `null` | no |
 | <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |

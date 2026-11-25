@@ -34,10 +34,10 @@ locals {
 
   # Istio Component (ambient gateways + beacon)
   # NOTE: the ambient IAM architecture needs the istio-ingress-route,
-  # gateway-metadata and istio-request-auth endpoints, which are currently only
-  # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
-  # them). Move these back to a stable track once those endpoints graduate.
-  istio_channel             = local.ambient_iam ? "dev/edge" : "2/stable"
+  # gateway-metadata and istio-request-auth endpoints, which are published on
+  # the 1.31 track of the Istio charms (2/* and 1/* predate them). Keep in sync
+  # with istio_k8s_channel in the tests/kubeflow-ambient-iam root module.
+  istio_channel             = local.ambient_iam ? "1.31/stable" : "2/stable"
   istio_ingress_k8s_channel = local.istio_channel
   istio_beacon_k8s_channel  = local.istio_channel
   istio_k8s_channel         = local.istio_channel

@@ -37,7 +37,8 @@ locals {
 }
 
 module "istio_k8s" {
-  source = "git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
+  # Pinned to the track/istio/1.31 branch, whose module accepts 1.31/* channels.
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-k8s/terraform?ref=63a66b199ecfc486283845cee187c2d97c90669d"
 
   model_uuid = local.istio_system_model_uuid
   app_name   = "istio-k8s"
