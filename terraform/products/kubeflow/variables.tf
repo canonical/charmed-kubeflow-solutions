@@ -406,12 +406,6 @@ variable "istio_k8s_config" {
   default     = {}
 }
 
-variable "istio_k8s_platform" {
-  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (Dex deployment only)."
-  type        = string
-  default     = ""
-}
-
 variable "istio_ingress_k8s_revision" {
   description = "Revision of the istio-ingress-k8s application"
   type        = number

@@ -10,13 +10,6 @@ load_dotenv()
 def pytest_addoption(parser):
     """Add CLI options to pytest."""
     parser.addoption(
-        "--istio-k8s-platform",
-        nargs="?",
-        default="",
-        type=str,
-        help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
-    )
-    parser.addoption(
         "--auth-type",
         nargs="?",
         default="dex",
@@ -68,13 +61,6 @@ def kubeflow_profiles_pss(request) -> list[str]:
     """Pod security standards enforced in Profiles' namespaces."""
     kubeflow_profiles_pss = request.config.getoption("--kubeflow-profiles-pss")
     return ["-var", f"kubeflow_profiles_security_policy={kubeflow_profiles_pss}"]
-
-
-@pytest.fixture(scope="module")
-def istio_k8s_platform(request) -> list[str]:
-    """Terraform module customization for the istio-k8s platform."""
-    platform = request.config.getoption("--istio-k8s-platform") or ""
-    return ["-var", f"istio_k8s_platform={platform}"]
 
 
 @pytest.fixture(scope="module")
@@ -247,7 +233,6 @@ def tf_vars(
     request,
     risk,
     auth_type,
-    istio_k8s_platform,
     enable_mlflow,
     enable_feast,
     enable_spark,
@@ -265,7 +250,6 @@ def tf_vars(
         # model is pre-created by the test and referenced via model_uuid.
         return (
             risk
-            + istio_k8s_platform
             + setup_s3_integrator_global
             + hostnames
             + ["-var", "create_model=false"]
@@ -286,7 +270,6 @@ def tf_vars(
         + enable_feast
         + enable_spark
         + auth_type
-        + istio_k8s_platform
         + risk
         + kubeflow_profiles_pss
         + setup_s3_integrator_global

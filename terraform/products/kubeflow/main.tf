@@ -19,18 +19,25 @@ resource "juju_model" "kubeflow" {
 
 module "iam" {
   count  = local.iam ? 1 : 0
-  source = "../../components/istio-ambient"
+  source = "../../components/istio"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
+  istio_ingress_k8s_gateways = {
+    ui = {
+      app_name = "istio-ingress-k8s-ui"
+      config   = var.istio_ingress_k8s_ui_config
+    }
+    m2m = {
+      app_name = "istio-ingress-k8s-m2m"
+      config   = var.istio_ingress_k8s_m2m_config
+    }
+  }
 
   istio_ingress_k8s = {
     channel  = local.istio_ingress_k8s_channel
     revision = var.istio_ingress_k8s_revision
     config   = var.istio_ingress_k8s_config
   }
-  istio_ingress_k8s_ui_config  = var.istio_ingress_k8s_ui_config
-  istio_ingress_k8s_m2m_config = var.istio_ingress_k8s_m2m_config
-
   istio_beacon_k8s = {
     channel  = local.istio_beacon_k8s_channel
     revision = var.istio_beacon_k8s_revision
@@ -47,20 +54,33 @@ module "iam" {
 # the Dex/OIDC `auth` component.
 module "dex" {
   count  = local.dex ? 1 : 0
-  source = "../../components/istio-ambient-dex"
+  source = "../../components/istio"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
 
+  istio_ingress_config = var.istio_ingress_config_offer_url != null ? {
+    kind = "offer"
+    url  = var.istio_ingress_config_offer_url
+  } : null
+
+  istio_ingress_k8s_gateways = {
+    ui = {
+      app_name = "istio-ingress-k8s"
+    }
+  }
+
   istio_k8s = {
     channel  = local.istio_k8s_channel
+    config   = var.istio_k8s_config
     revision = var.istio_k8s_revision
-    config   = merge(var.istio_k8s_config, { platform = var.istio_k8s_platform })
   }
+
   istio_ingress_k8s = {
     channel  = local.istio_ingress_k8s_channel
     revision = var.istio_ingress_k8s_revision
     config   = var.istio_ingress_k8s_config
   }
+
   istio_beacon_k8s = {
     channel  = local.istio_beacon_k8s_channel
     revision = var.istio_beacon_k8s_revision
@@ -133,8 +153,8 @@ module "github_profiles_automator" {
   config = merge({
     # Istio ingress gateway service-account principals (SPIFFE identities) that
     # are allowed to reach the profiles, one per ambient gateway.
-    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.iam[0].components.istio_ingress_k8s_ui.name}-istio"
-    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.iam[0].components.istio_ingress_k8s_m2m.name}-istio"
+    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.iam[0].components.istio_ingress_k8s.ui.name}-istio"
+    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.iam[0].components.istio_ingress_k8s.m2m.name}-istio"
   }, var.github_profiles_automator_config)
 }
 

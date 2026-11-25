@@ -14,8 +14,8 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
   }
 
   application {
-    name     = module.iam.requires.istio_ingress_k8s_ui_forward_auth.name
-    endpoint = module.iam.requires.istio_ingress_k8s_ui_forward_auth.endpoint
+    name     = module.iam.requires.istio_ingress_k8s.ui.forward_auth.name
+    endpoint = module.iam.requires.istio_ingress_k8s.ui.forward_auth.endpoint
   }
 }
 
@@ -32,8 +32,8 @@ resource "juju_integration" "oauth2_proxy_ui_ingress" {
   }
 
   application {
-    name     = module.iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
-    endpoint = module.iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
+    name     = module.iam.provides.istio_ingress_k8s.ui.ingress_unauthenticated.name
+    endpoint = module.iam.provides.istio_ingress_k8s.ui.ingress_unauthenticated.endpoint
   }
 }
 
@@ -49,8 +49,8 @@ resource "juju_integration" "request_auth_ui" {
   }
 
   application {
-    name     = module.iam.provides.istio_ingress_k8s_ui_istio_request_auth.name
-    endpoint = module.iam.provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
+    name     = module.iam.provides.istio_ingress_k8s.ui.istio_request_auth.name
+    endpoint = module.iam.provides.istio_ingress_k8s.ui.istio_request_auth.endpoint
   }
 }
 
@@ -64,8 +64,8 @@ resource "juju_integration" "request_auth_m2m" {
   }
 
   application {
-    name     = module.iam.provides.istio_ingress_k8s_m2m_istio_request_auth.name
-    endpoint = module.iam.provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
+    name     = module.iam.provides.istio_ingress_k8s.m2m.istio_request_auth.name
+    endpoint = module.iam.provides.istio_ingress_k8s.m2m.istio_request_auth.endpoint
   }
 }
 
@@ -80,8 +80,8 @@ resource "juju_integration" "istio_ingress_ui_certificates" {
   }
 
   application {
-    name     = module.iam.requires.istio_ingress_k8s_ui_certificates.name
-    endpoint = module.iam.requires.istio_ingress_k8s_ui_certificates.endpoint
+    name     = module.iam.requires.istio_ingress_k8s.ui.certificates.name
+    endpoint = module.iam.requires.istio_ingress_k8s.ui.certificates.endpoint
   }
 }
 
@@ -95,8 +95,8 @@ resource "juju_integration" "istio_ingress_m2m_certificates" {
   }
 
   application {
-    name     = module.iam.requires.istio_ingress_k8s_m2m_certificates.name
-    endpoint = module.iam.requires.istio_ingress_k8s_m2m_certificates.endpoint
+    name     = module.iam.requires.istio_ingress_k8s.m2m.certificates.name
+    endpoint = module.iam.requires.istio_ingress_k8s.m2m.certificates.endpoint
   }
 }
 
@@ -110,7 +110,7 @@ resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
   }
 
   application {
-    name     = module.iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.name
-    endpoint = module.iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+    name     = module.iam.provides.istio_ingress_k8s.m2m.istio_ingress_route.name
+    endpoint = module.iam.provides.istio_ingress_k8s.m2m.istio_ingress_route.endpoint
   }
 }
