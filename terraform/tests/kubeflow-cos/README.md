@@ -66,33 +66,33 @@ terraform apply
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
 | <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.1.1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_cos"></a> [cos](#module\_cos) | git::https://github.com/canonical/observability-stack//terraform/cos-lite | 04ab6c618dbbec62292a052a61cdb402d80e5974 |
 | <a name="module_kubeflow"></a> [kubeflow](#module\_kubeflow) | ../../products/kubeflow | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [juju_model.cos](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/model) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_auth_type"></a> [auth\_type](#input\_auth\_type) | Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). | `string` | `"dex"` | no |
 | <a name="input_cos_channel"></a> [cos\_channel](#input\_cos\_channel) | Channel to deploy COS Lite applications from | `string` | `"2/stable"` | no |
 | <a name="input_cos_model_name"></a> [cos\_model\_name](#input\_cos\_model\_name) | Name of the Juju model to create for COS | `string` | `"cos"` | no |

@@ -124,6 +124,7 @@ The deployment uses Istio ambient mesh with IAM authentication.
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
 | <a name="input_kratos_revision"></a> [kratos\_revision](#input\_kratos\_revision) | Revision for the Kratos application. | `number` | `null` | no |
 | <a name="input_kserve_controller_config"></a> [kserve\_controller\_config](#input\_kserve\_controller\_config) | Configuration for the kserve-controller application (e.g. domain-name). | `map(string)` | `{}` | no |
+| <a name="input_kubeflow_profiles_security_policy"></a> [kubeflow\_profiles\_security\_policy](#input\_kubeflow\_profiles\_security\_policy) | Security policy for pod security standards enforced in user workloads. Only `privileged` and `baseline` are supported | `string` | `"privileged"` | no |
 | <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | Offer URL for COS Loki logging. | `string` | `null` | no |
 | <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
 | <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |

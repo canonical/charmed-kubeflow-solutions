@@ -2,20 +2,20 @@
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
 | <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.1.1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_data_integrator_integrations"></a> [data\_integrator\_integrations](#module\_data\_integrator\_integrations) | ../../components/data-integrator | n/a |
 | <a name="module_iam"></a> [iam](#module\_iam) | ../../components/istio-ambient | n/a |
 | <a name="module_mlflow"></a> [mlflow](#module\_mlflow) | ../../components/mlflow-v3 | n/a |
@@ -27,7 +27,7 @@
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [juju_access_secret.s3_secret_access_global](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_application.self_signed_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.istio_ingress_m2m_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -43,7 +43,7 @@
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create a Juju model named mlflow for this product deployment | `bool` | `true` | no |
 | <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Value of the http\_proxy environment variable | `string` | `""` | no |
 | <a name="input_https_proxy"></a> [https\_proxy](#input\_https\_proxy) | Value of the https\_proxy environment variable | `string` | `""` | no |

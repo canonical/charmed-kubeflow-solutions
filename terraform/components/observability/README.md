@@ -181,20 +181,20 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
 | <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.1.1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [juju_application.opentelemetry_collector_k8s](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
 | [juju_integration.admission_webhook_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.argo_controller_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -263,7 +263,7 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_admission_webhook_logging"></a> [admission\_webhook\_logging](#input\_admission\_webhook\_logging) | Logging endpoint from core admission-webhook application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_argo_controller_grafana_dashboard"></a> [argo\_controller\_grafana\_dashboard](#input\_argo\_controller\_grafana\_dashboard) | Grafana dashboard endpoint from kfp argo-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_argo_controller_logging"></a> [argo\_controller\_logging](#input\_argo\_controller\_logging) | Logging endpoint from kfp argo-controller application | `object({ name = string, endpoint = string })` | `null` | no |
@@ -330,7 +330,7 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_components"></a> [components](#output\_components) | Map of the deployed observability component applications |
 | <a name="output_provides"></a> [provides](#output\_provides) | Map of endpoints provided by this component to other components (outbound relations) |
 <!-- END_TF_DOCS -->

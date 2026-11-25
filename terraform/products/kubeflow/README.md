@@ -7,20 +7,20 @@ an existing deployment.
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
 | <a name="requirement_juju"></a> [juju](#requirement\_juju) | >= 1.1.1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_juju"></a> [juju](#provider\_juju) | >= 1.1.1 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_auth"></a> [auth](#module\_auth) | ../../components/auth | n/a |
 | <a name="module_core"></a> [core](#module\_core) | ../../components/core | n/a |
 | <a name="module_dex"></a> [dex](#module\_dex) | ../../components/istio-ambient-dex | n/a |
@@ -49,7 +49,7 @@ an existing deployment.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [juju_access_secret.s3_secret_access_global](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_access_secret.s3_secret_access_spark](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/access_secret) | resource |
 | [juju_application.self_signed_certificates](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/application) | resource |
@@ -76,7 +76,7 @@ an existing deployment.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_admission_webhook_config"></a> [admission\_webhook\_config](#input\_admission\_webhook\_config) | Configuration for admission-webhook application | `map(string)` | `{}` | no |
 | <a name="input_admission_webhook_revision"></a> [admission\_webhook\_revision](#input\_admission\_webhook\_revision) | Revision of the admission-webhook application | `number` | `null` | no |
 | <a name="input_argo_controller_config"></a> [argo\_controller\_config](#input\_argo\_controller\_config) | Configuration for argo-controller application | `map(string)` | `{}` | no |

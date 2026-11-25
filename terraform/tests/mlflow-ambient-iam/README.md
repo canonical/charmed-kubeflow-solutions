@@ -94,9 +94,7 @@ The deployment uses Istio ambient mesh with IAM authentication.
 | <a name="input_create_iam_model"></a> [create\_iam\_model](#input\_create\_iam\_model) | Create the iam Juju model for the Identity Platform. | `bool` | `true` | no |
 | <a name="input_create_istio_system_model"></a> [create\_istio\_system\_model](#input\_create\_istio\_system\_model) | Create the istio-system Juju model for the Istio control plane (istio-k8s). | `bool` | `true` | no |
 | <a name="input_create_model"></a> [create\_model](#input\_create\_model) | Create the mlflow Juju model. | `bool` | `true` | no |
-| <a name="input_dashboards_offer"></a> [dashboards\_offer](#input\_dashboards\_offer) | Offer URL for COS Grafana dashboards. | `string` | `null` | no |
 | <a name="input_enable_kratos_external_idp_integrator"></a> [enable\_kratos\_external\_idp\_integrator](#input\_enable\_kratos\_external\_idp\_integrator) | Deploy the Kratos External IdP Integrator (Google / Entra / etc.). | `bool` | `false` | no |
-| <a name="input_enable_observability"></a> [enable\_observability](#input\_enable\_observability) | Enable observability wiring to an external COS deployment. | `bool` | `false` | no |
 | <a name="input_external_auth_hostname"></a> [external\_auth\_hostname](#input\_external\_auth\_hostname) | External hostname for the iam Traefik ingress. | `string` | n/a | yes |
 | <a name="input_external_m2m_hostname"></a> [external\_m2m\_hostname](#input\_external\_m2m\_hostname) | External hostname for the M2M ambient ingress gateway. | `string` | n/a | yes |
 | <a name="input_external_ui_hostname"></a> [external\_ui\_hostname](#input\_external\_ui\_hostname) | External hostname for the UI ambient ingress gateway. | `string` | n/a | yes |
@@ -113,9 +111,7 @@ The deployment uses Istio ambient mesh with IAM authentication.
 | <a name="input_istio_system_model_uuid"></a> [istio\_system\_model\_uuid](#input\_istio\_system\_model\_uuid) | UUID of an existing model to deploy istio-k8s into (required when create\_istio\_system\_model is false). | `string` | `null` | no |
 | <a name="input_kratos_external_idp_integrator"></a> [kratos\_external\_idp\_integrator](#input\_kratos\_external\_idp\_integrator) | Configuration for the Kratos External IdP Integrator (passed through to the iam product). | `any` | `{}` | no |
 | <a name="input_kratos_revision"></a> [kratos\_revision](#input\_kratos\_revision) | Revision for the Kratos application. | `number` | `null` | no |
-| <a name="input_logging_offer"></a> [logging\_offer](#input\_logging\_offer) | Offer URL for COS Loki logging. | `string` | `null` | no |
 | <a name="input_login_ui_revision"></a> [login\_ui\_revision](#input\_login\_ui\_revision) | Revision for the Identity Platform Login UI application. | `number` | `null` | no |
-| <a name="input_metrics_offer"></a> [metrics\_offer](#input\_metrics\_offer) | Offer URL for COS Prometheus remote-write. | `string` | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of an existing mlflow model (required when create\_model is false). | `string` | `null` | no |
 | <a name="input_release"></a> [release](#input\_release) | MLflow release to deploy. Use 'latest' for latest tracks or '3.15' for pinned 3.15 tracks. | `string` | `"latest"` | no |
 | <a name="input_risk"></a> [risk](#input\_risk) | Charm channel risk level to deploy (stable, candidate, beta, edge). | `string` | `"edge"` | no |
