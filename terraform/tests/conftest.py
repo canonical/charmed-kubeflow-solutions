@@ -17,14 +17,6 @@ def pytest_addoption(parser):
         help="Platform for istio-k8s (e.g., microk8s, or empty string for Canonical K8s)",
     )
     parser.addoption(
-        "--service-mesh-type",
-        nargs="?",
-        default="sidecar",
-        choices=["sidecar", "ambient"],
-        type=str,
-        help="Service mesh type (sidecar, ambient)",
-    )
-    parser.addoption(
         "--auth-type",
         nargs="?",
         default="dex",
@@ -61,22 +53,6 @@ def pytest_addoption(parser):
         help="Enable to deploy also Spark",
     )
     parser.addoption(
-        "--istio-cni-bin-dir",
-        nargs="?",
-        const="",
-        default="",
-        type=str,
-        help="Directory of binaries for Istio CNI",
-    )
-    parser.addoption(
-        "--istio-cni-conf-dir",
-        nargs="?",
-        const="",
-        default="",
-        type=str,
-        help="Directory of configurations for Istio CNI",
-    )
-    parser.addoption(
         "--kubeflow-profiles-pss",
         nargs="?",
         choices=["privileged", "baseline"],
@@ -95,30 +71,10 @@ def kubeflow_profiles_pss(request) -> list[str]:
 
 
 @pytest.fixture(scope="module")
-def sidecar_mode_istio_cni(request) -> list[str]:
-    """Istio's CNI configurations for the sidecar-mode Istio charms."""
-    istio_cni_bin_dir = request.config.getoption("--istio-cni-bin-dir") or ""
-    istio_cni_conf_dir = request.config.getoption("--istio-cni-conf-dir") or ""
-    return [
-        "-var",
-        f"istio_cni_bin_dir={istio_cni_bin_dir}",
-        "-var",
-        f"istio_cni_conf_dir={istio_cni_conf_dir}",
-    ]
-
-
-@pytest.fixture(scope="module")
 def istio_k8s_platform(request) -> list[str]:
     """Terraform module customization for the istio-k8s platform."""
     platform = request.config.getoption("--istio-k8s-platform") or ""
     return ["-var", f"istio_k8s_platform={platform}"]
-
-
-@pytest.fixture(scope="module")
-def service_mesh_type(request) -> list[str]:
-    """Terraform module customization for the service mesh type."""
-    mesh = request.config.getoption("--service-mesh-type")
-    return ["-var", f"service_mesh_type={mesh}"]
 
 
 @pytest.fixture(scope="module")
@@ -290,7 +246,6 @@ def hostnames(request, hostname_ui, hostname_m2m, hostname_auth) -> list[str]:
 def tf_vars(
     request,
     risk,
-    service_mesh_type,
     auth_type,
     istio_k8s_platform,
     enable_mlflow,
@@ -299,24 +254,15 @@ def tf_vars(
     is_mlflow_standalone,
     hostnames,
     kubeflow_profiles_pss,
-    sidecar_mode_istio_cni,
     setup_s3_integrator_global,
     github_profiles_automator_configs,
     mlflow_user_grants_across_workspaces,
 ) -> list[str]:
     """Overall Terraform module customization."""
     if request.config.getoption("--auth-type") == "iam":
-        # The kubeflow-ambient-iam and mlflow-ambient-iam roots always  ambient + iam and lets
+        # The kubeflow-ambient-iam and mlflow-ambient-iam roots always use ambient + iam and let
         # Terraform create the istio-system, iam and iam-core models. Only the kubeflow/mlflow
         # model is pre-created by the test and referenced via model_uuid.
-
-        # Validate that the service mesh type is ambient, as required by the IAM auth stack.
-        service_mesh = request.config.getoption("--service-mesh-type")
-        if service_mesh != "ambient":
-            raise ValueError(
-                "--auth-type=iam requires --service-mesh-type=ambient; "
-                f"got {service_mesh!r}"
-            )
         return (
             risk
             + istio_k8s_platform
@@ -339,12 +285,10 @@ def tf_vars(
         enable_mlflow
         + enable_feast
         + enable_spark
-        + service_mesh_type
         + auth_type
         + istio_k8s_platform
         + risk
         + kubeflow_profiles_pss
-        + sidecar_mode_istio_cni
         + setup_s3_integrator_global
         + [
             "-var",

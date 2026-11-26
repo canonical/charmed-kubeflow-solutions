@@ -21,7 +21,6 @@ This Terraform module deploys the [Feast](https://feast.dev/) feature store comp
 | `secrets` | `secrets` | `resource-dispatcher:secrets` |
 | `pod_defaults` | `pod-defaults` | `resource-dispatcher:pod-defaults` |
 | `dashboard_links` | `dashboard-links` | `kubeflow-dashboard:links` |
-| `ingress` | `ingress` | `istio-pilot:ingress` (sidecar) |
 | `istio_ingress_route` | `istio-ingress-route` | `istio-ingress-k8s:istio-ingress-route` (ambient) |
 | `service_mesh` | `service-mesh` | `istio-beacon-k8s:service-mesh` (ambient) |
 
@@ -106,7 +105,6 @@ module "feast" {
 | [juju_integration.feast_integrator_secrets](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.feast_ui_dashboard_links](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.feast_ui_feast_integrator_feast_configuration](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.feast_ui_ingress](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.feast_ui_istio_ingress_route](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.feast_ui_service_mesh](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 
@@ -117,7 +115,6 @@ module "feast" {
 | <a name="input_dashboard_links"></a> [dashboard\_links](#input\_dashboard\_links) | Kubeflow Dashboard links provider for feast-ui from kubeflow-dashboard:links (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_feast_integrator"></a> [feast\_integrator](#input\_feast\_integrator) | Configuration for feast-integrator application | <pre>object({<br/>    app_name    = optional(string, "feast-integrator")<br/>    channel     = optional(string, "0.49/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
 | <a name="input_feast_ui"></a> [feast\_ui](#input\_feast\_ui) | Configuration for feast-ui application | <pre>object({<br/>    app_name    = optional(string, "feast-ui")<br/>    channel     = optional(string, "0.49/stable")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, true)<br/>    constraints = optional(string, "arch=amd64")<br/>    config      = optional(map(string), {})<br/>    resources   = optional(map(string), {})<br/>  })</pre> | `{}` | no |
-| <a name="input_ingress"></a> [ingress](#input\_ingress) | Ingress provider for feast-ui from istio-pilot:ingress (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_istio_ingress_route"></a> [istio\_ingress\_route](#input\_istio\_ingress\_route) | Istio ingress route provider for feast-ui from istio-ingress-k8s:istio-ingress-route (ambient; supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | UUID of the Juju model where Feast is deployed | `string` | n/a | yes |
 | <a name="input_offline_store"></a> [offline\_store](#input\_offline\_store) | PostgreSQL database provider for feast-integrator offline store from postgresql-k8s:database (supports same-model endpoint or cross-model offer) | <pre>object({<br/>    kind     = string<br/>    name     = optional(string, null)<br/>    endpoint = optional(string, null)<br/>    url      = optional(string, null)<br/>  })</pre> | `null` | no |

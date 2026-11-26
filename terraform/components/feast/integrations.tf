@@ -118,23 +118,6 @@ resource "juju_integration" "feast_ui_dashboard_links" {
   }
 }
 
-# Feast UI ingress integration (istio-pilot:ingress -> feast-ui)
-resource "juju_integration" "feast_ui_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.feast_ui.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
 # Feast UI istio-ingress-route integration - ambient (istio-ingress-k8s:istio-ingress-route -> feast-ui)
 resource "juju_integration" "feast_ui_istio_ingress_route" {
   count      = var.istio_ingress_route != null ? 1 : 0
@@ -168,5 +151,4 @@ resource "juju_integration" "feast_ui_service_mesh" {
     offer_url = var.service_mesh.kind == "offer" ? var.service_mesh.url : null
   }
 }
-
 

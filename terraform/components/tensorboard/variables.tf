@@ -31,60 +31,6 @@ variable "dashboard_links" {
   }
 }
 
-variable "ingress" {
-  description = "Ingress provider for tensorboards-web-app from istio-pilot:ingress (sidecar; supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.ingress == null || contains(["endpoint", "offer"], var.ingress.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "endpoint" || (var.ingress.name != null && var.ingress.name != "" && var.ingress.endpoint != null && var.ingress.endpoint != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "offer" || (var.ingress.url != null && var.ingress.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
-variable "gateway_info" {
-  description = "Gateway info provider for tensorboard-controller from istio-pilot:gateway-info (sidecar; supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.gateway_info == null || contains(["endpoint", "offer"], var.gateway_info.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.gateway_info == null || var.gateway_info.kind != "endpoint" || (var.gateway_info.name != null && var.gateway_info.name != "" && var.gateway_info.endpoint != null && var.gateway_info.endpoint != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.gateway_info == null || var.gateway_info.kind != "offer" || (var.gateway_info.url != null && var.gateway_info.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
 variable "gateway_metadata" {
   description = "Gateway metadata provider for tensorboard-controller from istio-ingress-k8s:gateway-metadata (ambient; supports same-model endpoint or cross-model offer)"
   type = object({

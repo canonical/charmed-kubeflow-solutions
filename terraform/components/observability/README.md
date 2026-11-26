@@ -63,9 +63,7 @@ module "observability" {
 
   # KServe component
   kserve_controller_metrics_endpoint = module.kserve.provides.kserve_controller_metrics_endpoint
-  knative_operator_metrics_endpoint  = lookup(module.kserve.provides, "knative_operator_metrics_endpoint", null)
   kserve_controller_logging          = module.kserve.requires.kserve_controller_logging
-  knative_operator_logging           = lookup(module.kserve.requires, "knative_operator_logging", null)
 
   # Notebooks component
   jupyter_controller_grafana_dashboard = module.notebooks.provides.jupyter_controller_grafana_dashboard
@@ -140,7 +138,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | `kfp_api_metrics_endpoint` | `module.kfp.provides` |
 | `katib_controller_metrics_endpoint` | `module.katib.provides` |
 | `kserve_controller_metrics_endpoint` | `module.kserve.provides` |
-| `knative_operator_metrics_endpoint` | `module.kserve.provides` (conditional) |
 | `jupyter_controller_metrics_endpoint` | `module.notebooks.provides` |
 | `training_operator_metrics_endpoint` | `module.training.provides` (v1) |
 | `kubeflow_trainer_metrics_endpoint` | `module.training.provides` (v2) |
@@ -175,7 +172,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | `katib_db_manager_logging` | `module.katib.requires` |
 | `katib_ui_logging` | `module.katib.requires` |
 | `kserve_controller_logging` | `module.kserve.requires` |
-| `knative_operator_logging` | `module.kserve.requires` (conditional) |
 | `jupyter_controller_logging` | `module.notebooks.requires` |
 | `jupyter_ui_logging` | `module.notebooks.requires` |
 | `tensorboard_controller_logging` | `module.tensorboard.requires` |
@@ -210,9 +206,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | [juju_integration.envoy_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.envoy_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.istio_ingressgateway_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.istio_pilot_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.istio_pilot_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.jupyter_controller_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.jupyter_controller_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.jupyter_controller_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -232,10 +225,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | [juju_integration.kfp_ui_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_viewer_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kfp_viz_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.knative_eventing_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.knative_operator_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.knative_operator_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
-| [juju_integration.knative_serving_otel_collector](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_logging](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kserve_controller_metrics_endpoint](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
 | [juju_integration.kubeflow_dashboard_grafana_dashboard](https://registry.terraform.io/providers/juju/juju/latest/docs/resources/integration) | resource |
@@ -286,9 +275,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | <a name="input_envoy_grafana_dashboard"></a> [envoy\_grafana\_dashboard](#input\_envoy\_grafana\_dashboard) | Grafana dashboard endpoint from kfp envoy application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_envoy_logging"></a> [envoy\_logging](#input\_envoy\_logging) | Logging endpoint from kfp envoy application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_envoy_metrics_endpoint"></a> [envoy\_metrics\_endpoint](#input\_envoy\_metrics\_endpoint) | Metrics endpoint from kfp envoy application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_istio_ingressgateway_metrics_endpoint"></a> [istio\_ingressgateway\_metrics\_endpoint](#input\_istio\_ingressgateway\_metrics\_endpoint) | Metrics endpoint from istio-sidecar istio-ingressgateway application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_istio_pilot_grafana_dashboard"></a> [istio\_pilot\_grafana\_dashboard](#input\_istio\_pilot\_grafana\_dashboard) | Grafana dashboard endpoint from istio-sidecar istio-pilot application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_istio_pilot_metrics_endpoint"></a> [istio\_pilot\_metrics\_endpoint](#input\_istio\_pilot\_metrics\_endpoint) | Metrics endpoint from istio-sidecar istio-pilot application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_jupyter_controller_grafana_dashboard"></a> [jupyter\_controller\_grafana\_dashboard](#input\_jupyter\_controller\_grafana\_dashboard) | Grafana dashboard endpoint from notebooks jupyter-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_jupyter_controller_logging"></a> [jupyter\_controller\_logging](#input\_jupyter\_controller\_logging) | Logging endpoint from notebooks jupyter-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_jupyter_controller_metrics_endpoint"></a> [jupyter\_controller\_metrics\_endpoint](#input\_jupyter\_controller\_metrics\_endpoint) | Metrics endpoint from notebooks jupyter-controller application | `object({ name = string, endpoint = string })` | `null` | no |
@@ -308,11 +294,6 @@ All endpoint variables follow the same `object({ name = string, endpoint = strin
 | <a name="input_kfp_ui_logging"></a> [kfp\_ui\_logging](#input\_kfp\_ui\_logging) | Logging endpoint from kfp kfp-ui application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kfp_viewer_logging"></a> [kfp\_viewer\_logging](#input\_kfp\_viewer\_logging) | Logging endpoint from kfp kfp-viewer application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kfp_viz_logging"></a> [kfp\_viz\_logging](#input\_kfp\_viz\_logging) | Logging endpoint from kfp kfp-viz application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_knative_eventing_otel_collector"></a> [knative\_eventing\_otel\_collector](#input\_knative\_eventing\_otel\_collector) | OTel collector endpoint from kserve knative-eventing application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_knative_operator_logging"></a> [knative\_operator\_logging](#input\_knative\_operator\_logging) | Logging endpoint from kserve knative-operator application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_knative_operator_metrics_endpoint"></a> [knative\_operator\_metrics\_endpoint](#input\_knative\_operator\_metrics\_endpoint) | Metrics endpoint from kserve knative-operator application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_knative_operator_otel_collector"></a> [knative\_operator\_otel\_collector](#input\_knative\_operator\_otel\_collector) | OTel collector endpoint from kserve knative-operator application | `object({ name = string, endpoint = string })` | `null` | no |
-| <a name="input_knative_serving_otel_collector"></a> [knative\_serving\_otel\_collector](#input\_knative\_serving\_otel\_collector) | OTel collector endpoint from kserve knative-serving application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kserve_controller_logging"></a> [kserve\_controller\_logging](#input\_kserve\_controller\_logging) | Logging endpoint from kserve kserve-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kserve_controller_metrics_endpoint"></a> [kserve\_controller\_metrics\_endpoint](#input\_kserve\_controller\_metrics\_endpoint) | Metrics endpoint from kserve kserve-controller application | `object({ name = string, endpoint = string })` | `null` | no |
 | <a name="input_kubeflow_dashboard_grafana_dashboard"></a> [kubeflow\_dashboard\_grafana\_dashboard](#input\_kubeflow\_dashboard\_grafana\_dashboard) | Grafana dashboard endpoint from core kubeflow-dashboard application | `object({ name = string, endpoint = string })` | `null` | no |

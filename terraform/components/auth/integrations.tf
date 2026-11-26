@@ -33,58 +33,6 @@ resource "juju_integration" "dex_auth_oidc_gatekeeper_oidc_client" {
   }
 }
 
-# External ingress integrations (istio-pilot:ingress -> auth apps)
-
-resource "juju_integration" "dex_auth_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.dex_auth.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
-resource "juju_integration" "oidc_gatekeeper_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.oidc_gatekeeper.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
-# External ingress-auth integration (istio-pilot:ingress-auth -> oidc-gatekeeper)
-
-resource "juju_integration" "oidc_gatekeeper_ingress_auth" {
-  count      = var.ingress_auth != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.oidc_gatekeeper.name
-    endpoint = "ingress-auth"
-  }
-
-  application {
-    name      = var.ingress_auth.kind == "endpoint" ? var.ingress_auth.name : null
-    endpoint  = var.ingress_auth.kind == "endpoint" ? var.ingress_auth.endpoint : null
-    offer_url = var.ingress_auth.kind == "offer" ? var.ingress_auth.url : null
-  }
-}
-
 # Ambient service-mesh integrations (istio-beacon-k8s:service-mesh -> auth apps)
 
 resource "juju_integration" "dex_auth_service_mesh" {

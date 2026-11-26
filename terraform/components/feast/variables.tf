@@ -169,33 +169,6 @@ variable "dashboard_links" {
   }
 }
 
-variable "ingress" {
-  description = "Ingress provider for feast-ui from istio-pilot:ingress (supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.ingress == null || contains(["endpoint", "offer"], var.ingress.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "endpoint" || (var.ingress.name != null && var.ingress.name != "" && var.ingress.endpoint != null && var.ingress.endpoint != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "offer" || (var.ingress.url != null && var.ingress.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
 variable "istio_ingress_route" {
   description = "Istio ingress route provider for feast-ui from istio-ingress-k8s:istio-ingress-route (ambient; supports same-model endpoint or cross-model offer)"
   type = object({
