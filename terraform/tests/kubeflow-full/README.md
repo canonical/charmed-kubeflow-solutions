@@ -52,9 +52,7 @@ flowchart LR
   apps -. logs / metrics .- otel
 ```
 
-The deployment always uses `service_mesh_type = "ambient"`, `auth_type = "iam"`
-and `enable_observability = true`. The legacy sidecar + Dex/OIDC path is not
-used here.
+The deployment always uses `auth_type = "iam"` and `enable_observability = true`. The legacy Dex/OIDC path is not used here.
 
 ## Cross-model wiring
 

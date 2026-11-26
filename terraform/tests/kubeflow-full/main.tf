@@ -138,7 +138,6 @@ module "kubeflow" {
   risk              = var.risk
   create_model      = var.create_model
   model_uuid        = var.model_uuid
-  service_mesh_type = "ambient"
   auth_type         = "iam"
 
   # Cross-model wiring
