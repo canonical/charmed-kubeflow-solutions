@@ -81,9 +81,6 @@ jobs:
             auth-type: iam
             uats-env: mlflow-remote
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --include-cos-tests --cos-model cos --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
-        exclude:
-          - product: kubeflow-spark
-            service-mesh-type: ambient
 
     steps:
       - name: Checkout repository
