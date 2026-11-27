@@ -239,7 +239,7 @@ module "data_integrator_integrations" {
 
 module "observability" {
   count      = var.enable_observability ? 1 : 0
-  depends_on = [module.ambient_iam, module.mlflow]
+  depends_on = [module.iam, module.mlflow]
 
   source = "../../components/observability"
 
