@@ -29,9 +29,6 @@ locals {
   minio_channel         = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
   s3_integrator_channel = "2/edge"
 
-  # Istio Component (sidecar)
-  istio_sidecar_channel = var.release == "1.11" ? "1.28/${var.risk}" : "latest/${var.risk}"
-
   # Istio Component (ambient: istio-k8s, gateways + beacon)
   # NOTE: the ambient IAM architecture needs the istio-ingress-route,
   # gateway-metadata and istio-request-auth endpoints, which are published on
