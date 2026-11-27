@@ -315,7 +315,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/collect-k8s-logs
         with:
-          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
+          name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}-${{ matrix.pod-security-standards || 'no-pss' }}
           namespaces: ${{ startsWith(matrix.product, 'mlflow-standalone') && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }} ${{ matrix.product == 'mlflow-standalone-cos' && 'cos' || '' }}
 
       - name: Get juju status
