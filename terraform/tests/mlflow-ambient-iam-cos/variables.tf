@@ -171,6 +171,12 @@ variable "s3_bucket_global" {
   default     = ""
 }
 
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application"
+  type        = map(string)
+  default     = {}
+}
+
 variable "user_grants_across_workspaces" {
   description = <<-EOT
     Grants for all MLflow users across MLflow workspaces in terms of data-integrator instances,

@@ -59,6 +59,7 @@ module "mlflow_ambient_iam" {
   s3_access_key_global = var.s3_access_key_global
   s3_secret_key_global = var.s3_secret_key_global
   s3_endpoint_global   = var.s3_endpoint_global
+  s3_config_global     = var.s3_config_global
 
   user_grants_across_workspaces = var.user_grants_across_workspaces
 
