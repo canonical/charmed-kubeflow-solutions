@@ -90,6 +90,11 @@ jobs:
             uats-env: mlflow-remote
             # standalone MLflow is deployed in proxy mode by default, so UATs only need the tracking server's URI and no S3 credentials:
             uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
+          - product: mlflow-standalone-cos
+            service-mesh-type: ambient
+            auth-type: iam
+            uats-env: mlflow-remote
+            uats-extra-args: --model mlflow --mlflow-standalone --include-iam-ui-tests --include-iam-m2m-tests --include-cos-tests --cos-model cos --mlflow-tracking-uri http://mlflow-server.mlflow.svc.cluster.local:5000
         exclude:
           - product: kubeflow-spark
             service-mesh-type: ambient
@@ -262,6 +267,8 @@ jobs:
             EXTRA_COMPONENTS_ARG="--enable-mlflow"
           elif [[ "${{ matrix.product }}" == "mlflow-standalone" ]]; then
             EXTRA_COMPONENTS_ARG="--disable-kubeflow --enable-mlflow"
+          elif [[ "${{ matrix.product }}" == "mlflow-standalone-cos" ]]; then
+            EXTRA_COMPONENTS_ARG="--disable-kubeflow --enable-mlflow --enable-cos"
           elif [[ "${{ matrix.product }}" == "kubeflow-feast" ]]; then
             EXTRA_COMPONENTS_ARG="--enable-feast"
           elif [[ "${{ matrix.product }}" == "kubeflow-spark" ]]; then
@@ -331,11 +338,11 @@ jobs:
         uses: ./.github/actions/collect-k8s-logs
         with:
           name: control-planes-pods-logs-${{ matrix.product }}-${{ matrix.service-mesh-type }}-${{ matrix.auth-type }}
-          namespaces: ${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }}
+          namespaces: ${{ startsWith(matrix.product, 'mlflow-standalone') && 'mlflow' || 'kubeflow' }} istio-system ${{ matrix.auth-type == 'iam' && 'iam iam-core' || '' }} ${{ matrix.product == 'mlflow-standalone-cos' && 'cos' || '' }}
 
       - name: Get juju status
         env:
-          JUJU_MODEL: "${{ matrix.product == 'mlflow-standalone' && 'mlflow' || 'kubeflow' }}"
+          JUJU_MODEL: "${{ startsWith(matrix.product, 'mlflow-standalone') && 'mlflow' || 'kubeflow' }}"
         run: juju status -m "$JUJU_MODEL" --relations
         if: always()
 

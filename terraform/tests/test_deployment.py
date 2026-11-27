@@ -97,7 +97,10 @@ class TestCharm:
                 model_name,
             )
 
-            for system_model_name in ("istio-system", "iam"):
+            system_models = ["istio-system", "iam"]
+            if request.config.getoption("--enable-cos"):
+                system_models.append("cos")
+            for system_model_name in system_models:
                 _wait_model_active(system_model_name)
 
             # oauth2-proxy's workload recovers once the issuer DNS resolves, but
