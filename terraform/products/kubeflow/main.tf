@@ -12,33 +12,13 @@ resource "juju_model" "kubeflow" {
   }
 }
 
-module "istio" {
-  count  = local.sidecar ? 1 : 0
-  source = "../../components/istio-sidecar"
+# === Service mesh and authentication ======================================
+# The service mesh is always ambient. The IAM path uses two gateways (UI/M2M)
+# and an istio-k8s control plane in the istio-system model. The Dex path uses
+# one gateway, with istio-k8s and the gateway in this model.
 
-  model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-
-  istio_pilot = {
-    channel  = local.istio_sidecar_channel
-    revision = var.istio_pilot_revision
-    config   = local.istio_pilot_config
-  }
-  istio_ingressgateway = {
-    channel  = local.istio_sidecar_channel
-    revision = var.istio_ingressgateway_revision
-    config   = var.istio_ingressgateway_config
-  }
-}
-
-# === Ambient service mesh =================================================
-# Two ambient submodes (mutually exclusive):
-#  - ambient-iam: two gateways (UI/M2M) + beacon here; istio-k8s runs in the
-#    istio-system model (cross-model istio-ingress-config offer); IAM auth.
-#  - ambient-dex: single gateway + beacon + istio-k8s all in this model
-#    (component istio-ambient-dex); legacy Dex/OIDC auth.
-
-module "ambient_iam" {
-  count  = local.ambient_iam ? 1 : 0
+module "iam" {
+  count  = local.iam ? 1 : 0
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -57,20 +37,16 @@ module "ambient_iam" {
     config   = var.istio_beacon_k8s_config
   }
 
-  # The offer URL is only known after apply (it comes from a juju_offer in the
-  # istio-system model), so this object is gated on the known service_mesh_type
-  # rather than on the URL value — otherwise the gateways' integration count
-  # would depend on an unknown value.
-  istio_ingress_config = local.ambient_iam ? {
+  istio_ingress_config = {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
-  } : null
+  }
 }
 
-# ambient-dex: legacy single-gateway ambient mesh with istio-k8s deployed
-# in-model, fronted by the Dex/OIDC `auth` component.
-module "ambient_dex" {
-  count  = local.ambient_dex ? 1 : 0
+# Dex path: single-gateway mesh with istio-k8s deployed in-model, fronted by
+# the Dex/OIDC `auth` component.
+module "dex" {
+  count  = local.dex ? 1 : 0
   source = "../../components/istio-ambient-dex"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -92,13 +68,13 @@ module "ambient_dex" {
   }
 }
 
-# === IAM forward-auth + request-auth stack (ambient only) ===================
+# === IAM forward-auth + request-auth stack ================================
 # oauth2-proxy provides browser session forward-auth to the UI gateway.
 # request-authentication-configurator installs JWT RequestAuthentication on both
 # gateways. Both consume Hydra oauth from the iam model cross-model.
 
 module "oauth2_proxy" {
-  count  = local.ambient_iam ? 1 : 0
+  count  = local.iam ? 1 : 0
   source = "../../charms/oauth2-proxy-k8s"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -113,7 +89,7 @@ module "oauth2_proxy" {
 
   # Gated on the known mode (not the offer URL, which is only known
   # after apply) so oauth2-proxy's oauth integration count is plan-determinable.
-  oauth = local.ambient_iam ? {
+  oauth = local.iam ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
@@ -121,14 +97,14 @@ module "oauth2_proxy" {
   # Trust the self-signed CA fronting the Identity Platform via the send-ca-cert
   # offer from the iam-core model. Gated on the known mode so the
   # integration count is plan-determinable.
-  ca_cert = local.ambient_iam ? {
+  ca_cert = local.iam ? {
     kind = "offer"
     url  = var.send_ca_cert_offer_url
   } : null
 }
 
 module "request_authentication_configurator" {
-  count  = local.ambient_iam ? 1 : 0
+  count  = local.iam ? 1 : 0
   source = "../../charms/request-authentication-configurator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -141,14 +117,14 @@ module "request_authentication_configurator" {
 
   # Gated on the known mode (not the offer URL, which is only known
   # after apply) so the oauth integration count is plan-determinable.
-  oauth = local.ambient_iam ? {
+  oauth = local.iam ? {
     kind = "offer"
     url  = var.oauth_offer_url
   } : null
 }
 
 module "github_profiles_automator" {
-  count  = local.ambient_iam ? 1 : 0
+  count  = local.iam ? 1 : 0
   source = "../../charms/github-profiles-automator"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
@@ -157,15 +133,15 @@ module "github_profiles_automator" {
   config = merge({
     # Istio ingress gateway service-account principals (SPIFFE identities) that
     # are allowed to reach the profiles, one per ambient gateway.
-    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient_iam[0].components.istio_ingress_k8s_ui.name}-istio"
-    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.ambient_iam[0].components.istio_ingress_k8s_m2m.name}-istio"
+    "istio-ingressgateway-principal" = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.iam[0].components.istio_ingress_k8s_ui.name}-istio"
+    "additional-principals"          = "cluster.local/ns/${local.kubeflow_model_name}/sa/${module.iam[0].components.istio_ingress_k8s_m2m.name}-istio"
   }, var.github_profiles_automator_config)
 }
 
 # TLS certificates for the ambient gateways. Provides the `certificates`
 # relation consumed by both istio-ingress-k8s gateways.
 resource "juju_application" "self_signed_certificates" {
-  count = local.ambient_iam ? 1 : 0
+  count = local.iam ? 1 : 0
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
   name       = "self-signed-certificates"
@@ -183,11 +159,10 @@ resource "juju_application" "self_signed_certificates" {
 }
 
 module "auth" {
-  # Legacy Dex/OIDC auth: used on the sidecar and ambient-dex paths. The
-  # ambient-iam path uses the IAM stack instead.
-  count = local.legacy_auth ? 1 : 0
+  # Legacy Dex/OIDC auth; the IAM path uses the IAM stack instead.
+  count = local.dex ? 1 : 0
 
-  depends_on = [module.istio, module.ambient_dex]
+  depends_on = [module.dex]
 
   source = "../../components/auth"
 
@@ -205,26 +180,13 @@ module "auth" {
     config   = var.oidc_gatekeeper_config
   }
 
-  # sidecar: front via istio-pilot ingress. ambient-dex: join the mesh + use the
-  # single gateway's unauthenticated route.
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
-
-  ingress_auth = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress_auth.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress_auth.endpoint
-  } : null
-
-  service_mesh                        = local.ambient_dex ? local.service_mesh : null
+  # The Dex path joins the mesh and uses the single gateway's unauthenticated route.
+  service_mesh                        = local.dex ? local.service_mesh : null
   istio_ingress_route_unauthenticated = local.istio_ingress_route_unauthenticated
 }
 
 module "core" {
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.auth]
+  depends_on = [module.iam, module.dex, module.auth]
 
   source = "../../components/core"
 
@@ -262,12 +224,6 @@ module "core" {
     config   = var.pvcviewer_operator_config
   }
 
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
-
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
   gateway_metadata    = local.ui_gateway_metadata
@@ -275,7 +231,7 @@ module "core" {
 
 module "minio" {
   count      = local.deploy_minio ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.iam, module.dex]
 
   source = "../../charms/minio"
 
@@ -307,7 +263,7 @@ module "mysql" {
 
 module "katib" {
   count      = var.enable_katib ? 1 : 0
-  depends_on = [module.core, module.mysql, module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.core, module.mysql, module.iam, module.dex]
 
   source = "../../components/katib"
 
@@ -324,12 +280,6 @@ module "katib" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
 
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
@@ -403,7 +353,7 @@ resource "juju_access_secret" "s3_secret_access_global" {
 
 module "kfp" {
   count      = var.enable_kfp ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
+  depends_on = [module.iam, module.dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
   source = "../../components/kfp"
 
@@ -447,12 +397,6 @@ module "kfp" {
 
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
-
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
 
   argo_controller = {
     channel  = local.argo_controller_channel
@@ -525,7 +469,7 @@ module "kfp" {
 
 module "notebooks" {
   count      = var.enable_notebooks ? 1 : 0
-  depends_on = [module.core, module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.core, module.iam, module.dex]
 
   source = "../../components/notebooks"
 
@@ -536,12 +480,6 @@ module "notebooks" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
 
   gateway_metadata    = local.ui_gateway_metadata
   service_mesh        = local.service_mesh
@@ -562,7 +500,7 @@ module "notebooks" {
 
 module "tensorboard" {
   count      = var.enable_tensorboard ? 1 : 0
-  depends_on = [module.core, module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.core, module.iam, module.dex]
 
   source = "../../components/tensorboard"
 
@@ -573,18 +511,6 @@ module "tensorboard" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  gateway_info = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_gateway_info.name
-    endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
-  } : null
-
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
 
   gateway_metadata    = local.ui_gateway_metadata
   service_mesh        = local.service_mesh
@@ -604,7 +530,7 @@ module "tensorboard" {
 }
 
 module "resource_dispatcher" {
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.iam, module.dex]
 
   source = "../../charms/resource-dispatcher"
 
@@ -616,7 +542,7 @@ module "resource_dispatcher" {
 
 module "mlflow" {
   count      = var.enable_mlflow ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
+  depends_on = [module.iam, module.dex, module.core, module.minio, module.s3_global, module.mysql, module.resource_dispatcher]
 
   source = "../../components/mlflow-v2"
 
@@ -658,12 +584,6 @@ module "mlflow" {
     endpoint = module.resource_dispatcher.provides.pod_defaults.endpoint
   }
 
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
-
   service_mesh        = local.service_mesh
   istio_ingress_route = local.ui_istio_ingress_route
 
@@ -676,17 +596,11 @@ module "mlflow" {
 
 module "kserve" {
   count      = local.deploy_kserve ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.iam, module.dex]
 
   source = "../../components/kserve"
 
   model_uuid = var.create_model ? juju_model.kubeflow[0].uuid : var.model_uuid
-
-  gateway_info = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_gateway_info.name
-    endpoint = module.istio[0].provides.istio_pilot_gateway_info.endpoint
-  } : null
 
   gateway_metadata = local.m2m_gateway_metadata
   service_mesh     = local.service_mesh
@@ -695,38 +609,17 @@ module "kserve" {
     channel  = local.kserve_channel
     revision = var.kserve_controller_revision
     config = merge({
-      "deployment-mode" = local.sidecar ? "knative" : "standard",
+      "deployment-mode" = "standard",
       "http-proxy"      = var.http_proxy,
       "https-proxy"     = var.https_proxy,
       "no-proxy"        = var.no_proxy,
     }, var.kserve_controller_config)
   }
-
-  knative_operator = {
-    channel  = local.knative_channel
-    revision = var.knative_operator_revision
-    config   = var.knative_operator_config
-  }
-
-  knative_serving = {
-    channel  = local.knative_channel
-    revision = var.knative_serving_revision
-    config = merge({
-      "istio.gateway.namespace" = var.create_model ? juju_model.kubeflow[0].name : "kubeflow"
-      "istio.gateway.name"      = "kubeflow-gateway"
-    }, var.knative_serving_config)
-  }
-
-  knative_eventing = {
-    channel  = local.knative_channel
-    revision = var.knative_eventing_revision
-    config   = var.knative_eventing_config
-  }
 }
 
 module "training" {
   count      = (var.enable_training_v1 || var.enable_training_v2) ? 1 : 0
-  depends_on = [module.core, module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.core, module.iam, module.dex]
 
   source = "../../components/training"
 
@@ -758,7 +651,7 @@ module "training" {
 
 module "postgresql" {
   count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex]
+  depends_on = [module.iam, module.dex]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 
@@ -774,7 +667,7 @@ module "postgresql" {
 
 module "feast" {
   count      = var.enable_feast ? 1 : 0
-  depends_on = [module.istio, module.ambient_iam, module.ambient_dex, module.core, module.resource_dispatcher, module.postgresql]
+  depends_on = [module.iam, module.dex, module.core, module.resource_dispatcher, module.postgresql]
 
   source = "../../components/feast"
 
@@ -815,12 +708,6 @@ module "feast" {
     name     = module.core.provides.kubeflow_dashboard_links.name
     endpoint = module.core.provides.kubeflow_dashboard_links.endpoint
   }
-
-  ingress = local.sidecar ? {
-    kind     = "endpoint"
-    name     = module.istio[0].provides.istio_pilot_ingress.name
-    endpoint = module.istio[0].provides.istio_pilot_ingress.endpoint
-  } : null
 
   istio_ingress_route = local.ui_istio_ingress_route
   service_mesh        = local.service_mesh
@@ -941,7 +828,7 @@ module "external_integrations" {
 module "observability" {
   count = var.enable_observability ? 1 : 0
   depends_on = [
-    module.auth, module.core, module.istio, module.ambient_iam, module.ambient_dex,
+    module.auth, module.core, module.iam, module.dex,
     module.kfp, module.katib, module.kserve, module.notebooks,
     module.tensorboard, module.training, module.mlflow, module.minio,
   ]
@@ -973,11 +860,11 @@ module "observability" {
   kubeflow_volumes_logging                  = module.core.requires.kubeflow_volumes_logging
   pvcviewer_operator_logging                = module.core.requires.pvcviewer_operator_logging
 
-  # Auth (sidecar only; the ambient path uses the IAM stack)
-  dex_auth_grafana_dashboard = local.legacy_auth ? module.auth[0].provides.dex_auth_grafana_dashboard : null
-  dex_auth_metrics_endpoint  = local.legacy_auth ? module.auth[0].provides.dex_auth_metrics_endpoint : null
-  dex_auth_logging           = local.legacy_auth ? module.auth[0].requires.dex_auth_logging : null
-  oidc_gatekeeper_logging    = local.legacy_auth ? module.auth[0].requires.oidc_gatekeeper_logging : null
+  # Auth (Dex only; the IAM path uses the IAM stack)
+  dex_auth_grafana_dashboard = local.dex ? module.auth[0].provides.dex_auth_grafana_dashboard : null
+  dex_auth_metrics_endpoint  = local.dex ? module.auth[0].provides.dex_auth_metrics_endpoint : null
+  dex_auth_logging           = local.dex ? module.auth[0].requires.dex_auth_logging : null
+  oidc_gatekeeper_logging    = local.dex ? module.auth[0].requires.oidc_gatekeeper_logging : null
 
   # KFP
   argo_controller_grafana_dashboard = var.enable_kfp ? module.kfp[0].provides.argo_controller_grafana_dashboard : null
@@ -1007,12 +894,7 @@ module "observability" {
 
   # KServe
   kserve_controller_metrics_endpoint = local.deploy_kserve ? module.kserve[0].provides.kserve_controller_metrics_endpoint : null
-  knative_operator_metrics_endpoint  = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_metrics_endpoint, null) : null
-  knative_operator_otel_collector    = local.deploy_kserve ? try(module.kserve[0].provides.knative_operator_otel_collector, null) : null
   kserve_controller_logging          = local.deploy_kserve ? module.kserve[0].requires.kserve_controller_logging : null
-  knative_operator_logging           = local.deploy_kserve ? try(module.kserve[0].requires.knative_operator_logging, null) : null
-  knative_serving_otel_collector     = local.deploy_kserve ? try(module.kserve[0].requires.knative_serving_otel_collector, null) : null
-  knative_eventing_otel_collector    = local.deploy_kserve ? try(module.kserve[0].requires.knative_eventing_otel_collector, null) : null
 
   # Notebooks
   jupyter_controller_grafana_dashboard = var.enable_notebooks ? module.notebooks[0].provides.jupyter_controller_grafana_dashboard : null
@@ -1030,11 +912,6 @@ module "observability" {
   tensorboard_controller_metrics_endpoint = var.enable_tensorboard ? module.tensorboard[0].provides.tensorboard_controller_metrics_endpoint : null
   tensorboard_controller_logging          = var.enable_tensorboard ? module.tensorboard[0].requires.tensorboard_controller_logging : null
   tensorboards_web_app_logging            = var.enable_tensorboard ? module.tensorboard[0].requires.tensorboards_web_app_logging : null
-
-  # Istio Sidecar
-  istio_ingressgateway_metrics_endpoint = local.sidecar ? module.istio[0].provides.istio_ingressgateway_metrics_endpoint : null
-  istio_pilot_grafana_dashboard         = local.sidecar ? module.istio[0].provides.istio_pilot_grafana_dashboard : null
-  istio_pilot_metrics_endpoint          = local.sidecar ? module.istio[0].provides.istio_pilot_metrics_endpoint : null
 
   # Minio
   minio_grafana_dashboard = local.deploy_minio ? module.minio[0].provides.grafana_dashboard : null

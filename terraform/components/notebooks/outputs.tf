@@ -30,10 +30,6 @@ output "requires" {
       name     = juju_application.jupyter_ui.name
       endpoint = "dashboard-links"
     }
-    jupyter_ui_ingress = {
-      name     = juju_application.jupyter_ui.name
-      endpoint = "ingress"
-    }
     jupyter_ui_istio_ingress_route = {
       name     = juju_application.jupyter_ui.name
       endpoint = "istio-ingress-route"

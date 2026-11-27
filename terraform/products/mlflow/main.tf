@@ -13,11 +13,10 @@ resource "juju_model" "mlflow" {
 }
 
 # === Ambient service mesh =================================================
-# Unlike Kubeflow, only one ambient submode allowed:
-#  - ambient-iam: two gateways (UI/M2M) + beacon here; istio-k8s runs in the
-#    istio-system model (cross-model istio-ingress-config offer); IAM auth.
+# IAM authentication uses two gateways (UI/M2M) + beacon here; istio-k8s runs
+# in the istio-system model (cross-model istio-ingress-config offer).
 
-module "ambient_iam" {
+module "iam" {
   source = "../../components/istio-ambient"
 
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
@@ -37,9 +36,8 @@ module "ambient_iam" {
   }
 
   # The offer URL is only known after apply (it comes from a juju_offer in the
-  # istio-system model), so this object is gated on the known service_mesh_type
-  # rather than on the URL value — otherwise the gateways' integration count
-  # would depend on an unknown value.
+  # istio-system model), so this object is configured with the cross-model offer
+  # URL — otherwise the gateways' integration count would depend on an unknown value.
   istio_ingress_config = {
     kind = "offer"
     url  = var.istio_ingress_config_offer_url
@@ -169,7 +167,7 @@ resource "juju_access_secret" "s3_secret_access_global" {
 
 module "mlflow" {
   count      = 1
-  depends_on = [module.ambient_iam, module.postgresql, module.s3_global]
+  depends_on = [module.iam, module.postgresql, module.s3_global]
 
   source = "../../components/mlflow-v3"
 
@@ -204,7 +202,7 @@ module "mlflow" {
 
 module "postgresql" {
   count      = 1
-  depends_on = [module.ambient_iam]
+  depends_on = [module.iam]
 
   source = "git::https://github.com/canonical/postgresql-k8s-operator//terraform?ref=b7822d93f8d5d0d94ca3da36ea9f5b13f3e58d43"
 

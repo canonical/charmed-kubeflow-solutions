@@ -102,12 +102,11 @@ module "iam" {
 module "kubeflow" {
   source = "../../products/kubeflow"
 
-  release           = var.release
-  risk              = var.risk
-  create_model      = var.create_model
-  model_uuid        = var.model_uuid
-  service_mesh_type = "ambient"
-  auth_type         = "iam"
+  release      = var.release
+  risk         = var.risk
+  create_model = var.create_model
+  model_uuid   = var.model_uuid
+  auth_type    = "iam"
 
   # Cross-model wiring
   istio_ingress_config_offer_url = juju_offer.istio_ingress_config.url

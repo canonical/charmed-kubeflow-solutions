@@ -55,7 +55,7 @@ Terraform module deploying the `data-kubeflow-integrator` charm for Charmed Kube
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_data_integrator"></a> [data\_integrator](#input\_data\_integrator) | Configuration for data-integrator application | <pre>object({<br/>    app_name    = optional(string, "data-integrator")<br/>    channel     = optional(string, "latest/edge")<br/>    revision    = optional(number)<br/>    units       = optional(number, 1)<br/>    trust       = optional(bool, false)<br/>    constraints = optional(string)<br/>    config      = optional(map(string), {})<br/>  })</pre> | `{}` | no |
-| <a name="input_mlflow_server_endpoint"></a> [mlflow\_server\_endpoint](#input\_mlflow\_server\_endpoint) | n/a | <pre>object({<br/>    name               = string<br/>    endpoint           = string<br/>  })</pre> | `null` | no |
+| <a name="input_mlflow_server_endpoint"></a> [mlflow\_server\_endpoint](#input\_mlflow\_server\_endpoint) | n/a | <pre>object({<br/>    name     = string<br/>    endpoint = string<br/>  })</pre> | `null` | no |
 | <a name="input_model_uuid"></a> [model\_uuid](#input\_model\_uuid) | Reference to an existing model uuid. | `string` | n/a | yes |
 
 ## Outputs

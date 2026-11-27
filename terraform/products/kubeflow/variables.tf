@@ -381,19 +381,8 @@ variable "minio_storage_size" {
 
 # Istio Component Applications
 
-variable "service_mesh_type" {
-  description = "Service mesh to deploy: 'sidecar' (istio-pilot + istio-ingressgateway) or 'ambient' (Istio ambient mesh)."
-  type        = string
-  default     = "ambient"
-
-  validation {
-    condition     = contains(["sidecar", "ambient"], var.service_mesh_type)
-    error_message = "Valid values for service_mesh_type are (sidecar, ambient)."
-  }
-}
-
 variable "auth_type" {
-  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform). 'iam' requires service_mesh_type = 'ambient'."
+  description = "Authentication stack to deploy: 'dex' (legacy Dex + OIDC gatekeeper) or 'iam' (Canonical Identity Platform)."
   type        = string
   default     = "dex"
 
@@ -401,53 +390,24 @@ variable "auth_type" {
     condition     = contains(["dex", "iam"], var.auth_type)
     error_message = "Valid values for auth_type are (dex, iam)."
   }
-
-  validation {
-    condition     = !(var.auth_type == "iam" && var.service_mesh_type != "ambient")
-    error_message = "auth_type = 'iam' requires service_mesh_type = 'ambient'."
-  }
-}
-
-variable "istio_pilot_revision" {
-  description = "Revision of the istio-pilot application"
-  type        = number
-  default     = null
-}
-
-variable "istio_pilot_config" {
-  description = "Configuration for istio-pilot application"
-  type        = map(string)
-  default     = { default-gateway = "kubeflow-gateway" }
-}
-
-variable "istio_ingressgateway_revision" {
-  description = "Revision of the istio-ingressgateway application"
-  type        = number
-  default     = null
-}
-
-variable "istio_ingressgateway_config" {
-  description = "Configuration for istio-ingressgateway application"
-  type        = map(string)
-  default     = { kind = "ingress" }
 }
 
 # Ambient Component Applications
 
 variable "istio_k8s_revision" {
-  description = "Revision of the istio-k8s control-plane charm (ambient-dex only; istio-k8s runs in-model there)."
+  description = "Revision of the istio-k8s control-plane charm used by the Dex deployment."
   type        = number
   default     = null
 }
 
 variable "istio_k8s_config" {
-  description = "Configuration for the istio-k8s control-plane charm (ambient-dex only)."
+  description = "Configuration for the istio-k8s control-plane charm used by the Dex deployment."
   type        = map(string)
   default     = {}
 }
 
 variable "istio_k8s_platform" {
-  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (ambient-dex only)."
+  description = "Platform value for istio-k8s, merged into its config as 'platform' when non-empty (Dex deployment only)."
   type        = string
   default     = ""
 }
@@ -491,8 +451,7 @@ variable "istio_ingress_k8s_m2m_config" {
 variable "istio_ingress_config_offer_url" {
   description = <<-EOT
     Cross-model offer URL of istio-k8s:istio-ingress-config from the
-    istio-system model. The UI ambient gateway consumes this offer. Required when
-    service_mesh_type is 'ambient'.
+    istio-system model. The UI ambient gateway consumes this offer. Required for ambient IAM deployment.
   EOT
   type        = string
   default     = null
@@ -524,8 +483,7 @@ variable "self_signed_certificates_config" {
 variable "oauth_offer_url" {
   description = <<-EOT
     Cross-model offer URL of hydra:oauth from the iam model. Consumed by
-    oauth2-proxy and request-authentication-configurator. Required when
-    service_mesh_type is 'ambient'.
+    oauth2-proxy and request-authentication-configurator. Required for IAM authentication.
   EOT
   type        = string
   default     = null
@@ -535,8 +493,7 @@ variable "send_ca_cert_offer_url" {
   description = <<-EOT
     Cross-model offer URL of self-signed-certificates:send-ca-cert from the
     iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the
-    self-signed CA fronting the Identity Platform. Required when
-    service_mesh_type is 'ambient'.
+    self-signed CA fronting the Identity Platform. Required for IAM authentication.
   EOT
   type        = string
   default     = null
@@ -797,47 +754,6 @@ variable "kserve_controller_config" {
   description = "Configuration for kserve-controller application"
   type        = map(string)
   default     = {}
-
-  validation {
-    condition     = !(var.service_mesh_type != "sidecar" && try(var.kserve_controller_config["deployment-mode"], null) == "knative")
-    error_message = "deployment-mode cannot be set to 'knative' unless service_mesh_type is 'sidecar'."
-  }
-}
-
-variable "knative_operator_revision" {
-  description = "Revision of the knative-operator application"
-  type        = number
-  default     = null
-}
-
-variable "knative_operator_config" {
-  description = "Configuration for knative-operator application"
-  type        = map(string)
-  default     = {}
-}
-
-variable "knative_serving_revision" {
-  description = "Revision of the knative-serving application"
-  type        = number
-  default     = null
-}
-
-variable "knative_serving_config" {
-  description = "Configuration for knative-serving application"
-  type        = map(string)
-  default     = {}
-}
-
-variable "knative_eventing_revision" {
-  description = "Revision of the knative-eventing application"
-  type        = number
-  default     = null
-}
-
-variable "knative_eventing_config" {
-  description = "Configuration for knative-eventing application"
-  type        = map(string)
-  default     = {}
 }
 
 # Training Component Applications
@@ -1073,18 +989,6 @@ variable "https_proxy" {
 
 variable "no_proxy" {
   description = "Value of the no_proxy environment variable"
-  type        = string
-  default     = ""
-}
-
-variable "istio_cni_bin_dir" {
-  description = "Path to CNI binaries, e.g. /opt/cni/bin. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
-  type        = string
-  default     = ""
-}
-
-variable "istio_cni_conf_dir" {
-  description = "Path to conflist files describing the CNI configuration, e.g. /etc/cni/net.d. If not provided, the Istio control plane will be installed/upgraded with the Istio CNI plugin disabled. This path depends on the Kubernetes installation, please refer to https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/ for information to find out the correct path."
   type        = string
   default     = ""
 }

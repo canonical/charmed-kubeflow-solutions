@@ -68,10 +68,9 @@ locals {
   mlflow_channel = "2.22/${var.risk}"
 
   # KServe Component
-  kserve_channel  = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
-  knative_channel = var.release == "1.11" ? "1.16/${var.risk}" : "latest/${var.risk}"
-  deploy_kserve   = var.enable_kserve || var.enable_mlflow
-  deploy_mysql    = var.enable_kfp || var.enable_katib || var.enable_mlflow
+  kserve_channel = var.release == "1.11" ? "0.17/${var.risk}" : "latest/${var.risk}"
+  deploy_kserve  = var.enable_kserve || var.enable_mlflow
+  deploy_mysql   = var.enable_kfp || var.enable_katib || var.enable_mlflow
 
   # Object storage backend selection ('minio' or 'S3'). Integrated MLflow is MLflow 2,
   # which only supports minio (object-storage) and has no s3-credentials relation, so
@@ -87,19 +86,10 @@ locals {
   training_operator_channel = var.release == "1.11" ? "1.9/${var.risk}" : "latest/${var.risk}"
   kubeflow_trainer_channel  = var.release == "1.11" ? "2.1/edge" : "latest/${var.risk}"
 
-  kubeflow_profiles_service_mesh_config = local.ambient ? {
+  kubeflow_profiles_service_mesh_config = {
     "service-mesh-mode"             = "istio-ambient"
-    "istio-gateway-service-account" = local.ambient_iam ? "istio-ingress-k8s-ui-istio" : "istio-ingress-k8s-istio"
-    } : {
-    "service-mesh-mode"             = "istio-sidecar"
-    "istio-gateway-service-account" = "istio-ingressgateway-workload-service-account"
+    "istio-gateway-service-account" = local.iam ? "istio-ingress-k8s-ui-istio" : "istio-ingress-k8s-istio"
   }
-
-  istio_pilot_config = merge(
-    var.istio_pilot_config,
-    var.istio_cni_bin_dir != "" ? { "cni-bin-dir" = var.istio_cni_bin_dir } : {},
-    var.istio_cni_conf_dir != "" ? { "cni-conf-dir" = var.istio_cni_conf_dir } : {}
-  )
 
   argo_controller_config = merge(
     var.argo_controller_config,
@@ -141,69 +131,59 @@ locals {
   )
 
   # ------------------------------------------------------------------
-  # Service-mesh + auth mode helpers and gateway/mesh selectors, derived from
-  # the two inputs var.service_mesh_type ('sidecar' | 'ambient') and
-  # var.auth_type ('dex' | 'iam'). Supported combinations:
-  #   sidecar + dex : istio-pilot + istio-ingressgateway; Dex/OIDC auth.
-  #   ambient + dex : single gateway + beacon + istio-k8s in-model (component
-  #                   istio-ambient-dex); Dex/OIDC auth.
-  #   ambient + iam : two gateways (UI/M2M) + beacon (component istio-ambient);
-  #                   istio-k8s in istio-system; IAM auth stack.
-  # (sidecar + iam is rejected by variable validation.)
-  # For ambient_dex the UI and M2M selectors both resolve to the single gateway.
+  # Auth type configuration. The service mesh is always ambient.
+  # Dex uses an in-model control plane and single gateway; IAM uses two
+  # gateways with the control plane in the istio-system model.
   # ------------------------------------------------------------------
-  sidecar     = var.service_mesh_type == "sidecar"
-  ambient     = var.service_mesh_type == "ambient"
-  ambient_iam = local.ambient && var.auth_type == "iam"
-  ambient_dex = local.ambient && var.auth_type == "dex"
-  legacy_auth = var.auth_type == "dex"
+  iam = var.auth_type == "iam"
+  dex = var.auth_type == "dex"
 
-  ui_istio_ingress_route = local.ambient_iam ? {
+  ui_istio_ingress_route = local.iam ? {
     kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
-    } : local.ambient_dex ? {
+    name     = module.iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_ui_istio_ingress_route.endpoint
+    } : local.dex ? {
     kind     = "endpoint"
-    name     = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route.name
-    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route.endpoint
   } : null
 
-  ui_gateway_metadata = local.ambient_iam ? {
+  ui_gateway_metadata = local.iam ? {
     kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
-    } : local.ambient_dex ? {
+    name     = module.iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_ui_gateway_metadata.endpoint
+    } : local.dex ? {
     kind     = "endpoint"
-    name     = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
   } : null
 
-  m2m_gateway_metadata = local.ambient_iam ? {
+  m2m_gateway_metadata = local.iam ? {
     kind     = "endpoint"
-    name     = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
-    endpoint = module.ambient_iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
-    } : local.ambient_dex ? {
+    name     = module.iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.name
+    endpoint = module.iam[0].provides.istio_ingress_k8s_m2m_gateway_metadata.endpoint
+    } : local.dex ? {
     kind     = "endpoint"
-    name     = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.name
-    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s_gateway_metadata.endpoint
   } : null
 
   # Unauthenticated route on the single gateway, consumed by oidc-gatekeeper on
-  # the ambient-dex path.
-  istio_ingress_route_unauthenticated = local.ambient_dex ? {
+  # the Dex path.
+  istio_ingress_route_unauthenticated = local.dex ? {
     kind     = "endpoint"
-    name     = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.name
-    endpoint = module.ambient_dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.endpoint
+    name     = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.name
+    endpoint = module.dex[0].provides.istio_ingress_k8s_istio_ingress_route_unauthenticated.endpoint
   } : null
 
   # Beacon service-mesh (bare {name,endpoint}); service_mesh adds kind for the
   # component inputs that expect it.
-  beacon = local.ambient_iam ? {
-    name     = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient_iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
-    } : local.ambient_dex ? {
-    name     = module.ambient_dex[0].provides.istio_beacon_k8s_service_mesh.name
-    endpoint = module.ambient_dex[0].provides.istio_beacon_k8s_service_mesh.endpoint
+  beacon = local.iam ? {
+    name     = module.iam[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.iam[0].provides.istio_beacon_k8s_service_mesh.endpoint
+    } : local.dex ? {
+    name     = module.dex[0].provides.istio_beacon_k8s_service_mesh.name
+    endpoint = module.dex[0].provides.istio_beacon_k8s_service_mesh.endpoint
   } : null
 
   service_mesh = local.beacon == null ? null : {

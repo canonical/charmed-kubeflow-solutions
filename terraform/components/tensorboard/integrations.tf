@@ -18,40 +18,6 @@ resource "juju_integration" "tensorboards_web_app_dashboard_links" {
   }
 }
 
-# Tensorboards Web App ingress integration - sidecar (istio-pilot:ingress -> tensorboards-web-app)
-resource "juju_integration" "tensorboards_web_app_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.tensorboards_web_app.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
-# Tensorboard Controller gateway-info integration - sidecar (istio-pilot:gateway-info -> tensorboard-controller)
-resource "juju_integration" "tensorboard_controller_gateway_info" {
-  count      = var.gateway_info != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.tensorboard_controller.name
-    endpoint = "gateway-info"
-  }
-
-  application {
-    name      = var.gateway_info.kind == "endpoint" ? var.gateway_info.name : null
-    endpoint  = var.gateway_info.kind == "endpoint" ? var.gateway_info.endpoint : null
-    offer_url = var.gateway_info.kind == "offer" ? var.gateway_info.url : null
-  }
-}
-
 # Tensorboard Controller gateway-metadata integration - ambient (istio-ingress-k8s:gateway-metadata -> tensorboard-controller)
 resource "juju_integration" "tensorboard_controller_gateway_metadata" {
   count      = var.gateway_metadata != null ? 1 : 0

@@ -128,13 +128,6 @@ variable "kubeflow_trainer_grafana_dashboard" {
   default     = null
 }
 
-variable "istio_pilot_grafana_dashboard" {
-  description = "Grafana dashboard endpoint from istio-sidecar istio-pilot application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
 variable "minio_grafana_dashboard" {
   description = "Grafana dashboard endpoint from minio charm"
   type        = object({ name = string, endpoint = string })
@@ -216,13 +209,6 @@ variable "kserve_controller_metrics_endpoint" {
   default     = null
 }
 
-variable "knative_operator_metrics_endpoint" {
-  description = "Metrics endpoint from kserve knative-operator application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
 variable "jupyter_controller_metrics_endpoint" {
   description = "Metrics endpoint from notebooks jupyter-controller application"
   type        = object({ name = string, endpoint = string })
@@ -246,20 +232,6 @@ variable "kubeflow_trainer_metrics_endpoint" {
 
 variable "tensorboard_controller_metrics_endpoint" {
   description = "Metrics endpoint from tensorboard tensorboard-controller application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
-variable "istio_ingressgateway_metrics_endpoint" {
-  description = "Metrics endpoint from istio-sidecar istio-ingressgateway application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
-variable "istio_pilot_metrics_endpoint" {
-  description = "Metrics endpoint from istio-sidecar istio-pilot application"
   type        = object({ name = string, endpoint = string })
   nullable    = true
   default     = null
@@ -430,37 +402,8 @@ variable "kserve_controller_logging" {
   default     = null
 }
 
-variable "knative_operator_logging" {
-  description = "Logging endpoint from kserve knative-operator application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
 # ---------------------------------------------------------------------------
-# OTel collector endpoints (knative apps require — collector provides OTLP)
 # ---------------------------------------------------------------------------
-
-variable "knative_operator_otel_collector" {
-  description = "OTel collector endpoint from kserve knative-operator application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
-variable "knative_serving_otel_collector" {
-  description = "OTel collector endpoint from kserve knative-serving application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
-
-variable "knative_eventing_otel_collector" {
-  description = "OTel collector endpoint from kserve knative-eventing application"
-  type        = object({ name = string, endpoint = string })
-  nullable    = true
-  default     = null
-}
 
 variable "jupyter_controller_logging" {
   description = "Logging endpoint from notebooks jupyter-controller application"

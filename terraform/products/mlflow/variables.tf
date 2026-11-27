@@ -129,8 +129,7 @@ variable "istio_ingress_k8s_m2m_config" {
 variable "istio_ingress_config_offer_url" {
   description = <<-EOT
     Cross-model offer URL of istio-k8s:istio-ingress-config from the
-    istio-system model. The UI ambient gateway consumes this offer. Required when
-    service_mesh_type is 'ambient'.
+    istio-system model. The UI ambient gateway consumes this offer. Required for ambient IAM deployment.
   EOT
   type        = string
   default     = null
@@ -162,8 +161,7 @@ variable "self_signed_certificates_config" {
 variable "oauth_offer_url" {
   description = <<-EOT
     Cross-model offer URL of hydra:oauth from the iam model. Consumed by
-    oauth2-proxy and request-authentication-configurator. Required when
-    service_mesh_type is 'ambient'.
+    oauth2-proxy and request-authentication-configurator. Required for IAM authentication.
   EOT
   type        = string
   default     = null
@@ -173,8 +171,7 @@ variable "send_ca_cert_offer_url" {
   description = <<-EOT
     Cross-model offer URL of self-signed-certificates:send-ca-cert from the
     iam-core model. Consumed by oauth2-proxy on receive-ca-cert to trust the
-    self-signed CA fronting the Identity Platform. Required when
-    service_mesh_type is 'ambient'.
+    self-signed CA fronting the Identity Platform. Required for IAM authentication.
   EOT
   type        = string
   default     = null

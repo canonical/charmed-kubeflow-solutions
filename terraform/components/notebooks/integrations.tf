@@ -18,23 +18,6 @@ resource "juju_integration" "jupyter_ui_dashboard_links" {
   }
 }
 
-# Notebook Web App ingress integration - sidecar (istio-pilot:ingress -> jupyter-ui)
-resource "juju_integration" "jupyter_ui_ingress" {
-  count      = var.ingress != null ? 1 : 0
-  model_uuid = var.model_uuid
-
-  application {
-    name     = juju_application.jupyter_ui.name
-    endpoint = "ingress"
-  }
-
-  application {
-    name      = var.ingress.kind == "endpoint" ? var.ingress.name : null
-    endpoint  = var.ingress.kind == "endpoint" ? var.ingress.endpoint : null
-    offer_url = var.ingress.kind == "offer" ? var.ingress.url : null
-  }
-}
-
 # Notebook Web App istio-ingress-route integration - ambient (istio-ingress-k8s:istio-ingress-route -> jupyter-ui)
 resource "juju_integration" "notebook_web_app_istio_ingress_route" {
   count      = var.istio_ingress_route != null ? 1 : 0

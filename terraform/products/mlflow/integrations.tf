@@ -1,7 +1,7 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-# forward-auth (ambient-iam): oauth2-proxy -> UI gateway (istio-ingress-k8s-ui).
+# forward-auth: oauth2-proxy -> UI gateway (istio-ingress-k8s-ui).
 # Browser sessions on the UI gateway are authenticated by oauth2-proxy, which
 # federates to Hydra (iam model) through the oauth cross-model offer.
 resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
@@ -14,8 +14,8 @@ resource "juju_integration" "oauth2_proxy_ui_forward_auth" {
   }
 
   application {
-    name     = module.ambient_iam.requires.istio_ingress_k8s_ui_forward_auth.name
-    endpoint = module.ambient_iam.requires.istio_ingress_k8s_ui_forward_auth.endpoint
+    name     = module.iam.requires.istio_ingress_k8s_ui_forward_auth.name
+    endpoint = module.iam.requires.istio_ingress_k8s_ui_forward_auth.endpoint
   }
 }
 
@@ -32,12 +32,12 @@ resource "juju_integration" "oauth2_proxy_ui_ingress" {
   }
 
   application {
-    name     = module.ambient_iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
-    endpoint = module.ambient_iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
+    name     = module.iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.name
+    endpoint = module.iam.provides.istio_ingress_k8s_ui_ingress_unauthenticated.endpoint
   }
 }
 
-# request-authentication (ambient-iam): request-authentication-configurator
+# request-authentication: request-authentication-configurator
 # installs Istio RequestAuthentication (JWT validation) on each gateway.
 resource "juju_integration" "request_auth_ui" {
   count      = 1
@@ -49,8 +49,8 @@ resource "juju_integration" "request_auth_ui" {
   }
 
   application {
-    name     = module.ambient_iam.provides.istio_ingress_k8s_ui_istio_request_auth.name
-    endpoint = module.ambient_iam.provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
+    name     = module.iam.provides.istio_ingress_k8s_ui_istio_request_auth.name
+    endpoint = module.iam.provides.istio_ingress_k8s_ui_istio_request_auth.endpoint
   }
 }
 
@@ -64,12 +64,12 @@ resource "juju_integration" "request_auth_m2m" {
   }
 
   application {
-    name     = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_request_auth.name
-    endpoint = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
+    name     = module.iam.provides.istio_ingress_k8s_m2m_istio_request_auth.name
+    endpoint = module.iam.provides.istio_ingress_k8s_m2m_istio_request_auth.endpoint
   }
 }
 
-# TLS certificates (ambient-iam): self-signed-certificates -> both gateways.
+# TLS certificates: self-signed-certificates -> both gateways.
 resource "juju_integration" "istio_ingress_ui_certificates" {
   count      = 1
   model_uuid = var.create_model ? juju_model.mlflow[0].uuid : var.model_uuid
@@ -80,8 +80,8 @@ resource "juju_integration" "istio_ingress_ui_certificates" {
   }
 
   application {
-    name     = module.ambient_iam.requires.istio_ingress_k8s_ui_certificates.name
-    endpoint = module.ambient_iam.requires.istio_ingress_k8s_ui_certificates.endpoint
+    name     = module.iam.requires.istio_ingress_k8s_ui_certificates.name
+    endpoint = module.iam.requires.istio_ingress_k8s_ui_certificates.endpoint
   }
 }
 
@@ -95,8 +95,8 @@ resource "juju_integration" "istio_ingress_m2m_certificates" {
   }
 
   application {
-    name     = module.ambient_iam.requires.istio_ingress_k8s_m2m_certificates.name
-    endpoint = module.ambient_iam.requires.istio_ingress_k8s_m2m_certificates.endpoint
+    name     = module.iam.requires.istio_ingress_k8s_m2m_certificates.name
+    endpoint = module.iam.requires.istio_ingress_k8s_m2m_certificates.endpoint
   }
 }
 
@@ -110,7 +110,7 @@ resource "juju_integration" "mlflow_server_m2m_istio_ingress_route" {
   }
 
   application {
-    name     = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.name
-    endpoint = module.ambient_iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
+    name     = module.iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.name
+    endpoint = module.iam.provides.istio_ingress_k8s_m2m_istio_ingress_route.endpoint
   }
 }

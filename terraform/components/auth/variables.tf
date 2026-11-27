@@ -35,60 +35,6 @@ variable "oidc_gatekeeper" {
   default = {}
 }
 
-variable "ingress" {
-  description = "Ingress provider for auth applications (supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.ingress == null || contains(["endpoint", "offer"], var.ingress.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "endpoint" || (var.ingress.kind != null && var.ingress.kind != "" && var.ingress.name != null && var.ingress.name != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.ingress == null || var.ingress.kind != "offer" || (var.ingress.url != null && var.ingress.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
-variable "ingress_auth" {
-  description = "Ingress-auth provider for oidc-gatekeeper from istio-pilot:ingress-auth (supports same-model endpoint or cross-model offer)"
-  type = object({
-    kind     = string
-    name     = optional(string, null)
-    endpoint = optional(string, null)
-    url      = optional(string, null)
-  })
-  nullable = true
-  default  = null
-
-  validation {
-    condition     = var.ingress_auth == null || contains(["endpoint", "offer"], var.ingress_auth.kind)
-    error_message = "The 'kind' attribute must be either 'endpoint' or 'offer'."
-  }
-
-  validation {
-    condition     = var.ingress_auth == null || var.ingress_auth.kind != "endpoint" || (var.ingress_auth.kind != null && var.ingress_auth.kind != "" && var.ingress_auth.name != null && var.ingress_auth.name != "")
-    error_message = "Both 'name' and 'endpoint' attributes must be provided for an in-model integration."
-  }
-
-  validation {
-    condition     = var.ingress_auth == null || var.ingress_auth.kind != "offer" || (var.ingress_auth.url != null && var.ingress_auth.url != "")
-    error_message = "The 'url' attribute must be provided for a cross-model offer integration."
-  }
-}
-
 variable "service_mesh" {
   description = "Service mesh provider for auth applications from istio-beacon-k8s:service-mesh (supports same-model endpoint or cross-model offer)"
   type = object({
