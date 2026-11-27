@@ -237,11 +237,8 @@ module "data_integrator_integrations" {
   }
 }
 
-# TODO: restore when the integration with COS is available in MLflow 3:
-/*
-
 module "observability" {
-  count = var.enable_observability ? 1 : 0
+  count      = var.enable_observability ? 1 : 0
   depends_on = [module.iam, module.mlflow]
 
   source = "../../components/observability"
@@ -265,5 +262,3 @@ module "observability" {
   mlflow_server_metrics_endpoint  = module.mlflow[0].provides.mlflow_server_metrics_endpoint
   mlflow_server_logging           = module.mlflow[0].requires.mlflow_server_logging
 }
-
-*/

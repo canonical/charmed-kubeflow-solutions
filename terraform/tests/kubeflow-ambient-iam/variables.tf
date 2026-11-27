@@ -30,9 +30,9 @@ variable "istio_system_model_uuid" {
 }
 
 variable "istio_k8s_channel" {
-  description = "Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these)."
+  description = "Channel for the istio-k8s control plane charm. Must be on the 1.31 track (enforced by the pinned upstream module) and match the gateways' istio-ingress-config version."
   type        = string
-  default     = "dev/edge"
+  default     = "1.31/stable"
   nullable    = false
 }
 

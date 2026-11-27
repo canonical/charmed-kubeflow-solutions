@@ -8,8 +8,11 @@
 # is wired in integrations.tf since the upstream module only deploys the
 # application. The M2M gateway is JWT-only and is intentionally not wired to it.
 #
+# The upstream modules are pinned to the track/istio/1.31 branch, which only
+# accepts 1.31/* channels.
+#
 module "istio_ingress_k8s_ui" {
-  source = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=63a66b199ecfc486283845cee187c2d97c90669d"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s-ui"
@@ -21,7 +24,7 @@ module "istio_ingress_k8s_ui" {
 }
 
 module "istio_ingress_k8s_m2m" {
-  source = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-ingress-k8s/terraform?ref=63a66b199ecfc486283845cee187c2d97c90669d"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-ingress-k8s-m2m"
@@ -36,7 +39,7 @@ module "istio_ingress_k8s_m2m" {
 # natively (no Juju relation to istio-k8s).
 #
 module "istio_beacon_k8s" {
-  source = "git::https://github.com/canonical/service-mesh//charms/istio-beacon-k8s/terraform?ref=7ee9a3d468dbc85ae6e1492de1ba2b83015e8870"
+  source = "git::https://github.com/canonical/service-mesh//charms/istio-beacon-k8s/terraform?ref=63a66b199ecfc486283845cee187c2d97c90669d"
 
   model_uuid  = var.model_uuid
   app_name    = "istio-beacon-k8s"

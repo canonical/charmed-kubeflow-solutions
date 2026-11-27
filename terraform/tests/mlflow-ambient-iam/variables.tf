@@ -30,9 +30,9 @@ variable "istio_system_model_uuid" {
 }
 
 variable "istio_k8s_channel" {
-  description = "Channel for the istio-k8s control plane charm. Use dev/edge: it exposes jwks-ca-cert and matches the gateways' istio-ingress-config version (2/* predates these)."
+  description = "Channel for the istio-k8s control plane charm. Must be on the 1.31 track (enforced by the pinned upstream module) and match the gateways' istio-ingress-config version."
   type        = string
-  default     = "dev/edge"
+  default     = "1.31/stable"
   nullable    = false
 }
 
@@ -199,9 +199,6 @@ variable "risk" {
 # Observability (optional; wire to an external COS via offer URLs)
 # ---------------------------------------------------------------------------
 
-# TODO: restore when the integration with COS is available in MLflow 3:
-/*
-
 variable "enable_observability" {
   description = "Enable observability wiring to an external COS deployment."
   type        = bool
@@ -225,8 +222,6 @@ variable "metrics_offer" {
   type        = string
   default     = null
 }
-
-*/
 
 # Object storage (shared/global S3 integrator) variables
 
@@ -254,6 +249,12 @@ variable "s3_bucket_global" {
   description = "S3 bucket for the shared object storage integration"
   type        = string
   default     = ""
+}
+
+variable "s3_config_global" {
+  description = "Configuration for the shared s3-integrator application"
+  type        = map(string)
+  default     = {}
 }
 
 variable "user_grants_across_workspaces" {

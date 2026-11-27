@@ -232,9 +232,6 @@ variable "mlflow_server_config" {
 
 # Observability Component
 
-# TODO: restore when the integration with COS is available in MLflow 3:
-/*
-
 variable "enable_observability" {
   description = "Whether to deploy the observability component (opentelemetry-collector-k8s)"
   type        = bool
@@ -270,7 +267,6 @@ variable "opentelemetry_collector_k8s_config" {
   type        = map(string)
   default     = {}
 }
-*/
 
 # PostgreSQL
 

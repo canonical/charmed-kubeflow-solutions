@@ -43,6 +43,11 @@ def pytest_addoption(parser):
         help="Enable to deploy also MLflow",
     )
     parser.addoption(
+        "--enable-cos",
+        action="store_true",
+        help="Deploy also COS Lite (only for standalone MLflow with IAM)",
+    )
+    parser.addoption(
         "--enable-feast",
         action="store_true",
         help="Enable to deploy also Feast",
@@ -167,8 +172,16 @@ def hostname_ui(model_name):
 @pytest.fixture(scope="module")
 def solution_module_path(request, is_mlflow_standalone) -> str:
     """Path to the Terraform root module to apply for the selected auth stack."""
+    if request.config.getoption("--enable-cos") and (
+        not is_mlflow_standalone or request.config.getoption("--auth-type") != "iam"
+    ):
+        raise pytest.UsageError(
+            "--enable-cos requires --disable-kubeflow --enable-mlflow --auth-type=iam"
+        )
     if request.config.getoption("--auth-type") == "iam":
         if is_mlflow_standalone:
+            if request.config.getoption("--enable-cos"):
+                return "./../tests/mlflow-ambient-iam-cos"
             return "./../tests/mlflow-ambient-iam"
         return "./../tests/kubeflow-ambient-iam"
     return "./../products/kubeflow"

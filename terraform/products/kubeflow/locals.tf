@@ -29,12 +29,13 @@ locals {
   minio_channel         = var.release == "1.11" ? "1.10/${var.risk}" : "latest/${var.risk}"
   s3_integrator_channel = "2/edge"
 
-  # Istio Component (ambient gateways + beacon)
+  # Istio Component (ambient: istio-k8s, gateways + beacon)
   # NOTE: the ambient IAM architecture needs the istio-ingress-route,
-  # gateway-metadata and istio-request-auth endpoints, which are currently only
-  # published on the `dev/edge` channel of the Istio charms (2/* and 1/* predate
-  # them). Move these back to a stable track once those endpoints graduate.
-  istio_channel             = local.iam ? "dev/edge" : "2/stable"
+  # gateway-metadata and istio-request-auth endpoints, which are published on
+  # the 1.31 track of the Istio charms (2/* and 1/* predate them). Ambient-dex
+  # uses the same track for consistency. Keep in sync with istio_k8s_channel in
+  # the tests/kubeflow-ambient-iam root module.
+  istio_channel             = "1.31/stable"
   istio_ingress_k8s_channel = local.istio_channel
   istio_beacon_k8s_channel  = local.istio_channel
   istio_k8s_channel         = local.istio_channel
